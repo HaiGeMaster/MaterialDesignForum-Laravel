@@ -1,0 +1,645 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Controllers\AnswerController;
+use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\CacheController;
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\FollowController;
+use App\Http\Controllers\ImageController;
+use App\Http\Controllers\InboxController;
+// use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\OauthController;
+use App\Http\Controllers\OptionController;
+use App\Http\Controllers\QuestionController;
+use App\Http\Controllers\ReplyController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\TokenController;
+use App\Http\Controllers\TopicController;
+use App\Http\Controllers\TopicAbleController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserGroupController;
+use App\Http\Controllers\UserOptionController;
+use App\Http\Controllers\VoteController;
+
+use App\Mail\SendMailCommon;
+use App\Models\Answer as AnswerModel;
+use App\Models\Article as ArticleModel;
+use App\Models\Cache as CacheModel;
+use App\Models\Comment as CommentModel;
+use App\Models\Follow as FollowModel;
+use App\Models\Image as ImageModel;
+use App\Models\Inbox as InboxModel;
+use Illuminate\Support\Facades\Mail;
+use App\Models\Notification as NotificationModel;
+use App\Models\Oauth as OauthModel;
+use App\Models\Option as OptionModel;
+use App\Models\Question as QuestionModel;
+use App\Models\Reply as ReplyModel;
+use App\Models\Report as ReportModel;
+use App\Models\Token as TokenModel;
+use App\Models\Topic as TopicModel;
+use App\Models\TopicAble as TopicAbleModel;
+use App\Models\User as UserModel;
+use App\Models\UserGroup as UserGroupModel;
+use App\Models\UserOption as UserOptionModel;
+use App\Models\Vote as VoteModel;
+use Illuminate\Http\Request;
+use App\Services\Share;
+
+class NotificationController extends Controller
+{
+  //通知设置类型注释定义
+  /**
+   * @typedef NotificationType 通知类型
+   * @property string $user_follow 自己被关注
+   * @property string $topic_follow 话题被关注
+   * @property string $topic_delete 话题被删除
+   * @property string $article_follow 文章被关注
+   * @property string $article_comment 文章被评论
+   * @property string $article_like 文章被点赞
+   * @property string $article_delete 文章被删除
+   * @property string $question_follow 提问被关注
+   * @property string $question_comment 提问被评论
+   * @property string $question_answer 提问被回答
+   * @property string $question_delete 问题被删除
+   * @property string $answer_comment 回答被评论
+   * @property string $answer_like 回答被点赞
+   * @property string $answer_delete 回答被删除
+   * @property string $comment_like 评论被点赞
+   * @property string $comment_reply 评论被回复
+   * @property string $comment_delete 评论被删除
+   * @property string $reply_like 回复被点赞
+   * @property string $reply_reply 回复被回复
+   * @property string $reply_delete 回复被删除
+   * @property string $follow_user_update 关注用户更新
+   * @property string $follow_topic_update 关注话题更新
+   * @property string $follow_question_update 关注提问更新
+   * @property string $follow_article_update 关注文章更新
+   */
+  /**
+   * 添加互动通知 此方法不对外开放 仅供内部调用
+   * @param int $receiver_id 接收者ID
+   * @param int $sender_id 发送者ID system|user_id 一般是系统:0，也可以是用户id
+   * @param string $type 消息类型 @type NotificationType 通知类型 必须是有效的通知类型
+   * @param string $content_markdown 消息内容Markdown
+   * @param string $content_rendered 消息内容HTML
+   * @param int $user_id 用户ID
+   * @param int $topic_id 话题ID
+   * @param int $article_id 被xx的文章ID
+   * @param int $question_id 被xx的提问ID
+   * @param int $answer_id 被xx的回答ID
+   * @param int $comment_id 被xx的评论ID
+   * @param int $reply_id 被xx的回复ID
+   * @param int $reply_to_reply_id 被xx的回复回复ID
+   * @return array [is_add=>bool,notification=>NotificationModel]
+   */
+  public static function AddInteractionNotification(
+    $receiver_id = 0,
+    $sender_id = 0,
+    $type = '',
+    $content_markdown = null,
+    $content_rendered = null,
+    $user_id = 0,
+    $topic_id = 0,
+    $article_id = 0,
+    $question_id = 0,
+    $answer_id = 0,
+    $comment_id = 0,
+    $reply_id = 0,
+    $reply_to_reply_id = 0
+  ) {
+    $is_add = false;
+    $notification = null;
+
+    // if (NotificationModel::IsVaildType($type) && ($sender_id != $receiver_id)) {
+    if (NotificationModel::IsVaildType($type)) {
+      $notification = new NotificationModel;
+      $notification->receiver_id = $receiver_id;
+      $notification->sender_id = $sender_id;
+      $notification->type = $type;
+      $notification->content_markdown = $content_markdown;
+      $notification->content_rendered = $content_rendered;
+      $notification->user_id = $user_id;
+      $notification->topic_id = $topic_id;
+      $notification->article_id = $article_id;
+      $notification->question_id = $question_id;
+      $notification->answer_id = $answer_id;
+      $notification->comment_id = $comment_id;
+      $notification->reply_id = $reply_id;
+      $notification->reply_to_reply_id = $reply_to_reply_id;
+      $notification->create_time = Share::ServerTime();
+      $notification->delete_time = 0;
+
+      $is_add = $notification->save();
+      if ($is_add) {
+        $notification_setting = self::GetUserOptionNotificationSetting($receiver_id, $type);
+        $web_message = $notification_setting['web_message'];
+        $email_message = $notification_setting['email_message'];
+
+        //添加站内用户通知
+        if ($web_message) {
+          UserModel::AddNotificationCount($receiver_id);
+        }
+
+        //添加站外用户邮件通知
+        // 获取收件人邮箱
+        if ($email_message) {
+
+          $receiver = UserModel::where('user_id', '=', $receiver_id)->first();
+          if ($receiver && isset($receiver->email)) {
+            $receiver_email = $receiver->email;
+            $receiver_language = $receiver->language;
+
+            // $mail_title = i18n::t('Message.Client.Notifications.YouHaveNewNotifications', $receiver_language);
+            // $mail_content = i18n::t('Message.Client.Notifications.Type.' . $type, $receiver_language);
+
+            $mail_title = trans('Message.Client.Notifications.YouHaveNewNotifications');
+            $mail_content = trans('Message.Client.Notifications.Type.' . $type);
+
+            //$mail_content+当前服务器域名
+            $mail_content = $mail_content . ' [<a href="http://' . $_SERVER['HTTP_HOST'] . '">' . OptionModel::Get('site_name') . '</a>]';
+            // $mail_content = $mail_content . ' [' . $_SERVER['HTTP_HOST'] . ']';
+
+            // 替换发送者名字
+            $sender = UserModel::where('user_id', $sender_id)->first();
+            if ($sender && isset($sender->username)) {
+              $sender_name = $sender->username;
+              $mail_content = str_replace('{value}', $sender_name, $mail_content);
+            }
+
+            // 发送邮件
+            try {
+              Mail::to($receiver_email)->send(new SendMailCommon(
+                $mail_title,
+                ['body' => $mail_content]
+              ));
+            } catch (\Exception $e) {
+              error_log("Email sending failed: " . $e->getMessage());
+            }
+          } else {
+            // 处理未找到用户的情况
+            error_log("Receiver not found or email is missing.");
+          }
+        }
+      }
+    }
+    return [
+      'is_add' => $is_add,
+      'notification' => $notification
+    ];
+  }
+  /**
+   * 获取用户通知
+   * @param string $user_token 用户Token
+   * @param string $order 排序方式
+   * @param int $page 页码
+   * @param int $per_page 每页数量
+   * @return array
+   */
+  public static function GetUserInteractionNotifications(
+    $user_token,
+    $order,
+    $page,
+    $per_page = 20
+  ) {
+
+    // return 'fuck';
+
+    $orders = Share::HandleArrayField($order);
+    $field = $orders['field'];
+    $sort = $orders['sort'];
+    $user_id = TokenController::GetUserId($user_token);
+    $notifications = NotificationModel::where('receiver_id', $user_id)
+      ->where('delete_time', 0)
+      ->orderBy($field, $sort)
+      ->paginate($per_page, ['*'], 'page', $page);
+
+    // return $notifications;
+
+    if ($notifications != null) {
+      foreach ($notifications as $key => $notification) {
+        UserModel::SubNotificationCount($notification->receiver_id);
+
+        if ($notification->read_time == 0) {
+          NotificationModel::SetReadTime($notification->notification_id, Share::ServerTime());
+        }
+
+        $notification->sender_user = UserController::GetUser($notification->sender_id)['user'];
+        $notification->receiver_user = UserController::GetUser($notification->receiver_id)['user'];
+
+        //如果发送者或接收者不存在，则删除这个通知，避免引起报错。管理员手动删除或修改了用户ID会发生此情况
+        if ($notification->sender_user == null || $notification->receiver_user == null) {
+          //从$notifications中删除这个通知
+          unset($notifications[$key]);
+
+          //删除此通知但是未同步notifications中的pagination数据。。待修复。
+          continue;
+        }
+
+        $receiver_content = ''; //附加值
+        $sender_content = ''; //附加值
+        switch ($notification->type) {
+          //旧的类型详细
+          //question_answer 问题被回答
+          //question_comment 问题被评论
+          //question_delete 问题被删除
+          //article_comment 文章被评论
+          //article_delete 文章被删除
+          //answer_comment 回答被评论
+          //answer_delete 回答被删除
+          //comment_reply 评论被回复
+          //comment_delete 评论被删除
+          //reply_reply 回复被回复
+          //reply_delete 回复被删除
+          //类型注释定义
+          /**
+           * @typedef NotificationType 通知类型
+           * @property string user_follow 自己被关注 已做完
+           * @property string topic_follow 话题被关注 已做完
+           * @property string topic_delete 话题被删除 已做完
+           * @property string question_follow 提问被关注 已做完
+           * @property string question_comment 提问被评论 已做完
+           * @property string question_answer 提问被回答 已做完
+           * @property string question_delete 提问被删除 已做完
+           * @property string article_follow 文章被关注 已做完
+           * @property string article_comment 文章被评论 已做完
+           * @property string article_like 文章被点赞 已做完
+           * @property string article_delete 文章被删除 已做完
+           * @property string answer_comment 回答被评论 已做完
+           * @property string answer_like 回答被点赞 已做完
+           * @property string answer_delete 回答被删除 已做完
+           * @property string comment_like 评论被点赞 已做完
+           * @property string comment_reply 评论被回复 已做完
+           * @property string comment_delete 评论被删除 已做完
+           * @property string reply_like 回复被点赞 已做完
+           * @property string reply_reply 回复被回复 已做完
+           * @property string reply_delete 回复被删除 已做完
+           * @property string follow_user_update 关注的用户更新
+           * @property string follow_topic_update 关注的话题更新
+           * @property string follow_question_update 关注的提问更新
+           * @property string follow_article_update 关注的文章更新
+           */
+          case 'user_follow':
+            break;
+          case 'topic_follow':
+          case 'topic_delete':
+            $notification->topic = TopicModel::where('topic_id', $notification->topic_id)->first();
+            if ($notification->topic != null) {
+              $receiver_content = $notification->topic->name;
+            }
+            break;
+          case 'question_follow':
+            $notification->question = QuestionModel::where('question_id', $notification->question_id)->first();
+            if ($notification->question != null) {
+              $receiver_content = $notification->question->title;
+            }
+            break;
+          case 'question_comment':
+            $notification->question = QuestionModel::where('question_id', $notification->question_id)->first();
+            $notification->comment = CommentModel::where('comment_id', $notification->comment_id)->first();
+            if ($notification->question != null && $notification->comment != null) {
+              $receiver_content = $notification->question->title;
+              $sender_content = $notification->comment->content;
+            }
+            break;
+          case 'question_answer':
+            $notification->question = QuestionModel::where('question_id', $notification->question_id)->first();
+            $notification->answer = AnswerModel::where('answer_id', $notification->answer_id)->first();
+            if ($notification->question != null && $notification->answer != null) {
+              $receiver_content = $notification->question->title;
+              $sender_content = $notification->answer->content_markdown;
+            }
+            break;
+          case 'question_delete':
+            $notification->question = QuestionModel::where('question_id', $notification->question_id)->first();
+            if ($notification->question != null) {
+              $receiver_content = $notification->question->title;
+            }
+            break;
+          case 'article_follow':
+            $notification->article = ArticleModel::where('article_id', $notification->article_id)->first();
+            if ($notification->article != null) {
+              $receiver_content = $notification->article->title;
+            }
+            break;
+          case 'article_comment':
+            $notification->article = ArticleModel::where('article_id', $notification->article_id)->first();
+            $notification->comment = CommentModel::where('comment_id', $notification->comment_id)->first();
+            if ($notification->article != null && $notification->comment != null) {
+              $receiver_content = $notification->article->title;
+              $sender_content = $notification->comment->content;
+            }
+            break;
+          case 'article_like':
+            $notification->article = ArticleModel::where('article_id', $notification->article_id)->first();
+            if ($notification->article != null) {
+              $receiver_content = $notification->article->title;
+            }
+            break;
+          case 'article_delete':
+            $notification->article = ArticleModel::where('article_id', $notification->article_id)->first();
+            if ($notification->article != null) {
+              $receiver_content = $notification->article->title;
+            }
+            break;
+          case 'answer_comment':
+            $notification->answer = AnswerModel::where('answer_id', $notification->answer_id)->first();
+            $notification->comment = CommentModel::where('comment_id', $notification->comment_id)->first();
+            if ($notification->answer != null && $notification->comment != null) {
+              $receiver_content = $notification->answer->content_markdown;
+              $sender_content = $notification->comment->content;
+            }
+            break;
+          case 'answer_like':
+            $notification->answer = AnswerModel::where('answer_id', $notification->answer_id)->first();
+            if ($notification->answer != null) {
+              $receiver_content = $notification->answer->content_markdown;
+            }
+            break;
+          case 'answer_delete':
+            $notification->answer = AnswerModel::where('answer_id', $notification->answer_id)->first();
+            if ($notification->answer != null) {
+              $receiver_content = $notification->answer->content_markdown;
+            }
+            break;
+          case 'comment_like':
+            $notification->comment = CommentModel::where('comment_id', $notification->comment_id)->first();
+            if ($notification->comment != null) {
+              switch ($notification->comment->commentable_type) {
+                case 'article':
+                  $notification->article = ArticleModel::where('article_id', $notification->comment->commentable_id)->first();
+                  break;
+                case 'question':
+                  $notification->question = QuestionModel::where('question_id', $notification->comment->commentable_id)->first();
+                  break;
+                case 'answer':
+                  $notification->answer = AnswerModel::where('answer_id', $notification->comment->commentable_id)->first();
+                  break;
+              }
+
+              $receiver_content = $notification->comment->content;
+            }
+            break;
+          case 'comment_reply':
+            $notification->comment = CommentModel::where('comment_id', $notification->comment_id)->first();
+            $notification->reply = ReplyModel::where('reply_id', $notification->reply_id)->first();
+            if ($notification->comment != null) {
+              switch ($notification->comment->commentable_type) {
+                case 'article':
+                  $notification->article = ArticleModel::where('article_id', $notification->comment->commentable_id)->first();
+                  break;
+                case 'question':
+                  $notification->question = QuestionModel::where('question_id', $notification->comment->commentable_id)->first();
+                  break;
+                case 'answer':
+                  $notification->answer = AnswerModel::where('answer_id', $notification->comment->commentable_id)->first();
+                  break;
+              }
+              $receiver_content = $notification->comment->content;
+              // $sender_content = $notification->reply->content;
+            }
+            // $receiver_content = $notification->comment->content;
+            if ($notification->reply != null) {
+              $sender_content = $notification->reply->content;
+            }
+            // $sender_content = $notification->reply->content;
+            break;
+          case 'comment_delete':
+            $notification->comment = CommentModel::where('comment_id', $notification->comment_id)->first();
+            if ($notification->comment != null) {
+              // switch ($notification->comment->commentable_type) {
+              //     case 'article':
+              //         $notification->article = ArticleModel::where('article_id', $notification->comment->commentable_id)->first();
+              //         break;
+              //     case 'question':
+              //         $notification->question = QuestionModel::where('question_id', $notification->comment->commentable_id)->first();
+              //         break;
+              //     case 'answer':
+              //         $notification->answer = AnswerModel::where('answer_id', $notification->comment->commentable_id)->first();
+              //         break;
+              // }
+              if ($notification->comment->commentable_type == 'article') {
+                $notification->article = ArticleModel::where('article_id', $notification->comment->commentable_id)->first();
+              } else if ($notification->comment->commentable_type == 'question') {
+                $notification->question = QuestionModel::where('question_id', $notification->comment->commentable_id)->first();
+              } else if ($notification->comment->commentable_type == 'answer') {
+                $notification->answer = AnswerModel::where('answer_id', $notification->comment->commentable_id)->first();
+              }
+              $receiver_content = $notification->comment->content;
+            }
+            break;
+          case 'reply_like':
+            $notification->comment = CommentModel::where('comment_id', $notification->comment_id)->first();
+            $notification->reply = ReplyModel::where('reply_id', $notification->reply_id)->first();
+            if ($notification->comment != null) {
+              switch ($notification->comment->commentable_type) {
+                case 'article':
+                  $notification->article = ArticleModel::where('article_id', $notification->comment->commentable_id)->first();
+                  break;
+                case 'question':
+                  $notification->question = QuestionModel::where('question_id', $notification->comment->commentable_id)->first();
+                  break;
+                case 'answer':
+                  $notification->answer = AnswerModel::where('answer_id', $notification->comment->commentable_id)->first();
+                  break;
+              }
+            }
+            // if ($notification->reply != null) {
+            //   switch ($notification->reply->replyable_type) {
+            //     case 'comment':
+            //       $notification->comment = CommentModel::where('comment_id', $notification->reply->replyable_comment_id)->first();
+            //       break;
+            //     case 'reply':
+            //       $notification->reply = ReplyModel::where('reply_id', $notification->reply->replyable_reply_id)->first();
+            //       break;
+            //   }
+            // }
+            $receiver_content = $notification->reply->content;
+
+            break;
+          case 'reply_reply': //replyable_id
+            $notification->comment = CommentModel::where('comment_id', $notification->comment_id)->first(); //被回复的item comment_id
+            if ($notification->comment != null) {
+              // switch ($notification->comment->commentable_type) {
+              //     case 'article':
+              //         $notification->article = ArticleModel::where('article_id', $notification->comment->commentable_id)->first();
+              //         break;
+              //     case 'question':
+              //         $notification->question = QuestionModel::where('question_id', $notification->comment->commentable_id)->first();
+              //         break;
+              //     case 'answer':
+              //         $notification->answer = AnswerModel::where('answer_id', $notification->comment->commentable_id)->first();
+              //         break;
+              // }
+              if ($notification->comment->commentable_type == 'article') {
+                $notification->article = ArticleModel::where('article_id', $notification->comment->commentable_id)->first();
+              } else if ($notification->comment->commentable_type == 'question') {
+                $notification->question = QuestionModel::where('question_id', $notification->comment->commentable_id)->first();
+              } else if ($notification->comment->commentable_type == 'answer') {
+                $notification->answer = AnswerModel::where('answer_id', $notification->comment->commentable_id)->first();
+              }
+              $notification->reply = ReplyModel::where('reply_id', $notification->reply_id)->first(); //接收者的reply
+              $notification->replyable_reply = ReplyModel::where('reply_id', $notification->reply_to_reply_id)->first(); //发送者的reply
+
+              $receiver_content = $notification->reply->content;
+              $sender_content = $notification->replyable_reply->content;
+            }
+            break;
+          case 'reply_delete':
+            $notification->comment = CommentModel::where('comment_id', $notification->comment_id)->first();
+            $notification->reply = ReplyModel::where('reply_id', $notification->reply_id)->first();
+            $receiver_content = $notification->reply->content;
+            break;
+          case 'follow_user_update':
+            if ($notification->question_id != 0) {
+              $notification->question = QuestionModel::where('question_id', $notification->question_id)->first();
+              if ($notification->question != null) {
+                $receiver_content = $notification->question->title;
+                $sender_content = 'Message.Client.Notification.NewQuestion';
+              }
+            } else if ($notification->article_id != 0) {
+              $notification->article = ArticleModel::where('article_id', $notification->article_id)->first();
+              if ($notification->article != null) {
+                $receiver_content = $notification->article->title;
+                $sender_content = 'Message.Client.Notification.NewArticle';
+              }
+            }
+            break;
+          case 'follow_topic_update':
+            $notification->topic = TopicModel::where('topic_id', $notification->topic_id)->first();
+            // if($notification->topic != null){
+            //   $receiver_content = $notification->topic->name;
+            // }
+            if ($notification->question_id != 0) {
+              $notification->question = QuestionModel::where('question_id', $notification->question_id)->first();
+              if ($notification->question != null) {
+                $receiver_content = $notification->question->title;
+                $sender_content = 'Message.Client.Notification.NewQuestion';
+              }
+            } else if ($notification->article_id != 0) {
+              $notification->article = ArticleModel::where('article_id', $notification->article_id)->first();
+              if ($notification->article != null) {
+                $receiver_content = $notification->article->title;
+                $sender_content = 'Message.Client.Notification.NewArticle';
+              }
+            }
+            break;
+          case 'follow_question_update':
+            $notification->question = QuestionModel::where('question_id', $notification->question_id)->first();
+            if ($notification->question != null) {
+              $receiver_content = $notification->question->title;
+              $sender_content = 'Message.Client.Notification.NewQuestion';
+            }
+            break;
+          case 'follow_article_update':
+            $notification->article = ArticleModel::where('article_id', $notification->article_id)->first();
+            if ($notification->article != null) {
+              $receiver_content = $notification->article->title;
+              $sender_content = 'Message.Client.Notification.NewArticle';
+            }
+            break;
+        }
+        //如果$receiver_content超过10个字符，截取前10个字符
+        // if(strlen($receiver_content) > 10){
+        //     $receiver_content = substr($receiver_content, 0, 10).'...';
+        // }
+        $notification->receiver_content = $receiver_content;
+        $notification->sender_content = $sender_content;
+        // $notification->item_link = $item_link;
+      }
+    }
+
+    return Share::HandleDataAndPagination($notifications);
+  }
+  /**
+   * 设置通知为删除状态
+   * @param int $user_token 用户Token
+   * @param int $notification_id 通知ID
+   * @return array [is_delete=>bool,notification=>NotificationModel]
+   */
+  public static function DeleteNotification($user_token, $notification_id)
+  {
+    $is_delete = false;
+    $user_id = TokenController::GetUserId($user_token);
+    $notification = NotificationModel::where('notification_id', $notification_id)->first();
+    if ($notification != null && $notification->receiver_id == $user_id) {
+      $notification->delete_time = Share::ServerTime();
+      $is_delete = $notification->save();
+    }
+    return [
+      'is_delete' => $is_delete,
+      'notification' => $notification
+    ];
+  }
+  /**
+   * 设置用户的所有通知为删除状态
+   * @param int $user_token 用户Token
+   * @return array [is_delete=>bool]
+   */
+  public static function DeleteAllNotifications($user_token)
+  {
+    $is_delete = false;
+    $user_id = TokenController::GetUserId($user_token);
+    $notifications = NotificationModel::where('receiver_id', $user_id)
+      ->where('delete_time', 0)
+    ->update([
+      'delete_time' => Share::ServerTime(),
+    ]);
+    $is_delete = $notifications;
+    // if ($notifications != null) {
+    //   foreach ($notifications as $notification) {
+    //     $notification->delete_time = Share::ServerTime();
+    //     $is_delete = $notification->save();
+    //   }
+    // }
+    return [
+      'is_delete' => $is_delete,
+      // 'notifications' => $notifications
+    ];
+  }
+  /**
+   * 获取用户通知设置
+   * @param int $user_id 用户ID
+   * @return array|null 通知设置 转换为 [name=>[web_message=>bool,email_message=>bool]]
+   */
+  private static function GetUserOptionNotificationValue($user_id)
+  {
+    $data = UserOptionModel::where('user_id', $user_id)->where('name', 'notifications')->first();
+    if ($data != null) {
+      $data = json_decode($data->value, true); //将json字符串转换为数组
+      $new_data = [];
+      //将$data中的name作为$new_data的key
+      foreach ($data as $item) {
+        $new_data[$item['name']] = [
+          'web_message' => $item['web_message'] == 'true' ? true : false,
+          'email_message' => $item['email_message'] == 'true' ? true : false,
+        ];
+      }
+      return $new_data == [] ? null : $new_data;
+    }
+    return null;
+  }
+  /**
+   * 获取用户通知设置
+   * @param int $user_id 用户ID
+   * @param string $type 通知类型
+   * @return array [web_message=>bool,email_message=>bool] 用户通知设置为空的情况下默认都为['web_message' => true, 'email_message' => false]
+   */
+  public static function GetUserOptionNotificationSetting($user_id, $type): array
+  {
+    $data = self::GetUserOptionNotificationValue($user_id);
+    if ($data != null) {
+      if (array_key_exists($type, $data)) {
+        // return $data[$type];//相当于返回了 type [web_message=>bool,email_message=>bool]
+        return [
+          'web_message' => $data[$type]['web_message'],
+          'email_message' => $data[$type]['email_message'],
+        ];
+      }
+    }
+    // return ['web_message' => true, 'email_message' => false]; //用户通知设置为空的情况下默认都为['web_message' => true, 'email_message' => false]
+    return ['web_message' => true, 'email_message' => true]; //用户通知设置为空的情况下默认都为['web_message' => true, 'email_message' => false] //这样子将会邮件通知用户
+  }
+}
