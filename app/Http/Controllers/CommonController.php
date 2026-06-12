@@ -58,8 +58,157 @@ use App\Services\Share;
 
 class CommonController extends Controller
 {
-
+  /**
+   * 获取应用基本信息
+   * @param string $user_token 用户令牌
+   * @return array 返回应用基本信息
+   */
   public static function GetAppBaseInfo($user_token = '')
+  {
+    $langList = self::buildLangList();
+
+    $options = OptionController::GetAll();
+
+    $theme = $options['theme'] ?? 'MaterialDesignForum-Vuetify4';
+    // $theme = 'MaterialDesignForum-Vuetify4';
+    $settingFile = public_path("themes/{$theme}/setting.json");
+
+    $themeColor = [];
+    if (file_exists($settingFile)) {
+      $themeColor = json_decode(file_get_contents($settingFile), true) ?: [];
+    }
+
+    return [
+      'is_get' => true,
+      'data' => [
+        'lang_locale_list' => $langList,
+        'option_list' => $options,
+        'theme_color' => $themeColor['theme_color'],
+        'theme_list' => self::GetThemeList(),
+      ]
+    ];
+  }
+  /**
+   * 设置应用基本信息
+   * @param string $user_token 用户令牌
+   * @param array  $data       配置项键值对 [option_list, theme_color, lang_locale_list]
+   * @return array
+   */
+  public static function SetAppBaseInfo($user_token = '', $data = [])
+  {
+    if (!UserGroupController::IsAdmin($user_token)) {
+      return [
+        'is_set' => false,
+        'data'   => null,
+      ];
+    }
+
+    // 1. 保存 option_list 到数据库
+    if (!empty($data['option_list']) && is_array($data['option_list'])) {
+      foreach ($data['option_list'] as $name => $value) {
+        OptionModel::Set($name, $value);
+      }
+    }
+
+    // 2. 写入 theme_color 到主题的 setting.json
+    if (isset($data['theme_color']) && is_array($data['theme_color'])) {
+      $theme = $data['option_list']['theme']
+            ?? OptionModel::Get('theme')
+            ?? 'MaterialDesignForum-Vuetify4';
+
+      $settingFile = public_path("themes/{$theme}/setting.json");
+      if (file_exists($settingFile)) {
+        $themeSetting = json_decode(file_get_contents($settingFile), true) ?: [];
+        $themeSetting['theme_color'] = $data['theme_color'];
+        file_put_contents($settingFile, json_encode($themeSetting, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+      }
+    }
+
+    // // 3. 更新语言文件的 langInfo。。暂时不需要更新。
+    // if (!empty($data['lang_locale_list']) && is_array($data['lang_locale_list'])) {
+    //   foreach ($data['lang_locale_list'] as $locale => $item) {
+    //     $langFile = lang_path("{$locale}/Message.php");
+    //     if (!file_exists($langFile)) {
+    //       continue;
+    //     }
+    //     $messages = require $langFile;
+    //     if (isset($item['Message']['langInfo'])) {
+    //       $messages['langInfo'] = $item['Message']['langInfo'];
+    //       $export = var_export($messages, true);
+    //       $content = "<?php\n\nreturn {$export};\n";
+    //       file_put_contents($langFile, $content);
+    //     }
+    //   }
+    // }
+
+    // 4. 清除配置缓存
+    if (function_exists('artisan')) {
+      \Illuminate\Support\Facades\Artisan::call('config:clear');
+    }
+
+    // 5. 返回更新后的完整数据（与 GetAppBaseInfo 返回结构一致）
+    return [
+      'is_set' => true,
+      'data'   => [
+        'option_list'      => OptionController::GetAll(),
+        'theme_color'      => $data['theme_color'] ?? null,
+        'lang_locale_list' => self::buildLangList(),
+        'theme_list' => self::GetThemeList(),
+      ],
+    ];
+  }
+
+  /**
+   * 获取主题列表
+   * 扫描 public/themes/ 目录，读取每个主题的 theme.json
+   * @return array
+   */
+  private static function GetThemeList()
+  {
+    $themeList = [];
+    $themeDir  = public_path('themes');
+    $dirs      = glob($themeDir . '/*', GLOB_ONLYDIR);
+
+    foreach ($dirs as $dir) {
+      $themeJson = $dir . '/theme.json';
+      if (!file_exists($themeJson)) {
+        continue;
+      }
+
+      $info = json_decode(file_get_contents($themeJson), true);
+      if (!$info) {
+        continue;
+      }
+
+      $themeName = basename($dir);
+
+      // 读取 setting.json 中的 theme_color
+      $setting    = [];
+      $settingFile = $dir . '/setting.json';
+      if (file_exists($settingFile)) {
+        $settingData = json_decode(file_get_contents($settingFile), true);
+        // $setting     = $settingData['theme_color'] ?? [];
+        $setting     = $settingData ?? [];
+      }
+
+      $themeList[] = [
+        'name'        => $info['name'] ?? $themeName,
+        'version'     => $info['version'] ?? '',
+        'description' => $info['description'] ?? '',
+        'disabled'    => $info['disabled'] ?? false,
+        'setting'     => $setting,
+        'path'        => './public/themes/' . $themeName,
+      ];
+    }
+
+    return $themeList;
+  }
+
+  /**
+   * 构建语言列表（供 GetAppBaseInfo 和 SetAppBaseInfo 复用）
+   * @return array
+   */
+  private static function buildLangList()
   {
     $langList = [];
     $langDir = lang_path();
@@ -73,32 +222,15 @@ class CommonController extends Controller
         $messages = require $file;
         if (isset($messages['langInfo'])) {
           $langList[$locale] = [
-            'Message'=>[
-              'langInfo'=>$messages['langInfo'],
-            ]
+            'Message' => [
+              'langInfo' => $messages['langInfo'],
+            ],
           ];
         }
       }
     }
 
-    $options = OptionController::GetAll();
-
-    $theme = $options['theme'] ?? 'MaterialDesignForum-Vuetify4';
-    // $theme = 'MaterialDesignForum-Vuetify4';
-    $settingFile = public_path("themes/{$theme}/setting.json");
-    $themeColor = [];
-    if (file_exists($settingFile)) {
-      $themeColor = json_decode(file_get_contents($settingFile), true) ?: [];
-    }
-
-    return [
-      'is_get' => true,
-      'data' => [
-        'lang_locale_list' => $langList,
-        'option_list' => $options,
-        'theme_color' => $themeColor['theme_color'],
-      ]
-    ];
+    return $langList;
   }
 
   /**

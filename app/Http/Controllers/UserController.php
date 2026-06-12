@@ -46,9 +46,99 @@ use App\Services\Share;
 use App\Services\ImageCaptcha;
 use Mews\Captcha\Facades\Captcha;
 use itbdw\Ip\IpLocation;
+use Laravel\Socialite\One\User;
 
 class UserController extends Controller
 {
+  
+  /**
+   * 通过第三方平台登录或注册用户
+   * @param string $oauthName 第三方平台标识符 如 github, microsoft 等
+   * @param string $oauthUserId 第三方平台用户ID
+   * @param string $oauthUserName 第三方平台用户名
+   * @param string $oauthUserMail 第三方平台用户邮箱 用来查找数据库中是否有对应的用户
+   * @param string $oauthSourceResponse 第三方平台返回的用户信息
+   * @param string $user_token 对应的用户token。可以为空
+   * @return array 返回添加或更新后的Oauth模型实例或null
+   */
+  public static function OauthLoginOrRegister($oauthName, $oauthUserId, $oauthUserName, $oauthUserMail, $oauthSourceResponse, $user_token): array
+  {
+    $is_login = false;
+    $token = '';
+    //首先根据oauthUserId和oauthName查找是否存在对应的Oauth记录
+    $oauthUser = OauthController::GetOauthUser($oauthName, $oauthUserId);
+    if ($oauthUser) { //如果有绑定第三方平台记录，则直接查找对应用户去让其登录账号
+      $user_id = $oauthUser->user_id;
+      $local_user = UserModel::where('user_id', '=', $user_id)
+        ->where('disable_time', '=', 0)
+        ->first();
+      if ($local_user) {
+        //顺便更新oauth记录的用户名
+        $update_oauth = OauthModel::where('oauth_id', '=', $oauthUser->oauth_id)
+          ->update([
+            'oauth_user_name' => $oauthUserName,
+          ]);
+        $is_login = true;
+        $token = TokenController::SpawnUserToken($local_user);
+      }
+    } else if ($user_token) { //如果没有绑定第三方平台记录，且传入用户token，则根据token查找用户
+      $user_id = TokenController::GetUserId($user_token);
+      if ($user_id) {
+        $local_user = UserModel::where('user_id', '=', $user_id)
+          ->where('disable_time', '=', 0)
+          ->first();
+        if ($local_user) { //为其绑定Oauth记录
+          $oauthUser = OauthController::AddOauthUser($oauthName, $oauthUserId, $oauthUserName, $oauthUserMail, $oauthSourceResponse, $local_user->user_id);
+          if ($oauthUser) {
+            $is_login = true;
+            $token = TokenController::SpawnUserToken($local_user);
+          }
+        }
+      }
+    } else { //如果没有绑定第三方平台记录，则根据 oauthUserMail 查找是否有对应的用户
+      $local_user = UserModel::where('email', '=', $oauthUserMail)
+        ->where('disable_time', '=', 0)
+        ->first();
+      if ($local_user) { //如果有对应的用户，则添加或更新Oauth记录
+        $oauthUser = OauthController::AddOauthUser($oauthName, $oauthUserId, $oauthUserName, $oauthUserMail, $oauthSourceResponse, $local_user->user_id);
+        if ($oauthUser) { // 如果添加或更新成功，则登录用户
+          $is_login = true;
+          $token = TokenController::SpawnUserToken($local_user);
+        }
+      } else { //如果没有对应的用户，则注册新用户
+        $new_user = UserModel::create([
+          'email' => $oauthUserMail,
+          'username' => $oauthUserName,
+          'password' => self::HandlePassword(Share::ServerTime()), //使用时间戳作为默认密码
+          'create_ip' => self::GetClientIP(),
+          'create_location' => self::GetClientLocation(),
+          'last_login_time' => Share::ServerTime(),
+          'last_login_ip' => self::GetClientIP(),
+          'last_login_location' => self::GetClientLocation(),
+          'location' => self::GetClientLocation(),
+          'language' => config('app.locale'),
+          'create_time' => Share::ServerTime(),
+          'update_time' => Share::ServerTime(),
+          'avatar' => self::CreateDefaultAvatar($oauthUserName),
+          'cover' => self::CreateDefaultCover()
+        ]);
+        if ($new_user) { //如果新用户注册成功，则添加或更新Oauth记录
+          $new_user_model = UserModel::where('email', '=', $oauthUserMail)->first();
+          if ($new_user_model) {
+            $oauthUser = OauthController::AddOauthUser($oauthName, $oauthUserId, $oauthUserName, $oauthUserMail, $oauthSourceResponse, $new_user_model->user_id);
+            if ($oauthUser) {
+              $is_login = true;
+              $token = TokenController::SpawnUserToken($new_user_model);
+            }
+          }
+        }
+      }
+    }
+    return [
+      'is_login' => $is_login,
+      'token' => $token,
+    ];
+  }
   /**
    * 请求注册用户
    * @param string $email 邮箱

@@ -63,9 +63,47 @@ Route::post('/api/admin/data/server_info', function (Request $request) {
     return response()->json($result);
 });
 
-Route::post('/api/common/app_base_info', function (Request $request) {
+Route::post('/api/admin/data/mail_info/get', function (Request $request) {
+    $result = AdminController::GetMailConfig(
+        $request->input('user_token', $request->bearerToken())
+    );
+    return response()->json($result);
+});
+
+Route::post('/api/admin/data/mail_info/set', function (Request $request) {
+    $result = AdminController::SetMailConfig(
+        $request->input('user_token', $request->bearerToken()),
+        $request->input('mail_info')
+    );
+    return response()->json($result);
+});
+
+Route::post('/api/admin/data/oauth_info/get', function (Request $request) {
+    $result = AdminController::GetOauthConfig(
+        $request->input('user_token', $request->bearerToken())
+    );
+    return response()->json($result);
+});
+
+Route::post('/api/admin/data/oauth_info/set', function (Request $request) {
+    $result = AdminController::SetOauthConfig(
+        $request->input('user_token', $request->bearerToken()),
+        $request->input('oauth_info')
+    );
+    return response()->json($result);
+});
+
+Route::post('/api/common/app_base_info/get', function (Request $request) {
     $result = CommonController::GetAppBaseInfo(
         $request->input('user_token', $request->bearerToken())
+    );
+    return response()->json($result);
+});
+
+Route::post('/api/common/app_base_info/set', function (Request $request) {
+    $result = CommonController::SetAppBaseInfo(
+        $request->input('user_token', $request->bearerToken()),
+        $request->input('app_base_info')
     );
     return response()->json($result);
 });

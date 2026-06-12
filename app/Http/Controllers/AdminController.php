@@ -469,4 +469,180 @@ class AdminController extends Controller
       ]
     ];
   }
+  /**
+   * 获取邮件配置信息
+   * @param string $user_token 用户Token
+   * @return array|null
+   */
+  public static function GetMailConfig($user_token = '')
+  {
+    $is_get = false;
+    $data = null;
+    if (UserGroupController::IsAdmin($user_token)) {
+      $is_get = true;
+      $data = [
+        'MAIL_MAILER'       => env('MAIL_MAILER'),
+        'MAIL_HOST'         => env('MAIL_HOST'),
+        'MAIL_PORT'         => env('MAIL_PORT'),
+        'MAIL_USERNAME'     => env('MAIL_USERNAME'),
+        'MAIL_PASSWORD'     => env('MAIL_PASSWORD'),
+        // 'MAIL_ENCRYPTION'   => env('MAIL_ENCRYPTION'),
+        'MAIL_FROM_ADDRESS' => env('MAIL_FROM_ADDRESS'),
+        'MAIL_FROM_NAME'    => env('MAIL_FROM_NAME'),
+      ];
+    }
+
+    return [
+      'is_get' => $is_get,
+      'data' => $data,
+    ];
+  }
+
+  /**
+   * 设置邮件配置信息
+   * @param string $user_token 用户Token
+   * @param array  $data       邮件配置键值对
+   * @return array|null
+   */
+  public static function SetMailConfig($user_token = '', $data = [])
+  {
+    if (!UserGroupController::IsAdmin($user_token)) {
+      return null;
+    }
+
+    $keys = [
+      'MAIL_MAILER',
+      'MAIL_HOST',
+      'MAIL_PORT',
+      'MAIL_USERNAME',
+      'MAIL_PASSWORD',
+      'MAIL_ENCRYPTION',
+      'MAIL_FROM_ADDRESS',
+      'MAIL_FROM_NAME',
+    ];
+
+    $envPath = base_path('.env');
+    $lines = file($envPath);
+
+    foreach ($lines as &$line) {
+      foreach ($keys as $key) {
+        if (array_key_exists($key, $data) && str_starts_with($line, "{$key}=")) {
+          $line = "{$key}={$data[$key]}\n";
+          unset($data[$key]); // 标记已处理
+          break;
+        }
+      }
+    }
+    // 追加新增的键
+    foreach ($data as $key => $value) {
+      $lines[] = "{$key}={$value}\n";
+    }
+
+    file_put_contents($envPath, implode('', $lines));
+
+    
+    // 清除配置缓存，使新配置立即生效
+    if (function_exists('artisan')) {
+      \Illuminate\Support\Facades\Artisan::call('config:clear');
+
+    }
+
+    return [
+      'is_set' => true,
+      'data' => [
+        'MAIL_MAILER'       => env('MAIL_MAILER'),
+        'MAIL_HOST'         => env('MAIL_HOST'),
+        'MAIL_PORT'         => env('MAIL_PORT'),
+        'MAIL_USERNAME'     => env('MAIL_USERNAME'),
+        'MAIL_PASSWORD'     => env('MAIL_PASSWORD'),
+        'MAIL_ENCRYPTION'   => env('MAIL_ENCRYPTION'),
+        'MAIL_FROM_ADDRESS' => env('MAIL_FROM_ADDRESS'),
+        'MAIL_FROM_NAME'    => env('MAIL_FROM_NAME'),
+      ]
+    ];
+  }
+
+  /**
+   * 获取Oauth配置信息
+   * @param string $user_token 用户Token
+   * @return array|null
+   */
+  public static function GetOauthConfig($user_token = ''){
+    $is_get = false;
+    $data = null;
+    if (UserGroupController::IsAdmin($user_token)) {
+      $is_get = true;
+      $data = [
+        'GITHUB_CLIENT_ID' => env('GITHUB_CLIENT_ID'),
+        'GITHUB_CLIENT_SECRET' => env('GITHUB_CLIENT_SECRET'),
+        'GITHUB_REDIRECT_URI' => env('GITHUB_REDIRECT_URI'),
+        'MICROSOFT_CLIENT_ID' => env('MICROSOFT_CLIENT_ID'),
+        'MICROSOFT_CLIENT_SECRET' => env('MICROSOFT_CLIENT_SECRET'),
+        'MICROSOFT_REDIRECT_URI' => env('MICROSOFT_REDIRECT_URI'),
+        'MICROSOFT_TENANT_ID' => env('MICROSOFT_TENANT_ID'),
+        'GOOGLE_CLIENT_ID' => env('GOOGLE_CLIENT_ID'),
+        'GOOGLE_CLIENT_SECRET' => env('GOOGLE_CLIENT_SECRET'),
+        'GOOGLE_REDIRECT_URI' => env('GOOGLE_REDIRECT_URI'),
+      ];
+    }
+    return [
+      'is_get' => $is_get,
+      'data' => $data,
+    ];
+
+  }
+
+  /**
+   * 设置Oauth配置信息
+   * @param string $user_token 用户Token
+   * @param array  $data       Oauth配置键值对
+   * @return array|null
+   */
+  public static function SetOauthConfig($user_token = '', $data = [])
+  {
+    if (!UserGroupController::IsAdmin($user_token)) {
+      return null;
+    }
+
+    $keys = [
+      'GITHUB_CLIENT_ID',
+      'GITHUB_CLIENT_SECRET',
+      'GITHUB_REDIRECT_URI',
+      'MICROSOFT_CLIENT_ID',
+      'MICROSOFT_CLIENT_SECRET',
+      'MICROSOFT_REDIRECT_URI',
+      'MICROSOFT_TENANT_ID',
+      'GOOGLE_CLIENT_ID',
+      'GOOGLE_CLIENT_SECRET',
+      'GOOGLE_REDIRECT_URI',
+    ];
+
+    $envPath = base_path('.env');
+    $lines = file($envPath);
+
+    foreach ($lines as &$line) {
+      foreach ($keys as $key) {
+        if (array_key_exists($key, $data) && str_starts_with($line, "{$key}=")) {
+          $line = "{$key}={$data[$key]}\n";
+          unset($data[$key]);
+          break;
+        }
+      }
+    }
+    // 追加新的键
+    foreach ($data as $key => $value) {
+      $lines[] = "{$key}={$value}\n";
+    }
+
+    file_put_contents($envPath, implode('', $lines));
+
+    if (function_exists('artisan')) {
+      \Illuminate\Support\Facades\Artisan::call('config:clear');
+    }
+
+    return [
+      'is_set' => true,
+    ];
+  }
 }
+
