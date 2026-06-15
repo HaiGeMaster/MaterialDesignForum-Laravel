@@ -13,7 +13,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         //
-        $middleware->append(\App\Http\Middleware\CheckInstalled::class);
+        // 检查是否已安装
+        // $middleware->append(\App\Http\Middleware\CheckInstalled::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(function (Request $request) {

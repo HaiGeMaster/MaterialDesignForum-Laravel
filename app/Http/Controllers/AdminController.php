@@ -486,7 +486,7 @@ class AdminController extends Controller
         'MAIL_PORT'         => env('MAIL_PORT'),
         'MAIL_USERNAME'     => env('MAIL_USERNAME'),
         'MAIL_PASSWORD'     => env('MAIL_PASSWORD'),
-        // 'MAIL_ENCRYPTION'   => env('MAIL_ENCRYPTION'),
+        'MAIL_ENCRYPTION'   => env('MAIL_ENCRYPTION'),
         'MAIL_FROM_ADDRESS' => env('MAIL_FROM_ADDRESS'),
         'MAIL_FROM_NAME'    => env('MAIL_FROM_NAME'),
       ];

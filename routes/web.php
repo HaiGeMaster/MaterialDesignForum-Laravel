@@ -3,7 +3,7 @@
 use App\Http\Controllers\CommonController;
 use App\Http\Controllers\OptionController;
 use App\Http\Controllers\Auth\SocialiteController;
-
+use App\Http\Controllers\OauthController;
 // use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
 
@@ -18,11 +18,16 @@ if (config('app.debug')) {
         $result = CommonController::GetAppBaseInfo();
         return response()->json($result);
     });
+
+    Route::get('/test/GetUserOauthBindings', function () {
+        $result = OauthController::GetUserOauthBindings('4b155107d21d43a90cd6bdb0666b2c1a');
+        return response()->json($result);
+    });
 }
 
 Route::prefix('install')->group(function () {
-    Route::get('/', [InstallController::class, 'index']);
-    Route::post('/', [InstallController::class, 'store']);
+    // Route::get('/', [InstallController::class, 'index']);
+    // Route::post('/', [InstallController::class, 'store']);
 });
 
 

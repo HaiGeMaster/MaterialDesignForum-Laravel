@@ -3,13 +3,14 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\{
-    CommonController,
     AdminController,
     AnswerController,
     ArticleController,
+    CommonController,
     CommentController,
     FollowController,
     NotificationController,
+    OauthController,
     QuestionController,
     ReplyController,
     ReportController,
@@ -28,7 +29,6 @@ if (config('app.debug')) {
     // Route::get('/api/test/GetServerInfo', fn() => response()->json(['message' => 'Test endpoint']));
 }
 
-Route::get('/api/user/image_captcha/{time?}', [UserController::class, 'GetImageCaptcha']);
 
 // ==================== Admin 管理员 ====================
 
@@ -93,6 +93,9 @@ Route::post('/api/admin/data/oauth_info/set', function (Request $request) {
     return response()->json($result);
 });
 
+// ==================== Common 通用 ====================
+
+
 Route::post('/api/common/app_base_info/get', function (Request $request) {
     $result = CommonController::GetAppBaseInfo(
         $request->input('user_token', $request->bearerToken())
@@ -120,9 +123,9 @@ Route::post('/api/update/check', function (Request $request) {
     return response()->json($result);
 });
 
-///api/core/update/start
-Route::post('/api/update/start', function (Request $request) {
-    $result = UpdateController::update($request->input('user_token'));
+///api/core/update/server/info
+Route::post('/api/update/server/info', function (Request $request) {
+    $result = UpdateController::serveUpdateInfo();
     return response()->json($result);
 });
 
@@ -283,7 +286,7 @@ Route::post('/api/follows/get', function (Request $request) {
         $request->input('modes'),
         $request->input('followable_type'),
         $request->input('followable_id'),
-        $request->input('page'),
+        $request->input('page', 1),                       // 不传时用 1
         $request->input('user_token', $request->bearerToken() ?? ''),
         $request->input('per_page', 20),
         $request->input('is_admin', false)
@@ -514,6 +517,26 @@ Route::post('/api/user_groups/get', function (Request $request) {
 });
 
 // ==================== User 用户 ====================
+
+Route::get('/api/user/image_captcha/{time?}', [UserController::class, 'GetImageCaptcha']);
+
+
+Route::post('/api/user/oauths/get', function (Request $request) {
+    $result = OauthController::GetUserOauthBindings(
+        $request->input('user_token', $request->bearerToken()),
+    );
+    return response()->json($result);
+});
+
+
+Route::post('/api/user/oauth/delete', function (Request $request) {
+    $result = OauthController::DeleteOauth(
+        $request->input('user_token', $request->bearerToken()),
+        $request->input('oauth_id')
+    );
+    return response()->json($result);
+});
+
 
 Route::post('/api/user/answers/get', function (Request $request) {
     $result = UserController::GetUserAnswers(
