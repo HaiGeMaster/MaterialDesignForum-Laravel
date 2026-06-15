@@ -9,6 +9,7 @@
  */
 
 
+
 namespace App\Http\Controllers;
 
 
@@ -135,7 +136,7 @@ class CommonController extends Controller
     //     if (isset($item['Message']['langInfo'])) {
     //       $messages['langInfo'] = $item['Message']['langInfo'];
     //       $export = var_export($messages, true);
-    //       $content = "<?php\n\nreturn {$export};\n";
+    //       $content = "<-?php\n\nreturn {$export};\n";
     //       file_put_contents($langFile, $content);
     //     }
     //   }
