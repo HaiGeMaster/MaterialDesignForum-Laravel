@@ -10,7 +10,12 @@ class UpdateController extends Controller
     /**
      * 远程更新 API 地址
      */
-    private static string $remoteApiUrl = 'https://mdf.xbedrock.com/api/app/update/get';
+    private static string $remoteApiUrl = 'https://laravelmdf.xbedrock.com/update/server/info';
+
+    /**
+     * 默认更新下载链接
+     */
+    private static string $defaultDownloadUrl = 'https://www.123912.com/s/VFB9-QEnsd';
 
     /**
      * 客户端：检查是否有新版本
@@ -26,7 +31,11 @@ class UpdateController extends Controller
         }
 
         try {
-            $response = Http::timeout(30)->get(self::$remoteApiUrl);
+            $certPath = storage_path('certs/cacert.pem');
+
+            $response = Http::timeout(30)
+                ->withOptions(['verify' => file_exists($certPath) ? $certPath : true])
+                ->get(self::$remoteApiUrl);
 
             if (!$response->successful()) {
                 return self::buildResult(false, null, null, '无法连接更新服务器，HTTP: ' . $response->status());
@@ -68,7 +77,7 @@ class UpdateController extends Controller
             ];
         }
 
-        $downloadUrl = config('app.update_download_url');
+        $downloadUrl = config('app.update_download_url')??self::$defaultDownloadUrl;
 
         $result = [
             'is_get'      => true,

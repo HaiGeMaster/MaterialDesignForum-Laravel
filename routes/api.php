@@ -123,11 +123,8 @@ Route::post('/api/update/check', function (Request $request) {
     return response()->json($result);
 });
 
-///api/core/update/server/info
-Route::post('/api/update/server/info', function (Request $request) {
-    $result = UpdateController::serveUpdateInfo();
-    return response()->json($result);
-});
+///api/update/server/info
+// Route::post('/api/update/server/info', [UpdateController::class, 'serveUpdateInfo']);
 
 
 // ==================== Answer 回答 ====================
