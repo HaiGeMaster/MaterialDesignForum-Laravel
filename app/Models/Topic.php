@@ -39,25 +39,25 @@ class Topic extends Model
     'article_count' => 'integer',
     'question_count' => 'integer',
     'follower_count' => 'integer',
-    'create_time' => 'timestamp',
-    'update_time' => 'timestamp',
-    'delete_time' => 'timestamp',
+    'create_time' => 'datetime',
+    'update_time' => 'datetime',
+    'delete_time' => 'datetime',
   ];
 
-  public function articles(): MorphToMany
-  {
-    return $this->morphedByMany(Article::class, 'topicable', 'topicable', 'topic_id', 'topicable_id');
-  }
+  // public function articles(): MorphToMany
+  // {
+  //   return $this->morphedByMany(Article::class, 'topicable', 'topicable', 'topic_id', 'topicable_id');
+  // }
 
-  public function questions(): MorphToMany
-  {
-    return $this->morphedByMany(Question::class, 'topicable', 'topicable', 'topic_id', 'topicable_id');
-  }
+  // public function questions(): MorphToMany
+  // {
+  //   return $this->morphedByMany(Question::class, 'topicable', 'topicable', 'topic_id', 'topicable_id');
+  // }
 
-  public function followers(): MorphToMany
-  {
-    return $this->morphedByMany(User::class, 'followable', 'follow', 'followable_id', 'user_id');
-  }
+  // public function followers(): MorphToMany
+  // {
+  //   return $this->morphedByMany(User::class, 'followable', 'follow', 'followable_id', 'user_id');
+  // }
 
 
   // 搜索字段

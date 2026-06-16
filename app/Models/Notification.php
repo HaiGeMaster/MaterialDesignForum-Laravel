@@ -49,9 +49,9 @@ class Notification extends Model
     'comment_id' => 'integer',
     'reply_id' => 'integer',
     'reply_to_reply_id' => 'integer',
-    'create_time' => 'timestamp',
-    'read_time' => 'timestamp',
-    'delete_time' => 'timestamp',
+    'create_time' => 'datetime',
+    'read_time' => 'datetime',
+    'delete_time' => 'datetime',
   ];
 
     

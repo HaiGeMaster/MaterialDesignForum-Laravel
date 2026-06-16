@@ -44,35 +44,35 @@ class Article extends Model
         'vote_count' => 'integer',
         'vote_up_count' => 'integer',
         'vote_down_count' => 'integer',
-        'create_time' => 'timestamp',
-        'update_time' => 'timestamp',
-        'delete_time' => 'timestamp',
+        'create_time' => 'datetime',
+        'update_time' => 'datetime',
+        'delete_time' => 'datetime',
     ];
 
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id', 'user_id');
-    }
+    // public function user(): BelongsTo
+    // {
+    //     return $this->belongsTo(User::class, 'user_id', 'user_id');
+    // }
 
-    public function comments(): MorphMany
-    {
-        return $this->morphMany(Comment::class, 'commentable');
-    }
+    // public function comments(): MorphMany
+    // {
+    //     return $this->morphMany(Comment::class, 'commentable');
+    // }
 
-    public function votes(): MorphMany
-    {
-        return $this->morphMany(Vote::class, 'votable');
-    }
+    // public function votes(): MorphMany
+    // {
+    //     return $this->morphMany(Vote::class, 'votable');
+    // }
 
-    public function followers(): MorphMany
-    {
-        return $this->morphMany(Follow::class, 'followable');
-    }
+    // public function followers(): MorphMany
+    // {
+    //     return $this->morphMany(Follow::class, 'followable');
+    // }
 
-    public function topics(): MorphToMany
-    {
-        return $this->morphToMany(Topic::class, 'topicable', 'topicable', 'topicable_id', 'topic_id');
-    }
+    // public function topics(): MorphToMany
+    // {
+    //     return $this->morphToMany(Topic::class, 'topicable', 'topicable', 'topicable_id', 'topic_id');
+    // }
     
   // 搜索字段
   public static array $search_field = ['title','content_markdown'];

@@ -172,7 +172,7 @@ class ArticleController extends Controller
    */
   public static function GetArticle($article_id, $user_token = '')
   {
-    $article = ArticleModel::where('article_id', '=', $article_id)->where('delete_time', '=', 0)->first();
+    $article = ArticleModel::where('article_id', '=', $article_id)->whereNull('delete_time')->first();
     if ($article) {
       $article->topics = TopicController::GetAblesTopic($article_id, 'article');
       $article->user = UserController::GetUserInfo($article->user_id, $user_token)['user'];
@@ -220,12 +220,12 @@ class ArticleController extends Controller
         $article_ids = TopicAbleModel::where('topic_id', '=', $specify_topic_id)
           ->where('topicable_type', '=', 'article')
           ->pluck('topicable_id'); //获取指定话题下的所有文章id
-        $data = ArticleModel::where('delete_time', '=', 0)
+        $data = ArticleModel::whereNull('delete_time')
           ->whereIn('article_id', $article_ids) // 确保传递的是数组
           ->orderBy($field, $sort)
           ->paginate($per_page, ['*'], 'page', $page);
       } else if ($search_keywords != '') {
-        $data = ArticleModel::where('delete_time', '=', 0)
+        $data = ArticleModel::whereNull('delete_time')
           //->where($search_field, 'like', '%' . $search_keywords . '%')
           ->where(function ($query) use ($search_field, $search_keywords) {
             foreach ($search_field as $key => $value) {
@@ -235,7 +235,7 @@ class ArticleController extends Controller
           ->orderBy($field, $sort)
           ->paginate($per_page, ['*'], 'page', $page);
       } else {
-        $data = ArticleModel::where('delete_time', '=', 0)
+        $data = ArticleModel::whereNull('delete_time')
           ->orderBy($field, $sort)
           ->paginate($per_page, ['*'], 'page', $page);
       }
@@ -253,7 +253,7 @@ class ArticleController extends Controller
           ->pluck('topicable_id'); //获取指定话题下的所有文章id
         //将指定话题下的文章id与关注的文章id取交集，找出这两个数组中共同的元素，并将其存储到新的数组中
         $following_id_array = array_intersect($following_id_array, $article_ids->toArray());
-        $data = ArticleModel::where('delete_time', '=', 0)
+        $data = ArticleModel::whereNull('delete_time')
           ->whereIn(
             'article_id',
             $following_id_array
@@ -262,7 +262,7 @@ class ArticleController extends Controller
           ->paginate($per_page, ['*'], 'page', $page)
           ->items();
       } else if ($search_keywords != '') {
-        $data = ArticleModel::where('delete_time', '=', 0)
+        $data = ArticleModel::whereNull('delete_time')
           //->where($search_field, 'like', '%' . $search_keywords . '%')
           ->where(function ($query) use ($search_field, $search_keywords) {
             foreach ($search_field as $key => $value) {
@@ -277,7 +277,7 @@ class ArticleController extends Controller
           ->paginate($per_page, ['*'], 'page', $page)
           ->items();
       } else {
-        $data = ArticleModel::where('delete_time', '=', 0)->whereIn(
+        $data = ArticleModel::whereNull('delete_time')->whereIn(
           'article_id',
           $following_id_array
         )->orderBy($field, $sort)
@@ -324,7 +324,7 @@ class ArticleController extends Controller
     $is_edit = false;
     $user_id = TokenController::GetUserId($user_token);
     $article = ArticleModel::where('article_id', '=', $article_id)
-      ->where('delete_time', '=', 0)
+      ->whereNull('delete_time')
       ->first();
     if ($article != null && $is_valid_content && $user_id != null) {
       if (

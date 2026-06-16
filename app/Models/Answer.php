@@ -42,30 +42,30 @@ class Answer extends Model
         'vote_count' => 'integer',
         'vote_up_count' => 'integer',
         'vote_down_count' => 'integer',
-        'create_time' => 'timestamp',
-        'update_time' => 'timestamp',
-        'delete_time' => 'timestamp',
+        'create_time' => 'datetime',
+        'update_time' => 'datetime',
+        'delete_time' => 'datetime',
     ];
 
-    public function question(): BelongsTo
-    {
-        return $this->belongsTo(Question::class, 'question_id', 'question_id');
-    }
+    // public function question(): BelongsTo
+    // {
+    //     return $this->belongsTo(Question::class, 'question_id', 'question_id');
+    // }
 
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id', 'user_id');
-    }
+    // public function user(): BelongsTo
+    // {
+    //     return $this->belongsTo(User::class, 'user_id', 'user_id');
+    // }
 
-    public function comments(): MorphMany
-    {
-        return $this->morphMany(Comment::class, 'commentable');
-    }
+    // public function comments(): MorphMany
+    // {
+    //     return $this->morphMany(Comment::class, 'commentable');
+    // }
 
-    public function votes(): MorphMany
-    {
-        return $this->morphMany(Vote::class, 'votable');
-    }
+    // public function votes(): MorphMany
+    // {
+    //     return $this->morphMany(Vote::class, 'votable');
+    // }
 
     // 搜索字段
   public static array $search_field = ['content_markdown'];

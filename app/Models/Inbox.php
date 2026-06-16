@@ -32,8 +32,8 @@ class Inbox extends Model
     protected $casts = [
         'inbox_id' => 'integer',
         'receiver_id' => 'integer',
-        'create_time' => 'timestamp',
-        'read_time' => 'timestamp',
-        'delete_time' => 'timestamp',
+        'create_time' => 'datetime',
+        'read_time' => 'datetime',
+        'delete_time' => 'datetime',
     ];
 }

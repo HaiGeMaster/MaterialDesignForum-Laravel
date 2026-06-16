@@ -230,7 +230,8 @@ class NotificationController extends Controller
       foreach ($notifications as $key => $notification) {
         UserModel::SubNotificationCount($notification->receiver_id);
 
-        if ($notification->read_time == 0) {
+        // if ($notification->read_time == 0) {
+        if ($notification->read_time->eq($notification->create_time)) {
           NotificationModel::SetReadTime($notification->notification_id, Share::ServerTime());
         }
 
@@ -602,6 +603,11 @@ class NotificationController extends Controller
     //     $is_delete = $notification->save();
     //   }
     // }
+
+    //将用户的通知数量清零
+    if($is_delete){
+      UserModel::where('user_id', $user_id)->update(['notification_unread' => 0]);
+    }
     return [
       'is_delete' => $is_delete,
       // 'notifications' => $notifications

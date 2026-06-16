@@ -35,19 +35,19 @@ class Report extends Model
         'reportable_id' => 'integer',
         'user_id' => 'integer',
         'report_handle_state' => 'integer',
-        'create_time' => 'timestamp',
-        'delete_time' => 'timestamp',
+        'create_time' => 'datetime',
+        'delete_time' => 'datetime',
     ];
 
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id', 'user_id');
-    }
+    // public function user(): BelongsTo
+    // {
+    //     return $this->belongsTo(User::class, 'user_id', 'user_id');
+    // }
 
-    public function reportable(): MorphTo
-    {
-        return $this->morphTo();
-    }
+    // public function reportable(): MorphTo
+    // {
+    //     return $this->morphTo();
+    // }
 
     
   // 搜索字段

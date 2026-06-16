@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('comment', function (Blueprint $table) {
-            $table->unsignedInteger('comment_id')->comment('评论ID');
+            $table->unsignedInteger('comment_id')->autoIncrement()->comment('评论ID');
             $table->unsignedInteger('commentable_id')->comment('评论目标的ID');
             $table->char('commentable_type', 10)->charset('utf8mb4')->collate('utf8mb4_unicode_ci')->comment('评论目标类型：article、question、answer、文章、提问、回答');
             $table->unsignedInteger('user_id')->comment('用户ID');

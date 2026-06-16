@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('user', function (Blueprint $table) {
-            $table->unsignedInteger('user_id')->comment('用户ID');
+            $table->unsignedInteger('user_id')->autoIncrement()->comment('用户ID');
             $table->unsignedInteger('user_group_id')->default(2)->comment('用户组ID');
             $table->string('username', 30)->charset('utf8mb4')->collate('utf8mb4_unicode_ci')->comment('用户名');
             $table->string('email', 320)->charset('utf8mb4')->collate('utf8mb4_unicode_ci')->comment('邮箱');
@@ -44,7 +44,7 @@ return new class extends Migration
             $table->string('language', 30)->charset('utf8mb4')->collate('utf8mb4_unicode_ci')->nullable()->comment('使用的语言');
             $table->timestamp('create_time')->useCurrent()->comment('注册时间');
             $table->timestamp('update_time')->useCurrent()->comment('更新时间');
-            $table->timestamp('disable_time')->useCurrent()->comment('禁用时间');
+            $table->timestamp('disable_time')->nullable()->comment('禁用时间');
             
             $table->primary('user_id');
         });

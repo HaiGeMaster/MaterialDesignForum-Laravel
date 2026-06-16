@@ -34,7 +34,7 @@ class Image extends Model
     protected $casts = [
         'width' => 'integer',
         'height' => 'integer',
-        'create_time' => 'timestamp',
+        'create_time' => 'datetime',
         'item_id' => 'integer',
         'user_id' => 'integer',
     ];

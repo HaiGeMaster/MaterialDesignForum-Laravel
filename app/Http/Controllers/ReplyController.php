@@ -212,7 +212,7 @@ class ReplyController extends Controller
     // }
 
     $reply = ReplyModel::where('reply_id', '=', $reply_id)
-      ->where('delete_time', '=', 0)
+      ->whereNull('delete_time')
       ->first();
     if ($reply != null) {
       $reply->user = UserController::GetUserInfo($reply->user_id)['user'];
@@ -262,7 +262,7 @@ class ReplyController extends Controller
     if ($search_keywords != '') {
       if ($replyable_comment_id != '') {
         $data = ReplyModel::where('replyable_comment_id', '=', $replyable_comment_id)
-          ->where('delete_time', '=', 0)
+          ->whereNull('delete_time')
           //->where($search_field, 'like', '%' . $search_keywords . '%')
           ->where(function ($query) use ($search_field, $search_keywords) {
             foreach ($search_field as $key => $value) {
@@ -272,7 +272,7 @@ class ReplyController extends Controller
           ->orderBy($field, $sort)
           ->paginate($per_page, ['*'], 'page', $page);
       } else {
-        $data = ReplyModel::where('delete_time', '=', 0)
+        $data = ReplyModel::whereNull('delete_time')
           //->where($search_field, 'like', '%' . $search_keywords . '%')
           ->where(function ($query) use ($search_field, $search_keywords) {
             foreach ($search_field as $key => $value) {
@@ -285,11 +285,11 @@ class ReplyController extends Controller
     } else {
       if ($replyable_comment_id != '') {
         $data = ReplyModel::where('replyable_comment_id', '=', $replyable_comment_id)
-          ->where('delete_time', '=', 0)
+          ->whereNull('delete_time')
           ->orderBy($field, $sort)
           ->paginate($per_page, ['*'], 'page', $page);
       } else {
-        $data = ReplyModel::where('delete_time', '=', 0)
+        $data = ReplyModel::whereNull('delete_time')
           ->orderBy($field, $sort)
           ->paginate($per_page, ['*'], 'page', $page);
       }
@@ -388,7 +388,7 @@ class ReplyController extends Controller
     $is_edit = false;
     $user_id = TokenController::GetUserId($user_token);
     $reply = ReplyModel::where('reply_id', '=', $reply_id)
-      ->where('delete_time', '=', 0)
+      ->whereNull('delete_time')
       ->first();
     if ($reply != null && $is_valid_content && $user_id != null) {
       if (
@@ -533,7 +533,7 @@ class ReplyController extends Controller
   public static function GetReplyable($reply_id,  $user_token = '')
   {
     $reply = ReplyModel::where('reply_id', '=', $reply_id)
-      ->where('delete_time', '=', 0)
+      ->whereNull('delete_time')
       ->first();
     $replyable_data = null;
     $replyable_id = null;

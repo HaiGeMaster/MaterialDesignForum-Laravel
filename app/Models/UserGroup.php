@@ -222,10 +222,10 @@ class UserGroup extends Model
         'ability_vote' => 'boolean', //16
     ];
 
-    public function users(): HasMany
-    {
-        return $this->hasMany(User::class, 'user_group_id', 'user_group_id');
-    }
+    // public function users(): HasMany
+    // {
+    //     return $this->hasMany(User::class, 'user_group_id', 'user_group_id');
+    // }
 
 
     // 搜索字段

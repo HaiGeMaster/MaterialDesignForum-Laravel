@@ -13,6 +13,7 @@ namespace App\Http\Controllers;
 use App\Models\Image;
 use App\Services\AvatarGenerator;
 use App\Services\Share;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -194,7 +195,7 @@ class ImageController extends Controller
     public static function CreateUserDefaultAvatar(string $name, string $userId = 'cache'): array
     {
         if ($userId === 'cache') {
-            $userId = 'cache_' . md5($name) . '_' . Share::ServerTime();
+            $userId = 'cache_' . md5($name) . '_' . Carbon::now()->timestamp;
         }
 
         $config   = self::$pathData['user_avatar_default'];
@@ -234,11 +235,17 @@ class ImageController extends Controller
      */
     public static function CreateUserDefaultCover(): array
     {
+        // return [
+        //     'original' => '/public/static/default/user/covers/1/original/default.png',
+        //     'small'    => '/public/static/default/user/covers/1/small/default.png',
+        //     'middle'   => '/public/static/default/user/covers/1/middle/default.png',
+        //     'large'    => '/public/static/default/user/covers/1/large/default.png',
+        // ];
         return [
-            'original' => '/public/static/default/user/covers/1/original/default.png',
-            'small'    => '/public/static/default/user/covers/1/small/default.png',
-            'middle'   => '/public/static/default/user/covers/1/middle/default.png',
-            'large'    => '/public/static/default/user/covers/1/large/default.png',
+            'original' => '/static/default/user/covers/1/original/default.png',
+            'small'    => '/static/default/user/covers/1/small/default.png',
+            'middle'   => '/static/default/user/covers/1/middle/default.png',
+            'large'    => '/static/default/user/covers/1/large/default.png',
         ];
     }
 

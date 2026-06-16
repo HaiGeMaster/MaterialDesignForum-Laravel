@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('topic', function (Blueprint $table) {
-            $table->unsignedInteger('topic_id')->comment('话题ID');
+            $table->unsignedInteger('topic_id')->autoIncrement()->comment('话题ID');
             $table->integer('user_id')->comment('话题创建者用户id');
             $table->string('name', 20)->charset('utf8mb4')->collate('utf8mb4_unicode_ci')->default('')->comment('话题名称');
             $table->string('cover', 2000)->charset('utf8mb4')->collate('utf8mb4_unicode_ci')->nullable()->comment('封面图片token');

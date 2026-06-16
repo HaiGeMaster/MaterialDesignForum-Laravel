@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('article', function (Blueprint $table) {
-            $table->unsignedInteger('article_id')->comment('文章ID');
+            $table->unsignedInteger('article_id')->autoIncrement()->comment('文章ID');
             $table->unsignedInteger('user_id')->comment('用户ID');
             $table->string('title', 80)->charset('utf8mb4')->collate('utf8mb4_unicode_ci')->comment('标题');
             $table->text('content_markdown')->charset('utf8mb4')->collate('utf8mb4_unicode_ci')->comment('原始的正文内容');

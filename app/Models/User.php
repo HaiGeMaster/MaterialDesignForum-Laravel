@@ -86,58 +86,58 @@ class User extends Authenticatable
         'inbox_system' => 'integer',
         'inbox_user_group' => 'integer',
         'inbox_private_message' => 'integer',
-        'create_time' => 'timestamp',
-        'update_time' => 'timestamp',
-        'disable_time' => 'timestamp',
-        'last_login_time' => 'timestamp',
+        'create_time' => 'datetime',
+        'update_time' => 'datetime',
+        'disable_time' => 'datetime',
+        'last_login_time' => 'datetime',
         'password' => 'hashed',
     ];
 
 
-    public function userGroup(): BelongsTo
-    {
-        return $this->belongsTo(UserGroup::class, 'user_group_id', 'user_group_id');
-    }
+    // public function userGroup(): BelongsTo
+    // {
+    //     return $this->belongsTo(UserGroup::class, 'user_group_id', 'user_group_id');
+    // }
 
-    public function articles(): HasMany
-    {
-        return $this->hasMany(Article::class, 'user_id', 'user_id');
-    }
+    // public function articles(): HasMany
+    // {
+    //     return $this->hasMany(Article::class, 'user_id', 'user_id');
+    // }
 
-    public function questions(): HasMany
-    {
-        return $this->hasMany(Question::class, 'user_id', 'user_id');
-    }
+    // public function questions(): HasMany
+    // {
+    //     return $this->hasMany(Question::class, 'user_id', 'user_id');
+    // }
 
-    public function answers(): HasMany
-    {
-        return $this->hasMany(Answer::class, 'user_id', 'user_id');
-    }
+    // public function answers(): HasMany
+    // {
+    //     return $this->hasMany(Answer::class, 'user_id', 'user_id');
+    // }
 
-    public function comments(): HasMany
-    {
-        return $this->hasMany(Comment::class, 'user_id', 'user_id');
-    }
+    // public function comments(): HasMany
+    // {
+    //     return $this->hasMany(Comment::class, 'user_id', 'user_id');
+    // }
 
-    public function replies(): HasMany
-    {
-        return $this->hasMany(Reply::class, 'user_id', 'user_id');
-    }
+    // public function replies(): HasMany
+    // {
+    //     return $this->hasMany(Reply::class, 'user_id', 'user_id');
+    // }
 
-    public function follows(): HasMany
-    {
-        return $this->hasMany(Follow::class, 'user_id', 'user_id');
-    }
+    // public function follows(): HasMany
+    // {
+    //     return $this->hasMany(Follow::class, 'user_id', 'user_id');
+    // }
 
-    public function votes(): HasMany
-    {
-        return $this->hasMany(Vote::class, 'user_id', 'user_id');
-    }
+    // public function votes(): HasMany
+    // {
+    //     return $this->hasMany(Vote::class, 'user_id', 'user_id');
+    // }
 
-    public function notifications(): HasMany
-    {
-        return $this->hasMany(Notification::class, 'user_id', 'user_id');
-    }
+    // public function notifications(): HasMany
+    // {
+    //     return $this->hasMany(Notification::class, 'user_id', 'user_id');
+    // }
 
     // 搜索字段
     public static array $search_field = [

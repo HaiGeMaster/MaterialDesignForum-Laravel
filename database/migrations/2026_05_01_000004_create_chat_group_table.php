@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('chat_group', function (Blueprint $table) {
-            $table->unsignedInteger('chat_group_id')->comment('聊天组ID');
+            $table->unsignedInteger('chat_group_id')->autoIncrement()->comment('聊天组ID');
             $table->string('chat_group_name', 10)->charset('utf8mb4')->collate('utf8mb4_unicode_ci')->comment('聊天组名称');
             $table->string('chat_group_avatar', 255)->charset('utf8mb4')->collate('utf8mb4_unicode_ci')->comment('聊天组头像');
             $table->unsignedInteger('chat_group_user_count')->default(0)->comment('聊天组人数');

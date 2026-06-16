@@ -52,6 +52,7 @@ use App\Http\Controllers\{
 
 use App\Services\Share;
 use App\Services\ImageCaptcha;
+use Carbon\Carbon;
 use Mews\Captcha\Facades\Captcha;
 use itbdw\Ip\IpLocation;
 use Laravel\Socialite\One\User;
@@ -78,7 +79,7 @@ class UserController extends Controller
     if ($oauthUser) { //如果有绑定第三方平台记录，则直接查找对应用户去让其登录账号
       $user_id = $oauthUser->user_id;
       $local_user = UserModel::where('user_id', '=', $user_id)
-        ->where('disable_time', '=', 0)
+        ->whereNull('disable_time')
         ->first();
       if ($local_user) {
         //顺便更新oauth记录的用户名
@@ -93,7 +94,7 @@ class UserController extends Controller
       $user_id = TokenController::GetUserId($user_token);
       if ($user_id) {
         $local_user = UserModel::where('user_id', '=', $user_id)
-          ->where('disable_time', '=', 0)
+          ->whereNull('disable_time')
           ->first();
         if ($local_user) { //为其绑定Oauth记录
           $oauthUser = OauthController::AddOauthUser($oauthName, $oauthUserId, $oauthUserName, $oauthUserMail, $oauthSourceResponse, $local_user->user_id);
@@ -105,7 +106,7 @@ class UserController extends Controller
       }
     } else { //如果没有绑定第三方平台记录，则根据 oauthUserMail 查找是否有对应的用户
       $local_user = UserModel::where('email', '=', $oauthUserMail)
-        ->where('disable_time', '=', 0)
+        ->whereNull('disable_time')
         ->first();
       if ($local_user) { //如果有对应的用户，则添加或更新Oauth记录
         $oauthUser = OauthController::AddOauthUser($oauthName, $oauthUserId, $oauthUserName, $oauthUserMail, $oauthSourceResponse, $local_user->user_id);
@@ -117,7 +118,7 @@ class UserController extends Controller
         $new_user = UserModel::create([
           'email' => $oauthUserMail,
           'username' => $oauthUserName,
-          'password' => self::HandlePassword(Share::ServerTime()), //使用时间戳作为默认密码
+          'password' => self::HandlePassword(Carbon::now()->timestamp), //使用时间戳作为默认密码
           'create_ip' => self::GetClientIP(),
           'create_location' => self::GetClientLocation(),
           'last_login_time' => Share::ServerTime(),
@@ -168,7 +169,7 @@ class UserController extends Controller
 
     //不使用base64的原因是为了防止用户输入的用户名中包含base64编码的字符，导致解码失败
     // $client_username = $username == "" ? "User" . Share::ServerTime() : base64_decode($username);
-    $client_username = $username == "" ? "User" . Share::ServerTime() : $username;
+    $client_username = $username == "" ? "User" . Carbon::now()->timestamp : $username;
     if ($client_username == "") {
       $client_username = $client_email;
     }
@@ -176,6 +177,7 @@ class UserController extends Controller
     if ($client_user == null) {
       $client_user = UserModel::where('username', '=', $client_username)->first(); // == null;
       if ($client_user == null) {
+        // return CacheModel::where('name', '=', $client_email)->first();
         if (CacheController::IsVaildCaptcha($client_email, $client_email_captcha)) {
           $user = new UserModel();
           if (UserModel::count() == 0) {
@@ -427,7 +429,7 @@ class UserController extends Controller
       'name' => $Captcha['md5code'],
       'value' => $Captcha['code'],
       'create_time' => Share::ServerTime(),
-      'life_time' => Share::ServerTime() + (60 * 5)
+      'life_time' => Carbon::now()->addSeconds(60 * 5)
     ]);
     // 用输出缓冲捕获 imagepng 的原始输出
     ob_start();
@@ -449,10 +451,9 @@ class UserController extends Controller
    * @param string $username_or_email 用户名或邮箱
    * @param string $password 密码
    * @param string $image_capthca 验证码（用户输入值，base64编码）
-   * @param string $captcha_key 验证码key（来自 GetImageCaptcha 返回的key）
    * @return array {is_login:是否登录成功,token:token字符串}
    */
-  public static function Login($username_or_email, $password, $image_capthca = "", $captcha_key = "")
+  public static function Login($username_or_email, $password, $image_capthca = "")
   {
     try {
       $snackbar = '';
@@ -462,31 +463,30 @@ class UserController extends Controller
       $image_capthca = $image_capthca ? base64_decode($image_capthca) : '';
 
       $user = UserModel::where('email', '=', $username_or_email)
-        ->where('disable_time', '=', 0)->first();
+        ->whereNull('disable_time')->first();
       if ($user == null) {
         $user = UserModel::where('username', '=', $username_or_email)
-          ->where('disable_time', '=', 0)->first();
+          ->whereNull('disable_time')->first();
       }
 
-
       // return [
-      //   'password' => $password,
-      //   'user' => $user,
+      //   'CacheController::IsVaildImgCaptcha($image_capthca))'=>CacheController::IsVaildImgCaptcha($image_capthca),
+
+      //   '验证'=>($user->email == $username_or_email || $user->username == $username_or_email) &&
+      //     $user->password == $password &&
+      //     ($image_capthca == '' || CacheController::IsVaildImgCaptcha($image_capthca)),
+
+      //     '($user->email == $username_or_email || $user->username == $username_or_email)'=>($user->email == $username_or_email || $user->username == $username_or_email),
+
+      //     '$user->password == $password'=>$user->password == $password,
+
+      //     '$image_capthca' => $image_capthca,
+
+      //     '$image_capthca==空'=>$image_capthca=='',
+
+      //     'CacheController::IsVaildImgCaptcha($image_capthca)'=>CacheController::IsVaildImgCaptcha($image_capthca),
+
       // ];
-      
-
-
-      // $mail_user = UserModel::where('email', '=', $username_or_email)
-      // ->where('disable_time', '=', 0)->first();
-      // $name_user = UserModel::where('username', '=', $username_or_email)
-      // ->where('disable_time', '=', 0)->first();
-      // return [
-      //   'is_login' => false,
-      //   'user' => $user,
-      //   'mail_user' => $mail_user,
-      //   'name_user' => $name_user,
-      // ];
-
 
       $token = '';
       $is_login = false;
@@ -510,6 +510,8 @@ class UserController extends Controller
             'last_login_time' => Share::ServerTime(),
           ]);
           if ($token != '' && $update_user) {
+          // //查询用户组是否可以前台登录
+          //   $user_group_login = UserGroupController::CanNormalLogin($token)
             // return 3;
             $is_login = true;
           }
@@ -582,7 +584,7 @@ class UserController extends Controller
     $user = null;
     if ($user_id) {
       $user = UserModel::where('user_id', '=', $user_id)
-        ->where('disable_time', '=', 0)
+        ->whereNull('disable_time')
         ->first();
       if ($user) {
         $user->last_login_ip = self::GetClientIP();
@@ -657,6 +659,7 @@ class UserController extends Controller
    */
   public static function GetUserInfo($user_id, $user_token = '')
   {
+    // return '你妈逼';
     $user = UserModel::find($user_id);
     $return_user = null;
 
@@ -707,7 +710,7 @@ class UserController extends Controller
    * @param string $per_page 每页显示的数量
    * @param string $search_keywords 搜索关键词
    * @param array $search_field 搜索字段
-   * @param string $is_admin 是否是管理员
+   * @param bool $is_admin 是否是管理员
    * @return array {分页用户信息}
    */
   public static function GetUsers(
@@ -720,6 +723,7 @@ class UserController extends Controller
     $search_field = [],
     $is_admin = false
   ) {
+    // return UserModel::all();
     if ($search_field == []) {
       $search_field = UserModel::$search_field;
     }
@@ -729,7 +733,7 @@ class UserController extends Controller
     $order = $order['sort'];
     if ($type == 'recommended') {
       if ($search_keywords != '') {
-        $data = UserModel::where('disable_time', '=', 0)
+        $data = UserModel::whereNull('disable_time')
           //->where($search_field, 'like', '%' . $search_keywords . '%')
           ->where(function ($query) use ($search_field, $search_keywords) {
             foreach ($search_field as $key => $value) {
@@ -739,7 +743,7 @@ class UserController extends Controller
           ->orderBy($field, $order)
           ->paginate($per_page, ['*'], 'page', $page);
       } else {
-        $data = UserModel::where('disable_time', '=', 0)
+        $data = UserModel::whereNull('disable_time')
           ->orderBy($field, $order)
           ->paginate($per_page, ['*'], 'page', $page);
       }
@@ -752,7 +756,7 @@ class UserController extends Controller
         ->pluck('followable_id');
 
       if ($search_keywords != '') {
-        $data = UserModel::where('disable_time', '=', 0)
+        $data = UserModel::whereNull('disable_time')
           ->whereIn('user_id', $followees_id)
           //->where($search_field, 'like', '%' . $search_keywords . '%')
           ->where(function ($query) use ($search_field, $search_keywords) {
@@ -763,7 +767,7 @@ class UserController extends Controller
           ->orderBy($field, $order)
           ->paginate($per_page, ['*'], 'page', $page);
       } else {
-        $data = UserModel::where('disable_time', '=', 0)
+        $data = UserModel::whereNull('disable_time')
           ->whereIn('user_id', $followees_id)
           ->orderBy($field, $order)
           ->paginate($per_page, ['*'], 'page', $page);
@@ -777,7 +781,7 @@ class UserController extends Controller
         ->pluck('user_id');
 
       if ($search_keywords != '') {
-        $data = UserModel::where('disable_time', '=', 0)
+        $data = UserModel::whereNull('disable_time')
           ->whereIn('user_id', $followers_id)
           //->where($search_field, 'like', '%' . $search_keywords . '%')
           ->where(function ($query) use ($search_field, $search_keywords) {
@@ -788,7 +792,7 @@ class UserController extends Controller
           ->orderBy($field, $order)
           ->paginate($per_page, ['*'], 'page', $page);
       } else {
-        $data = UserModel::where('disable_time', '=', 0)
+        $data = UserModel::whereNull('disable_time')
           ->whereIn('user_id', $followers_id)
           ->orderBy($field, $order)
           ->paginate($per_page, ['*'], 'page', $page);
@@ -796,14 +800,14 @@ class UserController extends Controller
 
       $data = Share::HandleDataAndPagination($data);
     } else {
-      // $data = UserModel::where('disable_time', '=', 0)
+      // $data = UserModel::whereNull('disable_time')
       //   ->orderBy($field, $order)
       //   ->paginate($per_page, ['*'], 'page', $page);
       // $data = Share::HandleDataAndPagination($data);
 
       if (!$is_admin) {
         if ($search_keywords != '') {
-          $data = UserModel::where('disable_time', '=', 0)
+          $data = UserModel::whereNull('disable_time')
             //->where($search_field, 'like', '%' . $search_keywords . '%')
             ->where(function ($query) use ($search_field, $search_keywords) {
               foreach ($search_field as $key => $value) {
@@ -813,11 +817,11 @@ class UserController extends Controller
             ->orderBy($field, $order)
             ->paginate($per_page, ['*'], 'page', $page);
         } else {
-          $data = UserModel::where('disable_time', '=', 0)
+          $data = UserModel::whereNull('disable_time')
             ->orderBy($field, $order)
             ->paginate($per_page, ['*'], 'page', $page);
         }
-      } else if ($is_admin && (UserGroupController::IsAdmin($user_token) || UserGroupController::IsAdminLogin($user_token))) {
+      } else if ($is_admin && (UserGroupController::IsAdmin($user_token) || UserGroupController::CanAdminLogin($user_token))) {
         if ($search_keywords != '') {
           $data = UserModel::where(function ($query) use ($search_field, $search_keywords) {
             foreach ($search_field as $key => $value) {
@@ -840,11 +844,14 @@ class UserController extends Controller
     //   // $user->save();
     // }
 
-    if ($data['data'] != null && !$is_admin) {
+    if ($data['data'] != null && ($is_admin=='false'||$is_admin==false||!$is_admin)) {
+    // if ($data['data'] != null && Share::IsValid($is_admin)==false) {
       foreach ($data['data'] as $key => $value) {
         $data['data'][$key] = self::GetUserInfo($value['user_id'], $user_token)['user'];
       }
     }
+
+    // $data['is_admin'] = $is_admin;
 
     if ($data['data'] != null && !UserGroupController::IsAdmin($user_token)) {
       foreach ($data['data'] as $key => $value) {
@@ -857,6 +864,16 @@ class UserController extends Controller
       }
     }
 
+
+    // 附加用户组信息
+    // if ($data['data'] != null) {
+    //   foreach ($data['data'] as $key => $value) {
+    //     if (empty($value['user_group'])) {
+    //       $data['data'][$key]['user_group'] = UserGroupController::GetUserGroupInfo($value['user_group_id']);
+    //     }
+    //   }
+    // }
+
     //循环检查有人的背景图是否为空
     if ($data['data'] != null) {
       foreach ($data['data'] as $key => $value) {
@@ -865,6 +882,8 @@ class UserController extends Controller
         }
       }
     }
+
+    // return '你妈逼';
 
     return $data;
   }
@@ -1088,7 +1107,7 @@ class UserController extends Controller
     $field = $orders['field'];
     $sort = $orders['sort'];
     $data = QuestionModel::where('user_id', '=', $user_id)
-      ->where('delete_time', '=', 0)
+      ->whereNull('delete_time')
       ->orderBy($field, $sort)
       ->paginate($per_page, ['*'], 'page', $page);
     $data = Share::HandleDataAndPagination($data);
@@ -1120,7 +1139,7 @@ class UserController extends Controller
     $field = $orders['field'];
     $sort = $orders['sort'];
     $data = ArticleModel::where('user_id', '=', $user_id)
-      ->where('delete_time', '=', 0)
+      ->whereNull('delete_time')
       ->orderBy($field, $sort)
       ->paginate($per_page, ['*'], 'page', $page);
     $data = Share::HandleDataAndPagination($data);
@@ -1152,7 +1171,7 @@ class UserController extends Controller
     $field = $orders['field'];
     $sort = $orders['sort'];
     $data = AnswerModel::where('user_id', '=', $user_id)
-      ->where('delete_time', '=', 0)
+      ->whereNull('delete_time')
       ->orderBy($field, $sort)
       ->paginate($per_page, ['*'], 'page', $page);
     $data = Share::HandleDataAndPagination($data);

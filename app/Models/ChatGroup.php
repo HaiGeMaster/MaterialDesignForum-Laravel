@@ -35,18 +35,18 @@ class ChatGroup extends Model
         'chat_group_id' => 'integer',
         'chat_group_user_count' => 'integer',
         'chat_group_owner_user_id' => 'integer',
-        'create_time' => 'timestamp',
-        'update_time' => 'timestamp',
-        'delete_time' => 'timestamp',
+        'create_time' => 'datetime',
+        'update_time' => 'datetime',
+        'delete_time' => 'datetime',
     ];
 
-    public function owner(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'chat_group_owner_user_id', 'user_id');
-    }
+    // public function owner(): BelongsTo
+    // {
+    //     return $this->belongsTo(User::class, 'chat_group_owner_user_id', 'user_id');
+    // }
 
-    public function members(): HasMany
-    {
-        return $this->hasMany(ChatGroupable::class, 'chat_group_id', 'chat_group_id');
-    }
+    // public function members(): HasMany
+    // {
+    //     return $this->hasMany(ChatGroupable::class, 'chat_group_id', 'chat_group_id');
+    // }
 }

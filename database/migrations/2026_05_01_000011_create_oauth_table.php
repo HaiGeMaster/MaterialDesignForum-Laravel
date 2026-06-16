@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('oauth', function (Blueprint $table) {
-            $table->unsignedInteger('oauth_id')->comment('索引ID');
+            $table->unsignedInteger('oauth_id')->autoIncrement()->comment('索引ID');
             $table->string('oauth_name', 255)->charset('utf8mb4')->collate('utf8mb4_unicode_ci')->comment('第三方平台标识符');
             $table->string('oauth_user_id', 255)->charset('utf8mb4')->collate('utf8mb4_unicode_ci')->comment('第三方平台用户ID');
             $table->string('oauth_user_name', 255)->charset('utf8mb4')->collate('utf8mb4_unicode_ci')->comment('第三方平台用户名');

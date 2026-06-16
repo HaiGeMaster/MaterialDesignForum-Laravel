@@ -12,6 +12,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cache as CacheModel;
 use App\Services\Share;
+use Carbon\Carbon;
 // use Illuminate\Support\Facades\Cache;
 //由于laraval自带缓存，所以这里直接使用laravel的缓存
 class CacheController extends Controller
@@ -39,7 +40,7 @@ class CacheController extends Controller
             //如果过期了
             // if ($captcha->life_time < Share::ServerTime()) {
                 $captcha->value = $md5code;
-                $captcha->life_time = Share::ServerTime() + 60 * 5;
+                $captcha->life_time = Carbon::now()->addSeconds(60 * 5);
                 $captcha->save();
             // }
         }else{
@@ -47,7 +48,7 @@ class CacheController extends Controller
                 'name' => $name,
                 'value' => $md5code,
                 'create_time' => Share::ServerTime(),
-                'life_time' => Share::ServerTime() + 60 * 5,
+                'life_time' => Carbon::now()->addSeconds(60 * 5),
             ]);
         }
         return $code;
@@ -78,6 +79,8 @@ class CacheController extends Controller
     public static function IsVaildImgCaptcha($value):bool{
         $query = CacheModel::where('value', '=', $value)->where('life_time', '>', Share::ServerTime())->first();
         if ($query) {
+            //顺便删除过期的验证码
+            // $delete_query = CacheModel::where('life_time', '<', Share::ServerTime())->delete();
             return true;
         } else {
             return false;

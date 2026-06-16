@@ -42,20 +42,20 @@ class Comment extends Model
         'vote_count' => 'integer',
         'vote_up_count' => 'integer',
         'vote_down_count' => 'integer',
-        'create_time' => 'timestamp',
-        'update_time' => 'timestamp',
-        'delete_time' => 'timestamp',
+        'create_time' => 'datetime',
+        'update_time' => 'datetime',
+        'delete_time' => 'datetime',
     ];
 
-    public function commentable(): MorphTo
-    {
-        return $this->morphTo();
-    }
+    // public function commentable(): MorphTo
+    // {
+    //     return $this->morphTo();
+    // }
 
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id', 'user_id');
-    }
+    // public function user(): BelongsTo
+    // {
+    //     return $this->belongsTo(User::class, 'user_id', 'user_id');
+    // }
 
     
   // 搜索字段

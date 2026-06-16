@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('inbox', function (Blueprint $table) {
-            $table->unsignedInteger('inbox_id')->comment('私信ID');
+            $table->unsignedInteger('inbox_id')->autoIncrement()->comment('私信ID');
             $table->string('sender_id', 10)->charset('utf8mb4')->collate('utf8mb4_unicode_ci')->comment('发送者ID：system、user_id');
             $table->string('sender_type', 30)->charset('utf8mb4')->collate('utf8mb4_unicode_ci')->comment('发送者类型 user_to_user、user_to_chat_group、system_to_user、system_to_user_group');
             $table->unsignedInteger('receiver_id')->comment('接收者ID：user_id、chat_group_id');

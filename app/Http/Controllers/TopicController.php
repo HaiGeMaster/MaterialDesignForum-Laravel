@@ -85,7 +85,7 @@ class TopicController extends Controller
       //   ->get();
       //获取id列表到topic_ids
       $topic_ids = TopicModel::whereIn('topic_id', $topic_ids)
-        ->where('delete_time', '=', 0) //只获取删除时间为0的
+        ->whereNull('delete_time') //只获取删除时间为0的
         ->pluck('topic_id')
         ->toArray();
       $topics = [];
@@ -182,7 +182,7 @@ class TopicController extends Controller
   public static function GetTopic($topic_id, $user_token = '')
   {
     $topic = TopicModel::where('topic_id', '=', $topic_id)
-      ->where('delete_time', '=', 0)
+      ->whereNull('delete_time')
       ->first();
     if ($topic) {
       // $topic['is_follow'] = false;
@@ -234,7 +234,7 @@ class TopicController extends Controller
     $sort = $orders['sort'];
     if ($following == 'false' || $following == false) {
       if ($search_keywords != '') {
-        $data = TopicModel::where('delete_time', '=', 0)
+        $data = TopicModel::whereNull('delete_time')
           //->where($search_field, 'like', '%' . $search_keywords . '%')
           ->where(function ($query) use ($search_field, $search_keywords) {
             foreach ($search_field as $key => $value) {
@@ -244,7 +244,7 @@ class TopicController extends Controller
           ->orderBy($field, $sort)
           ->paginate($per_page, ['*'], 'page', $page);
       } else {
-        $data = TopicModel::where('delete_time', '=', 0)->orderBy($field, $sort)->paginate($per_page, ['*'], 'page', $page);
+        $data = TopicModel::whereNull('delete_time')->orderBy($field, $sort)->paginate($per_page, ['*'], 'page', $page);
       }
       $data = Share::HandleDataAndPagination($data);
     } else if ($following == 'true' || $following == true && $user_token != '') {
@@ -255,7 +255,7 @@ class TopicController extends Controller
         array_push($following_id_array, $value->followable_id);
       }
       if ($search_keywords != '') {
-        $data = TopicModel::where('delete_time', '=', 0)
+        $data = TopicModel::whereNull('delete_time')
           //->where($search_field, 'like', '%' . $search_keywords . '%')
           ->where(function ($query) use ($search_field, $search_keywords) {
             foreach ($search_field as $key => $value) {
@@ -269,7 +269,7 @@ class TopicController extends Controller
           ->paginate($per_page, ['*'], 'page', $page)
           ->items();
       } else {
-        $data = TopicModel::where('delete_time', '=', 0)->whereIn(
+        $data = TopicModel::whereNull('delete_time')->whereIn(
           'topic_id',
           $following_id_array
         )->orderBy($field, $sort)->paginate($per_page, ['*'], 'page', $page)->items();
@@ -309,7 +309,7 @@ class TopicController extends Controller
     $is_edit = false;
     $user_id = TokenController::GetUserId($user_token);
     $topic = TopicModel::where('topic_id', '=', $topic_id)
-      ->where('delete_time', '=', 0)
+      ->whereNull('delete_time')
       ->first();
     if ($topic != null && $is_valid_content && $user_id != null) {
       if (

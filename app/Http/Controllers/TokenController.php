@@ -14,6 +14,7 @@ use App\Models\Token as TokenModel;
 use App\Models\User as UserModel;
 use App\Http\Controllers\UserGroupController;
 use App\Services\Share;
+use Carbon\Carbon;
 
 class TokenController extends Controller
 {
@@ -45,7 +46,7 @@ class TokenController extends Controller
     $token->device = $device;
     $token->create_time = Share::ServerTime();
     $token->update_time = Share::ServerTime();
-    $token->expire_time = Share::ServerTime() + 86400 * 30;
+    $token->expire_time = Carbon::now()->addSeconds(86400 * 30);
     $token->save();
 
     return $token_text;

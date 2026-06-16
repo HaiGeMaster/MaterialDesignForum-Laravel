@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -12,14 +11,11 @@ class DatabaseSeeder extends Seeder
 
     /**
      * Seed the application's database.
+     * 默认数据已在迁移文件中插入，此处预留扩展。
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // 默认数据在 migrations 中通过 DB::insert() 写入
+        // 如需额外测试数据，在此添加
     }
 }

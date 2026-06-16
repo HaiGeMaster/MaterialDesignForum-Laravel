@@ -149,7 +149,7 @@ class AnswerController extends Controller
   public static function GetAnswer($answer_id, $user_token = '')
   {
     $answer = AnswerModel::where('answer_id', $answer_id)
-      ->where('delete_time', '=', 0)
+      ->whereNull('delete_time')
       ->first();
     if ($answer != null) {
       $answer->user = UserController::GetUserInfo($answer->user_id)['user'];
@@ -191,7 +191,7 @@ class AnswerController extends Controller
     if ($search_keywords != '') {
       if ($question_id != '') {
         $data = AnswerModel::where('question_id', '=', $question_id)
-          ->where('delete_time', '=', 0)
+          ->whereNull('delete_time')
           //->where($search_field, 'like', '%' . $search_keywords . '%')
           ->where(function ($query) use ($search_field, $search_keywords) {
             foreach ($search_field as $key => $value) {
@@ -201,7 +201,7 @@ class AnswerController extends Controller
           ->orderBy($field, $sort)
           ->paginate($per_page, ['*'], 'page', $page);
       } else {
-        $data = AnswerModel::where('delete_time', '=', 0)
+        $data = AnswerModel::whereNull('delete_time')
           //->where($search_field, 'like', '%' . $search_keywords . '%')
           ->where(function ($query) use ($search_field, $search_keywords) {
             foreach ($search_field as $key => $value) {
@@ -214,11 +214,11 @@ class AnswerController extends Controller
     } else {
       if ($question_id != '') {
         $data = AnswerModel::where('question_id', '=', $question_id)
-          ->where('delete_time', '=', 0)
+          ->whereNull('delete_time')
           ->orderBy($field, $sort)
           ->paginate($per_page, ['*'], 'page', $page);
       } else {
-        $data = AnswerModel::where('delete_time', '=', 0)
+        $data = AnswerModel::whereNull('delete_time')
           ->orderBy($field, $sort)
           ->paginate($per_page, ['*'], 'page', $page);
       }
@@ -256,7 +256,7 @@ class AnswerController extends Controller
     $is_edit = false;
     $user_id = TokenController::GetUserId($user_token);
     $answer = AnswerModel::where('answer_id', $answer_id)
-      ->where('delete_time', '=', 0)
+      ->whereNull('delete_time')
       ->first();
     if ($answer != null && $is_valid_content && $user_id != null) {
       if (

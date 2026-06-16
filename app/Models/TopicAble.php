@@ -28,6 +28,6 @@ class TopicAble extends Model
     protected $casts = [
         'topic_id' => 'integer',
         'topicable_id' => 'integer',
-        'create_time' => 'timestamp',
+        'create_time' => 'datetime',
     ];
 }

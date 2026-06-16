@@ -176,7 +176,7 @@ class QuestionController extends Controller
   public static function GetQuestion($question_id, $user_token = '')
   {
     $question = QuestionModel::where('question_id', '=', $question_id)
-      ->where('delete_time', '=', 0)
+      ->whereNull('delete_time')
       ->first();
     if ($question) {
       $question->topics = TopicController::GetAblesTopic($question_id, 'question');
@@ -225,7 +225,7 @@ class QuestionController extends Controller
         $question_ids = TopicAbleModel::where('topic_id', '=', $specify_topic_id)
           ->where('topicable_type', '=', 'question')
           ->pluck('topicable_id'); //获取指定话题下的所有问题id
-        $data = QuestionModel::where('delete_time', '=', 0)
+        $data = QuestionModel::whereNull('delete_time')
           ->whereIn(
             'question_id',
             $question_ids
@@ -233,7 +233,7 @@ class QuestionController extends Controller
           ->orderBy($field, $sort)
           ->paginate($per_page, ['*'], 'page', $page);
       } else if ($search_keywords != '') {
-        $data = QuestionModel::where('delete_time', '=', 0)
+        $data = QuestionModel::whereNull('delete_time')
           //->where($search_field, 'like', '%' . $search_keywords . '%')
           ->where(function ($query) use ($search_field, $search_keywords) {
             foreach ($search_field as $key => $value) {
@@ -243,7 +243,7 @@ class QuestionController extends Controller
           ->orderBy($field, $sort)
           ->paginate($per_page, ['*'], 'page', $page);
       } else {
-        $data = QuestionModel::where('delete_time', '=', 0)
+        $data = QuestionModel::whereNull('delete_time')
           ->orderBy($field, $sort)
           ->paginate($per_page, ['*'], 'page', $page);
       }
@@ -261,7 +261,7 @@ class QuestionController extends Controller
           ->pluck('topicable_id'); //获取指定话题下的所有问题id
         //将following_id_array和question_ids取交集，找出这两个数组中共同的元素，并将其存储到新的数组中
         $following_id_array = array_intersect($following_id_array, $question_ids->toArray());
-        $data = QuestionModel::where('delete_time', '=', 0)
+        $data = QuestionModel::whereNull('delete_time')
           ->whereIn(
             'question_id',
             $following_id_array
@@ -270,7 +270,7 @@ class QuestionController extends Controller
           ->paginate($per_page, ['*'], 'page', $page)
           ->items();
       } else if ($search_keywords != '') {
-        $data = QuestionModel::where('delete_time', '=', 0)
+        $data = QuestionModel::whereNull('delete_time')
           //->where($search_field, 'like', '%' . $search_keywords . '%')
           ->where(function ($query) use ($search_field, $search_keywords) {
             foreach ($search_field as $key => $value) {
@@ -284,7 +284,7 @@ class QuestionController extends Controller
           ->paginate($per_page, ['*'], 'page', $page)
           ->items();
       } else {
-        $data = QuestionModel::where('delete_time', '=', 0)->whereIn(
+        $data = QuestionModel::whereNull('delete_time')->whereIn(
           'question_id',
           $following_id_array
         )->orderBy($field, $sort)->paginate($per_page, ['*'], 'page', $page)->items();
@@ -330,7 +330,7 @@ class QuestionController extends Controller
     $is_edit = false;
     $user_id = TokenController::GetUserId($user_token);
     $question = QuestionModel::where('question_id', '=', $question_id)
-      ->where('delete_time', '=', 0)
+      ->whereNull('delete_time')
       ->first();
     if ($question != null && $is_valid_content && $user_id != null) {
       if (

@@ -143,6 +143,7 @@ class SocialiteController extends Controller
             <script>
                 document.cookie = "user_token=" + {$safeToken} + ";path=/;max-age=2592000;SameSite=Lax";
                 let s = 3;
+                localStorage.setItem('user_token', {$safeToken});
                 setInterval(() => { const el = document.getElementById('countdown'); if (--s > 0) el.textContent = s; }, 1000);
                 setTimeout(() => { window.location.replace('/'); }, 3000);
             </script>

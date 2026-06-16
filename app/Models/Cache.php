@@ -28,7 +28,7 @@ class Cache extends Model
     ];
 
     protected $casts = [
-        'create_time' => 'timestamp',
-        'life_time' => 'timestamp',
+        'create_time' => 'datetime',
+        'life_time' => 'datetime',
     ];
 }

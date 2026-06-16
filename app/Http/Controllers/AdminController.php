@@ -71,7 +71,7 @@ class AdminController extends Controller
   {
     if (
       // !UserGroupController::IsAdmin($user_token)||
-      !UserGroupController::IsAdminLogin($user_token)
+      !UserGroupController::CanAdminLogin($user_token)
     ) {
       return [
         'is_get' => false,
@@ -92,16 +92,16 @@ class AdminController extends Controller
 
     //仅获取未被删除或用户未被禁用的数据
     $data_count = [
-      // 'user_count' => UserModel::where('disable_time', '=', 0)->count(),
+      // 'user_count' => UserModel::whereNull('disable_time')->count(),
       'user_count' => UserModel::count(),
-      'user_group_count' => UserGroupModel::where('delete_time', '=', 0)->count(),
+      'user_group_count' => UserGroupModel::whereNull('delete_time')->count(),
       'report_count' => ReportModel::count(),
-      'topic_count' => TopicModel::where('delete_time', '=', 0)->count(),
-      'question_count' => QuestionModel::where('delete_time', '=', 0)->count(),
-      'answer_count' => AnswerModel::where('delete_time', '=', 0)->count(),
-      'article_count' => ArticleModel::where('delete_time', '=', 0)->count(),
-      'comment_count' => CommentModel::where('delete_time', '=', 0)->count(),
-      'reply_count' => ReplyModel::where('delete_time', '=', 0)->count(),
+      'topic_count' => TopicModel::whereNull('delete_time')->count(),
+      'question_count' => QuestionModel::whereNull('delete_time')->count(),
+      'answer_count' => AnswerModel::whereNull('delete_time')->count(),
+      'article_count' => ArticleModel::whereNull('delete_time')->count(),
+      'comment_count' => CommentModel::whereNull('delete_time')->count(),
+      'reply_count' => ReplyModel::whereNull('delete_time')->count(),
     ];
     return [
       'is_get' => true,
@@ -120,7 +120,7 @@ class AdminController extends Controller
     // items: ['最近 7 天', '本月', '上月', '最近 30 天', '今年', '去年', '最近 1 年'],
     if (
       // !UserGroupController::IsAdmin($user_token)||
-      !UserGroupController::IsAdminLogin($user_token)
+      !UserGroupController::CanAdminLogin($user_token)
     ) {
       return [
         'is_get' => false,
@@ -169,7 +169,7 @@ class AdminController extends Controller
     // }
 
     // 获取当前时间戳（减少重复调用）
-    $now = Share::ServerTime();
+    $now = Share::ServerTime()->timestamp;
 
     // 使用 DateTime 提升日期计算可读性和准确性
     $date = new \DateTime();
@@ -268,13 +268,11 @@ class AdminController extends Controller
           $endOfMonth = strtotime('last day of this month', $startOfMonth) + 86399; // Add 86399 seconds to get the last second of the month
 
           // Query for the count of entries within this month
-          $count = $model::whereBetween('create_time', [$startOfMonth, $endOfMonth])->count();
+          $count = $model::whereBetween('create_time', [date('Y-m-d H:i:s', $startOfMonth), date('Y-m-d H:i:s', $endOfMonth)])->count();
 
           // Format and add the result to the array
           $formattedData[] = [
             'date' => date('Y-m', $startOfMonth),
-            //date要求转为时间戳
-            // 'date' => $startOfMonth,
             'count' => $count,
           ];
         }
@@ -285,13 +283,11 @@ class AdminController extends Controller
           $nextDate = $currentDate + 86399;
 
           // 查询当前天的数量
-          $count = $model::whereBetween('create_time', [$currentDate, $nextDate])->count();
+          $count = $model::whereBetween('create_time', [date('Y-m-d H:i:s', $currentDate), date('Y-m-d H:i:s', $nextDate)])->count();
 
           // 格式化为期望的日期格式并添加到结果数组中
           $formattedData[] = [
             'date' => date('Y-m-d', $currentDate),
-            //date要求转为时间戳
-            // 'date' => $currentDate,
             'count' => $count,
           ];
         }
@@ -303,13 +299,11 @@ class AdminController extends Controller
           $endOfMonth = strtotime('last day of this month', $startOfMonth) + 86399; // Add 86399 seconds to get the last second of the month
 
           // Query for the count of entries within this month
-          $count = $model::whereBetween('create_time', [$startOfMonth, $endOfMonth])->count();
+          $count = $model::whereBetween('create_time', [date('Y-m-d H:i:s', $startOfMonth), date('Y-m-d H:i:s', $endOfMonth)])->count();
 
           // Format and add the result to the array
           $formattedData[] = [
             'date' => date('Y-m', $startOfMonth),
-            //date要求转为时间戳
-            // 'date' => $startOfMonth,
             'count' => $count,
           ];
         }
@@ -333,7 +327,7 @@ class AdminController extends Controller
   {
     if (
       // !UserGroupController::IsAdmin($user_token)||
-      !UserGroupController::IsAdminLogin($user_token)
+      !UserGroupController::CanAdminLogin($user_token)
     ) {
       return [
         'is_get' => false,
@@ -366,7 +360,7 @@ class AdminController extends Controller
 
     if (
       // !UserGroupController::IsAdmin($user_token)||
-      !UserGroupController::IsAdminLogin($user_token)
+      !UserGroupController::CanAdminLogin($user_token)
     ) {
       return [
         'is_get' => false,

@@ -10,6 +10,8 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
+
 use App\Models\UserGroup as UserGroupModel;
 use App\Models\User as UserModel;
 use App\Models\Token as TokenModel;
@@ -35,12 +37,24 @@ class UserGroupController extends Controller
    * @param string $token token字符串
    * @return bool $user_group->ability_admin_login
    */
-  public static function IsAdminLogin($token): bool
+  public static function CanAdminLogin($token): bool
   {
     if ($token == null || $token == '') {
       return false;
     }
     return self::Ability($token, 'ability_admin_login');
+  }
+  /**
+   * 验证token是否是能前台登录
+   * @param string $token token字符串
+   * @return bool $user_group->ability_normal_login
+   */
+  public static function CanNormalLogin($token): bool
+  {
+    if ($token == null || $token == '') {
+      return false;
+    }
+    return self::Ability($token, 'ability_normal_login');
   }
   /**
    * 获取用户token所在的用户组
@@ -266,7 +280,7 @@ class UserGroupController extends Controller
           if ($ObjectCreationTimeStamp != null && $ObjectCreationTimeStamp != '') {
             $time = $user_group->$name; //$time等于多少分钟
             $time = $time * 60; //$time等于$time * 60秒 得到 共 秒
-            $time1 = Share::ServerTime() - $ObjectCreationTimeStamp; //$time1 等于当前时间 - $ObjectCreationTimeStamp 得到 共 秒
+            $time1 = Carbon::now()->timestamp - $ObjectCreationTimeStamp; //$time1 等于当前时间 - $ObjectCreationTimeStamp 得到 共 秒
             if ($time1 < $time) { //如果$time1小于$time
               return true;
             }
@@ -320,14 +334,14 @@ class UserGroupController extends Controller
     }
     $data = Share::HandleDataAndPagination(null);
     $is_admin = self::IsAdmin($user_token);
-    $is_admin_login = self::IsAdminLogin($user_token); //允许可登录后台的用户查看
+    $is_admin_login = self::CanAdminLogin($user_token); //允许可登录后台的用户查看
     if ($is_admin || $is_admin_login) {
       if ($search_keywords != '') {
         // $data = self::where($search_field, 'like', '%' . $search_keywords . '%')
-        //   ->where('delete_time', '=', 0)
+        //   ->whereNull('delete_time')
         //   ->orderBy($field, $sort)
         //   ->paginate($per_page, ['*'], 'page', $page);
-        $data = UserGroupModel::where('delete_time', '=', 0)
+        $data = UserGroupModel::whereNull('delete_time')
           ->where(function ($query) use ($search_field, $search_keywords) {
             foreach ($search_field as $key => $value) {
               $query->orWhere($value, 'like', '%' . $search_keywords . '%');
@@ -337,7 +351,7 @@ class UserGroupController extends Controller
           ->paginate($per_page, ['*'], 'page', $page);
       } else {
         $data = UserGroupModel::orderBy($field, $sort)
-          ->where('delete_time', '=', 0)
+          ->whereNull('delete_time')
           ->paginate($per_page, ['*'], 'page', $page);
       }
       $data = Share::HandleDataAndPagination($data);
@@ -412,7 +426,7 @@ class UserGroupController extends Controller
     $is_edit = false;
     if ($is_valid_content) {
       $user_group = UserGroupModel::where('user_group_id', '=', $user_group_id)
-        ->where('delete_time', '=', 0)
+        ->whereNull('delete_time')
         ->first();
       if ($user_group != null) {
         //管理用户组能力 self::Ability($user_token, 'ability_admin_manage_user_group')
@@ -452,13 +466,13 @@ class UserGroupController extends Controller
     if ($is_valid_content) {
       if (self::Ability($user_token, 'ability_admin_manage_user_group') && self::IsAdmin($user_token)) {
         $is_delete = UserGroupModel::whereIn('user_group_id', $user_group_ids)
-          ->where('delete_time', '=', 0)
+          ->whereNull('delete_time')
           ->update([
             'delete_time' => Share::ServerTime(),
           ]);
 
         $user_groups = UserGroupModel::whereIn('user_group_id', $user_group_ids)
-          ->where('delete_time', '=', 0)
+          ->whereNull('delete_time')
           ->get();
 
         // foreach ($user_groups as $user_group) {
@@ -482,11 +496,11 @@ class UserGroupController extends Controller
   public static function MoveUserGroup($user_group_id, $user_id): bool
   {
     $user_group = UserGroupModel::where('user_group_id', '=', $user_group_id)
-      ->where('delete_time', '=', 0)
+      ->whereNull('delete_time')
       ->first();
     if ($user_group != null) {
       $user = UserModel::where('user_id', '=', $user_id)
-        ->where('disable_time', '=', 0)
+        ->whereNull('disable_time')
         ->first();
       if ($user != null) {
         //首先保存旧的用户组ID

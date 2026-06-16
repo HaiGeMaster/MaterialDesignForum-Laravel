@@ -120,7 +120,7 @@ class ReportController extends Controller
     if($search_field == []){
       $search_field = ReportModel::$search_field;
     }
-    if (!UserGroupController::IsAdminLogin($user_token)&&!UserGroupController::Ability($user_token,'ability_admin_manage_report')
+    if (!UserGroupController::CanAdminLogin($user_token)&&!UserGroupController::Ability($user_token,'ability_admin_manage_report')
     ) {
       return Share::HandleDataAndPagination(null);
     }

@@ -38,3 +38,6 @@ MaterialDesignForum-Laravel.code-workspace
 import_sql.php
 MaterialDesignForum-Laravel.7z
 *.7z
+gen_api_js.php
+help.txt
+api.js

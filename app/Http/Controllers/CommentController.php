@@ -197,7 +197,7 @@ class CommentController extends Controller
   public static function GetComment($comment_id, $user_token = '')
   {
     $comment = CommentModel::where('comment_id', '=', $comment_id)
-      ->where('delete_time', '=', 0)
+      ->whereNull('delete_time')
       ->first();
     if ($comment != null) {
       $comment->user = UserController::GetUserInfo($comment->user_id, $user_token)['user'];
@@ -244,7 +244,7 @@ class CommentController extends Controller
       if (($commentable_id != 0 && $commentable_id != '') && $commentable_type != '') {
         $data = CommentModel::where('commentable_id', '=', $commentable_id)
           ->where('commentable_type', '=', $commentable_type)
-          ->where('delete_time', '=', 0)
+          ->whereNull('delete_time')
           //->where($search_field, 'like', '%' . $search_keywords . '%')
           ->where(function ($query) use ($search_field, $search_keywords) {
             foreach ($search_field as $key => $value) {
@@ -254,7 +254,7 @@ class CommentController extends Controller
           ->orderBy($field, $sort)
           ->paginate($per_page, ['*'], 'page', $page);
       } else {
-        $data = CommentModel::where('delete_time', '=', 0)
+        $data = CommentModel::whereNull('delete_time')
           //->where($search_field, 'like', '%' . $search_keywords . '%')
           ->where(function ($query) use ($search_field, $search_keywords) {
             foreach ($search_field as $key => $value) {
@@ -268,11 +268,11 @@ class CommentController extends Controller
       if (($commentable_id != 0 && $commentable_id != '') && $commentable_type != '') {
         $data = CommentModel::where('commentable_id', '=', $commentable_id)
           ->where('commentable_type', '=', $commentable_type)
-          ->where('delete_time', '=', 0)
+          ->whereNull('delete_time')
           ->orderBy($field, $sort)
           ->paginate($per_page, ['*'], 'page', $page);
       } else {
-        $data = CommentModel::where('delete_time', '=', 0)
+        $data = CommentModel::whereNull('delete_time')
           ->orderBy($field, $sort)
           ->paginate($per_page, ['*'], 'page', $page);
       }
@@ -344,7 +344,7 @@ class CommentController extends Controller
     // }
     $user_id = TokenController::GetUserId($user_token);
     $comment = CommentModel::where('comment_id', '=', $comment_id)
-      ->where('delete_time', '=', 0)
+      ->whereNull('delete_time')
       ->first();
     if ($comment != null && $is_valid_content && $user_id != null) {
       if (

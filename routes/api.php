@@ -95,7 +95,6 @@ Route::post('/api/admin/data/oauth_info/set', function (Request $request) {
 
 // ==================== Common 通用 ====================
 
-
 Route::post('/api/common/app_base_info/get', function (Request $request) {
     $result = CommonController::GetAppBaseInfo(
         $request->input('user_token', $request->bearerToken())
@@ -515,8 +514,7 @@ Route::post('/api/user_groups/get', function (Request $request) {
 
 // ==================== User 用户 ====================
 
-Route::get('/api/user/image_captcha/{time?}', [UserController::class, 'GetImageCaptcha']);
-
+// Route::get('/api/user/image_captcha/{time?}', [UserController::class, 'GetImageCaptcha']);
 
 Route::post('/api/user/oauths/get', function (Request $request) {
     $result = OauthController::GetUserOauthBindings(
@@ -525,7 +523,6 @@ Route::post('/api/user/oauths/get', function (Request $request) {
     return response()->json($result);
 });
 
-
 Route::post('/api/user/oauth/delete', function (Request $request) {
     $result = OauthController::DeleteOauth(
         $request->input('user_token', $request->bearerToken()),
@@ -533,7 +530,6 @@ Route::post('/api/user/oauth/delete', function (Request $request) {
     );
     return response()->json($result);
 });
-
 
 Route::post('/api/user/answers/get', function (Request $request) {
     $result = UserController::GetUserAnswers(
@@ -651,8 +647,7 @@ Route::post('/api/user/login', function (Request $request) {
     $result = UserController::Login(
         $request->input('username_or_email'),
         $request->input('password'),
-        $request->input('image_captcha', ''),
-        $request->input('captcha_key', '')
+        $request->input('image_capthca', '')
     );
     return response()->json($result);
 });

@@ -9,12 +9,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('notification', function (Blueprint $table) {
-            $table->unsignedInteger('notification_id')->comment('通知ID');
+            $table->unsignedInteger('notification_id')->autoIncrement()->comment('通知ID');
             $table->unsignedInteger('receiver_id')->comment('接收者ID');
             $table->integer('sender_id')->comment('发送者ID');
             $table->string('type', 40)->charset('utf8mb4')->collate('utf8mb4_unicode_ci')->comment('消息类型：question_answered, question_commented, question_deleted, article_commented, article_deleted, answer_commented, answer_deleted, comment_replied, comment_deleted');
-            $table->text('content_markdown')->charset('utf8mb4')->collate('utf8mb4_unicode_ci')->comment('内容原文');
-            $table->text('content_rendered')->charset('utf8mb4')->collate('utf8mb4_unicode_ci')->comment('内容正文');
+            $table->text('content_markdown')->nullable()->charset('utf8mb4')->collate('utf8mb4_unicode_ci')->comment('内容原文');
+            $table->text('content_rendered')->nullable()->charset('utf8mb4')->collate('utf8mb4_unicode_ci')->comment('内容正文');
             $table->integer('user_id')->default(0)->comment('用户ID');
             $table->integer('topic_id')->default(0)->comment('话题ID');
             $table->integer('article_id')->default(0)->comment('文章ID');

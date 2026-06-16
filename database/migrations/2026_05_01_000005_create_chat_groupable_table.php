@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('chat_groupable', function (Blueprint $table) {
-            $table->unsignedInteger('chat_groupable_id')->comment('索引ID');
+            $table->unsignedInteger('chat_groupable_id')->autoIncrement()->comment('索引ID');
             $table->unsignedInteger('user_id')->comment('用户ID');
             $table->unsignedInteger('chat_group_id')->comment('加入的聊天组ID');
             $table->timestamp('create_time')->useCurrent()->comment('创建时间');

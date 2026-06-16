@@ -30,17 +30,17 @@ class ChatGroupable extends Model
         'chat_groupable_id' => 'integer',
         'user_id' => 'integer',
         'chat_group_id' => 'integer',
-        'create_time' => 'timestamp',
-        'delete_time' => 'timestamp',
+        'create_time' => 'datetime',
+        'delete_time' => 'datetime',
     ];
 
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id', 'user_id');
-    }
+    // public function user(): BelongsTo
+    // {
+    //     return $this->belongsTo(User::class, 'user_id', 'user_id');
+    // }
 
-    public function chatGroup(): BelongsTo
-    {
-        return $this->belongsTo(ChatGroup::class, 'chat_group_id', 'chat_group_id');
-    }
+    // public function chatGroup(): BelongsTo
+    // {
+    //     return $this->belongsTo(ChatGroup::class, 'chat_group_id', 'chat_group_id');
+    // }
 }

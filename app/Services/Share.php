@@ -87,10 +87,6 @@ class Share
             ]
         ];
         if ($data != null) {
-            $previousPageUrl = $data->total() == 1 ? null : $data->previousPageUrl();
-            $nextPageUrl = $data->total() == 1 ? null : $data->nextPageUrl();
-            $previousPageUrl = $previousPageUrl != null ? intval(str_replace('/?page=', '', $previousPageUrl)) : null;
-            $nextPageUrl = $nextPageUrl != null ? intval(str_replace('/?page=', '', $nextPageUrl)) : null;
             $data_items = $data->items();
             //如果$data_items是空数组，则返回null
             if (count($data_items) == 0 || $data_items == null || $data_items == []) {
@@ -98,14 +94,14 @@ class Share
             }
             $rdata = [
                 'is_get' => $data_items != null,
-                'data' => $data_items, //bug 可能为[]空数组
+                'data' => $data_items,
                 'pagination' => [
-                    'page' => $data->total() == 1 ? 1 : $data->currentPage(), //当前页码
-                    'per_page' => $data->total() == 1 ? 1 : $data->perPage(), //每页显示的数量
-                    'total' => $data->total(), //总共有多少个项目
-                    'pages' => $data->total() == 1 ? 1 : $data->lastPage(), //总共有多少页
-                    'previous' => $previousPageUrl, //上一页
-                    'next' => $nextPageUrl, //下一页
+                    'page'     => $data->currentPage(),
+                    'per_page' => $data->perPage(),
+                    'total'    => $data->total(),
+                    'pages'    => $data->lastPage(),
+                    'previous' => $data->currentPage() > 1 ? $data->currentPage() - 1 : null,
+                    'next'     => $data->hasMorePages() ? $data->currentPage() + 1 : null,
                 ]
             ];
         }
@@ -123,19 +119,15 @@ class Share
             'is_get' => false,
             'data' => null,
             'pagination' => [
-                'page' => 1, //当前页码
-                'per_page' => 0, //每页显示的数量
-                'total' => 0, //总共有多少个项目
-                'pages' => 0, //总共有多少页
-                'previous' => null, //上一页
-                'next' => null, //下一页
+                'page' => 1,
+                'per_page' => 0,
+                'total' => 0,
+                'pages' => 0,
+                'previous' => null,
+                'next' => null,
             ]
         ];
         if ($data != null) {
-            $previousPageUrl = $pagination->total() == 1 ? null : $pagination->previousPageUrl();
-            $nextPageUrl = $pagination->total() == 1 ? null : $pagination->nextPageUrl();
-            $previousPageUrl = $previousPageUrl != null ? intval(str_replace('/?page=', '', $previousPageUrl)) : null;
-            $nextPageUrl = $nextPageUrl != null ? intval(str_replace('/?page=', '', $nextPageUrl)) : null;
             $data_items = $data;
             //如果$data_items是空数组，则返回null
             if (count($data_items) == 0 || $data_items == null || $data_items == []) {
@@ -145,12 +137,12 @@ class Share
                 'is_get' => $data_items != null,
                 'data' => $data_items,
                 'pagination' => [
-                    'page' => $pagination->total() == 1 ? 1 : $pagination->currentPage(), //当前页码
-                    'per_page' => $pagination->total() == 1 ? 1 : $pagination->perPage(), //每页显示的数量
-                    'total' => $pagination->total(), //总共有多少个项目
-                    'pages' => $pagination->total() == 1 ? 1 : $pagination->lastPage(), //总共有多少页
-                    'previous' => $previousPageUrl, //上一页
-                    'next' => $nextPageUrl, //下一页
+                    'page'     => $pagination->currentPage(),
+                    'per_page' => $pagination->perPage(),
+                    'total'    => $pagination->total(),
+                    'pages'    => $pagination->lastPage(),
+                    'previous' => $pagination->currentPage() > 1 ? $pagination->currentPage() - 1 : null,
+                    'next'     => $pagination->hasMorePages() ? $pagination->currentPage() + 1 : null,
                 ]
             ];
         }
@@ -161,7 +153,22 @@ class Share
      */
     public static function ServerTime()
     {
-        $timestamp = Carbon::now()->timestamp;
-        return $timestamp;
+        // $timestamp = Carbon::now()->timestamp;
+        // return $timestamp;
+        return Carbon::now();
     }
+    // /**
+    //  * 验证值是否有效
+    //  * @param mixed $value 值
+    //  * @return bool
+    //  */
+    // public static function IsValid($value): bool
+    // {
+    //     return !empty($value) && $value !== null && $value !== false && $value != '' && $value != 0 && $value != '0' && $value != 'false';
+    // }
+    // public static function IsValid($value): bool
+    // {
+    //     return !empty($value)
+    //         && !in_array(strtolower(trim((string) $value)), ['false', 'null', 'undefined', '']);
+    // }
 }

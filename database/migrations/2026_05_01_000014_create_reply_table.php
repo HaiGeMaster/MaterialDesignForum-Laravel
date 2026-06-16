@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('reply', function (Blueprint $table) {
-            $table->unsignedInteger('reply_id')->comment('回复ID');
+            $table->unsignedInteger('reply_id')->autoIncrement()->comment('回复ID');
             $table->unsignedInteger('replyable_id')->comment('回复目标的ID:comment_id、reply_id');
             $table->char('replyable_type', 10)->charset('utf8mb4')->collate('utf8mb4_unicode_ci')->comment('回复目标类型：comment、reply、评论、回复');
             $table->integer('replyable_comment_id')->comment('回复目标的父项：评论ID');

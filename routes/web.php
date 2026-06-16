@@ -4,8 +4,8 @@ use App\Http\Controllers\CommonController;
 use App\Http\Controllers\OptionController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\OauthController;
-
 use App\Http\Controllers\UpdateController;
+use App\Http\Controllers\UserController;
 // use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
 
@@ -34,6 +34,8 @@ Route::prefix('install')->group(function () {
 
 // /update/server/info
 Route::get('/update/server/info', [UpdateController::class, 'serveUpdateInfo']);
+
+Route::get('/user/image_captcha/{time?}', [UserController::class, 'GetImageCaptcha']);
 
 Route::get('/auth/github/redirect', [SocialiteController::class, 'redirectToGithub']);
 Route::get('/auth/github/callback',  [SocialiteController::class, 'handleGithubCallback']);// routes/web.php
