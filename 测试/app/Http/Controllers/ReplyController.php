@@ -1,0 +1,618 @@
+<?php
+
+/**
+ * Author HaiGeMaster
+ * @package MaterialDesignForum
+ * @link https://github.com/HaiGeMaster
+ * @copyright Copyright (c) 2023 HaiGeMaster
+ * @start-date 2023/05/20-15:53:29
+ */
+
+namespace App\Http\Controllers;
+
+// use App\Http\Controllers\AnswerController;
+// use App\Http\Controllers\ArticleController;
+// use App\Http\Controllers\CacheController;
+use App\Http\Controllers\CommentController;
+// use App\Http\Controllers\FollowController;
+// use App\Http\Controllers\ImageController;
+// use App\Http\Controllers\InboxController;
+use App\Http\Controllers\NotificationController;
+// use App\Http\Controllers\OauthController;
+// use App\Http\Controllers\OptionController;
+// use App\Http\Controllers\QuestionController;
+// use App\Http\Controllers\ReplyController;
+// use App\Http\Controllers\ReportController;
+use App\Http\Controllers\TokenController;
+// use App\Http\Controllers\TopicController;
+// use App\Http\Controllers\TopicAbleController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserGroupController;
+// use App\Http\Controllers\UserOptionController;
+use App\Http\Controllers\VoteController;
+
+use App\Models\Answer as AnswerModel;
+// use App\Models\Article as ArticleModel;
+// use App\Models\Cache as CacheModel;
+use App\Models\Comment as CommentModel;
+// use App\Models\Follow as FollowModel;
+// use App\Models\Image as ImageModel;
+// use App\Models\Inbox as InboxModel;
+// use App\Models\Notification as NotificationModel;
+// use App\Models\Oauth as OauthModel;
+// use App\Models\Option as OptionModel;
+// use App\Models\Question as QuestionModel;
+use App\Models\Reply as ReplyModel;
+// use App\Models\Report as ReportModel;
+// use App\Models\Token as TokenModel;
+// use App\Models\Topic as TopicModel;
+// use App\Models\TopicAble as TopicAbleModel;
+use App\Models\User as UserModel;
+// use App\Models\UserGroup as UserGroupModel;
+// use App\Models\UserOption as UserOptionModel;
+// use App\Models\Vote as VoteModel;
+use App\Services\Share;
+use Illuminate\Http\Request;
+
+class ReplyController extends Controller
+{
+   /**
+   * 获取回复所有者用户id
+   * @param int $reply_id 回复ID
+   * @return int|null 用户ID
+   */
+  public static function GetReplyOwnerId($reply_id)
+  {
+    $reply = ReplyModel::find($reply_id);
+    if ($reply != null) {
+      return $reply->user_id;
+    }
+    return null;
+  }
+  /**
+   * 添加回复
+   * @param int $replyable_id 回复目标的ID
+   * @param string $replyable_type 回复目标类型：comment、reply、评论、回复
+   * @param int $replyable_comment_id 回复的评论ID
+   * @param string $content 原始正文内容
+   * @param string $user_token 用户Token
+   * @param int $replyable_user_id 回复目标用户ID
+   * @return array [is_add=>bool,reply_id=>int|null] 是否添加成功，回复ID或null
+   */
+  public static function AddReply(
+    $replyable_id,
+    $replyable_type,
+    $replyable_comment_id,
+    $content,
+    $user_token,
+    $replyable_user_id = 0
+  ) {
+    $is_valid_content =
+      $replyable_id != 0 &&
+      $replyable_type != '' &&
+      $replyable_comment_id != '' &&
+      $content != '' &&
+      $user_token != '' &&
+      $replyable_user_id != 0;
+    $is_add = false;
+    $reply_id = null;
+    $user_id = TokenController::GetUserId($user_token);
+    if (
+      $user_id != null
+      && $is_valid_content
+      && (
+        UserGroupController::Ability($user_token, 'ability_create_reply') ||
+        UserGroupController::IsAdmin($user_token)
+      )
+    ) {
+      $reply = new ReplyModel();
+      $reply->replyable_id = $replyable_id;
+      $reply->replyable_type = $replyable_type;
+      $reply->replyable_comment_id = $replyable_comment_id;
+      $reply->user_id = $user_id;
+      $reply->content = $content;
+      $reply->create_time = Share::ServerTime();
+      $reply->update_time = Share::ServerTime();
+      $reply->replyable_user_id = $replyable_user_id;
+      $is_add = $reply->save();
+      if ($is_add) {
+        UserModel::AddReplyCount($user_id);
+        $reply_to_reply_id = $reply->reply_id;
+
+        switch ($replyable_type) {
+          case 'comment':
+            CommentModel::AddReplyCount($replyable_id);
+            //此时$replyable_id为评论ID
+            //根据回复的评论ID获取评论
+            $comment = CommentController::GetComment($replyable_id, $user_token)['comment'];
+            if ($comment != null) {
+              NotificationController::AddInteractionNotification(
+                $comment->user_id,
+                $user_id,
+                'comment_reply',
+                null,
+                null,
+                0,
+                0,
+                $comment->commentable_type == 'article' ? $comment->commentable_id : 0,
+                $comment->commentable_type == 'question' ? $comment->commentable_id : 0,
+                $comment->commentable_type == 'answer' ? $comment->commentable_id : 0,
+                $comment->comment_id,
+                $reply->reply_id,
+                0
+              );
+            }
+            break;
+          case 'reply':
+            CommentModel::AddReplyCount($replyable_comment_id);
+            ReplyModel::AddReplyCount($replyable_id);
+            //根据回复的回复ID获取回复
+            $reply = self::GetReply($replyable_id, $user_token)['reply'];
+            $comment = CommentController::GetComment($reply->replyable_comment_id, $user_token)['comment'];
+            if ($comment != null && $reply != null) {
+              NotificationController::AddInteractionNotification(
+                $reply->user_id,
+                $user_id,
+                'reply_reply',
+                null,
+                null,
+                0,
+                0,
+                $comment->commentable_type == 'article' ? $comment->commentable_id : 0,
+                $comment->commentable_type == 'question' ? $comment->commentable_id : 0,
+                $comment->commentable_type == 'answer' ? $comment->commentable_id : 0,
+                $comment->comment_id,
+                $reply_to_reply_id,
+                $reply->reply_id
+              );
+            }
+            break;
+        }
+        $reply_id = $reply->reply_id;
+      }
+    }
+    return [
+      'is_add' => $is_add,
+      'reply_id' => $reply_id,
+      'reply' => self::GetReply($reply_id, $user_token)['reply'],
+    ];
+  }
+  /**
+   * 获取回复
+   * @param int $reply_id 回复ID
+   * @param string $user_token 用户Token
+   * @return array is_get:是否获取 reply:回复信息
+   */
+  public static function GetReply($reply_id,  $user_token = '')
+  {
+    // try {
+    //   $reply = ReplyModel::where('reply_id', '=', $reply_id)
+    //     ->where('delete_time', '=', 0)
+    //     ->first();
+    //   if ($reply != null) {
+    //     $reply->user = UserController::GetUserInfo($reply->user_id)['user'];
+    //     $reply->vote = VoteController::GetVote($reply->reply_id, 'reply', $user_token)['vote'];
+    //     $reply->replyable_user = UserController::GetUserInfo($reply->replyable_user_id)['user'];
+    //     // if ($reply->replyable_user_id != 0) {
+    //     //   //$reply->replyable_user = UserController::GetUserInfo($reply->replyable_user_id)['user'];
+    //     //   //$reply->replyable_user->is_follow = FollowController::IsFollow($user_token, 'user', $reply->replyable_user_id);
+    //     //   // $reply->vote = VoteController::GetVote($reply->reply_id, 'reply', $user_token)['vote'];
+    //     // }
+    //   }
+    //   return [
+    //     'is_get' => $reply != null,
+    //     'reply' => $reply==null?[]:$reply,
+    //   ];
+    // } catch (\Exception $e) {
+    //   return [
+    //     'is_get' => false,
+    //     'reply' => [],
+    //     'error' => $e->getMessage(),
+    //   ];
+    // }
+
+    $reply = ReplyModel::where('reply_id', '=', $reply_id)
+      ->whereNull('delete_time')
+      ->first();
+    if ($reply != null) {
+      $reply->user = UserController::GetUserInfo($reply->user_id)['user'];
+      // $reply->vote = VoteController::GetVote($reply->reply_id, 'reply', $user_token)['vote'];
+      // $reply->replyable_user = UserController::GetUserInfo($reply->replyable_user_id)['user'];
+      if ($reply->replyable_user_id != 0) {
+        $reply->replyable_user = UserController::GetUserInfo($reply->replyable_user_id)['user'];
+        //$reply->replyable_user->is_follow = FollowController::IsFollow($user_token, 'user', $reply->replyable_user_id);
+        $reply->vote = VoteController::GetVote($reply->reply_id, 'reply', $user_token)['vote'];
+      }
+    }
+    return [
+      'is_get' => $reply != null,
+      'reply' => $reply == null ? [] : $reply,
+    ];
+  }
+  /**
+   * 获取回复列表
+   * @param int $replyable_comment_id 回复目标的父项评论ID
+   * @param string $order 排序方式
+   * @param int $page 页码
+   * @param string $user_token 用户Token
+   * @param int $per_page 每页数量
+   * @param string $search_keywords 搜索关键词
+   * @param array $search_field 搜索字段
+   * @return Reply[]|null
+   */
+  public static function GetReplys(
+    $replyable_comment_id,
+    $order,
+    $page,
+    $user_token,
+    $per_page = 20,
+    $search_keywords = '',
+    $search_field = []
+  ) {
+    if ($search_field == []) {
+      $search_field = ReplyModel::$search_field;
+    }
+
+    $data = Share::HandleDataAndPagination(null);
+    $orders = Share::HandleArrayField($order);
+
+    $field = $orders['field'];
+    $sort = $orders['sort'];
+
+    if ($search_keywords != '') {
+      if ($replyable_comment_id != '') {
+        $data = ReplyModel::where('replyable_comment_id', '=', $replyable_comment_id)
+          ->whereNull('delete_time')
+          //->where($search_field, 'like', '%' . $search_keywords . '%')
+          ->where(function ($query) use ($search_field, $search_keywords) {
+            foreach ($search_field as $key => $value) {
+              $query->orWhere($value, 'like', '%' . $search_keywords . '%');
+            }
+          })
+          ->orderBy($field, $sort)
+          ->paginate($per_page, ['*'], 'page', $page);
+      } else {
+        $data = ReplyModel::whereNull('delete_time')
+          //->where($search_field, 'like', '%' . $search_keywords . '%')
+          ->where(function ($query) use ($search_field, $search_keywords) {
+            foreach ($search_field as $key => $value) {
+              $query->orWhere($value, 'like', '%' . $search_keywords . '%');
+            }
+          })
+          ->orderBy($field, $sort)
+          ->paginate($per_page, ['*'], 'page', $page);
+      }
+    } else {
+      if ($replyable_comment_id != '') {
+        $data = ReplyModel::where('replyable_comment_id', '=', $replyable_comment_id)
+          ->whereNull('delete_time')
+          ->orderBy($field, $sort)
+          ->paginate($per_page, ['*'], 'page', $page);
+      } else {
+        $data = ReplyModel::whereNull('delete_time')
+          ->orderBy($field, $sort)
+          ->paginate($per_page, ['*'], 'page', $page);
+      }
+    }
+
+    $data = Share::HandleDataAndPagination($data);
+
+    $request = new Request();
+    $is_admin = $request->input('is_admin', false);
+
+    if ($data['data'] != null) {
+      foreach ($data['data'] as $key => $value) {
+
+        //以下代码有bug，暂时注释
+        // if ($value->replyable_type == 'reply') {
+
+        //   $data['data'][$key]->replyable_parent_id = self::GetReply($value->replyable_id, $user_token)['reply']->replyable_id;
+        //   $data['data'][$key]->replyable_parent_type = self::GetReply($value->replyable_id, $user_token)['reply']->replyable_type;
+
+        //   if ($data['data'][$key]->replyable_parent_type == 'reply') {
+
+        //     $data['data'][$key]->replyable_parent_id = self::GetReply($data['data'][$key]->replyable_parent_id, $user_token)['reply']->replyable_id;
+        //     $data['data'][$key]->replyable_parent_type = self::GetReply($data['data'][$key]->replyable_parent_id, $user_token)['reply']->replyable_type;
+
+        //     if ($data['data'][$key]->replyable_parent_type == 'comment') {
+
+        //       $data['data'][$key]->replyable_parent_id = CommentController::GetComment($data['data'][$key]->replyable_parent_id, $user_token)['comment']->commentable_id;
+        //       $data['data'][$key]->replyable_parent_type = CommentController::GetComment($data['data'][$key]->replyable_parent_id, $user_token)['comment']->commentable_type;
+
+        //       if ($data['data'][$key]->replyable_parent_type == 'answer') {
+
+        //         $data['data'][$key]->replyable_parent_id = AnswerController::GetAnswer($data['data'][$key]->replyable_parent_id, $user_token)['answer']->question_id;
+        //         $data['data'][$key]->replyable_parent_type = 'question'; //AnswerController::GetAnswer($data['data'][$key]->replyable_parent_id, $user_token)['answer']->answerable_type;
+        //       }
+        //     }
+        //   } else if ($data['data'][$key]->replyable_parent_type == 'comment') {
+
+        //     $data['data'][$key]->replyable_parent_id = CommentController::GetComment($data['data'][$key]->replyable_parent_id, $user_token)['comment']->commentable_id;
+        //     $data['data'][$key]->replyable_parent_type = CommentController::GetComment($data['data'][$key]->replyable_parent_id, $user_token)['comment']->commentable_type;
+
+        //     if ($data['data'][$key]->replyable_parent_type == 'answer') {
+
+        //       $data['data'][$key]->replyable_parent_id = AnswerController::GetAnswer($data['data'][$key]->replyable_parent_id, $user_token)['answer']->question_id;
+        //       $data['data'][$key]->replyable_parent_type = 'question'; //AnswerController::GetAnswer($data['data'][$key]->replyable_parent_id, $user_token)['answer']->answerable_type;
+        //     }
+        //   } else if ($data['data'][$key]->replyable_parent_type == 'answer') {
+
+        //     $data['data'][$key]->replyable_parent_id = AnswerController::GetAnswer($data['data'][$key]->replyable_parent_id, $user_token)['answer']->question_id;
+        //     $data['data'][$key]->replyable_parent_type = 'question'; //AnswerController::GetAnswer($data['data'][$key]->replyable_parent_id, $user_token)['answer']->answerable_type;
+        //   }
+        // } else if ($value->replyable_type == 'comment') {
+
+        //   $data['data'][$key]->replyable_parent_id = CommentController::GetComment($value->replyable_id, $user_token)['comment']->commentable_id;
+        //   $data['data'][$key]->replyable_parent_type = CommentController::GetComment($value->replyable_id, $user_token)['comment']->commentable_type;
+
+        //   if ($data['data'][$key]->replyable_parent_type == 'answer') {
+
+        //     $data['data'][$key]->replyable_parent_id = AnswerController::GetAnswer($data['data'][$key]->replyable_parent_id, $user_token)['answer']->question_id;
+        //     $data['data'][$key]->replyable_parent_type = 'question'; //AnswerController::GetAnswer($data['data'][$key]->replyable_parent_id, $user_token)['answer']->answerable_type;
+        //   }
+        // }
+
+        if (!$is_admin) {
+
+          $replyable_parent = self::GetReplyable($value->reply_id, $user_token);
+
+          $data['data'][$key]->replyable_parent_id = $replyable_parent['replyable_parent_id'];
+          $data['data'][$key]->replyable_parent_type = $replyable_parent['replyable_parent_type'];
+        }
+
+        $data['data'][$key]->user = UserController::GetUserInfo($value->user_id, $user_token)['user'];
+        $data['data'][$key]->vote = VoteController::GetVote($value->reply_id, 'reply', $user_token)['vote']; //$value->replyable_type
+        $data['data'][$key]->replyable_user = UserController::GetUserInfo($value->replyable_user_id, $user_token)['user'];
+      }
+    }
+
+    return $data;
+  }
+  /**
+   * 编辑回复
+   * @param int $reply_id 回复ID
+   * @param string $content 原始正文内容
+   * @param string $user_token 用户Token
+   * @return array [is_edit=>bool,reply=>Reply|null] 是否编辑成功，回复信息或null
+   */
+  public static function EditReply($reply_id,  $content,  $user_token)
+  {
+    $is_valid_content = $reply_id != null && $content != null && $user_token != '' && $reply_id != '' && $content != '' && $user_token != '';
+    $is_edit = false;
+    $user_id = TokenController::GetUserId($user_token);
+    $reply = ReplyModel::where('reply_id', '=', $reply_id)
+      ->whereNull('delete_time')
+      ->first();
+    if ($reply != null && $is_valid_content && $user_id != null) {
+      if (
+        (
+          TokenController::IsUserSelf($user_token, $reply->user_id) &&
+          UserGroupController::Ability($user_token, 'ability_edit_own_reply') &&
+          (
+            UserGroupController::Ability($user_token, 'ability_edit_reply_only_no_reply') ? ($reply->reply_count == 0 ? true : false) : true
+          ) &&
+          UserGroupController::BeforeTime($user_token, 'time_before_edit_reply', $reply->create_time)
+        )
+        ||
+        (UserGroupController::IsAdmin($user_token) && UserGroupController::Ability($user_token, 'ability_admin_manage_reply'))
+        // UserGroupController::IsAdmin($user_token)
+      ) {
+        $reply->content = $content;
+        $reply->update_time = Share::ServerTime();
+        $is_edit = $reply->save();
+      }
+    }
+    return [
+      'is_edit' => $is_edit,
+      'reply' => self::GetReply($reply_id, $user_token)['reply'],
+    ];
+  }
+  /**
+   * 删除回复
+   * @param int[] $reply_ids 回复ID数组
+   * @param string $user_token 用户Token
+   * @return array is_delete:bool 是否删除成功 delete_ids:删除成功的IDID数组
+   */
+  public static function DeleteReplys($reply_ids,  $user_token)
+  {
+    $is_valid_content = $reply_ids != null && $user_token != '' && $reply_ids != '' && $user_token != '';
+    $is_delete = false;
+    $user_id = TokenController::GetUserId($user_token);
+    $delete_ids = [];
+    $replys = [];
+    if (
+      $user_id != null &&
+      $is_valid_content
+    ) {
+      $replys = ReplyModel::whereIn('reply_id', $reply_ids)->get();
+      foreach ($replys as $key => $reply) {
+        if (
+          (
+            TokenController::IsUserSelf($user_token, $reply->user_id) &&
+            UserGroupController::Ability($user_token, 'ability_delete_own_reply') &&
+            (
+              UserGroupController::Ability($user_token, 'ability_delete_reply_only_no_reply') ? ($reply->reply_count == 0 ? true : false) : true
+            ) &&
+            UserGroupController::BeforeTime($user_token, 'time_before_delete_reply', $reply->create_time)
+          )
+          ||
+          (UserGroupController::IsAdmin($user_token) && UserGroupController::Ability($user_token, 'ability_admin_manage_reply'))
+          // UserGroupController::IsAdmin($user_token)
+        ) {
+          UserModel::SubReplyCount($reply->user_id);
+          $comment = CommentController::GetComment($reply->replyable_comment_id, $user_token)['comment'];
+          if ($comment != null) {
+            NotificationController::AddInteractionNotification(
+              $reply->user_id,
+              $user_id,
+              'reply_delete',
+              null,
+              null,
+              0,
+              0,
+              $comment->commentable_type == 'article' ? $comment->commentable_id : 0,
+              $comment->commentable_type == 'question' ? $comment->commentable_id : 0,
+              $comment->commentable_type == 'answer' ? $comment->commentable_id : 0,
+              $comment->comment_id,
+              $reply->reply_id
+            );
+          }
+
+          switch ($reply->replyable_type) {
+            case 'comment':
+              CommentModel::SubReplyCount($reply->replyable_id);
+              break;
+            case 'reply':
+              CommentModel::SubReplyCount($reply->replyable_comment_id);
+              ReplyModel::SubReplyCount($reply->replyable_id);
+              break;
+          }
+
+          //联动删除此回复的所有回复
+          //删除此回复的所有回复
+          // $reply_replys = ReplyModel::where('replyable_id', '=', $reply->reply_id)
+          //   ->where('replyable_type', '=', 'reply')
+          //   ->get();
+          // if($reply_replys!=null){
+          //   foreach ($reply_replys as $key => $reply_reply) {
+          //     $reply_reply->delete_time = Share::ServerTime();
+          //     $reply_reply->save();
+
+          //     UserController::SubReplyCount($reply_reply->user_id);
+          //     ReplyModel::SubReplyCount($reply_reply->replyable_id);
+          //   }
+          // }
+
+          //减少对应评论或回复的数量
+          // if ($reply->replyable_type == 'comment') {
+          //   CommentController::SubReplyCount($reply->replyable_id);
+          // } else if ($reply->replyable_type == 'reply') {
+          //   CommentController::SubReplyCount($reply->replyable_comment_id);
+          //   ReplyModel::SubReplyCount($reply->replyable_id);
+          // }
+          //删除回复
+          $reply->delete_time = Share::ServerTime();
+
+          $is_delete = $reply->save();
+          array_push($delete_ids, $reply->reply_id);
+        }
+      }
+    }
+    return [
+      'is_delete' => $is_delete,
+      'delete_ids' => $delete_ids,
+      'data' => $replys,
+    ];
+    // if ($is_valid_content) {
+    //   $user_id = TokenController::GetUserId($user_token);
+    //   if ($user_id != null) {
+    //     $is_delete = ReplyModel::whereIn('reply_id', $reply_ids)
+    //       ->where('delete_time', '=', 0)
+    //       ->update([
+    //         'delete_time' => Share::ServerTime(),
+    //       ]);
+    //   }
+    // }
+    // return [
+    //   'is_delete' => $is_delete,
+    // ];
+  }
+  /**
+   * 获取回复的最终目标对象是question还是article的id和type
+   * @param int $reply_id 回复ID
+   * @param string $user_token 用户Token
+   * @return array [is_get=>bool,replyable_id=>int|null,replyable_type=>string|null] 是否获取成功，回复目标对象ID或null，回复目标对象类型或null
+   */
+  public static function GetReplyable($reply_id,  $user_token = '')
+  {
+    $reply = ReplyModel::where('reply_id', '=', $reply_id)
+      ->whereNull('delete_time')
+      ->first();
+    $replyable_data = null;
+    $replyable_id = null;
+    $replyable_type = null;
+    try {
+      if ($reply != null) {
+        if ($reply->replyable_type == 'reply') {
+          // $replyable_id = self::GetReply($reply->replyable_id, $user_token)['reply']->replyable_id;
+          // $replyable_type = self::GetReply($reply->replyable_id, $user_token)['reply']->replyable_type;
+          $replyable_data = ReplyModel::where('reply_id', '=', $reply->replyable_id)
+            ->first();
+          $replyable_id = $replyable_data->replyable_id;
+          $replyable_type = $replyable_data->replyable_type;
+          if ($replyable_type == 'reply') {
+            // $replyable_id = self::GetReply($replyable_id, $user_token)['reply']->replyable_id;
+            // $replyable_type = self::GetReply($replyable_id, $user_token)['reply']->replyable_type;
+            $replyable_data = ReplyModel::where('reply_id', '=', $replyable_id)
+              ->first();
+            $replyable_id = $replyable_data->replyable_id;
+            $replyable_type = $replyable_data->replyable_type;
+            if ($replyable_type == 'comment') {
+              // $replyable_id = CommentController::GetComment($replyable_id, $user_token)['comment']->commentable_id;
+              // $replyable_type = CommentController::GetComment($replyable_id, $user_token)['comment']->commentable_type;
+              $replyable_data = CommentModel::where('comment_id', '=', $replyable_id)
+                ->first();
+              $replyable_id = $replyable_data->commentable_id;
+              $replyable_type = $replyable_data->commentable_type;
+              if ($replyable_type == 'answer') {
+                // $replyable_id = AnswerController::GetAnswer($replyable_id, $user_token)['answer']->question_id;
+                // $replyable_type = 'question';
+                $replyable_data = AnswerModel::where('answer_id', '=', $replyable_id)
+                  ->first();
+                $replyable_id = $replyable_data->question_id;
+                $replyable_type = 'question';
+              }
+            }
+          } else if ($replyable_type == 'comment') {
+            // $replyable_id = CommentController::GetComment($replyable_id, $user_token)['comment']->commentable_id;
+            // $replyable_type = CommentController::GetComment($replyable_id, $user_token)['comment']->commentable_type;
+            $replyable_data = CommentModel::where('comment_id', '=', $replyable_id)
+              ->first();
+            $replyable_id = $replyable_data->commentable_id;
+            $replyable_type = $replyable_data->commentable_type;
+            if ($replyable_type == 'answer') {
+              // $replyable_id = AnswerController::GetAnswer($replyable_id, $user_token)['answer']->question_id;
+              // $replyable_type = 'question';
+              $replyable_data = AnswerModel::where('answer_id', '=', $replyable_id)
+                ->first();
+              $replyable_id = $replyable_data->question_id;
+              $replyable_type = 'question';
+            }
+          } else if ($replyable_type == 'answer') {
+            // $replyable_id = AnswerController::GetAnswer($replyable_id, $user_token)['answer']->question_id;
+            // $replyable_type = 'question';
+            $replyable_data = AnswerModel::where('answer_id', '=', $replyable_id)
+              ->first();
+            $replyable_id = $replyable_data->question_id;
+            $replyable_type = 'question';
+          }
+        } else if ($reply->replyable_type == 'comment') {
+          // $replyable_id = CommentController::GetComment($reply->replyable_id, $user_token)['comment']->commentable_id;
+          // $replyable_type = CommentController::GetComment($reply->replyable_id, $user_token)['comment']->commentable_type;
+          $replyable_data = CommentModel::where('comment_id', '=', $reply->replyable_id)
+            ->first();
+          $replyable_id = $replyable_data->commentable_id;
+          $replyable_type = $replyable_data->commentable_type;
+          if ($replyable_type == 'answer') {
+            // $replyable_id = AnswerController::GetAnswer($replyable_id, $user_token)['answer']->question_id;
+            // $replyable_type = 'question';
+            $replyable_data = AnswerModel::where('answer_id', '=', $replyable_id)
+              ->first();
+            $replyable_id = $replyable_data->question_id;
+            $replyable_type = 'question';
+          }
+        }
+      }
+    } catch (\Exception $e) {
+      return [
+        'replyable_parent_id' => null,
+        'replyable_parent_type' => null,
+        'error' => $e->getMessage(),
+      ];
+    }
+    return [
+      'replyable_parent_id' => $replyable_id,
+      'replyable_parent_type' => $replyable_type,
+    ];
+  }
+}

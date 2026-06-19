@@ -1,0 +1,180 @@
+<?php
+
+/**
+ * Author HaiGeMaster
+ * @package MaterialDesignForum
+ * @link https://github.com/HaiGeMaster
+ * @copyright Copyright (c) 2023 HaiGeMaster
+ * @start-date 2023/05/20-15:53:29
+ */
+
+namespace App\Http\Controllers;
+
+use App\Http\Controllers\AnswerController;
+use App\Http\Controllers\ArticleController;
+// use App\Http\Controllers\CacheController;
+use App\Http\Controllers\CommentController;
+// use App\Http\Controllers\FollowController;
+// use App\Http\Controllers\ImageController;
+// use App\Http\Controllers\InboxController;
+// use App\Http\Controllers\NotificationController;
+// use App\Http\Controllers\OauthController;
+// use App\Http\Controllers\OptionController;
+use App\Http\Controllers\QuestionController;
+use App\Http\Controllers\ReplyController;
+// use App\Http\Controllers\ReportController;
+use App\Http\Controllers\TokenController;
+use App\Http\Controllers\TopicController;
+// use App\Http\Controllers\TopicAbleController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserGroupController;
+// use App\Http\Controllers\UserOptionController;
+// use App\Http\Controllers\VoteController;
+
+// use App\Models\Answer as AnswerModel;
+// use App\Models\Article as ArticleModel;
+// use App\Models\Cache as CacheModel;
+// use App\Models\Comment as CommentModel;
+// use App\Models\Follow as FollowModel;
+// use App\Models\Image as ImageModel;
+// use App\Models\Inbox as InboxModel;
+// use App\Models\Notification as NotificationModel;
+// use App\Models\Oauth as OauthModel;
+// use App\Models\Option as OptionModel;
+// use App\Models\Question as QuestionModel;
+// use App\Models\Reply as ReplyModel;
+use App\Models\Report as ReportModel;
+// use App\Models\Token as TokenModel;
+// use App\Models\Topic as TopicModel;
+// use App\Models\TopicAble as TopicAbleModel;
+// use App\Models\User as UserModel;
+// use App\Models\UserGroup as UserGroupModel;
+// use App\Models\UserOption as UserOptionModel;
+// use App\Models\Vote as VoteModel;
+use App\Services\Share;
+// use Illuminate\Http\Request;
+
+class ReportController extends Controller
+{
+  /**
+   * 添加举报
+   * @param int $reportable_id 举报目标ID
+   * @param string $reportable_type 举报目标类型 用户举报类型：user-用户、topic-话题、question-问题、article-文章、answer-答案、comment-评论、reply-回复
+   * @param int $user_token 用户ID
+   * @param string $reason 举报原因
+   * @return array is_add:是否添加 report:举报
+   */
+  public static function AddReport($reportable_id, $reportable_type, $user_token, $reason)
+  {
+    $report = new ReportModel();
+    $report->reportable_id = $reportable_id;
+    $report->reportable_type = $reportable_type;
+    $report->user_id = TokenController::GetUserId($user_token);
+    $report->reason = $reason;
+    $report->create_time = Share::ServerTime();
+    $report->report_handle_state = 0;
+    return [
+      'is_add' => $report->save(),
+      'report' => self::GetReport($report->id)
+    ];
+  }
+  /**
+   * 处理举报
+   * @param int $report_id 举报ID
+   * @param int $report_handle_state 举报处理状态
+   * @return bool
+   */
+  public static function HandleReport($report_id, $report_handle_state): bool
+  {
+    $report = ReportModel::find($report_id);
+    $report->report_handle_state = $report_handle_state;
+    return $report->save();
+  }
+  /**
+   * 获取举报
+   * @param int $report_id 举报ID
+   * @return mixed
+   */
+  public static function GetReport($report_id)
+  {
+    return ReportModel::find($report_id);
+  }
+  /**
+   * 获取举报列表
+   * @param string $order 排序
+   * @param int $page 页数
+   * @param int $user_token 用户token
+   * @param int $per_page 每页数量
+   * @param string $search_keywords 搜索关键词
+   * @param array $search_field 搜索字段
+   * @return array is_get:是否获取 data:举报列表
+   */
+  public static function GetReports(
+    $order,
+    $page,
+    $user_token,
+    $per_page = 20,
+    $search_keywords = '',
+    $search_field = []
+  ) {
+    if($search_field == []){
+      $search_field = ReportModel::$search_field;
+    }
+    if (!UserGroupController::CanAdminLogin($user_token)&&!UserGroupController::Ability($user_token,'ability_admin_manage_report')
+    ) {
+      return Share::HandleDataAndPagination(null);
+    }
+    // where('report_handle_state', '=', 0)
+    $reports = Share::HandleDataAndPagination(null);
+    $orders = Share::HandleArrayField($order);
+    $field = $orders['field'];
+    $sort = $orders['sort'];
+    if ($search_keywords != '') {
+      // $reports = ReportModel::where($search_field, 'like', '%' . $search_keywords . '%')
+      //   ->orderBy($field, $sort)
+      //   ->paginate($per_page, ['*'], 'page', $page);
+      $reports = ReportModel::where(function ($query) use ($search_field, $search_keywords) {
+        foreach ($search_field as $key => $value) {
+          $query->orWhere($value, 'like', '%' . $search_keywords . '%');
+        }
+      })
+        ->orderBy($field, $sort)
+        ->paginate($per_page, ['*'], 'page', $page);
+    } else {
+      $reports = ReportModel::orderBy($field, $sort)
+        ->paginate($per_page, ['*'], 'page', $page);
+    }
+    foreach ($reports as $report) {
+      // $report->reportable = $report->reportable;
+      $reportable_type = $report->reportable_type;
+      switch ($reportable_type) {
+        case 'user':
+          $report->reportable = UserController::GetUserInfo($report->reportable_id)['user'];
+          break;
+        case 'topic':
+          $report->reportable = TopicController::GetTopic($report->reportable_id)['topic'];
+          break;
+        case 'question':
+          $report->reportable = QuestionController::GetQuestion($report->reportable_id)['question'];
+          break;
+        case 'article':
+          $report->reportable = ArticleController::GetArticle($report->reportable_id)['article'];
+          break;
+        case 'answer':
+          $report->reportable = AnswerController::GetAnswer($report->reportable_id)['answer'];
+          break;
+        case 'comment':
+          $report->reportable = CommentController::GetComment($report->reportable_id)['comment'];
+          break;
+        case 'reply':
+          $report->reportable = ReplyController::GetReply($report->reportable_id)['reply'];
+          break;
+        default:
+          $report->reportable = null;
+          break;
+      }
+      $report->user = UserController::GetUserInfo($report->user_id)['user'];
+    }
+    return Share::HandleDataAndPagination($reports);
+  }
+}

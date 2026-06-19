@@ -1,0 +1,495 @@
+<?php
+
+/**
+ * Author HaiGeMaster
+ * @package MaterialDesignForum
+ * @link https://github.com/HaiGeMaster
+ * @copyright Copyright (c) 2023 HaiGeMaster
+ * @start-date 2023/05/20-15:53:29
+ */
+
+namespace App\Http\Controllers;
+
+use App\Http\Controllers\AnswerController;
+use App\Http\Controllers\ArticleController;
+// use App\Http\Controllers\CacheController;
+// use App\Http\Controllers\CommentController;
+// use App\Http\Controllers\FollowController;
+// use App\Http\Controllers\ImageController;
+// use App\Http\Controllers\InboxController;
+use App\Http\Controllers\NotificationController;
+// use App\Http\Controllers\OauthController;
+// use App\Http\Controllers\OptionController;
+use App\Http\Controllers\QuestionController;
+// use App\Http\Controllers\ReplyController;
+// use App\Http\Controllers\ReportController;
+use App\Http\Controllers\TokenController;
+// use App\Http\Controllers\TopicController;
+// use App\Http\Controllers\TopicAbleController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserGroupController;
+// use App\Http\Controllers\UserOptionController;
+use App\Http\Controllers\VoteController;
+
+use App\Models\Answer as AnswerModel;
+use App\Models\Article as ArticleModel;
+// use App\Models\Cache as CacheModel;
+use App\Models\Comment as CommentModel;
+// use App\Models\Follow as FollowModel;
+// use App\Models\Image as ImageModel;
+// use App\Models\Inbox as InboxModel;
+// use App\Models\Notification as NotificationModel;
+// use App\Models\Oauth as OauthModel;
+// use App\Models\Option as OptionModel;
+use App\Models\Question as QuestionModel;
+// use App\Models\Reply as ReplyModel;
+// use App\Models\Report as ReportModel;
+// use App\Models\Token as TokenModel;
+// use App\Models\Topic as TopicModel;
+// use App\Models\TopicAble as TopicAbleModel;
+use App\Models\User as UserModel;
+// use App\Models\UserGroup as UserGroupModel;
+// use App\Models\UserOption as UserOptionModel;
+// use App\Models\Vote as VoteModel;
+use App\Services\Share;
+// use Illuminate\Http\Request;
+
+class CommentController extends Controller
+{
+   /**
+   * 获取评论所有者用户id
+   * @param int $comment_id 评论ID
+   * @return int|null 用户ID
+   */
+  public static function GetCommentOwnerId($comment_id)
+  {
+    $comment = CommentModel::find($comment_id);
+    if ($comment != null) {
+      return $comment->user_id;
+    }
+    return null;
+  }
+  /**
+   * 添加评论
+   * @param int $commentable_id 评论目标的ID
+   * @param string $commentable_type 评论目标类型：article、question、answer、文章、提问、回答
+   * @param string $content 原始正文内容
+   * @param string $user_token 用户Token
+   * @return array 返回评论信息
+   */
+  public static function AddComment(
+    $commentable_id,
+    $commentable_type,
+    $content,
+    $user_token
+  ) {
+    $is_valid_content =
+      $commentable_id != null &&
+      $commentable_type != null &&
+      $content != null &&
+      $user_token != '' &&
+      $commentable_id != '' &&
+      $commentable_type != '' &&
+      $content != '' &&
+      $user_token != '';
+    $is_add = false;
+    $comment = null;
+    $user_id = TokenController::GetUserId($user_token);
+    if (
+      $user_id != null
+      && $is_valid_content
+      && (
+        UserGroupController::Ability($user_token, 'ability_create_comment') ||
+        UserGroupController::IsAdmin($user_token)
+      )
+    ) {
+      $comment = new CommentModel;
+      $comment->commentable_id = $commentable_id;
+      $comment->commentable_type = $commentable_type;
+      $comment->user_id = $user_id;
+      $comment->content = $content;
+      $comment->create_time = Share::ServerTime();
+      $comment->update_time = Share::ServerTime();
+      $is_add = $comment->save();
+      if ($is_add) {
+        UserModel::AddCommentCount($user_id);
+        // $target_user_id = 0;
+        // $target_user_message = '';
+        // $comment_user_name = UserController::GetUserInfo($user_id, $user_token)['user']->user_name;
+        switch ($commentable_type) {
+          case 'article':
+            ArticleModel::AddCommentCount($commentable_id);
+            //获取文章作者用户ID
+            $article = ArticleController::GetArticle($commentable_id, $user_token)['article'];
+            if ($article != null) {
+              NotificationController::AddInteractionNotification(
+                $article->user_id,
+                $user_id,
+                'article_comment',
+                null,
+                null,
+                0,
+                0,
+                $article->article_id,
+                0,
+                0,
+                $comment->comment_id,
+                0
+              );
+            }
+            break;
+          case 'question':
+            QuestionModel::AddCommentCount($commentable_id);
+            //根据问题ID获取问题
+            $question = QuestionController::GetQuestion($commentable_id, $user_token)['question'];
+            if ($question != null) {
+              NotificationController::AddInteractionNotification(
+                $question->user_id,
+                $user_id,
+                'question_comment',
+                null,
+                null,
+                0,
+                0,
+                0,
+                $question->question_id,
+                0,
+                $comment->comment_id,
+                0
+              );
+            }
+            break;
+          case 'answer':
+            AnswerModel::AddCommentCount($commentable_id);
+            //根据回答ID获取回答
+            $answer = AnswerController::GetAnswer($commentable_id, $user_token)['answer'];
+            if ($answer != null) {
+              NotificationController::AddInteractionNotification(
+                $answer->user_id,
+                $user_id,
+                'answer_comment',
+                null,
+                null,
+                0,
+                0,
+                0,
+                0,
+                $answer->answer_id,
+                $comment->comment_id,
+                0
+              );
+            }
+            break;
+        }
+      }
+    }
+    return [
+      'is_add' => $is_add,
+      'comment' => self::GetComment($comment->comment_id, $user_token)['comment'],
+    ];
+  }
+  /**
+   * 获取评论
+   * @param int $comment_id 评论ID
+   * @param string $user_token 用户Token
+   * @return array is_get:是否获取 comment:评论信息
+   */
+  public static function GetComment($comment_id, $user_token = '')
+  {
+    $comment = CommentModel::where('comment_id', '=', $comment_id)
+      ->whereNull('delete_time')
+      ->first();
+    if ($comment != null) {
+      $comment->user = UserController::GetUserInfo($comment->user_id, $user_token)['user'];
+      $comment->vote = VoteController::GetVote($comment->comment_id, 'comment', $user_token)['vote'];
+    }
+    return [
+      'is_get' => $comment != null,
+      'comment' => $comment,
+    ];
+  }
+  /**
+   * 获取评论列表
+   * @param int $commentable_id 评论目标的ID
+   * @param string $commentable_type 评论目标类型：article、question、answer、文章、提问、回答
+   * @param string $order 排序方式
+   * @param int $page 页码
+   * @param string $user_token 用户Token
+   * @param int $per_page 每页数量
+   * @param string $search_keywords 搜索关键词
+   * @param array $search_field 搜索字段
+   * @return array
+   */
+  public static function GetComments(
+    $commentable_id,
+    $commentable_type,
+    $order,
+    $page,
+    $user_token,
+    $per_page = 20,
+    $search_keywords = '',
+    $search_field = []
+  ) {
+    if ($search_field == []) {
+      $search_field = CommentModel::$search_field;
+    }
+
+    $data = Share::HandleDataAndPagination(null);
+    $orders = Share::HandleArrayField($order);
+
+    $field = $orders['field'];
+    $sort = $orders['sort'];
+
+    if ($search_keywords != '') {
+      if (($commentable_id != 0 && $commentable_id != '') && $commentable_type != '') {
+        $data = CommentModel::where('commentable_id', '=', $commentable_id)
+          ->where('commentable_type', '=', $commentable_type)
+          ->whereNull('delete_time')
+          //->where($search_field, 'like', '%' . $search_keywords . '%')
+          ->where(function ($query) use ($search_field, $search_keywords) {
+            foreach ($search_field as $key => $value) {
+              $query->orWhere($value, 'like', '%' . $search_keywords . '%');
+            }
+          })
+          ->orderBy($field, $sort)
+          ->paginate($per_page, ['*'], 'page', $page);
+      } else {
+        $data = CommentModel::whereNull('delete_time')
+          //->where($search_field, 'like', '%' . $search_keywords . '%')
+          ->where(function ($query) use ($search_field, $search_keywords) {
+            foreach ($search_field as $key => $value) {
+              $query->orWhere($value, 'like', '%' . $search_keywords . '%');
+            }
+          })
+          ->orderBy($field, $sort)
+          ->paginate($per_page, ['*'], 'page', $page);
+      }
+    } else {
+      if (($commentable_id != 0 && $commentable_id != '') && $commentable_type != '') {
+        $data = CommentModel::where('commentable_id', '=', $commentable_id)
+          ->where('commentable_type', '=', $commentable_type)
+          ->whereNull('delete_time')
+          ->orderBy($field, $sort)
+          ->paginate($per_page, ['*'], 'page', $page);
+      } else {
+        $data = CommentModel::whereNull('delete_time')
+          ->orderBy($field, $sort)
+          ->paginate($per_page, ['*'], 'page', $page);
+      }
+    }
+
+    $data = Share::HandleDataAndPagination($data);
+
+    if ($data['data'] != null) {
+      foreach ($data['data'] as $key => $value) {
+        $data['data'][$key]->commentable_parent_id = $data['data'][$key]->commentable_id;
+        $data['data'][$key]->commentable_parent_type = $data['data'][$key]->commentable_type;
+
+        if ($data['data'][$key]->commentable_parent_type == 'answer') {
+
+          //$data['data'][$key]->commentable_parent_id = AnswerController::GetAnswer($data['data'][$key]->commentable_parent_id, $user_token)['answer']->answerable_id;
+          //$data['data'][$key]->commentable_parent_type = AnswerController::GetAnswer($data['data'][$key]->commentable_parent_id, $user_token)['answer']->answerable_type;
+
+          // $data['data'][$key]->commentable_parent_id = AnswerController::GetAnswer($data['data'][$key]->commentable_parent_id, $user_token)['answer']->question_id;
+          $data['data'][$key]->commentable_parent_id = AnswerModel::where('answer_id', '=', $data['data'][$key]->commentable_parent_id)->first()->question_id;
+          $data['data'][$key]->commentable_parent_type = 'question'; //AnswerController::GetAnswer($data['data'][$key]->commentable_parent_id, $user_token)['answer']->answerable_type;
+        }
+        $data['data'][$key]->user = UserController::GetUserInfo($value->user_id, $user_token)['user'];
+        $data['data'][$key]->vote = VoteController::GetVote($value->comment_id, 'comment', $user_token)['vote'];
+      }
+    }
+
+    //$data['$per_page'] = $per_page;
+
+    return $data;
+  }
+  /**
+   * 编辑评论
+   * @param int $comment_id 评论ID
+   * @param string $content 原始正文内容
+   * @param string $user_token 用户Token
+   * @return array [is_edit=>bool,comment=>object]
+   */
+  public static function EditComment(
+    $comment_id,
+    $content,
+    $user_token
+  ) {
+    $is_valid_content =
+      $comment_id != null &&
+      $content != null &&
+      $user_token != '' &&
+      $comment_id != '' &&
+      $content != '' &&
+      $user_token != '';
+    $is_edit = false;
+    // $comment = null;
+    // $user_id = TokenController::GetUserId($user_token);
+    // if (
+    //   $user_id != null
+    //   && $is_valid_content
+    //   && (
+    //     UserGroupController::Ability($user_token, 'ability_edit_own_comment') ||
+    //     UserGroupController::IsAdmin($user_token)
+    //   )
+    // ) {
+    //   $comment = CommentModel::where('comment_id', '=', $comment_id)
+    //     ->where('delete_time', '=', 0)
+    //     ->first();
+    //   if ($comment != null) {
+    //     $comment->content = $content;
+    //     $comment->update_time = Share::ServerTime();
+    //     $is_edit = $comment->save();
+    //   }
+    // }
+    $user_id = TokenController::GetUserId($user_token);
+    $comment = CommentModel::where('comment_id', '=', $comment_id)
+      ->whereNull('delete_time')
+      ->first();
+    if ($comment != null && $is_valid_content && $user_id != null) {
+      if (
+        (
+          TokenController::IsUserSelf($user_token, $comment->user_id) &&
+          UserGroupController::Ability($user_token, 'ability_edit_own_comment') &&
+          (
+            UserGroupController::Ability($user_token, 'ability_edit_comment_only_no_reply') ? ($comment->reply_count == 0 ? true : false) : true
+          ) &&
+          UserGroupController::BeforeTime($user_token, 'time_before_edit_comment', $comment->create_time)
+        )
+        ||
+        (UserGroupController::IsAdmin($user_token) && UserGroupController::Ability($user_token, 'ability_admin_manage_comment'))
+        // UserGroupController::IsAdmin($user_token)
+      ) {
+        $comment->content = $content;
+        $comment->update_time = Share::ServerTime();
+        $is_edit = $comment->save();
+      }
+    }
+    return [
+      'is_edit' => $is_edit,
+      'comment' => self::GetComment($comment_id, $user_token)['comment'],
+    ];
+  }
+  /**
+   * 删除评论
+   * @param int[] $comment_ids 评论ID数组
+   * @param string $user_token 用户Token
+   * @return array is_delete:bool 是否删除成功 delete_ids:删除成功的IDID数组
+   */
+  public static function DeleteComments(
+    $comment_ids,
+    $user_token
+  ) {
+    $is_valid_content =
+      $comment_ids != null &&
+      $user_token != '' &&
+      $comment_ids != '' &&
+      $user_token != '';
+    $is_delete = false;
+    $user_id = TokenController::GetUserId($user_token);
+    $delete_ids = [];
+    $comments = [];
+    if (
+      $user_id != null &&
+      $is_valid_content
+    ) {
+      $comments = CommentModel::whereIn('comment_id', $comment_ids)->get();
+      foreach ($comments as $key => $comment) {
+        if (
+          (
+            TokenController::IsUserSelf($user_token, $comment->user_id) &&
+            UserGroupController::Ability($user_token, 'ability_delete_own_comment') &&
+            (
+              UserGroupController::Ability($user_token, 'ability_delete_comment_only_no_reply') ? ($comment->reply_count == 0 ? true : false) : true
+            ) &&
+            UserGroupController::BeforeTime($user_token, 'time_before_delete_comment', $comment->create_time)
+          )
+          ||
+          (UserGroupController::IsAdmin($user_token) && UserGroupController::Ability($user_token, 'ability_admin_manage_comment'))
+          // UserGroupController::IsAdmin($user_token)
+        ) {
+          UserModel::SubCommentCount($comment->user_id);
+          NotificationController::AddInteractionNotification(
+            $comment->user_id,
+            $user_id,
+            'comment_delete',
+            null,
+            null,
+            0,
+            0,
+            $comment->commentable_type=='article'?ArticleController::GetArticle($comment->commentable_id)['article']->article_id:0,
+            $comment->commentable_type=='question'?QuestionController::GetQuestion($comment->commentable_id)['question']->question_id:0,
+            $comment->commentable_type=='answer'?AnswerController::GetAnswer($comment->commentable_id)['answer']->answer_id:0,
+            $comment->comment_id,
+            0
+          );
+
+          switch ($comment->commentable_type) {
+            case 'article':
+              ArticleModel::SubCommentCount($comment->commentable_id);
+              break;
+            case 'question':
+              QuestionModel::SubCommentCount($comment->commentable_id);
+              break;
+            case 'answer':
+              AnswerModel::SubCommentCount($comment->commentable_id);
+              break;
+          }
+
+          //联动删除此评论下的所有回复
+          //删除此评论下的所有回复 ->where('delete_time', '=', 0)//看情况决定是否加上这个条件
+          // $replys = ReplyController::where('replyable_comment_id', '=', $comment->comment_id)
+          //   ->get();
+          // if($replys != null){
+          //   foreach ($replys as $key => $reply) {
+          //     $reply->delete_time = Share::ServerTime();
+          //     $reply->save();
+
+          //     UserController::SubReplyCount($reply->user_id);
+          //   }
+          // }
+
+          //减少对应问题或文章的评论数量
+          // if ($comment->commentable_type == 'answer') {
+          //   //如果是回答评论，则减少对应问题的评论数量
+          //   QuestionController::SubCommentCount($comment->commentable_id);
+          // } else {
+          //   //如果是文章或问题评论，则减少对应文章或问题的评论数量
+          //   if ($comment->commentable_type == 'article') {
+          //     ArticleController::SubCommentCount($comment->commentable_id);
+          //   } else if ($comment->commentable_type == 'question') {
+          //     QuestionController::SubCommentCount($comment->commentable_id);
+          //   }
+          // }
+          //删除评论
+          $comment->delete_time = Share::ServerTime();
+
+          $is_delete = $comment->save();
+          array_push($delete_ids, $comment->comment_id);
+        }
+      }
+    }
+    return [
+      'is_delete' => $is_delete,
+      'delete_ids' => $delete_ids,
+      'data' => $comments,
+    ];
+    // if (
+    //   $user_id != null
+    //   && $is_valid_content
+    //   && (
+    //     UserGroupController::Ability($user_token, 'ability_delete_own_comment') ||
+    //     UserGroupController::IsAdmin($user_token)
+    //   )
+    // ) {
+    //   $is_delete = CommentModel::whereIn('comment_id', $comment_ids)
+    //     ->where('delete_time', '=', 0)
+    //     ->update([
+    //       'delete_time' => Share::ServerTime(),
+    //     ]);
+    // }
+    // return [
+    //   'is_delete' => $is_delete,
+    // ];
+  }
+}
