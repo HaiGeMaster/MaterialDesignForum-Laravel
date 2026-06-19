@@ -90,7 +90,7 @@ class User extends Authenticatable
         'update_time' => 'datetime',
         'disable_time' => 'datetime',
         'last_login_time' => 'datetime',
-        'password' => 'hashed',
+        // 'password' => 'hashed',//使用自定义的哈希算法
     ];
 
 

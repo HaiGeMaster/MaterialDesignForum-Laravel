@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Schema;
+// use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 
 class InstallController extends Controller

@@ -12,7 +12,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Cache as CacheModel;
 use App\Services\Share;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
+
 // use Illuminate\Support\Facades\Cache;
 //由于laraval自带缓存，所以这里直接使用laravel的缓存
 class CacheController extends Controller

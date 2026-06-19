@@ -13,7 +13,7 @@ namespace App\Http\Controllers;
 use App\Models\Image;
 use App\Services\AvatarGenerator;
 use App\Services\Share;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;

@@ -146,7 +146,14 @@ class AvatarGenerator
 
         // 绘制文字
         $text = $this->getInitials();
+        // $fontSize = (int) $size / 2;
+
         $fontSize = (int) round($size * 0.42);
+
+        // // PHP 8.4+ FreeType 改用 72 DPI，需补偿回 96 DPI 的渲染效果
+        // if (PHP_VERSION_ID >= 80400) {
+        //     $fontSize = (int) round($fontSize * 4 / 3);
+        // }
 
         $fontPath = $this->findFont();
         if ($fontPath !== null) {

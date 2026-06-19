@@ -11,10 +11,31 @@
 namespace App\Services;
 
 use Illuminate\Support\Carbon;
+use App\Models\Option;
 
 class Share
 {
-
+    /**
+     * 获取路由主题的index.html
+     * @return string
+     */
+    public static function GetRouteThemeIndex()
+    {
+        try {
+            //获取数据库中的theme的value
+            $theme = Option::where('name', 'theme')->first();
+            $themename = 'MaterialDesignForum-Vuetify4';
+            if ($theme) {
+                $themename = $theme->value;
+            }
+            $html = file_get_contents(public_path('themes/'.$themename.'/index.html'));
+            $html = str_replace('{lang}', app()->getLocale(), $html);
+            return $html;
+        } catch (\Exception $e) {
+            // 主题文件不存在或读取失败，返回默认提示
+            return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Error</title></head><body><h1>Theme not found</h1></body></html>';
+        }
+    }
     /**
      * 处理Array数据为SQL 处理排序
      * @param string $data 数据 示例:-follower_count +follower_count
@@ -87,6 +108,12 @@ class Share
             ]
         ];
         if ($data != null) {
+            // 参考旧后端：从分页 URL 中提取页码，比手工 currentPage()+1 更可靠
+            $previousPageUrl = $data->total() == 1 ? null : $data->previousPageUrl();
+            $nextPageUrl     = $data->total() == 1 ? null : $data->nextPageUrl(); //得出值：https://laravelmdf.xbedrock.com/api/users/get?page=2
+            $previousPage    = $previousPageUrl != null ? self::getPageFromUrl($previousPageUrl) : null;
+            $nextPage        = $nextPageUrl != null     ? self::getPageFromUrl($nextPageUrl)     : null;
+
             $data_items = $data->items();
             //如果$data_items是空数组，则返回null
             if (count($data_items) == 0 || $data_items == null || $data_items == []) {
@@ -96,12 +123,12 @@ class Share
                 'is_get' => $data_items != null,
                 'data' => $data_items,
                 'pagination' => [
-                    'page'     => $data->currentPage(),
-                    'per_page' => $data->perPage(),
+                    'page'     => $data->total() == 1 ? 1 : $data->currentPage(),
+                    'per_page' => $data->total() == 1 ? 1 : $data->perPage(),
                     'total'    => $data->total(),
-                    'pages'    => $data->lastPage(),
-                    'previous' => $data->currentPage() > 1 ? $data->currentPage() - 1 : null,
-                    'next'     => $data->hasMorePages() ? $data->currentPage() + 1 : null,
+                    'pages'    => $data->total() == 1 ? 1 : $data->lastPage(),
+                    'previous' => $previousPage,
+                    'next'     => $nextPage,
                 ]
             ];
         }
@@ -128,21 +155,34 @@ class Share
             ]
         ];
         if ($data != null) {
+            // 参考旧后端：从分页 URL 中提取页码
+            $previousPageUrl = $pagination->total() == 1 ? null : $pagination->previousPageUrl();
+            $nextPageUrl     = $pagination->total() == 1 ? null : $pagination->nextPageUrl();
+            $previousPage    = $previousPageUrl != null ? self::getPageFromUrl($previousPageUrl) : null;
+            $nextPage        = $nextPageUrl != null     ? self::getPageFromUrl($nextPageUrl)     : null;
+
             $data_items = $data;
             //如果$data_items是空数组，则返回null
             if (count($data_items) == 0 || $data_items == null || $data_items == []) {
                 $data_items = null;
             }
+            // 额外校验：$pagination 来自"关注"表的分页，实际数据是话题/文章等不同表
+            // 当实际数据不足 perPage 时（如被删除），即使分页器说还有下一页，实际也没有数据了
+            $dataCount = $data_items !== null ? count($data_items) : 0;
+            if ($nextPage !== null && $dataCount < $pagination->perPage()) {
+                $nextPage = null;
+            }
+
             $rdata = [
                 'is_get' => $data_items != null,
                 'data' => $data_items,
                 'pagination' => [
-                    'page'     => $pagination->currentPage(),
-                    'per_page' => $pagination->perPage(),
+                    'page'     => $pagination->total() == 1 ? 1 : $pagination->currentPage(),
+                    'per_page' => $pagination->total() == 1 ? 1 : $pagination->perPage(),
                     'total'    => $pagination->total(),
-                    'pages'    => $pagination->lastPage(),
-                    'previous' => $pagination->currentPage() > 1 ? $pagination->currentPage() - 1 : null,
-                    'next'     => $pagination->hasMorePages() ? $pagination->currentPage() + 1 : null,
+                    'pages'    => $pagination->total() == 1 ? 1 : $pagination->lastPage(),
+                    'previous' => $previousPage,
+                    'next'     => $nextPage,
                 ]
             ];
         }
@@ -171,4 +211,18 @@ class Share
     //     return !empty($value)
     //         && !in_array(strtolower(trim((string) $value)), ['false', 'null', 'undefined', '']);
     // }
+
+    /**
+     * 从分页 URL 中提取 page 参数
+     * 例如 "https://xxx.com/api/users/get?page=2" → 2
+     */
+    private static function getPageFromUrl($url): ?int
+    {
+        $query = parse_url($url, PHP_URL_QUERY);
+        if ($query === null) {
+            return null;
+        }
+        parse_str($query, $params);
+        return isset($params['page']) ? intval($params['page']) : null;
+    }
 }

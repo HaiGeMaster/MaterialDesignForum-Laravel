@@ -14,7 +14,8 @@ use App\Models\Token as TokenModel;
 use App\Models\User as UserModel;
 use App\Http\Controllers\UserGroupController;
 use App\Services\Share;
-use Carbon\Carbon;
+// us1e Carbon\Carbon;
+use Illuminate\Support\Carbon;
 
 class TokenController extends Controller
 {
@@ -119,7 +120,7 @@ class TokenController extends Controller
           $query_token_device == $device && //查询到的token的设备与传入的设备相同
           $query_token_token == $user_token //查询到的token与用户token相同
         ) {
-          if ($user->disable_time > Share::ServerTime()) { //如果禁用时间大于当前时间，说明未解除禁用
+          if ($user->disable_time instanceof Carbon && $user->disable_time->isFuture()) { //如果禁用时间大于当前时间，说明未解除禁用
             // return -6;
             return null;
           }

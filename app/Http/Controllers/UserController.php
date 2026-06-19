@@ -13,53 +13,44 @@ namespace App\Http\Controllers;
 
 
 use App\Mail\SendMailCommon;
-use Illuminate\Support\Facades\{
-  Hash,
-  Log,
-  Mail,
-  Cache,
-  Validator
-};
+use Illuminate\Support\Carbon;
+// use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+// use Illuminate\Support\Facades\Cache;
+// use Illuminate\Support\Facades\Validator;
+// use Illuminate\Http\Request;
+// use Illuminate\Http\Response;
+// use Illuminate\Http\JsonResponse;
 
-use Illuminate\Http\{
-  Request,
-  Response,
-  JsonResponse,
-};
 
-use App\Models\{
-  User as UserModel,
-  Cache as CacheModel,
-  Token as TokenModel,
-  UserGroup as UserGroupModel,
-  Oauth as OauthModel,
-  Follow as FollowModel,
-  Question as QuestionModel,
-  Answer as AnswerModel,
-  Article as ArticleModel,
-};
+use App\Models\User as UserModel;
+use App\Models\Cache as CacheModel;
+// use App\Models\Token as TokenModel;
+use App\Models\UserGroup as UserGroupModel;
+use App\Models\Oauth as OauthModel;
+use App\Models\Follow as FollowModel;
+use App\Models\Question as QuestionModel;
+use App\Models\Answer as AnswerModel;
+use App\Models\Article as ArticleModel;
 
-use App\Http\Controllers\{
-  TokenController,
-  UserGroupController,
-  ImageController,
-  CacheController,
-  FollowController,
-  QuestionController,
-  AnswerController,
-  ArticleController,
-};
+
+use App\Http\Controllers\TokenController;
+use App\Http\Controllers\UserGroupController;
+use App\Http\Controllers\ImageController;
+use App\Http\Controllers\CacheController;
+use App\Http\Controllers\FollowController;
+// use App\Http\Controllers\QuestionController;
+// use App\Http\Controllers\AnswerController;
+// use App\Http\Controllers\ArticleController;
 
 use App\Services\Share;
 use App\Services\ImageCaptcha;
-use Carbon\Carbon;
-use Mews\Captcha\Facades\Captcha;
 use itbdw\Ip\IpLocation;
-use Laravel\Socialite\One\User;
 
 class UserController extends Controller
 {
-  
+
   /**
    * 通过第三方平台登录或注册用户
    * @param string $oauthName 第三方平台标识符 如 github, microsoft 等
@@ -162,7 +153,8 @@ class UserController extends Controller
     $v = false;
     $snackbar = '';
     $client_email = base64_decode($email);
-    $client_password = self::HandlePassword(base64_decode($password)); //base64_decode($password);
+    $p = base64_decode($password);
+    $client_password = self::HandlePassword($p); //base64_decode($password);
     $client_email_captcha = md5(base64_decode($email_captcha));
     //$client_username = base64_decode($username);
     // $client_username = $username == "" ? "User" . Share::ServerTime() : $username;
@@ -209,13 +201,13 @@ class UserController extends Controller
             }
             CacheController::DeleteCaptcha($client_email_captcha);
           }
-        }else{
+        } else {
           $snackbar = 'Message.Components.Account.CodeError';
         }
-      }else{
+      } else {
         $snackbar = 'Message.Components.Account.TheUsernameCanOnlyBeUniqueOrTheEmailHasBeenRegisteredOrTheVerificationCodeIsIncorrect';
       }
-    }else{
+    } else {
       $snackbar = 'Message.Components.Account.UserIsHasBeenRegistered';
     }
     $data = array(
@@ -510,15 +502,15 @@ class UserController extends Controller
             'last_login_time' => Share::ServerTime(),
           ]);
           if ($token != '' && $update_user) {
-          // //查询用户组是否可以前台登录
-          //   $user_group_login = UserGroupController::CanNormalLogin($token)
+            // //查询用户组是否可以前台登录
+            //   $user_group_login = UserGroupController::CanNormalLogin($token)
             // return 3;
             $is_login = true;
           }
-        }else{
+        } else {
           $snackbar = 'Message.Components.Account.LoginEmailOrUsernameDoesNotExistOrPasswordOrVerificationCodeIsIncorrect';
         }
-      }else{
+      } else {
         $snackbar = 'Message.Components.Account.UserNameOrEMailNotFound';
       }
       return [
@@ -556,8 +548,8 @@ class UserController extends Controller
       $v = true;
     }
     $data = array(
-      'cache'=>$client_cache,
-      'user'=>$Update_user,
+      'cache' => $client_cache,
+      'user' => $Update_user,
       'is_reset' => $v,
       'snackbar' => $v ? 'Message.Components.Account.ResetPasswordSuccess' : 'Message.Components.Account.TheResetEmailDoesNotExistOrTheVerificationCodeIsIncorrectOrTheNewPasswordCannotBeTheSameAsTheOldPassword',
     );
@@ -844,8 +836,8 @@ class UserController extends Controller
     //   // $user->save();
     // }
 
-    if ($data['data'] != null && ($is_admin=='false'||$is_admin==false||!$is_admin)) {
-    // if ($data['data'] != null && Share::IsValid($is_admin)==false) {
+    if ($data['data'] != null && ($is_admin == 'false' || $is_admin == false || !$is_admin)) {
+      // if ($data['data'] != null && Share::IsValid($is_admin)==false) {
       foreach ($data['data'] as $key => $value) {
         $data['data'][$key] = self::GetUserInfo($value['user_id'], $user_token)['user'];
       }
