@@ -5,6 +5,8 @@ public/themes
 public/locale
 tests/
 
+dev_help/
+
 *.log
 .DS_Store
 .env
