@@ -81,28 +81,27 @@ Material Design Forum通过以下优势成为现代化论坛平台：
 ## 安装配置方法
 
 ### 环境要求
-- 服务器：支持PHP 7.4及以上版本
+- 服务器：PHP 8.2
 - 数据库：MySQL 5.7及以上版本
 - 浏览器：Google Chrome、Mozilla Firefox、Microsoft Edge等
 
 ### 安装步骤
 1. 下载最新版本的Material Design Forum部署文件（包含前端代码和后端代码）
 2. 解压文件到服务器目录
-3. 导入数据库文件（位于`assets/demo_table.sql`）
-4. 访问网站进行安装（通常为`http://yourdomain/install`）,之后你可以参考`.env.example`文件配置数据库连接信息到`.env`
-5. 将请求转到`index.php`
+3. 运行 Laravel 数据库迁移命令：
+    ```bash
+    php artisan migrate
+    ```
+    如无法运行迁移命令，可手动导入数据库文件（位于 `database\demo_laravel_table.sql`）
+4. 将站点运行目录设置为 `public`
+5. 参考 `.env.example` 创建 `.env` 文件，配置数据库连接信息
+6. 配置伪静态规则（Nginx）：
     ```nginx
-     ##这是nginx配置,其他服务器请自行配置
-     location / {
+    location / {
         try_files $uri $uri/ /index.php;
-     }
-     ```
-6. 默认有两个用户
-   - 用户名：Admin
-   - 密码：1234
-   ---
-   - 用户名：User
-   - 密码：1234
+    }
+    ```
+    > Apache 等其他服务器请自行配置对应的 URL 重写规则。
 
 适用于：
 - Material Design爱好者
@@ -194,28 +193,27 @@ Material Design Forum stands out as a modern forum platform through the followin
 ## Installation & Configuration Guide
 
 ### Environment Requirements
-- Server: PHP 7.4 or higher
+- Server: PHP 8.2
 - Database: MySQL 5.7 or higher
 - Browsers: Google Chrome, Mozilla Firefox, Microsoft Edge, etc.
 
 ### Installation Steps
 1. Download the latest version of Material Design Forum deployment package (including frontend and backend code)
 2. Extract files to your server directory
-3. Import the database file located at `assets/demo_table.sql`
-4. Access your website to start installation (typically `http://yourdomain.com/install`). Then configure database connection details in `.env` file by referring to `.env.example`
-5. Configure request routing to `index.php`
+3. Run Laravel database migration:
+    ```bash
+    php artisan migrate
+    ```
+    If migration fails, manually import the database file located at `database\demo_laravel_table.sql`
+4. Set the site document root to `public`
+5. Create a `.env` file by referring to `.env.example` and configure your database connection details
+6. Configure URL rewrite rules (Nginx):
     ```nginx
-     ## Nginx configuration example (configure accordingly for other servers)
-     location / {
+    location / {
         try_files $uri $uri/ /index.php;
-     }
-     ```
-6. Default user accounts:
-   - Username: Admin
-   - Password: 1234
-   ---
-   - Username: User
-   - Password: 1234
+    }
+    ```
+    > For Apache or other servers, configure the corresponding URL rewrite rules accordingly.
 
 Ideal for:
 - Material Design enthusiasts
