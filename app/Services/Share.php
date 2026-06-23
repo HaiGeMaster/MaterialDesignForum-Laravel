@@ -25,15 +25,17 @@ class Share
             //获取数据库中的theme的value
             $theme = Option::where('name', 'theme')->first();
             $themename = 'MaterialDesignForum-Vuetify4';
-            if ($theme) {
+            // 如果数据库里有值，就用数据库的
+            if ($theme && !empty($theme->value)) {
                 $themename = $theme->value;
             }
-            $html = file_get_contents(public_path('themes/'.$themename.'/index.html'));
-            $html = str_replace('{lang}', Option::Get('default_language')??app()->getLocale(), $html);
+            $html = file_get_contents(public_path('themes/' . $themename . '/index.html'));
+            $html = str_replace('{lang}', Option::Get('default_language') ?? app()->getLocale(), $html);
+            $html = str_replace('{title}', Option::Get('site_name') ?? config('app.name'), $html);
             return $html;
         } catch (\Exception $e) {
             // 主题文件不存在或读取失败，返回默认提示
-            return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Error</title></head><body><h1>Theme not found</h1></body></html>';
+            return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Error</title></head><body><h1>Theme not found :(' . $e->getMessage() . '</h1></body></html>';
         }
     }
     /**

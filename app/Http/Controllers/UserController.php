@@ -718,6 +718,7 @@ class UserController extends Controller
     $is_admin = false
   ) {
     // return UserModel::all();
+    $is_admin = filter_var($is_admin, FILTER_VALIDATE_BOOLEAN);
     if ($search_field == []) {
       $search_field = UserModel::$search_field;
     }

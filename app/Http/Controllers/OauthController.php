@@ -106,12 +106,13 @@ class OauthController extends Controller
             return [];
         }
 
-        // $records = Oauth::where('user_id', $userId)->get()->keyBy('oauth_name');
+        $records = Oauth::where('user_id', $userId)->get()->keyBy('oauth_name');
+
         // 查出该用户所有绑定，按 oauth_name 为 key 组织（排除敏感字段）
-        $records = Oauth::where('user_id', $userId)
-            ->select('oauth_id', 'oauth_name', 'oauth_user_id', 'oauth_user_name', 'oauth_user_email', 'user_id')
-            ->get()
-            ->keyBy('oauth_name');
+        // $records = Oauth::where('user_id', $userId)
+        //     ->select('oauth_id', 'oauth_name', 'oauth_user_id', 'oauth_user_name', 'oauth_user_email', 'user_id')
+        //     ->get()
+        //     ->keyBy('oauth_name');
 
         // 补全所有支持的平台，未绑定的为 null
         $platforms = ['github', 'microsoft', 'google', 'sso'];
