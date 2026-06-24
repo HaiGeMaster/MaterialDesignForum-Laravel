@@ -1274,12 +1274,12 @@ class UserController extends Controller
    * 设置多个用户的禁用时间
    * @param string $user_token token 操作者用户token字符串
    * @param string $user_ids 用户id数组
-   * @param string $disable_time 禁用时间默认0是不禁用,其他值是禁用时间
+   * @param string $disable_time 禁用时间默认null是不禁用,其他值是禁用时间
    */
-  public static function SetUsersDisableTime($user_token, $user_ids, $disable_time = 0)
+  public static function SetUsersDisableTime($user_token, $user_ids, $disable_time = null)
   {
     $is_set = false;
-    $disable_time != 0 ? Share::ServerTime() : 0;
+    $disable_time != null ? Share::ServerTime() : null;
     $is_admin =  (UserGroupController::IsAdmin($user_token) && UserGroupController::Ability($user_token, 'ability_admin_manage_user'));
     // UserGroupController::IsAdmin($user_token)//UserGroupController::IsAdmin($user_token);
     if ($is_admin) {

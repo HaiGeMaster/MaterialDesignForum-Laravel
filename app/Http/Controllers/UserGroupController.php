@@ -403,7 +403,7 @@ class UserGroupController extends Controller
         }
         $user_group->create_time = Share::ServerTime();
         $user_group->update_time = Share::ServerTime();
-        $user_group->delete_time = 0;
+        // $user_group->delete_time = 0;
         $is_add = $user_group->save();
       }
     }

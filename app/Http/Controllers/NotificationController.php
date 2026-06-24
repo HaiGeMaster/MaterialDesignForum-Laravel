@@ -138,7 +138,7 @@ class NotificationController extends Controller
       $notification->reply_id = $reply_id;
       $notification->reply_to_reply_id = $reply_to_reply_id;
       $notification->create_time = Share::ServerTime();
-      $notification->delete_time = 0;
+      // $notification->delete_time = 0;
 
       $is_add = $notification->save();
       if ($is_add) {

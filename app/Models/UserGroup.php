@@ -162,6 +162,9 @@ class UserGroup extends Model
     protected $casts = [
         'user_group_icon_show' => 'boolean',
         'is_admin' => 'boolean',
+        'create_time' => 'datetime',
+        'update_time' => 'datetime',
+        'delete_time' => 'datetime',
         'ability_normal_login' => 'boolean',
         'ability_admin_login' => 'boolean',
         'ability_admin_manage_user_group' => 'boolean',
