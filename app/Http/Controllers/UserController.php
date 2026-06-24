@@ -839,7 +839,7 @@ class UserController extends Controller
     //   // $user->save();
     // }
 
-    if ($data['data'] != null && ($is_admin == 'false' || $is_admin == false || !$is_admin)) {
+    if ($data['data'] != null && !$is_admin) {
       // if ($data['data'] != null && Share::IsValid($is_admin)==false) {
       foreach ($data['data'] as $key => $value) {
         $data['data'][$key] = self::GetUserInfo($value['user_id'], $user_token)['user'];
@@ -849,6 +849,7 @@ class UserController extends Controller
     // $data['is_admin'] = $is_admin;
 
     if ($data['data'] != null && !UserGroupController::IsAdmin($user_token)) {
+      //此处保证了就算有人把is_admin变成真，但不是管理员，也不能获取到用户的邮箱和密码等信息
       foreach ($data['data'] as $key => $value) {
         $data['data'][$key]['email'] = null; //不返回邮箱
         $data['data'][$key]['password'] = null; //不返回密码
