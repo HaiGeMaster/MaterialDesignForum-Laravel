@@ -64,7 +64,23 @@ class SocialiteController extends Controller
         });
     }
 
-    // 如果之后要添加新的 OAuth 提供商（如 Google、GitLab），现在只需写一个 4 行的方法即可接入，无需再复制整段逻辑。
+    // 重定向到 Google 授权页
+    public function redirectToGoogle()
+    {
+        /** @var \Laravel\Socialite\Two\AbstractProvider $driver */
+        $driver = Socialite::driver('google');
+        return $driver->setScopes(['openid', 'profile', 'email'])->redirect();
+    }
+
+    // Google 回调处理
+    public function handleGoogleCallback(Request $request)
+    {
+        return $this->handleCallback('google', $request, function ($user) {
+            return $user->getName();
+        });
+    }
+
+    // 如果之后要添加新的 OAuth 提供商（如 GitLab），现在只需写一个 4 行的方法即可接入，无需再复制整段逻辑。
 
     /**
      * 统一 OAuth 回调处理（消除 GitHub/Microsoft 重复代码）。

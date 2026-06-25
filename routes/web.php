@@ -16,8 +16,8 @@ use App\Http\Controllers\OauthController;
 use App\Http\Controllers\UpdateController;
 use App\Http\Controllers\UserController;
 use App\Services\Share;
-// use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
+// use Illuminate\Support\Facades\App;
 
 
 if (config('app.debug')) {
@@ -48,9 +48,12 @@ Route::get('/update/server/info', [UpdateController::class, 'serveUpdateInfo']);
 Route::get('/user/image_captcha/{time?}', [UserController::class, 'GetImageCaptcha']);
 
 Route::get('/auth/github/redirect', [SocialiteController::class, 'redirectToGithub']);
-Route::get('/auth/github/callback',  [SocialiteController::class, 'handleGithubCallback']);// routes/web.php
+Route::get('/auth/github/callback',  [SocialiteController::class, 'handleGithubCallback']);
 Route::get('/auth/microsoft/redirect', [SocialiteController::class, 'redirectToMicrosoft']);
 Route::get('/auth/microsoft/callback',  [SocialiteController::class, 'handleMicrosoftCallback']);
+Route::get('/auth/google/redirect', [SocialiteController::class, 'redirectToGoogle']);
+Route::get('/auth/google/callback', [SocialiteController::class, 'handleGoogleCallback']);
+
 
 Route::get('/{any}', function () {
     // $html = file_get_contents(public_path('themes/MaterialDesignForum-Vuetify4/index.html'));

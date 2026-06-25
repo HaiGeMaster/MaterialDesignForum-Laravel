@@ -86,6 +86,7 @@ class CommonController extends Controller
         'option_list' => $options,
         'theme_color' => $themeColor['theme_color'],
         'theme_list' => self::GetThemeList(),
+        'oauth_list' => self::getValidOauthList(),
       ]
     ];
   }
@@ -114,8 +115,8 @@ class CommonController extends Controller
     // 2. 写入 theme_color 到主题的 setting.json
     if (isset($data['theme_color']) && is_array($data['theme_color'])) {
       $theme = $data['option_list']['theme']
-            ?? OptionModel::Get('theme')
-            ?? 'MaterialDesignForum-Vuetify4';
+        ?? OptionModel::Get('theme')
+        ?? 'MaterialDesignForum-Vuetify4';
 
       $settingFile = public_path("themes/{$theme}/setting.json");
       if (file_exists($settingFile)) {
@@ -155,6 +156,7 @@ class CommonController extends Controller
         'theme_color'      => $data['theme_color'] ?? null,
         'lang_locale_list' => self::buildLangList(),
         'theme_list' => self::GetThemeList(),
+        'oauth_list' => self::getValidOauthList(),
       ],
     ];
   }
@@ -246,5 +248,18 @@ class CommonController extends Controller
       return null;
     }
     return ['Message' => require $file];
+  }
+
+  /**
+   * 获取已配置的有效 OAuth 登录方式
+   * @return array [provider => bool] 已配置环境变量的为 true
+   */
+  public static function getValidOauthList()
+  {
+    return [
+      'github'    => env('GITHUB_CLIENT_ID') && env('GITHUB_CLIENT_SECRET') && env('GITHUB_REDIRECT_URI'),
+      'microsoft' => env('MICROSOFT_CLIENT_ID') && env('MICROSOFT_CLIENT_SECRET') && env('MICROSOFT_REDIRECT_URI'),
+      'google'    => env('GOOGLE_CLIENT_ID') && env('GOOGLE_CLIENT_SECRET') && env('GOOGLE_REDIRECT_URI'),
+    ];
   }
 }

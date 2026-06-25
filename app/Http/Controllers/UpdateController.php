@@ -18,7 +18,7 @@ class UpdateController extends Controller
     /**
      * 远程更新 API 地址
      */
-    private static string $remoteApiUrl = 'https://laravelmdf.xbedrock.com/update/server/info';
+    private static string $remoteApiUrl = 'https://www.xbedrock.com/update/server/info';
 
     /**
      * 默认更新下载链接
