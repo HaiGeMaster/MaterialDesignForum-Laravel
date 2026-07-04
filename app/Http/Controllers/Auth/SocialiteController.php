@@ -123,17 +123,25 @@ class SocialiteController extends Controller
     }
 
     /**
-     * OAuth 登录成功跳转页（设置 cookie 后 3 秒跳转）
+     * OAuth 登录成功跳转页（设置 cookie 后跳转，debug 模式下显示倒计时）
      */
     private static function oauthRedirectHtml(string $provider, string $token): string
     {
-        $icon      = $token !== '' ? '✅' : '⚠️';
-        $status    = $token !== '' ? '成功' : '异常';
+        $isDebug   = config('app.debug');
+        $success   = $token !== '';
         $safeToken = json_encode($token, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $delay     = $isDebug ? 3000 : 0;
 
-        // Secure 要求 HTTPS 环境，如果本地是 HTTP 开发，可以去掉 ;Secure。
+        // 状态文字、图标名称和 CSS 类名
+        $statusText = $success ? '登录成功' : '登录异常';
+        $iconClass  = $success ? 'success' : 'warning';
+        $iconName   = $success ? 'check_circle' : 'warning';
 
-        // document.cookie = "user_token=" + {$safeToken} + ";path=/;max-age=2592000;SameSite=Lax;Secure";
+        // debug 模式显示倒计时文字，否则直接跳转
+        $countdownHtml = $isDebug
+            ? '<p class="body-medium">将在 <span id="countdown">3</span> 秒后自动跳转到首页...</p>'
+            : '';
+
         return <<<HTML
         <!DOCTYPE html>
         <html lang="zh-CN">
@@ -141,27 +149,110 @@ class SocialiteController extends Controller
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>{$provider} 登录</title>
+            <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
             <style>
-                body { display:flex; justify-content:center; align-items:center; min-height:100vh; background:#f5f5f5; font-family:system-ui,sans-serif; margin:0; }
-                .card { text-align:center; background:#fff; padding:48px 64px; border-radius:16px; box-shadow:0 4px 24px rgba(0,0,0,0.08); }
-                .icon { font-size:56px; margin-bottom:16px; }
-                h2 { color:#333; margin:0 0 8px; font-size:22px; }
-                p { color:#888; font-size:14px; margin:0; }
-                #countdown { color:#1890ff; font-weight:700; }
+                :root {
+                    --md-sys-color-primary: #6750a4;
+                    --md-sys-color-on-primary: #ffffff;
+                    --md-sys-color-primary-container: #eaddff;
+                    --md-sys-color-on-primary-container: #21005d;
+                    --md-sys-color-surface: #fef7ff;
+                    --md-sys-color-on-surface: #1d1b20;
+                    --md-sys-color-on-surface-variant: #49454f;
+                    --md-sys-color-outline: #79747e;
+                    --md-sys-color-error: #b3261e;
+                    --md-sys-color-error-container: #f9dedc;
+                    --md-sys-color-on-error: #ffffff;
+                    --md-sys-elevation-2: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
+                    --md-sys-elevation-3: 0 1px 3px rgba(0,0,0,0.3), 0 4px 8px 3px rgba(0,0,0,0.15);
+                }
+                * { margin:0; padding:0; box-sizing:border-box; }
+                body {
+                    display:flex; justify-content:center; align-items:center;
+                    min-height:100vh;
+                    background: var(--md-sys-color-surface);
+                    font-family: 'Roboto', system-ui, -apple-system, sans-serif;
+                    margin:0;
+                }
+                .card {
+                    text-align:center;
+                    background:#fff;
+                    padding:40px 48px;
+                    border-radius:28px;
+                    box-shadow: var(--md-sys-elevation-3);
+                    max-width:400px;
+                    width:90vw;
+                }
+                .icon-wrap {
+                    display:inline-flex;
+                    align-items:center;
+                    justify-content:center;
+                    width:64px; height:64px;
+                    border-radius:50%;
+                    margin-bottom:20px;
+                }
+                .icon-wrap.success {
+                    background: var(--md-sys-color-primary-container);
+                }
+                .icon-wrap.warning {
+                    background: var(--md-sys-color-error-container);
+                }
+                .icon-wrap .material-symbols-outlined {
+                    font-size: 36px;
+                    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+                }
+                .icon-wrap.success .material-symbols-outlined {
+                    color: var(--md-sys-color-primary);
+                }
+                .icon-wrap.warning .material-symbols-outlined {
+                    color: var(--md-sys-color-error);
+                }
+                .headline-small {
+                    font-size:24px; font-weight:400; line-height:32px;
+                    color: var(--md-sys-color-on-surface);
+                    margin-bottom:4px;
+                }
+                .body-medium {
+                    font-size:14px; font-weight:400; line-height:20px;
+                    color: var(--md-sys-color-on-surface-variant);
+                    letter-spacing:0.25px;
+                }
+                #countdown { color:var(--md-sys-color-primary); font-weight:500; }
+                .progress-bar {
+                    margin-top: 24px;
+                    width:100%; height:4px;
+                    background: #e7e0ec;
+                    border-radius:2px;
+                    overflow:hidden;
+                }
+                .progress-bar .fill {
+                    height:100%;
+                    background: var(--md-sys-color-primary);
+                    border-radius:2px;
+                    animation: shrink 3s linear forwards;
+                }
+                @keyframes shrink { from { width:100%; } to { width:0%; } }
             </style>
         </head>
         <body>
             <div class="card">
-                <div class="icon">{$icon}</div>
-                <h2>{$provider} 登录{$status}</h2>
-                <p>将在 <span id="countdown">3</span> 秒后自动跳转到首页...</p>
+                <div class="icon-wrap {$iconClass}">
+                    <span class="material-symbols-outlined">{$iconName}</span>
+                </div>
+                <h2 class="headline-small">{$provider} {$statusText}</h2>
+                {$countdownHtml}
+                <div class="progress-bar"><div class="fill"></div></div>
             </div>
             <script>
                 document.cookie = "user_token=" + {$safeToken} + ";path=/;max-age=2592000;SameSite=Lax";
-                let s = 3;
                 localStorage.setItem('user_token', {$safeToken});
-                setInterval(() => { const el = document.getElementById('countdown'); if (--s > 0) el.textContent = s; }, 1000);
-                setTimeout(() => { window.location.replace('/'); }, 3000);
+                var delay = {$delay};
+                if (delay > 0) {
+                    var el = document.getElementById('countdown');
+                    var s = 3;
+                    setInterval(function() { if (--s > 0) el.textContent = s; }, 1000);
+                }
+                setTimeout(function() { window.location.replace('/'); }, delay);
             </script>
         </body>
         </html>
@@ -178,20 +269,79 @@ class SocialiteController extends Controller
         <html lang="zh-CN">
         <head>
             <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>{$provider} 登录失败</title>
+            <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
             <style>
-                body { display:flex; justify-content:center; align-items:center; min-height:100vh; background:#fff5f5; font-family:system-ui,sans-serif; margin:0; }
-                .card { text-align:center; background:#fff; padding:48px 64px; border-radius:16px; box-shadow:0 4px 24px rgba(0,0,0,0.08); max-width:520px; }
-                .icon { font-size:56px; margin-bottom:16px; }
-                h2 { color:#e53e3e; margin:0 0 16px; font-size:22px; }
-                pre { background:#f7f7f7; padding:16px; border-radius:8px; text-align:left; font-size:12px; color:#666; overflow-x:auto; margin:0; }
+                :root {
+                    --md-sys-color-surface: #fef7ff;
+                    --md-sys-color-on-surface: #1d1b20;
+                    --md-sys-color-on-surface-variant: #49454f;
+                    --md-sys-color-error: #b3261e;
+                    --md-sys-color-error-container: #f9dedc;
+                    --md-sys-color-on-error-container: #410e0b;
+                    --md-sys-elevation-3: 0 1px 3px rgba(0,0,0,0.3), 0 4px 8px 3px rgba(0,0,0,0.15);
+                }
+                * { margin:0; padding:0; box-sizing:border-box; }
+                body {
+                    display:flex; justify-content:center; align-items:center;
+                    min-height:100vh;
+                    background: var(--md-sys-color-error-container);
+                    font-family: 'Roboto', system-ui, -apple-system, sans-serif;
+                    margin:0;
+                }
+                .card {
+                    text-align:center;
+                    background:#fff;
+                    padding:40px 48px;
+                    border-radius:28px;
+                    box-shadow: var(--md-sys-elevation-3);
+                    max-width:480px;
+                    width:90vw;
+                }
+                .icon-wrap {
+                    display:inline-flex;
+                    align-items:center;
+                    justify-content:center;
+                    width:64px; height:64px;
+                    border-radius:50%;
+                    background: var(--md-sys-color-error-container);
+                    margin-bottom:20px;
+                }
+                .icon-wrap .material-symbols-outlined {
+                    font-size:36px;
+                    color: var(--md-sys-color-error);
+                    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+                }
+                .headline-small {
+                    font-size:24px; font-weight:400; line-height:32px;
+                    color: var(--md-sys-color-on-surface);
+                    margin-bottom:16px;
+                }
+                .error-box {
+                    background: var(--md-sys-color-error-container);
+                    padding:16px;
+                    border-radius:12px;
+                    text-align:left;
+                }
+                .error-box pre {
+                    font-family: 'Roboto Mono', 'Cascadia Code', monospace;
+                    font-size:12px; line-height:1.6;
+                    color: var(--md-sys-color-on-error-container);
+                    white-space:pre-wrap; word-break:break-all;
+                    margin:0;
+                }
             </style>
         </head>
         <body>
             <div class="card">
-                <div class="icon">❌</div>
-                <h2>{$provider} 登录失败</h2>
-                <pre>{$error}</pre>
+                <div class="icon-wrap">
+                    <span class="material-symbols-outlined">error</span>
+                </div>
+                <h2 class="headline-small">{$provider} 登录失败</h2>
+                <div class="error-box">
+                    <pre>{$error}</pre>
+                </div>
             </div>
         </body>
         </html>

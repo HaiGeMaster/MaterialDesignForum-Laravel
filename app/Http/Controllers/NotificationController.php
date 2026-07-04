@@ -167,7 +167,7 @@ class NotificationController extends Controller
             $mail_content = trans('Message.Client.Notifications.Type.' . $type);
 
             //$mail_content+当前服务器域名
-            $mail_content = $mail_content . ' [<a href="http://' . $_SERVER['HTTP_HOST'] . '">' . OptionModel::Get('site_name')??config('app.name') . '</a>]';
+            $mail_content = $mail_content . ' <a href="http://' . $_SERVER['HTTP_HOST'] . '">' . (OptionModel::Get('site_name')??config('app.name')) . '</a>';
             // $mail_content = $mail_content . ' [' . $_SERVER['HTTP_HOST'] . ']';
 
             // 替换发送者名字

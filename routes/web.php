@@ -55,9 +55,13 @@ Route::get('/auth/google/redirect', [SocialiteController::class, 'redirectToGoog
 Route::get('/auth/google/callback', [SocialiteController::class, 'handleGoogleCallback']);
 
 
+Route::get('/admin', function () {
+    $html = file_get_contents(public_path('themes/MaterialDesignForum-Vuetify4/index.html'));
+    $html = str_replace('{lang}', app()->getLocale(), $html);
+    return response($html)->header('Content-Type', 'text/html; charset=UTF-8');
+});
+
 Route::get('/{any}', function () {
-    // $html = file_get_contents(public_path('themes/MaterialDesignForum-Vuetify4/index.html'));
-    // $html = str_replace('{lang}', app()->getLocale(), $html);
     $html = Share::GetRouteThemeIndex();
     return response($html)->header('Content-Type', 'text/html; charset=UTF-8');
 })->where('any', '.*');
