@@ -150,8 +150,8 @@ Route::post('/api/answer/add', function (Request $request) {
 Route::post('/api/answer/edit', function (Request $request) {
     $result = AnswerController::EditAnswer(
         $request->input('answer_id'),
-        $request->input('content_markdown'),
-        $request->input('content_rendered'),
+        urldecode($request->input('content_markdown')),
+        urldecode($request->input('content_rendered')),
         $request->input('user_token', $request->bearerToken())
     );
     return response()->json($result);
