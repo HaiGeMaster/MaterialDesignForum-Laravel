@@ -1,0 +1,117 @@
+{
+  "Message": {
+    "NewInstall": {
+      "title": "Assistant d'installation MaterialDesignForum",
+
+      "steps": {
+        "envCheck": "Vérification de l'environnement",
+        "dbConfig": "Configuration de la base de données",
+        "siteSettings": "Paramètres du site",
+        "adminAccount": "Compte administrateur",
+        "startInstall": "Installation"
+      },
+
+      "env": {
+        "title": "Vérification de l'environnement",
+        "notPassed": "Les prérequis d'environnement ne sont pas satisfaits. Veuillez les corriger avant de continuer.",
+        "phpVersion": "Version PHP",
+        "phpVersionHelp": "Nécessite PHP 8.1 ou supérieur",
+        "enabled": "Activé",
+        "disabled": "Désactivé",
+        "extPrefix": "Extension PHP : {name}",
+        "extLabel": {
+          "pdo": "PDO",
+          "mbstring": "Mbstring",
+          "openssl": "OpenSSL",
+          "json": "JSON",
+          "fileinfo": "Fileinfo",
+          "tokenizer": "Tokenizer",
+          "ctype": "Ctype",
+          "xml": "XML",
+          "gd": "GD"
+        },
+        "extHelp": {
+          "pdo": "Activer l'extension php_pdo",
+          "mbstring": "Activer l'extension php_mbstring",
+          "openssl": "Activer l'extension php_openssl",
+          "json": "Activer l'extension php_json",
+          "fileinfo": "Activer l'extension php_fileinfo",
+          "tokenizer": "Activer l'extension php_tokenizer",
+          "ctype": "Activer l'extension php_ctype",
+          "xml": "Activer l'extension php_xml",
+          "gd": "Activer l'extension php_gd (pour le traitement d'images)"
+        },
+        "dirPrefix": "Permission du répertoire : {name}",
+        "dirLabel": {
+          "storage_writable": "storage/ accessible en écriture",
+          "bootstrap_writable": "bootstrap/cache/ accessible en écriture",
+          "env_writable": ".env accessible en écriture"
+        },
+        "dirHelp": {
+          "storage_writable": "Assurez-vous que le répertoire storage/ est accessible en écriture",
+          "bootstrap_writable": "Assurez-vous que le répertoire bootstrap/cache/ est accessible en écriture",
+          "env_writable": "Assurez-vous que le fichier .env est accessible en écriture"
+        },
+        "writable": "Accessible en écriture",
+        "unwritable": "Non accessible en écriture"
+      },
+
+      "db": {
+        "title": "Configuration de la base de données",
+        "host": "Hôte",
+        "port": "Port",
+        "database": "Base de données",
+        "username": "Nom d'utilisateur",
+        "password": "Mot de passe",
+        "testConnection": "Tester la connexion",
+        "success": "Connecté",
+        "fail": "Échec de la connexion"
+      },
+
+      "site": {
+        "title": "Paramètres du site",
+        "name": "Nom du site",
+        "url": "URL du site",
+        "adminSection": "Compte administrateur",
+        "adminUsername": "Nom d'utilisateur admin",
+        "email": "E-mail",
+        "password": "Mot de passe",
+        "passwordHint": "Au moins 8 caractères",
+        "confirmPassword": "Confirmer le mot de passe",
+        "passwordMismatch": "Les mots de passe ne correspondent pas"
+      },
+
+      "install": {
+        "title": "Installation",
+        "hint": "Cliquez sur \"Installer\" pour démarrer l'installation.",
+        "failed": "L'installation a échoué. Veuillez vérifier les messages d'erreur.",
+        "completed": "Installation terminée !",
+        "goHome": "Aller à l'accueil",
+        "logs": {
+          "savingDb": "Enregistrement de la configuration de la base de données...",
+          "migrating": "Exécution des migrations de base de données...",
+          "creatingAdmin": "Création du compte administrateur...",
+          "savingSite": "Enregistrement des paramètres du site...",
+          "completed": "Installation terminée !",
+          "failed": "Échec de l'installation",
+          "unknownError": "Erreur inconnue",
+          "executeFailed": "Échec de l'exécution"
+        }
+      },
+
+      "actions": {
+        "prev": "Précédent",
+        "next": "Suivant",
+        "startInstall": "Installer",
+        "close": "Fermer"
+      },
+
+      "snackbar": {
+        "fixEnvFirst": "Veuillez corriger les problèmes d'environnement avant de continuer.",
+        "testDbFirst": "Veuillez d'abord tester la connexion à la base de données.",
+        "passwordMismatch": "Veuillez vous assurer que les mots de passe correspondent.",
+        "backToDbConfig": "Veuillez revenir à \"Configuration de la base de données\" et tester la connexion."
+      }
+    }
+  }
+}

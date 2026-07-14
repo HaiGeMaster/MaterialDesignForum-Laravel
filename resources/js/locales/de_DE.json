@@ -1,0 +1,117 @@
+{
+  "Message": {
+    "NewInstall": {
+      "title": "MaterialDesignForum Installationsassistent",
+
+      "steps": {
+        "envCheck": "Umgebungsprüfung",
+        "dbConfig": "Datenbankeinrichtung",
+        "siteSettings": "Seiteneinstellungen",
+        "adminAccount": "Administratorkonto",
+        "startInstall": "Installation"
+      },
+
+      "env": {
+        "title": "Umgebungsprüfung",
+        "notPassed": "Umgebungsanforderungen nicht erfüllt. Bitte beheben Sie die Probleme, bevor Sie fortfahren.",
+        "phpVersion": "PHP-Version",
+        "phpVersionHelp": "Benötigt PHP 8.1 oder höher",
+        "enabled": "Aktiviert",
+        "disabled": "Deaktiviert",
+        "extPrefix": "PHP-Erweiterung: {name}",
+        "extLabel": {
+          "pdo": "PDO",
+          "mbstring": "Mbstring",
+          "openssl": "OpenSSL",
+          "json": "JSON",
+          "fileinfo": "Fileinfo",
+          "tokenizer": "Tokenizer",
+          "ctype": "Ctype",
+          "xml": "XML",
+          "gd": "GD"
+        },
+        "extHelp": {
+          "pdo": "Aktivieren Sie die php_pdo-Erweiterung",
+          "mbstring": "Aktivieren Sie die php_mbstring-Erweiterung",
+          "openssl": "Aktivieren Sie die php_openssl-Erweiterung",
+          "json": "Aktivieren Sie die php_json-Erweiterung",
+          "fileinfo": "Aktivieren Sie die php_fileinfo-Erweiterung",
+          "tokenizer": "Aktivieren Sie die php_tokenizer-Erweiterung",
+          "ctype": "Aktivieren Sie die php_ctype-Erweiterung",
+          "xml": "Aktivieren Sie die php_xml-Erweiterung",
+          "gd": "Aktivieren Sie die php_gd-Erweiterung (für Bildverarbeitung)"
+        },
+        "dirPrefix": "Verzeichnisberechtigung: {name}",
+        "dirLabel": {
+          "storage_writable": "storage/ beschreibbar",
+          "bootstrap_writable": "bootstrap/cache/ beschreibbar",
+          "env_writable": ".env beschreibbar"
+        },
+        "dirHelp": {
+          "storage_writable": "Stellen Sie sicher, dass das storage/-Verzeichnis beschreibbar ist",
+          "bootstrap_writable": "Stellen Sie sicher, dass das bootstrap/cache/-Verzeichnis beschreibbar ist",
+          "env_writable": "Stellen Sie sicher, dass die .env-Datei beschreibbar ist"
+        },
+        "writable": "Beschreibbar",
+        "unwritable": "Nicht beschreibbar"
+      },
+
+      "db": {
+        "title": "Datenbankeinrichtung",
+        "host": "Host",
+        "port": "Port",
+        "database": "Datenbank",
+        "username": "Benutzername",
+        "password": "Passwort",
+        "testConnection": "Verbindung testen",
+        "success": "Verbunden",
+        "fail": "Verbindung fehlgeschlagen"
+      },
+
+      "site": {
+        "title": "Seiteneinstellungen",
+        "name": "Seitenname",
+        "url": "Seiten-URL",
+        "adminSection": "Administratorkonto",
+        "adminUsername": "Admin-Benutzername",
+        "email": "E-Mail",
+        "password": "Passwort",
+        "passwordHint": "Mindestens 8 Zeichen",
+        "confirmPassword": "Passwort bestätigen",
+        "passwordMismatch": "Passwörter stimmen nicht überein"
+      },
+
+      "install": {
+        "title": "Installation",
+        "hint": "Klicken Sie auf \"Installation\", um die Installation zu starten.",
+        "failed": "Installation fehlgeschlagen. Bitte überprüfen Sie die Fehlermeldungen.",
+        "completed": "Installation abgeschlossen!",
+        "goHome": "Zur Startseite",
+        "logs": {
+          "savingDb": "Speichere Datenbankkonfiguration...",
+          "migrating": "Führe Datenbankmigrationen aus...",
+          "creatingAdmin": "Erstelle Administratorkonto...",
+          "savingSite": "Speichere Seiteneinstellungen...",
+          "completed": "Installation abgeschlossen!",
+          "failed": "Installation fehlgeschlagen",
+          "unknownError": "Unbekannter Fehler",
+          "executeFailed": "Ausführung fehlgeschlagen"
+        }
+      },
+
+      "actions": {
+        "prev": "Zurück",
+        "next": "Weiter",
+        "startInstall": "Installieren",
+        "close": "Schließen"
+      },
+
+      "snackbar": {
+        "fixEnvFirst": "Bitte beheben Sie die Umgebungsprobleme, bevor Sie fortfahren.",
+        "testDbFirst": "Bitte testen Sie zuerst die Datenbankverbindung.",
+        "passwordMismatch": "Bitte stellen Sie sicher, dass die Passwörter übereinstimmen.",
+        "backToDbConfig": "Bitte gehen Sie zurück zu \"Datenbankeinrichtung\" und testen Sie die Verbindung."
+      }
+    }
+  }
+}

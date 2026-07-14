@@ -1,0 +1,117 @@
+{
+  "Message": {
+    "NewInstall": {
+      "title": "MaterialDesignForum 安裝精靈",
+
+      "steps": {
+        "envCheck": "環境檢測",
+        "dbConfig": "資料庫設定",
+        "siteSettings": "站台設定",
+        "adminAccount": "管理員帳號",
+        "startInstall": "開始安裝"
+      },
+
+      "env": {
+        "title": "環境檢測",
+        "notPassed": "環境不符合要求，請修復後再繼續",
+        "phpVersion": "PHP 版本",
+        "phpVersionHelp": "需要 PHP 8.1 或更高版本",
+        "enabled": "已啟用",
+        "disabled": "未啟用",
+        "extPrefix": "PHP 擴展: {name}",
+        "extLabel": {
+          "pdo": "PDO",
+          "mbstring": "Mbstring",
+          "openssl": "OpenSSL",
+          "json": "JSON",
+          "fileinfo": "Fileinfo",
+          "tokenizer": "Tokenizer",
+          "ctype": "Ctype",
+          "xml": "XML",
+          "gd": "GD"
+        },
+        "extHelp": {
+          "pdo": "啟用 php_pdo 擴展",
+          "mbstring": "啟用 php_mbstring 擴展",
+          "openssl": "啟用 php_openssl 擴展",
+          "json": "啟用 php_json 擴展",
+          "fileinfo": "啟用 php_fileinfo 擴展",
+          "tokenizer": "啟用 php_tokenizer 擴展",
+          "ctype": "啟用 php_ctype 擴展",
+          "xml": "啟用 php_xml 擴展",
+          "gd": "啟用 php_gd 擴展（用於圖片處理）"
+        },
+        "dirPrefix": "目錄權限: {name}",
+        "dirLabel": {
+          "storage_writable": "storage/ 可寫入",
+          "bootstrap_writable": "bootstrap/cache/ 可寫入",
+          "env_writable": ".env 可寫入"
+        },
+        "dirHelp": {
+          "storage_writable": "確保 storage/ 目錄可寫入",
+          "bootstrap_writable": "確保 bootstrap/cache/ 目錄可寫入",
+          "env_writable": "確保 .env 檔案可寫入"
+        },
+        "writable": "可寫入",
+        "unwritable": "不可寫入"
+      },
+
+      "db": {
+        "title": "資料庫設定",
+        "host": "資料庫主機",
+        "port": "連接埠",
+        "database": "資料庫名稱",
+        "username": "使用者名稱",
+        "password": "密碼",
+        "testConnection": "測試連線",
+        "success": "連線成功",
+        "fail": "連線失敗"
+      },
+
+      "site": {
+        "title": "站台設定",
+        "name": "站台名稱",
+        "url": "站台網址",
+        "adminSection": "管理員帳號",
+        "adminUsername": "管理員使用者名稱",
+        "email": "電子郵件",
+        "password": "密碼",
+        "passwordHint": "至少 8 個字元",
+        "confirmPassword": "確認密碼",
+        "passwordMismatch": "兩次密碼不一致"
+      },
+
+      "install": {
+        "title": "開始安裝",
+        "hint": "點擊「開始安裝」按鈕執行安裝。",
+        "failed": "安裝失敗，請檢查錯誤訊息。",
+        "completed": "安裝完成！",
+        "goHome": "進入首頁",
+        "logs": {
+          "savingDb": "正在儲存資料庫設定...",
+          "migrating": "正在執行資料庫遷移...",
+          "creatingAdmin": "正在建立管理員帳號...",
+          "savingSite": "正在儲存站台設定...",
+          "completed": "安裝完成！",
+          "failed": "安裝失敗",
+          "unknownError": "未知錯誤",
+          "executeFailed": "執行失敗"
+        }
+      },
+
+      "actions": {
+        "prev": "上一步",
+        "next": "下一步",
+        "startInstall": "開始安裝",
+        "close": "關閉"
+      },
+
+      "snackbar": {
+        "fixEnvFirst": "請先修復環境問題後再繼續",
+        "testDbFirst": "請先測試資料庫連線",
+        "passwordMismatch": "請確認兩次輸入的密碼一致",
+        "backToDbConfig": "請先回到「資料庫設定」步驟測試資料庫連線"
+      }
+    }
+  }
+}

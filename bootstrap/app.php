@@ -12,9 +12,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
         // 检查是否已安装
-        // $middleware->append(\App\Http\Middleware\CheckInstalled::class);
+        $middleware->append(\App\Http\Middleware\CheckInstalled::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(function (Request $request) {

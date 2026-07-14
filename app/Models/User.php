@@ -10,6 +10,7 @@
 
 namespace App\Models;
 
+use App\Http\Controllers\ImageController;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -593,5 +594,25 @@ class User extends Authenticatable
     public static function AvatarStringToArray($avatar)
     {
         return json_decode($avatar, true);
+    }
+
+    /**
+     * 创建默认封面
+     * @return array 默认封面url数组
+     */
+    public static function CreateDefaultCover(): array
+    {
+        return ImageController::CreateUserDefaultCover();
+    }
+
+    /**
+     * 创建默认头像
+     * @param string $name 用户名
+     * @param string|int $user_id 用户id
+     * @return array 默认头像url数组
+     */
+    public static function CreateDefaultAvatar(string $name, $user_id = 'cache'): array
+    {
+        return ImageController::CreateUserDefaultAvatar($name, $user_id);
     }
 }

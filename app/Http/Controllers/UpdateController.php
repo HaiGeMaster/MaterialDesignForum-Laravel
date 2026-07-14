@@ -113,6 +113,7 @@ class UpdateController extends Controller
             'is_update'       => $isUpdate,
             'new_version'     => $newVersion,
             'current_version' => $currentVersion,
+            'getLocalVersion()' => self::getLocalVersion(),
         ];
 
         if ($errorMessage !== null) {
@@ -142,6 +143,11 @@ class UpdateController extends Controller
         $content = file_get_contents($composerPath);
         if ($content === false) {
             return null;
+        }
+
+        // 移除 UTF-8 BOM（Windows PowerShell 的 Set-Content -Encoding UTF8 会写入 BOM）
+        if (str_starts_with($content, "\xEF\xBB\xBF")) {
+            $content = substr($content, 3);
         }
 
         $data = json_decode($content, true);

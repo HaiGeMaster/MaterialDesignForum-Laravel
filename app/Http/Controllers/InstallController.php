@@ -10,93 +10,196 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Option;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-// use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\Validator;
 
 class InstallController extends Controller
 {
     /**
-     * 安装页面
+     * 安装向导首页
      */
     public function index()
     {
-        // 防止重复安装
         if ($this->alreadyInstalled()) {
             abort(404);
         }
 
-        return view('install.index', [
-            'requirements' => $this->checkRequirements(),
+        return view('install', [
+            'version'    => $this->getAppVersion(),
+            'locale'     => app()->getLocale(),
+            'phpVersion' => PHP_VERSION,
+            'envCheck'   => $this->checkRequirements(),
         ]);
     }
 
+    // ==================== 分步安装 API ====================
+
     /**
-     * 执行安装
+     * 测试数据库连接
      */
-    public function store(Request $request)
+    public function testDb(Request $request)
     {
         if ($this->alreadyInstalled()) {
-            abort(403, '系统已安装');
-        }
-
-        $validator = Validator::make($request->all(), [
-            'db_host'     => 'required',
-            'db_port'     => 'required|numeric',
-            'db_database' => 'required',
-            'db_username' => 'required',
-            'db_password' => 'nullable',
-
-            'admin_name'     => 'required',
-            'admin_email'    => 'required|email',
-            'admin_password'=> 'required|min:6',
-        ]);
-
-        if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
+            return response()->json(['ok' => false, 'message' => '已安装']);
         }
 
         try {
-            // 1️⃣ 写入 .env
-            $this->updateEnv($request);
+            $host     = $request->input('host', '127.0.0.1');
+            $port     = $request->input('port', '3306');
+            $database = $request->input('database', '');
+            $username = $request->input('username', 'root');
+            $password = $request->input('password', '');
 
-            // 2️⃣ 重新加载配置
-            Artisan::call('config:clear');
-
-            // 3️⃣ 测试数据库连接
-            DB::purge('mysql');
-            DB::connection()->getPdo();
-
-            // 4️⃣ 执行迁移
-            Artisan::call('migrate:fresh --force');
-
-            // 5️⃣ 创建管理员
-            DB::table('users')->insert([
-                'name'       => $request->admin_name,
-                'email'      => $request->admin_email,
-                'password'   => Hash::make($request->admin_password),
-                'created_at' => now(),
-                'updated_at' => now(),
+            $dsn = "mysql:host={$host};port={$port};dbname={$database}";
+            new \PDO($dsn, $username, $password, [
+                \PDO::ATTR_TIMEOUT => 5,
+                \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
             ]);
 
-            // 6️⃣ 安装完成标记
-            file_put_contents(
-                storage_path('installed.lock'),
-                json_encode([
-                    'installed_at' => now()->toDateTimeString(),
-                    'version' => config('app.version', '1.0.0'),
-                ], JSON_PRETTY_PRINT)
-            );
-
-            return redirect('/')->with('success', '安装成功');
-
+            return response()->json(['ok' => true]);
         } catch (Exception $e) {
-            return back()->withErrors(['error' => $e->getMessage()]);
+            return response()->json(['ok' => false, 'message' => $e->getMessage()]);
         }
+    }
+
+    /**
+     * Step 1: 保存 .env 数据库配置
+     */
+    public function saveDb(Request $request)
+    {
+        if ($this->alreadyInstalled()) {
+            return response()->json(['ok' => false, 'message' => '已安装']);
+        }
+
+        try {
+            $this->updateEnv([
+                'DB_HOST'     => $request->input('db.host', '127.0.0.1'),
+                'DB_PORT'     => $request->input('db.port', '3306'),
+                'DB_DATABASE' => $request->input('db.database', ''),
+                'DB_USERNAME' => $request->input('db.username', 'root'),
+                'DB_PASSWORD' => $request->input('db.password', ''),
+            ]);
+
+            // 重新加载配置，使新的 DB 配置生效
+            Artisan::call('config:clear');
+            DB::purge('mysql');
+            DB::reconnect('mysql');
+
+            return response()->json(['ok' => true]);
+        } catch (Exception $e) {
+            return response()->json(['ok' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Step 2: 运行数据库迁移
+     */
+    public function migrate(Request $request)
+    {
+        if ($this->alreadyInstalled()) {
+            return response()->json(['ok' => false, 'message' => '已安装']);
+        }
+
+        try {
+            Artisan::call('migrate', ['--force' => true]);
+            $output = Artisan::output();
+
+            // 检查是否有错误
+            if (str_contains($output, 'Exception') || str_contains($output, 'error')) {
+                return response()->json(['ok' => false, 'message' => $output]);
+            }
+
+            return response()->json(['ok' => true, 'output' => $output]);
+        } catch (Exception $e) {
+            return response()->json(['ok' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Step 3: 创建管理员账号
+     */
+    public function createAdmin(Request $request)
+    {
+        if ($this->alreadyInstalled()) {
+            return response()->json(['ok' => false, 'message' => '已安装']);
+        }
+
+        try {
+            $adminData = $request->input('admin', []);
+
+            $user = new User();
+            $user->username    = $adminData['username'] ?? 'admin';
+            $user->email       = $adminData['email'] ?? 'admin@localhost';
+            $user->password    = md5($adminData['password']); // 项目使用 md5
+            $user->avatar      = User::CreateDefaultAvatar($user->username);
+            $user->cover       = User::CreateDefaultCover();
+            $user->create_ip   = $request->ip();
+            $user->create_time = now()->timestamp;
+            $user->update_time = now()->timestamp;
+            $user->user_group_id = 1; // 管理员组
+            $user->save();
+
+            return response()->json(['ok' => true]);
+        } catch (Exception $e) {
+            return response()->json(['ok' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Step 4: 保存站点设置
+     */
+    public function saveSite(Request $request)
+    {
+        if ($this->alreadyInstalled()) {
+            return response()->json(['ok' => false, 'message' => '已安装']);
+        }
+
+        try {
+            $siteData = $request->input('site', []);
+
+            // 保存站点名称
+            if (!empty($siteData['name'])) {
+                Option::Set('site_name', $siteData['name']);
+            }
+
+            // 保存站点 URL
+            if (!empty($siteData['url'])) {
+                $this->updateEnv([
+                    'APP_URL' => $siteData['url'],
+                ]);
+            }
+
+            // 写入安装标记
+            $this->markInstalled();
+
+            return response()->json(['ok' => true]);
+        } catch (Exception $e) {
+            return response()->json(['ok' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    // ==================== 辅助方法 ====================
+
+    /**
+     * 从 composer.json 获取应用版本号
+     */
+    protected function getAppVersion(): string
+    {
+        $composerFile = base_path('composer.json');
+
+        if (file_exists($composerFile)) {
+            $composer = json_decode(file_get_contents($composerFile), true);
+            if (!empty($composer['version'])) {
+                return $composer['version'];
+            }
+        }
+
+        return '1.0.0';
     }
 
     /**
@@ -108,47 +211,68 @@ class InstallController extends Controller
     }
 
     /**
-     * 环境检测
+     * 环境检测（返回给前端）
      */
     protected function checkRequirements(): array
     {
         return [
-            'PHP >= 8.1' => version_compare(PHP_VERSION, '8.1.0', '>='),
-            'PDO' => extension_loaded('pdo'),
-            'Mbstring' => extension_loaded('mbstring'),
-            'OpenSSL' => extension_loaded('openssl'),
-            'storage writable' => is_writable(storage_path()),
-            '.env writable' => is_writable(base_path('.env')),
+            'php_version'        => PHP_VERSION,
+            'php_ok'             => version_compare(PHP_VERSION, '8.1.0', '>='),
+            'pdo'                => extension_loaded('pdo'),
+            'mbstring'           => extension_loaded('mbstring'),
+            'openssl'            => extension_loaded('openssl'),
+            'json'               => extension_loaded('json'),
+            'fileinfo'           => extension_loaded('fileinfo'),
+            'tokenizer'          => extension_loaded('tokenizer'),
+            'ctype'              => extension_loaded('ctype'),
+            'xml'                => extension_loaded('xml'),
+            'gd'                 => extension_loaded('gd'),
+            'storage_writable'   => is_writable(storage_path()),
+            'bootstrap_writable' => is_writable(base_path('bootstrap/cache')),
+            'env_writable'       => is_writable(base_path('.env')),
         ];
     }
 
     /**
      * 写入 .env
      */
-    protected function updateEnv(Request $request): void
+    protected function updateEnv(array $replacements): void
     {
         $envPath = base_path('.env');
-        $envContent = file_get_contents($envPath);
 
-        $replacements = [
-            'DB_HOST'     => $request->db_host,
-            'DB_PORT'     => $request->db_port,
-            'DB_DATABASE'=> $request->db_database,
-            'DB_USERNAME'=> $request->db_username,
-            'DB_PASSWORD'=> $request->db_password,
-        ];
+        if (!file_exists($envPath)) {
+            $envPath = base_path('.env.example');
+            copy($envPath, base_path('.env'));
+            $envPath = base_path('.env');
+        }
+
+        $envContent = file_get_contents($envPath);
 
         foreach ($replacements as $key => $value) {
             $pattern = "/^{$key}=.*/m";
             $replacement = "{$key}=" . addslashes($value);
 
             if (preg_match($pattern, $envContent)) {
-                $envContent = preg_replace($pattern, $replacement, $envContent);
+                $envContent = preg_replace($pattern, $replacement, $envContent, 1);
             } else {
                 $envContent .= PHP_EOL . $replacement;
             }
         }
 
         file_put_contents($envPath, $envContent);
+    }
+
+    /**
+     * 写入安装完成标记
+     */
+    protected function markInstalled(): void
+    {
+        file_put_contents(
+            storage_path('installed.lock'),
+            json_encode([
+                'installed_at' => now()->toDateTimeString(),
+                'version'      => $this->getAppVersion(),
+            ], JSON_PRETTY_PRINT)
+        );
     }
 }

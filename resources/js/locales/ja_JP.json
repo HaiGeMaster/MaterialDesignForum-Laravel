@@ -1,0 +1,117 @@
+{
+  "Message": {
+    "NewInstall": {
+      "title": "MaterialDesignForum インストールウィザード",
+
+      "steps": {
+        "envCheck": "環境チェック",
+        "dbConfig": "データベース設定",
+        "siteSettings": "サイト設定",
+        "adminAccount": "管理者アカウント",
+        "startInstall": "インストール"
+      },
+
+      "env": {
+        "title": "環境チェック",
+        "notPassed": "環境要件が満たされていません。続行する前に修正してください。",
+        "phpVersion": "PHP バージョン",
+        "phpVersionHelp": "PHP 8.1 以上が必要です",
+        "enabled": "有効",
+        "disabled": "無効",
+        "extPrefix": "PHP 拡張: {name}",
+        "extLabel": {
+          "pdo": "PDO",
+          "mbstring": "Mbstring",
+          "openssl": "OpenSSL",
+          "json": "JSON",
+          "fileinfo": "Fileinfo",
+          "tokenizer": "Tokenizer",
+          "ctype": "Ctype",
+          "xml": "XML",
+          "gd": "GD"
+        },
+        "extHelp": {
+          "pdo": "php_pdo 拡張を有効にしてください",
+          "mbstring": "php_mbstring 拡張を有効にしてください",
+          "openssl": "php_openssl 拡張を有効にしてください",
+          "json": "php_json 拡張を有効にしてください",
+          "fileinfo": "php_fileinfo 拡張を有効にしてください",
+          "tokenizer": "php_tokenizer 拡張を有効にしてください",
+          "ctype": "php_ctype 拡張を有効にしてください",
+          "xml": "php_xml 拡張を有効にしてください",
+          "gd": "php_gd 拡張を有効にしてください（画像処理用）"
+        },
+        "dirPrefix": "ディレクトリ権限: {name}",
+        "dirLabel": {
+          "storage_writable": "storage/ 書き込み可能",
+          "bootstrap_writable": "bootstrap/cache/ 書き込み可能",
+          "env_writable": ".env 書き込み可能"
+        },
+        "dirHelp": {
+          "storage_writable": "storage/ ディレクトリが書き込み可能であることを確認してください",
+          "bootstrap_writable": "bootstrap/cache/ ディレクトリが書き込み可能であることを確認してください",
+          "env_writable": ".env ファイルが書き込み可能であることを確認してください"
+        },
+        "writable": "書き込み可能",
+        "unwritable": "書き込み不可"
+      },
+
+      "db": {
+        "title": "データベース設定",
+        "host": "ホスト",
+        "port": "ポート",
+        "database": "データベース",
+        "username": "ユーザー名",
+        "password": "パスワード",
+        "testConnection": "接続テスト",
+        "success": "接続成功",
+        "fail": "接続失敗"
+      },
+
+      "site": {
+        "title": "サイト設定",
+        "name": "サイト名",
+        "url": "サイトURL",
+        "adminSection": "管理者アカウント",
+        "adminUsername": "管理者ユーザー名",
+        "email": "メールアドレス",
+        "password": "パスワード",
+        "passwordHint": "8文字以上",
+        "confirmPassword": "パスワード（確認）",
+        "passwordMismatch": "パスワードが一致しません"
+      },
+
+      "install": {
+        "title": "インストール",
+        "hint": "「インストール」をクリックしてインストールを開始します。",
+        "failed": "インストールに失敗しました。エラーメッセージを確認してください。",
+        "completed": "インストールが完了しました！",
+        "goHome": "ホームページへ",
+        "logs": {
+          "savingDb": "データベース設定を保存中...",
+          "migrating": "データベースマイグレーションを実行中...",
+          "creatingAdmin": "管理者アカウントを作成中...",
+          "savingSite": "サイト設定を保存中...",
+          "completed": "インストールが完了しました！",
+          "failed": "インストール失敗",
+          "unknownError": "不明なエラー",
+          "executeFailed": "実行失敗"
+        }
+      },
+
+      "actions": {
+        "prev": "前へ",
+        "next": "次へ",
+        "startInstall": "インストール",
+        "close": "閉じる"
+      },
+
+      "snackbar": {
+        "fixEnvFirst": "続行する前に環境の問題を修正してください。",
+        "testDbFirst": "最初にデータベース接続をテストしてください。",
+        "passwordMismatch": "パスワードが一致することを確認してください。",
+        "backToDbConfig": "「データベース設定」に戻って接続をテストしてください。"
+      }
+    }
+  }
+}

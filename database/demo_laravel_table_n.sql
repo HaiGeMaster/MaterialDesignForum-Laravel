@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主机： localhost
--- 生成日期： 2026-06-20 19:59:18
+-- 生成日期： 2026-07-14 10:26:40
 -- 服务器版本： 8.0.12
 -- PHP 版本： 7.4.3
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- 数据库： `demo_laravel_table`
+-- 数据库： `demo_laravel_table_n`
 --
 
 -- --------------------------------------------------------
@@ -187,7 +187,7 @@ CREATE TABLE `inbox` (
 
 CREATE TABLE `migrations` (
   `id` int(10) UNSIGNED NOT NULL,
-  `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `migration` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `batch` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -202,8 +202,8 @@ CREATE TABLE `notification` (
   `receiver_id` int(10) UNSIGNED NOT NULL COMMENT '接收者ID',
   `sender_id` int(11) NOT NULL COMMENT '发送者ID',
   `type` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '消息类型：question_answered, question_commented, question_deleted, article_commented, article_deleted, answer_commented, answer_deleted, comment_replied, comment_deleted',
-  `content_markdown` text COLLATE utf8mb4_unicode_ci,
-  `content_rendered` text COLLATE utf8mb4_unicode_ci,
+  `content_markdown` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '内容原文',
+  `content_rendered` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '内容正文',
   `user_id` int(11) NOT NULL DEFAULT '0' COMMENT '用户ID',
   `topic_id` int(11) NOT NULL DEFAULT '0' COMMENT '话题ID',
   `article_id` int(11) NOT NULL DEFAULT '0' COMMENT '文章ID',

@@ -1,0 +1,117 @@
+{
+  "Message": {
+    "NewInstall": {
+      "title": "MaterialDesignForum 安装向导",
+
+      "steps": {
+        "envCheck": "环境检测",
+        "dbConfig": "数据库配置",
+        "siteSettings": "站点设置",
+        "adminAccount": "管理员账号",
+        "startInstall": "开始安装"
+      },
+
+      "env": {
+        "title": "环境检测",
+        "notPassed": "环境不满足要求，请修复后再继续",
+        "phpVersion": "PHP 版本",
+        "phpVersionHelp": "需要 PHP 8.1 或更高版本",
+        "enabled": "已启用",
+        "disabled": "未启用",
+        "extPrefix": "PHP 扩展: {name}",
+        "extLabel": {
+          "pdo": "PDO",
+          "mbstring": "Mbstring",
+          "openssl": "OpenSSL",
+          "json": "JSON",
+          "fileinfo": "Fileinfo",
+          "tokenizer": "Tokenizer",
+          "ctype": "Ctype",
+          "xml": "XML",
+          "gd": "GD"
+        },
+        "extHelp": {
+          "pdo": "启用 php_pdo 扩展",
+          "mbstring": "启用 php_mbstring 扩展",
+          "openssl": "启用 php_openssl 扩展",
+          "json": "启用 php_json 扩展",
+          "fileinfo": "启用 php_fileinfo 扩展",
+          "tokenizer": "启用 php_tokenizer 扩展",
+          "ctype": "启用 php_ctype 扩展",
+          "xml": "启用 php_xml 扩展",
+          "gd": "启用 php_gd 扩展（用于图片处理）"
+        },
+        "dirPrefix": "目录权限: {name}",
+        "dirLabel": {
+          "storage_writable": "storage/ 可写",
+          "bootstrap_writable": "bootstrap/cache/ 可写",
+          "env_writable": ".env 可写"
+        },
+        "dirHelp": {
+          "storage_writable": "确保 storage/ 目录可写",
+          "bootstrap_writable": "确保 bootstrap/cache/ 目录可写",
+          "env_writable": "确保 .env 文件可写"
+        },
+        "writable": "可写",
+        "unwritable": "不可写"
+      },
+
+      "db": {
+        "title": "数据库配置",
+        "host": "数据库地址",
+        "port": "端口",
+        "database": "数据库名",
+        "username": "用户名",
+        "password": "密码",
+        "testConnection": "测试连接",
+        "success": "连接成功",
+        "fail": "连接失败"
+      },
+
+      "site": {
+        "title": "站点设置",
+        "name": "站点名称",
+        "url": "站点地址",
+        "adminSection": "管理员账号",
+        "adminUsername": "管理员用户名",
+        "email": "邮箱",
+        "password": "密码",
+        "passwordHint": "至少 8 个字符",
+        "confirmPassword": "确认密码",
+        "passwordMismatch": "两次密码不一致"
+      },
+
+      "install": {
+        "title": "开始安装",
+        "hint": "点击\"开始安装\"按钮执行安装。",
+        "failed": "安装失败，请检查错误信息。",
+        "completed": "安装完成！",
+        "goHome": "进入首页",
+        "logs": {
+          "savingDb": "正在保存数据库配置...",
+          "migrating": "正在运行数据库迁移...",
+          "creatingAdmin": "正在创建管理员账号...",
+          "savingSite": "正在保存站点设置...",
+          "completed": "安装完成！",
+          "failed": "安装失败",
+          "unknownError": "未知错误",
+          "executeFailed": "执行失败"
+        }
+      },
+
+      "actions": {
+        "prev": "上一步",
+        "next": "下一步",
+        "startInstall": "开始安装",
+        "close": "关闭"
+      },
+
+      "snackbar": {
+        "fixEnvFirst": "请先修复环境问题后再继续",
+        "testDbFirst": "请先测试数据库连接",
+        "passwordMismatch": "请确认两次输入的密码一致",
+        "backToDbConfig": "请先回到\"数据库配置\"步骤测试数据库连接"
+      }
+    }
+  }
+}

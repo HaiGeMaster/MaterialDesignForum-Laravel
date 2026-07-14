@@ -1,0 +1,117 @@
+{
+  "Message": {
+    "NewInstall": {
+      "title": "Мастер установки MaterialDesignForum",
+
+      "steps": {
+        "envCheck": "Проверка окружения",
+        "dbConfig": "Настройка базы данных",
+        "siteSettings": "Настройки сайта",
+        "adminAccount": "Учетная запись администратора",
+        "startInstall": "Установка"
+      },
+
+      "env": {
+        "title": "Проверка окружения",
+        "notPassed": "Требования к окружению не выполнены. Пожалуйста, исправьте их перед продолжением.",
+        "phpVersion": "Версия PHP",
+        "phpVersionHelp": "Требуется PHP 8.1 или выше",
+        "enabled": "Включено",
+        "disabled": "Отключено",
+        "extPrefix": "Расширение PHP: {name}",
+        "extLabel": {
+          "pdo": "PDO",
+          "mbstring": "Mbstring",
+          "openssl": "OpenSSL",
+          "json": "JSON",
+          "fileinfo": "Fileinfo",
+          "tokenizer": "Tokenizer",
+          "ctype": "Ctype",
+          "xml": "XML",
+          "gd": "GD"
+        },
+        "extHelp": {
+          "pdo": "Включите расширение php_pdo",
+          "mbstring": "Включите расширение php_mbstring",
+          "openssl": "Включите расширение php_openssl",
+          "json": "Включите расширение php_json",
+          "fileinfo": "Включите расширение php_fileinfo",
+          "tokenizer": "Включите расширение php_tokenizer",
+          "ctype": "Включите расширение php_ctype",
+          "xml": "Включите расширение php_xml",
+          "gd": "Включите расширение php_gd (для обработки изображений)"
+        },
+        "dirPrefix": "Права доступа к каталогу: {name}",
+        "dirLabel": {
+          "storage_writable": "storage/ доступен для записи",
+          "bootstrap_writable": "bootstrap/cache/ доступен для записи",
+          "env_writable": ".env доступен для записи"
+        },
+        "dirHelp": {
+          "storage_writable": "Убедитесь, что каталог storage/ доступен для записи",
+          "bootstrap_writable": "Убедитесь, что каталог bootstrap/cache/ доступен для записи",
+          "env_writable": "Убедитесь, что файл .env доступен для записи"
+        },
+        "writable": "Доступен для записи",
+        "unwritable": "Недоступен для записи"
+      },
+
+      "db": {
+        "title": "Настройка базы данных",
+        "host": "Хост",
+        "port": "Порт",
+        "database": "База данных",
+        "username": "Имя пользователя",
+        "password": "Пароль",
+        "testConnection": "Проверить соединение",
+        "success": "Подключено",
+        "fail": "Ошибка подключения"
+      },
+
+      "site": {
+        "title": "Настройки сайта",
+        "name": "Название сайта",
+        "url": "URL сайта",
+        "adminSection": "Учетная запись администратора",
+        "adminUsername": "Имя администратора",
+        "email": "Email",
+        "password": "Пароль",
+        "passwordHint": "Минимум 8 символов",
+        "confirmPassword": "Подтвердите пароль",
+        "passwordMismatch": "Пароли не совпадают"
+      },
+
+      "install": {
+        "title": "Установка",
+        "hint": "Нажмите «Установить», чтобы начать установку.",
+        "failed": "Установка не удалась. Проверьте сообщения об ошибках.",
+        "completed": "Установка завершена!",
+        "goHome": "На главную",
+        "logs": {
+          "savingDb": "Сохранение конфигурации базы данных...",
+          "migrating": "Выполнение миграций базы данных...",
+          "creatingAdmin": "Создание учетной записи администратора...",
+          "savingSite": "Сохранение настроек сайта...",
+          "completed": "Установка завершена!",
+          "failed": "Ошибка установки",
+          "unknownError": "Неизвестная ошибка",
+          "executeFailed": "Ошибка выполнения"
+        }
+      },
+
+      "actions": {
+        "prev": "Назад",
+        "next": "Далее",
+        "startInstall": "Установить",
+        "close": "Закрыть"
+      },
+
+      "snackbar": {
+        "fixEnvFirst": "Пожалуйста, исправьте проблемы с окружением перед продолжением.",
+        "testDbFirst": "Пожалуйста, сначала проверьте подключение к базе данных.",
+        "passwordMismatch": "Пожалуйста, убедитесь, что пароли совпадают.",
+        "backToDbConfig": "Пожалуйста, вернитесь к разделу «Настройка базы данных» и проверьте подключение."
+      }
+    }
+  }
+}

@@ -121,8 +121,8 @@ class UserController extends Controller
           'language' => config('app.locale'),
           'create_time' => Share::ServerTime(),
           'update_time' => Share::ServerTime(),
-          'avatar' => self::CreateDefaultAvatar($oauthUserName),
-          'cover' => self::CreateDefaultCover()
+          'avatar' => UserModel::CreateDefaultAvatar($oauthUserName),
+          'cover' => UserModel::CreateDefaultCover()
         ]);
         if ($new_user) { //如果新用户注册成功，则添加或更新Oauth记录
           $new_user_model = UserModel::where('email', '=', $oauthUserMail)->first();
@@ -193,8 +193,8 @@ class UserController extends Controller
           $user->update_time = Share::ServerTime();
           //获取网络时间
 
-          $user->avatar = self::CreateDefaultAvatar($client_username); //可能会导致注册失败 vue开发时
-          $user->cover = self::CreateDefaultCover();
+          $user->avatar = UserModel::CreateDefaultAvatar($client_username); //可能会导致注册失败 vue开发时
+          $user->cover = UserModel::CreateDefaultCover();
           $v = $user->save();
           if ($v) {
             $add = UserGroupController::AddUserGroupUserCount($user->user_group_id);
@@ -284,24 +284,24 @@ class UserController extends Controller
       'user' => self::GetUser($edit_target_user_id, $user_token)['user'],
     ];
   }
-  /**
-   * 创建默认头像
-   * @param string $name 用户名
-   * @param string $user_id 用户id
-   * @return string 默认头像url
-   */
-  public static function CreateDefaultAvatar($name, $user_id = 'cache')
-  {
-    return ImageController::CreateUserDefaultAvatar($name, $user_id);
-  }
-  /**
-   * 创建默认封面
-   * @return string 默认封面url
-   */
-  public static function CreateDefaultCover()
-  {
-    return ImageController::CreateUserDefaultCover();
-  }
+//   /**
+//    * 创建默认头像
+//    * @param string $name 用户名
+//    * @param string $user_id 用户id
+//    * @return string 默认头像url
+//    */
+//   public static function CreateDefaultAvatar($name, $user_id = 'cache')
+//   {
+//     return ImageController::CreateUserDefaultAvatar($name, $user_id);
+//   }
+//   /**
+//    * 创建默认封面
+//    * @return string 默认封面url
+//    */
+//   public static function CreateDefaultCover()
+//   {
+//     return ImageController::CreateUserDefaultCover();
+//   }
   /**
    * 获取客户端IP地址
    */
@@ -896,7 +896,7 @@ class UserController extends Controller
     }
     $users = UserModel::all();
     foreach ($users as $key => $value) {
-      $avatar = self::CreateDefaultAvatar($value->username, $value->user_id);
+      $avatar = UserModel::CreateDefaultAvatar($value->username, $value->user_id);
       UserModel::find($value->user_id)->update([
         'avatar' => $avatar,
       ]);
@@ -959,7 +959,7 @@ class UserController extends Controller
               }
             }
           }
-          $avatar = self::CreateDefaultAvatar($user->username, $user_id);
+          $avatar = UserModel::CreateDefaultAvatar($user->username, $user_id);
           $is_reset = UserModel::find($user_id)->update([
             'avatar' => $avatar,
           ]);

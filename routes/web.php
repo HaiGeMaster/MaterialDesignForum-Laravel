@@ -10,6 +10,7 @@
 
 
 use App\Http\Controllers\CommonController;
+use App\Http\Controllers\InstallController;
 use App\Http\Controllers\OptionController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\OauthController;
@@ -17,7 +18,6 @@ use App\Http\Controllers\UpdateController;
 use App\Http\Controllers\UserController;
 use App\Services\Share;
 use Illuminate\Support\Facades\Route;
-// use Illuminate\Support\Facades\App;
 
 
 if (config('app.debug')) {
@@ -38,8 +38,12 @@ if (config('app.debug')) {
 }
 
 Route::prefix('install')->group(function () {
-    // Route::get('/', [InstallController::class, 'index']);
-    // Route::post('/', [InstallController::class, 'store']);
+    Route::get('/', [InstallController::class, 'index']);
+    Route::post('test-db', [InstallController::class, 'testDb']);
+    Route::post('save-db', [InstallController::class, 'saveDb']);
+    Route::post('migrate', [InstallController::class, 'migrate']);
+    Route::post('create-admin', [InstallController::class, 'createAdmin']);
+    Route::post('save-site', [InstallController::class, 'saveSite']);
 });
 
 // /update/server/info
@@ -59,6 +63,10 @@ Route::get('/admin', function () {
     $html = file_get_contents(public_path('themes/MaterialDesignForum-Vuetify4/index.html'));
     $html = str_replace('{lang}', app()->getLocale(), $html);
     return response($html)->header('Content-Type', 'text/html; charset=UTF-8');
+});
+
+Route::get('/webmanifest.json', function () {
+    return response()->json(Share::GetWebManifest(), 200, [], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 });
 
 Route::get('/{any}', function () {

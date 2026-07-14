@@ -1,0 +1,117 @@
+{
+  "Message": {
+    "NewInstall": {
+      "title": "MaterialDesignForum Installation Wizard",
+
+      "steps": {
+        "envCheck": "Environment Check",
+        "dbConfig": "Database Setup",
+        "siteSettings": "Site Settings",
+        "adminAccount": "Admin Account",
+        "startInstall": "Install"
+      },
+
+      "env": {
+        "title": "Environment Check",
+        "notPassed": "Environment requirements not met. Please correct them before continuing.",
+        "phpVersion": "PHP Version",
+        "phpVersionHelp": "Requires PHP 8.1 or higher",
+        "enabled": "Enabled",
+        "disabled": "Disabled",
+        "extPrefix": "PHP Extension: {name}",
+        "extLabel": {
+          "pdo": "PDO",
+          "mbstring": "Mbstring",
+          "openssl": "OpenSSL",
+          "json": "JSON",
+          "fileinfo": "Fileinfo",
+          "tokenizer": "Tokenizer",
+          "ctype": "Ctype",
+          "xml": "XML",
+          "gd": "GD"
+        },
+        "extHelp": {
+          "pdo": "Enable php_pdo extension",
+          "mbstring": "Enable php_mbstring extension",
+          "openssl": "Enable php_openssl extension",
+          "json": "Enable php_json extension",
+          "fileinfo": "Enable php_fileinfo extension",
+          "tokenizer": "Enable php_tokenizer extension",
+          "ctype": "Enable php_ctype extension",
+          "xml": "Enable php_xml extension",
+          "gd": "Enable php_gd extension (for image processing)"
+        },
+        "dirPrefix": "Directory Permission: {name}",
+        "dirLabel": {
+          "storage_writable": "storage/ writable",
+          "bootstrap_writable": "bootstrap/cache/ writable",
+          "env_writable": ".env writable"
+        },
+        "dirHelp": {
+          "storage_writable": "Ensure storage/ directory is writable",
+          "bootstrap_writable": "Ensure bootstrap/cache/ directory is writable",
+          "env_writable": "Ensure .env file is writable"
+        },
+        "writable": "Writable",
+        "unwritable": "Unwritable"
+      },
+
+      "db": {
+        "title": "Database Setup",
+        "host": "Host",
+        "port": "Port",
+        "database": "Database",
+        "username": "Username",
+        "password": "Password",
+        "testConnection": "Test Connection",
+        "success": "Connected",
+        "fail": "Connection Failed"
+      },
+
+      "site": {
+        "title": "Site Settings",
+        "name": "Site Name",
+        "url": "Site URL",
+        "adminSection": "Administrator Account",
+        "adminUsername": "Admin Username",
+        "email": "Email",
+        "password": "Password",
+        "passwordHint": "At least 8 characters",
+        "confirmPassword": "Confirm Password",
+        "passwordMismatch": "Passwords do not match"
+      },
+
+      "install": {
+        "title": "Install",
+        "hint": "Click \"Install\" to start the installation.",
+        "failed": "Installation failed. Please check the error messages.",
+        "completed": "Installation complete!",
+        "goHome": "Go to Homepage",
+        "logs": {
+          "savingDb": "Saving database configuration...",
+          "migrating": "Running database migrations...",
+          "creatingAdmin": "Creating administrator account...",
+          "savingSite": "Saving site settings...",
+          "completed": "Installation complete!",
+          "failed": "Installation failed",
+          "unknownError": "Unknown error",
+          "executeFailed": "Execution failed"
+        }
+      },
+
+      "actions": {
+        "prev": "Previous",
+        "next": "Next",
+        "startInstall": "Install",
+        "close": "Close"
+      },
+
+      "snackbar": {
+        "fixEnvFirst": "Please correct the environment issues before continuing.",
+        "testDbFirst": "Please test the database connection first.",
+        "passwordMismatch": "Please ensure the passwords match.",
+        "backToDbConfig": "Please go back to \"Database Setup\" and test the connection."
+      }
+    }
+  }
+}

@@ -16,6 +16,44 @@ use App\Models\Option;
 class Share
 {
     /**
+     * 动态生成 PWA webmanifest.json
+     * @return array
+     */
+    public static function GetWebManifest(): array
+    {
+        $siteName  = Option::Get('site_name') ?? config('app.name', 'MaterialDesignForum');
+        $shortName = Option::Get('site_short_name') ?? $siteName;
+        $theme     = Option::Get('theme') ?? 'MaterialDesignForum-MDUI2';
+
+        $primaryColor = '#2196F3';
+        $bgColor      = '#FFFFFF';
+
+        $settingFile = public_path("themes/{$theme}/setting.json");
+        if (file_exists($settingFile)) {
+            $setting    = json_decode(file_get_contents($settingFile), true);
+            $themeColor = $setting['theme_color'] ?? $setting['default_theme_color'] ?? [];
+            $light      = $themeColor['light']['colors'] ?? [];
+            $dark       = $themeColor['dark']['colors'] ?? [];
+            $primaryColor = $light['primary'] ?? $dark['primary'] ?? '#2196F3';
+            $bgColor      = $light['background'] ?? '#FFFFFF';
+        }
+
+        return [
+            'name'             => $siteName,
+            'short_name'       => $shortName,
+            'start_url'        => '/',
+            'display'          => 'standalone',
+            'background_color' => $bgColor,
+            'theme_color'      => $primaryColor,
+            'description'      => Option::Get('site_description') ?? '',
+            'icons'            => [
+                ['src' => '/favicon.png', 'sizes' => '192x192', 'type' => 'image/png'],
+                ['src' => '/favicon.png', 'sizes' => '512x512', 'type' => 'image/png'],
+            ],
+        ];
+    }
+
+    /**
      * 获取路由主题的index.html
      * @return string
      */
@@ -32,6 +70,40 @@ class Share
             $html = file_get_contents(public_path('themes/' . $themename . '/index.html'));
             $html = str_replace('{lang}', Option::Get('default_language') ?? app()->getLocale(), $html);
             $html = str_replace('{title}', Option::Get('site_name') ?? config('app.name'), $html);
+            $html = str_replace('{keywords}', Option::Get('site_keywords') ?? '', $html);
+            $html = str_replace('{description}', Option::Get('site_description') ?? '', $html);
+
+            // 注入 Service Worker 注册脚本（PWA 安装前提）
+            $swScript = <<<'SW'
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').then(reg => {
+      console.log('[PWA] ServiceWorker registered:', reg.scope);
+    }).catch(err => {
+      console.log('[PWA] ServiceWorker failed:', err);
+    });
+  });
+
+  // 拦截安装提示事件（可用于自定义安装按钮）
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    // 将 deferredPrompt 暴露到 window，方便前端调用 prompt() 弹出安装
+    window.__pwaInstall = () => {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(r => {
+        console.log('[PWA] User choice:', r.outcome);
+        deferredPrompt = null;
+      });
+    };
+  });
+}
+</script>
+SW;
+            $html = str_replace('</body>', $swScript . "\n</body>", $html);
+
             return $html;
         } catch (\Exception $e) {
             // 主题文件不存在或读取失败，返回默认提示

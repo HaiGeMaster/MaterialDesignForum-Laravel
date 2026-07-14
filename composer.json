@@ -1,4 +1,4 @@
-﻿{
+{
     "$schema": "https://getcomposer.org/schema.json",
     "name": "laravel/laravel",
     "type": "project",
@@ -6,7 +6,7 @@
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "author": "HaiGeMaster(https://github.com/HaiGeMaster)",
-    "version": "2026.07.08",
+    "version": "2026.07.14",
     "require": {
         "php": "^8.2",
         "itbdw/ip-database": "3.0.2",

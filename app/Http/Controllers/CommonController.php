@@ -12,6 +12,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Log;
 
 // use App\Http\Controllers\AnswerController;
 // use App\Http\Controllers\ArticleController;
@@ -120,9 +121,13 @@ class CommonController extends Controller
 
       $settingFile = public_path("themes/{$theme}/setting.json");
       if (file_exists($settingFile)) {
-        $themeSetting = json_decode(file_get_contents($settingFile), true) ?: [];
-        $themeSetting['theme_color'] = $data['theme_color'];
-        file_put_contents($settingFile, json_encode($themeSetting, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        if (!is_writable($settingFile)) {
+          Log::warning('setting.json 无写入权限，theme_color 未保存: ' . $settingFile);
+        } else {
+          $themeSetting = json_decode(file_get_contents($settingFile), true) ?: [];
+          $themeSetting['theme_color'] = $data['theme_color'];
+          file_put_contents($settingFile, json_encode($themeSetting, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        }
       }
     }
 
