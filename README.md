@@ -2,10 +2,10 @@
 # Material Design Forum - LaravelServer
 
 
-<img src="https://mdf.xbedrock.com/assets/info_content/md3/device_info_template_auto.png" alt="MDUI2主题预览图" width="100%">
+<img src="https://www.xbedrock.com/assets/info_content/md3/device_info_template_auto.png" alt="MDUI2主题预览图" width="100%">
 
 
-<img src="https://mdf.xbedrock.com/assets/info_content/md2/device_info_template_auto.png" alt="Vuetify2主题预览图" width="100%">
+<img src="https://www.xbedrock.com/assets/info_content/md2/device_info_template_auto.png" alt="Vuetify2主题预览图" width="100%">
 
 # [CN] Material Design Forum - 现代化网页论坛应用
 
@@ -78,31 +78,6 @@ Material Design Forum通过以下优势成为现代化论坛平台：
 3. 灵活的自定义选项
 4. 完善的多语言支持
 
-## 安装配置方法
-
-### 环境要求
-- 服务器：PHP 8.2
-- 数据库：MySQL 5.7及以上版本
-- 浏览器：Google Chrome、Mozilla Firefox、Microsoft Edge等
-
-### 安装步骤
-1. 下载最新版本的Material Design Forum部署文件（包含前端代码和后端代码）
-2. 解压文件到服务器目录
-3. 运行 Laravel 数据库迁移命令：
-    ```bash
-    php artisan migrate
-    ```
-    如无法运行迁移命令，可手动导入数据库文件（位于 `database\demo_laravel_table.sql`）
-4. 将站点运行目录设置为 `public`
-5. 参考 `.env.example` 创建 `.env` 文件，配置数据库连接信息
-6. 配置伪静态规则（Nginx）：
-    ```nginx
-    location / {
-        try_files $uri $uri/ /index.php;
-    }
-    ```
-    > Apache 等其他服务器请自行配置对应的 URL 重写规则。
-
 适用于：
 - Material Design爱好者
 - 社区管理员
@@ -114,10 +89,10 @@ Material Design Forum通过以下优势成为现代化论坛平台：
 # Material Design Forum - LaravelServer
 
 
-<img src="https://mdf.xbedrock.com/assets/info_content/md3/device_info_template_auto.png" alt="MDUI2 Theme Preview" width="100%">
+<img src="https://www.xbedrock.com/assets/info_content/md3/device_info_template_auto.png" alt="MDUI2 Theme Preview" width="100%">
 
 
-<img src="https://mdf.xbedrock.com/assets/info_content/md2/device_info_template_auto.png" alt="Vuetify2 Theme Preview" width="100%">
+<img src="https://www.xbedrock.com/assets/info_content/md2/device_info_template_auto.png" alt="Vuetify2 Theme Preview" width="100%">
 
 # [EN] Material Design Forum - Modern Web-Based Forum Application
 
@@ -189,31 +164,6 @@ Material Design Forum stands out as a modern forum platform through the followin
 2. Robust feature system
 3. Flexible customization options
 4. Comprehensive multilingual support
-
-## Installation & Configuration Guide
-
-### Environment Requirements
-- Server: PHP 8.2
-- Database: MySQL 5.7 or higher
-- Browsers: Google Chrome, Mozilla Firefox, Microsoft Edge, etc.
-
-### Installation Steps
-1. Download the latest version of Material Design Forum deployment package (including frontend and backend code)
-2. Extract files to your server directory
-3. Run Laravel database migration:
-    ```bash
-    php artisan migrate
-    ```
-    If migration fails, manually import the database file located at `database\demo_laravel_table.sql`
-4. Set the site document root to `public`
-5. Create a `.env` file by referring to `.env.example` and configure your database connection details
-6. Configure URL rewrite rules (Nginx):
-    ```nginx
-    location / {
-        try_files $uri $uri/ /index.php;
-    }
-    ```
-    > For Apache or other servers, configure the corresponding URL rewrite rules accordingly.
 
 Ideal for:
 - Material Design enthusiasts

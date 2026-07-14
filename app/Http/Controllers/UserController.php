@@ -34,6 +34,9 @@ use App\Models\Follow as FollowModel;
 use App\Models\Question as QuestionModel;
 use App\Models\Answer as AnswerModel;
 use App\Models\Article as ArticleModel;
+use App\Models\Topic as TopicModel;
+use App\Models\Comment as CommentModel;
+use App\Models\Reply as ReplyModel;
 
 
 use App\Http\Controllers\TokenController;
@@ -52,6 +55,7 @@ use itbdw\Ip\IpLocation;
 
 class UserController extends Controller
 {
+
 
   /**
    * 通过第三方平台登录或注册用户
@@ -508,6 +512,9 @@ class UserController extends Controller
             //   $user_group_login = UserGroupController::CanNormalLogin($token)
             // return 3;
             $is_login = true;
+
+            //更新一下用户的各类内容数量
+            // self::RefreshUserCounts($user->user_id);
           }
         } else {
           $snackbar = 'Message.Components.Account.LoginEmailOrUsernameDoesNotExistOrPasswordOrVerificationCodeIsIncorrect';
@@ -588,6 +595,8 @@ class UserController extends Controller
           $user->password = null;
           $user->user_group = UserGroupModel::find($user->user_group_id);
           $is_login = true;
+            //更新一下用户的各类内容数量
+            self::RefreshUserCounts($user->user_id);
         }
       }
     }
@@ -1294,6 +1303,29 @@ class UserController extends Controller
       'is_delete' => $is_set,
     ];
   }
+  /**
+   * 重新统计并更新用户的各类内容数量
+   * 只统计 delete_time 为 null 的记录
+   * @param int $user_id 用户ID
+   * @return bool 是否更新成功
+   */
+  public static function RefreshUserCounts($user_id)
+  {
+    $user = UserModel::find($user_id);
+    if (!$user) {
+      return false;
+    }
+
+    $user->topic_count   = TopicModel::where('user_id', $user_id)->whereNull('delete_time')->count();
+    $user->article_count = ArticleModel::where('user_id', $user_id)->whereNull('delete_time')->count();
+    $user->question_count = QuestionModel::where('user_id', $user_id)->whereNull('delete_time')->count();
+    $user->answer_count  = AnswerModel::where('user_id', $user_id)->whereNull('delete_time')->count();
+    $user->comment_count = CommentModel::where('user_id', $user_id)->whereNull('delete_time')->count();
+    $user->reply_count   = ReplyModel::where('user_id', $user_id)->whereNull('delete_time')->count();
+
+    return $user->save();
+  }
+
   /**
    * 处理密码
    * @param string $password 密码
