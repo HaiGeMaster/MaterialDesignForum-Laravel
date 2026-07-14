@@ -85,14 +85,15 @@
         "title": "开始安装",
         "hint": "点击\"开始安装\"按钮执行安装。",
         "failed": "安装失败，请检查错误信息。",
-        "completed": "安装完成！",
+        "completed": "安装完成",
         "goHome": "进入首页",
+        "goAdmin": "进入后台",
         "logs": {
           "savingDb": "正在保存数据库配置...",
           "migrating": "正在运行数据库迁移...",
           "creatingAdmin": "正在创建管理员账号...",
           "savingSite": "正在保存站点设置...",
-          "completed": "安装完成！",
+          "completed": "安装完成",
           "failed": "安装失败",
           "unknownError": "未知错误",
           "executeFailed": "执行失败"

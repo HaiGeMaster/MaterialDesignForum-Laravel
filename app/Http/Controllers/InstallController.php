@@ -12,6 +12,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Option;
 use App\Models\User;
+use App\Models\UserGroup;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -143,6 +144,8 @@ class InstallController extends Controller
             $user->update_time = now()->timestamp;
             $user->user_group_id = 1; // 管理员组
             $user->save();
+
+            UserGroup::AddUserGroupUserCount(1);
 
             return response()->json(['ok' => true]);
         } catch (Exception $e) {

@@ -85,14 +85,15 @@
         "title": "Installation",
         "hint": "Klicken Sie auf \"Installation\", um die Installation zu starten.",
         "failed": "Installation fehlgeschlagen. Bitte überprüfen Sie die Fehlermeldungen.",
-        "completed": "Installation abgeschlossen!",
+        "completed": "Installation abgeschlossen",
         "goHome": "Zur Startseite",
+        "goAdmin": "Zum Admin-Panel",
         "logs": {
           "savingDb": "Speichere Datenbankkonfiguration...",
           "migrating": "Führe Datenbankmigrationen aus...",
           "creatingAdmin": "Erstelle Administratorkonto...",
           "savingSite": "Speichere Seiteneinstellungen...",
-          "completed": "Installation abgeschlossen!",
+          "completed": "Installation abgeschlossen",
           "failed": "Installation fehlgeschlagen",
           "unknownError": "Unbekannter Fehler",
           "executeFailed": "Ausführung fehlgeschlagen"

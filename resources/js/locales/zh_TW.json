@@ -85,14 +85,15 @@
         "title": "開始安裝",
         "hint": "點擊「開始安裝」按鈕執行安裝。",
         "failed": "安裝失敗，請檢查錯誤訊息。",
-        "completed": "安裝完成！",
+        "completed": "安裝完成",
         "goHome": "進入首頁",
+        "goAdmin": "進入後台",
         "logs": {
           "savingDb": "正在儲存資料庫設定...",
           "migrating": "正在執行資料庫遷移...",
           "creatingAdmin": "正在建立管理員帳號...",
           "savingSite": "正在儲存站台設定...",
-          "completed": "安裝完成！",
+          "completed": "安裝完成",
           "failed": "安裝失敗",
           "unknownError": "未知錯誤",
           "executeFailed": "執行失敗"

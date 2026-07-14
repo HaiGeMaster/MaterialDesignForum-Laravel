@@ -85,14 +85,15 @@
         "title": "설치",
         "hint": "\"설치\"를 클릭하여 설치를 시작합니다.",
         "failed": "설치에 실패했습니다. 오류 메시지를 확인해 주세요.",
-        "completed": "설치가 완료되었습니다!",
+        "completed": "설치가 완료되었습니다",
         "goHome": "홈페이지로 이동",
+        "goAdmin": "관리자 페이지로 이동",
         "logs": {
           "savingDb": "데이터베이스 설정 저장 중...",
           "migrating": "데이터베이스 마이그레이션 실행 중...",
           "creatingAdmin": "관리자 계정 생성 중...",
           "savingSite": "사이트 설정 저장 중...",
-          "completed": "설치 완료!",
+          "completed": "설치 완료",
           "failed": "설치 실패",
           "unknownError": "알 수 없는 오류",
           "executeFailed": "실행 실패"

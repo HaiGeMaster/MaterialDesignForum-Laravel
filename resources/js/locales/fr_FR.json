@@ -85,14 +85,15 @@
         "title": "Installation",
         "hint": "Cliquez sur \"Installer\" pour démarrer l'installation.",
         "failed": "L'installation a échoué. Veuillez vérifier les messages d'erreur.",
-        "completed": "Installation terminée !",
+        "completed": "Installation terminée ",
         "goHome": "Aller à l'accueil",
+        "goAdmin": "Aller au panneau d'administration",
         "logs": {
           "savingDb": "Enregistrement de la configuration de la base de données...",
           "migrating": "Exécution des migrations de base de données...",
           "creatingAdmin": "Création du compte administrateur...",
           "savingSite": "Enregistrement des paramètres du site...",
-          "completed": "Installation terminée !",
+          "completed": "Installation terminée ",
           "failed": "Échec de l'installation",
           "unknownError": "Erreur inconnue",
           "executeFailed": "Échec de l'exécution"

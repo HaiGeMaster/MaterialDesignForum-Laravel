@@ -325,10 +325,14 @@
                     </v-alert>
 
                     <div v-if="installComplete" class="mt-4 text-center">
-                      <v-btn color="primary" size="large" @click="goToHome">
+                      <v-btn color="primary" size="large" @click="goToHome" class="mr-3">
                         <v-icon icon="mdi-home" class="mr-2" />
                         {{ $t('Message.NewInstall.install.goHome') }}
                       </v-btn>
+                      <!-- <v-btn color="primary" size="large" variant="outlined" @click="goToAdmin">
+                        <v-icon icon="mdi-shield-account" class="mr-2" />
+                        {{ $t('Message.NewInstall.install.goAdmin') }}
+                      </v-btn> -->
                     </div>
                   </v-card-text>
                 </v-card>
@@ -648,6 +652,10 @@ export default {
 
     goToHome() {
       window.location.href = '/'
+    },
+
+    goToAdmin() {
+      window.location.href = '/admin'
     },
   },
 }

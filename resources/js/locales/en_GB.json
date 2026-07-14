@@ -85,14 +85,15 @@
         "title": "Install",
         "hint": "Click \"Install\" to start the installation.",
         "failed": "Installation failed. Please check the error messages.",
-        "completed": "Installation complete!",
+        "completed": "Installation complete",
         "goHome": "Go to Homepage",
+        "goAdmin": "Go to Admin Panel",
         "logs": {
           "savingDb": "Saving database configuration...",
           "migrating": "Running database migrations...",
           "creatingAdmin": "Creating administrator account...",
           "savingSite": "Saving site settings...",
-          "completed": "Installation complete!",
+          "completed": "Installation complete",
           "failed": "Installation failed",
           "unknownError": "Unknown error",
           "executeFailed": "Execution failed"
