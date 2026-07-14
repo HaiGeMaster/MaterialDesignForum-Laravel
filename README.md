@@ -1,7 +1,7 @@
 
 # MaterialDesignForum 指引页面
 
-<details open>
+<details>
 <summary>
 1.介绍
 </summary>
