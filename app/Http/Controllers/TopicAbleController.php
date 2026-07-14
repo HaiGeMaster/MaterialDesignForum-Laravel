@@ -120,7 +120,7 @@ class TopicAbleController extends Controller
     // foreach ($topic_ids as $topic_id) {
     //   $topic = TopicController::GetTopic($topic_id)['topic'];
     //   if($topic!=null){
-    //     if ($topic->delete_time != 0) {
+    //     if ($topic->delete_time != null) {
     //       //$topic_ids->forget($topic_id);
     //       //删除$topic_ids中的$topic_id
     //       $topic_ids = $topic_ids->forget($topic_id);

@@ -1188,8 +1188,8 @@ class UserController extends Controller
         // $data['data'][$key]->question_title = QuestionController::GetQuestion($value->question_id, $user_token)['question']['title'];
 
         $question = QuestionModel::find($value->question_id);
-        //如果$question->delete_time不为0则说明问题已经被删除
-        if ($question->delete_time != 0) {
+        //如果$question->delete_time不为null则说明问题已经被删除
+        if ($question->delete_time != null) {
           $data['data'][$key]->question_title = null;
 
           //同时从数组中删除这个回答
