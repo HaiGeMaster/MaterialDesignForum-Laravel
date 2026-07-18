@@ -11,7 +11,11 @@
 namespace App\Services;
 
 use Illuminate\Support\Carbon;
+use App\Models\Article;
 use App\Models\Option;
+use App\Models\Question;
+use App\Models\Topic;
+use App\Models\User;
 
 class Share
 {
@@ -54,10 +58,11 @@ class Share
     }
 
     /**
-     * 获取路由主题的index.html
+     * 获取路由主题的index.html（支持页面级 SEO 注入）
+     * @param string $requestPath 当前请求路径，如 /topics/123
      * @return string
      */
-    public static function GetRouteThemeIndex()
+    public static function GetRouteThemeIndex($requestPath = '/')
     {
         try {
             //获取数据库中的theme的value
@@ -68,10 +73,33 @@ class Share
                 $themename = $theme->value;
             }
             $html = file_get_contents(public_path('themes/' . $themename . '/index.html'));
-            $html = str_replace('{lang}', Option::Get('default_language') ?? app()->getLocale(), $html);
-            $html = str_replace('{title}', Option::Get('site_name') ?? config('app.name'), $html);
-            $html = str_replace('{keywords}', Option::Get('site_keywords') ?? '', $html);
-            $html = str_replace('{description}', Option::Get('site_description') ?? '', $html);
+
+            // 站点全局默认值
+            $siteName     = Option::Get('site_name') ?? config('app.name', 'MaterialDesignForum');
+            $siteDesc     = Option::Get('site_description') ?? '';
+            $siteKeywords = Option::Get('site_keywords') ?? '';
+            $baseUrl      = rtrim(config('app.url'), '/');
+            $lang         = Option::Get('default_language') ?? app()->getLocale();
+
+            // 解析请求路径，获取页面级 SEO 数据
+            $pageMeta = self::resolvePageMeta($requestPath, $baseUrl, $siteName, $siteDesc, $siteKeywords);
+
+            // ── 基础 Meta ──
+            $html = str_replace('{lang}', $lang, $html);
+            $html = str_replace('{title}', $pageMeta['title'], $html);
+            $html = str_replace('{keywords}', $pageMeta['keywords'], $html);
+            $html = str_replace('{description}', $pageMeta['description'], $html);
+
+            // ── Open Graph ──
+            $html = str_replace('{og_title}', $pageMeta['og_title'], $html);
+            $html = str_replace('{og_description}', $pageMeta['og_description'], $html);
+            $html = str_replace('{og_image}', $pageMeta['og_image'], $html);
+            $html = str_replace('{og_url}', $pageMeta['og_url'], $html);
+            $html = str_replace('{og_type}', $pageMeta['og_type'], $html);
+
+            // ── Canonical & 结构化数据 ──
+            $html = str_replace('{canonical}', $pageMeta['canonical'], $html);
+            $html = str_replace('{structured_data}', $pageMeta['structured_data'], $html);
 
             // 注入 Service Worker 注册脚本（PWA 安装前提）
             $swScript = <<<'SW'
@@ -109,6 +137,271 @@ SW;
             // 主题文件不存在或读取失败，返回默认提示
             return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Error</title></head><body><h1>Theme not found :(' . $e->getMessage() . '</h1></body></html>';
         }
+    }
+
+    /**
+     * 根据请求路径解析页面级 SEO 元数据
+     */
+    private static function resolvePageMeta(
+        string $path,
+        string $baseUrl,
+        string $siteName,
+        string $siteDesc,
+        string $siteKeywords
+    ): array {
+        $path  = '/' . trim(parse_url($path, PHP_URL_PATH) ?? '', '/');
+        $url   = $baseUrl . $path;
+        $image = $baseUrl . '/favicon.png';
+
+        // 默认值（全局）
+        $meta = [
+            'title'           => $siteName,
+            'keywords'        => $siteKeywords,
+            'description'     => $siteDesc,
+            'og_title'        => $siteName,
+            'og_description'  => $siteDesc,
+            'og_image'        => $image,
+            'og_url'          => $url,
+            'og_type'         => 'website',
+            'canonical'       => '<link rel="canonical" href="' . htmlspecialchars($url) . '" />',
+            'structured_data' => '',
+        ];
+
+        // ── 1. 首页 ──
+        if ($path === '/' || $path === '') {
+            $meta['structured_data'] = self::buildWebSiteSchema($siteName, $url);
+            return $meta;
+        }
+
+        // ── 2. 列表页 ──
+        $listPages = [
+            '/topics'    => ['title' => '话题列表 - ' . $siteName, 'desc' => '浏览所有话题'],
+            '/questions' => ['title' => '问题列表 - ' . $siteName, 'desc' => '浏览所有问题'],
+            '/articles'  => ['title' => '文章列表 - ' . $siteName, 'desc' => '浏览所有文章'],
+            '/users'     => ['title' => '用户列表 - ' . $siteName, 'desc' => '浏览所有用户'],
+        ];
+        if (isset($listPages[$path])) {
+            $p = $listPages[$path];
+            $meta['title']          = $p['title'];
+            $meta['og_title']       = $p['title'];
+            $meta['description']    = $p['desc'];
+            $meta['og_description'] = $p['desc'];
+            return $meta;
+        }
+
+        // ── 3. 话题详情 /topics/{id} ──
+        if (preg_match('#^/topics/(\d+)$#', $path, $m)) {
+            $topic = Topic::where('topic_id', (int) $m[1])
+                ->whereNull('delete_time')
+                ->first();
+            if ($topic) {
+                $title = $topic->name . ' - ' . $siteName;
+                $desc  = self::truncate($topic->description ?? '', 200);
+                $img   = self::resolveOgImage($topic->cover ?? null, $image);
+
+                $meta['title']           = $title;
+                $meta['og_title']        = $title;
+                $meta['description']     = $desc;
+                $meta['og_description']  = $desc;
+                $meta['og_image']        = $img;
+                $meta['structured_data'] = self::buildArticleSchema(
+                    $title, $desc, $url, $img,
+                    $topic->create_time ?? now()
+                );
+            }
+            return $meta;
+        }
+
+        // ── 4. 文章详情 /articles/{id} ──
+        if (preg_match('#^/articles/(\d+)$#', $path, $m)) {
+            $article = Article::where('article_id', (int) $m[1])
+                ->whereNull('delete_time')
+                ->first();
+            if ($article) {
+                $title = $article->title . ' - ' . $siteName;
+                $desc  = self::truncate(strip_tags($article->content_rendered ?? ''), 200);
+
+                $meta['title']           = $title;
+                $meta['og_title']        = $title;
+                $meta['description']     = $desc;
+                $meta['og_description']  = $desc;
+                $meta['og_type']         = 'article';
+                $meta['structured_data'] = self::buildArticleSchema(
+                    $title, $desc, $url, $image,
+                    $article->create_time ?? now()
+                );
+            }
+            return $meta;
+        }
+
+        // ── 5. 问题详情 /questions/{id} ──
+        if (preg_match('#^/questions/(\d+)$#', $path, $m)) {
+            $question = Question::where('question_id', (int) $m[1])
+                ->whereNull('delete_time')
+                ->first();
+            if ($question) {
+                $title = $question->title . ' - ' . $siteName;
+                $desc  = self::truncate(strip_tags($question->content_rendered ?? ''), 200);
+
+                $meta['title']           = $title;
+                $meta['og_title']        = $title;
+                $meta['description']     = $desc;
+                $meta['og_description']  = $desc;
+                $meta['structured_data'] = self::buildQASchema(
+                    $title, $desc, $url,
+                    $question->create_time ?? now(),
+                    $question->answer_count ?? 0
+                );
+            }
+            return $meta;
+        }
+
+        // ── 6. 用户主页 /users/{user_id} ──
+        if (preg_match('#^/users/(\d+)$#', $path, $m)) {
+            $user = User::where('user_id', (int) $m[1])
+                ->whereNull('disable_time')
+                ->first();
+            if ($user) {
+                $name  = $user->username;
+                $title = $name . ' - ' . $siteName;
+                $desc  = self::truncate(
+                    trim(($user->headline ?? '') . ' | ' . ($user->bio ?? '')), 200
+                );
+                $img   = self::resolveOgImage($user->avatar ?? null, $image);
+
+                $meta['title']           = $title;
+                $meta['og_title']        = $title;
+                $meta['description']     = $desc;
+                $meta['og_description']  = $desc;
+                $meta['og_image']        = $img;
+                $meta['og_type']         = 'profile';
+                $meta['structured_data'] = self::buildPersonSchema(
+                    $name, $desc, $url, $img
+                );
+            }
+            return $meta;
+        }
+
+        return $meta;
+    }
+
+    /**
+     * 提取 OG 图片 URL（兼容 JSON 数组格式的 avatar/cover）
+     */
+    private static function resolveOgImage($field, string $fallback): string
+    {
+        if (empty($field)) {
+            return $fallback;
+        }
+        if (is_array($field)) {
+            // 优先取 large，其次取第一个
+            return $field['large'] ?? $field[0] ?? $fallback;
+        }
+        if (is_string($field)) {
+            $decoded = json_decode($field, true);
+            if (is_array($decoded)) {
+                return $decoded['large'] ?? $decoded[0] ?? $fallback;
+            }
+            // 纯字符串 URL 必须以 http 开头
+            if (str_starts_with($field, 'http')) {
+                return $field;
+            }
+            // 相对路径补全
+            return rtrim(config('app.url'), '/') . '/' . ltrim($field, '/');
+        }
+        return $fallback;
+    }
+
+    /**
+     * 截取文本（不截断多字节字符）
+     */
+    private static function truncate(string $text, int $maxLen = 200): string
+    {
+        $text = trim(preg_replace('/\s+/', ' ', $text));
+        if (mb_strlen($text) <= $maxLen) {
+            return $text;
+        }
+        return mb_substr($text, 0, $maxLen) . '…';
+    }
+
+    // ═══════════════════════════════════════════
+    //  结构化数据 (JSON-LD) 构建方法
+    // ═══════════════════════════════════════════
+
+    private static function buildWebSiteSchema(string $name, string $url): string
+    {
+        $data = [
+            '@context'    => 'https://schema.org',
+            '@type'       => 'WebSite',
+            'name'        => $name,
+            'url'         => $url,
+        ];
+        return '<script type="application/ld+json">' . json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . '</script>';
+    }
+
+    private static function buildArticleSchema(
+        string $title,
+        string $desc,
+        string $url,
+        string $image,
+        $datePublished
+    ): string {
+        $data = [
+            '@context'        => 'https://schema.org',
+            '@type'           => 'Article',
+            'headline'        => $title,
+            'description'     => $desc,
+            'url'             => $url,
+            'image'           => $image,
+            'datePublished'   => $datePublished instanceof \DateTimeInterface
+                ? $datePublished->toIso8601String()
+                : $datePublished,
+        ];
+        return '<script type="application/ld+json">' . json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . '</script>';
+    }
+
+    private static function buildQASchema(
+        string $title,
+        string $desc,
+        string $url,
+        $datePublished,
+        int $answerCount
+    ): string {
+        $data = [
+            '@context'        => 'https://schema.org',
+            '@type'           => 'QAPage',
+            'name'            => $title,
+            'description'     => $desc,
+            'url'             => $url,
+            'datePublished'   => $datePublished instanceof \DateTimeInterface
+                ? $datePublished->toIso8601String()
+                : $datePublished,
+            'mainEntity'      => [
+                '@type'          => 'Question',
+                'name'           => $title,
+                'text'           => $desc,
+                'answerCount'    => $answerCount,
+                'url'            => $url,
+            ],
+        ];
+        return '<script type="application/ld+json">' . json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . '</script>';
+    }
+
+    private static function buildPersonSchema(
+        string $name,
+        string $desc,
+        string $url,
+        string $image
+    ): string {
+        $data = [
+            '@context'    => 'https://schema.org',
+            '@type'       => 'Person',
+            'name'        => $name,
+            'description' => $desc,
+            'url'         => $url,
+            'image'       => $image,
+        ];
+        return '<script type="application/ld+json">' . json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . '</script>';
     }
     /**
      * 处理Array数据为SQL 处理排序

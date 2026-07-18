@@ -14,6 +14,7 @@ use App\Http\Controllers\InstallController;
 use App\Http\Controllers\OptionController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\OauthController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\UpdateController;
 use App\Http\Controllers\UserController;
 use App\Services\Share;
@@ -69,7 +70,9 @@ Route::get('/webmanifest.json', function () {
     return response()->json(Share::GetWebManifest(), 200, [], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 });
 
-Route::get('/{any}', function () {
-    $html = Share::GetRouteThemeIndex();
+Route::get('/sitemaps/sitemap.xml', [SitemapController::class, 'index']);
+
+Route::get('/{any}', function (\Illuminate\Http\Request $request) {
+    $html = Share::GetRouteThemeIndex($request->path());
     return response($html)->header('Content-Type', 'text/html; charset=UTF-8');
 })->where('any', '.*');

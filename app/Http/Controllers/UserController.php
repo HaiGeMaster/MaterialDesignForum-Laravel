@@ -514,7 +514,7 @@ class UserController extends Controller
             $is_login = true;
 
             //更新一下用户的各类内容数量
-            // self::RefreshUserCounts($user->user_id);
+            self::RefreshUserCounts($user->user_id);
           }
         } else {
           $snackbar = 'Message.Components.Account.LoginEmailOrUsernameDoesNotExistOrPasswordOrVerificationCodeIsIncorrect';
@@ -596,7 +596,7 @@ class UserController extends Controller
           $user->user_group = UserGroupModel::find($user->user_group_id);
           $is_login = true;
             //更新一下用户的各类内容数量
-            self::RefreshUserCounts($user->user_id);
+            // self::RefreshUserCounts($user->user_id);
         }
       }
     }
