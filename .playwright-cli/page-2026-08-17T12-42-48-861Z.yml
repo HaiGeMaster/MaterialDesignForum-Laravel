@@ -1,0 +1,78 @@
+- generic [ref=e5]:
+  - banner [ref=e6]:
+    - generic [ref=e7]:
+      - button [ref=e8] [cursor=pointer]:
+        - generic [ref=e9]: 󰍜
+      - generic [ref=e12]:
+        - generic [ref=e13]: 󰊌
+        - text: MDForum
+      - button "切换到深色模式" [ref=e14] [cursor=pointer]:
+        - generic [ref=e15]: 󰖔
+      - link "登录 / 注册" [ref=e17] [cursor=pointer]:
+        - /url: /users/me
+        - generic [ref=e18]: 󰀄
+  - navigation [ref=e21]:
+    - list [ref=e23]:
+      - link "首页" [ref=e24] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e25]: 󰋜
+      - link "话题" [ref=e29] [cursor=pointer]:
+        - /url: /topics
+        - generic [ref=e30]: 󰓻
+      - link "问题" [ref=e34] [cursor=pointer]:
+        - /url: /questions
+        - generic [ref=e35]: 󰋗
+      - link "文章" [ref=e39] [cursor=pointer]:
+        - /url: /articles
+        - generic [ref=e40]: 󰈙
+      - separator [ref=e44]
+      - link "人脉" [ref=e45] [cursor=pointer]:
+        - /url: /users
+        - generic [ref=e46]: 󰡉
+  - main [ref=e50]:
+    - generic [ref=e53]:
+      - generic [ref=e54]:
+        - generic [ref=e55]: 󰓻
+        - generic [ref=e56]: 热门话题
+        - link "查看全部" [ref=e57] [cursor=pointer]:
+          - /url: /topics
+          - generic [ref=e59]: 󰅂
+      - generic [ref=e61]:
+        - button "上一页" [ref=e62] [cursor=pointer]:
+          - generic [ref=e63]: 󰅁
+        - button "下一页" [ref=e66] [cursor=pointer]:
+          - generic [ref=e67]: 󰅂
+        - progressbar [ref=e69]
+      - generic [ref=e73]:
+        - generic [ref=e75]:
+          - generic [ref=e76]:
+            - generic [ref=e77]: 󰈸
+            - generic [ref=e78]: 热门问题
+            - link "查看全部" [ref=e79] [cursor=pointer]:
+              - /url: /questions
+              - generic [ref=e81]: 󰅂
+          - progressbar [ref=e83]
+        - generic [ref=e88]:
+          - generic [ref=e89]:
+            - generic [ref=e90]: 󰅒
+            - generic [ref=e91]: 最新问题
+            - link "查看全部" [ref=e92] [cursor=pointer]:
+              - /url: /questions
+              - generic [ref=e94]: 󰅂
+          - progressbar [ref=e96]
+        - generic [ref=e101]:
+          - generic [ref=e102]:
+            - generic [ref=e103]: 󰈸
+            - generic [ref=e104]: 热门文章
+            - link "查看全部" [ref=e105] [cursor=pointer]:
+              - /url: /articles
+              - generic [ref=e107]: 󰅂
+          - progressbar [ref=e109]
+        - generic [ref=e114]:
+          - generic [ref=e115]:
+            - generic [ref=e116]: 󰅒
+            - generic [ref=e117]: 最新文章
+            - link "查看全部" [ref=e118] [cursor=pointer]:
+              - /url: /articles
+              - generic [ref=e120]: 󰅂
+          - progressbar [ref=e122]

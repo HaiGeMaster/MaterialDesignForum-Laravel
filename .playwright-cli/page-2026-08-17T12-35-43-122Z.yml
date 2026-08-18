@@ -1,0 +1,165 @@
+- generic [ref=e5]:
+  - banner [ref=e6]:
+    - generic [ref=e7]:
+      - button [ref=e8] [cursor=pointer]:
+        - generic [ref=e9]: 󰍜
+      - generic [ref=e12]:
+        - generic [ref=e13]: 󰊌
+        - text: MDForum
+      - button "切换到深色模式" [active] [ref=e14] [cursor=pointer]:
+        - generic [ref=e15]: 󰖔
+      - link "登录 / 注册" [ref=e17] [cursor=pointer]:
+        - /url: /users/me
+        - generic [ref=e18]: 󰀄
+  - navigation [ref=e21]:
+    - list [ref=e23]:
+      - link "首页" [ref=e24] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e25]: 󰋜
+      - link "话题" [ref=e29] [cursor=pointer]:
+        - /url: /topics
+        - generic [ref=e30]: 󰓻
+      - link "问题" [ref=e34] [cursor=pointer]:
+        - /url: /questions
+        - generic [ref=e35]: 󰋗
+      - link "文章" [ref=e39] [cursor=pointer]:
+        - /url: /articles
+        - generic [ref=e40]: 󰈙
+      - separator [ref=e44]
+      - link "人脉" [ref=e45] [cursor=pointer]:
+        - /url: /users
+        - generic [ref=e46]: 󰡉
+  - main [ref=e50]:
+    - generic [ref=e52]:
+      - generic [ref=e53]:
+        - generic [ref=e54]: 󰓻
+        - generic [ref=e55]: 热门话题
+        - link "查看全部" [ref=e56] [cursor=pointer]:
+          - /url: /topics
+          - generic [ref=e58]: 󰅂
+      - generic [ref=e60]:
+        - button "上一页" [ref=e61] [cursor=pointer]:
+          - generic [ref=e62]: 󰅁
+        - generic [ref=e64]:
+          - generic [ref=e66] [cursor=pointer]:
+            - generic [ref=e67]: 󰓹
+            - generic [ref=e70]:
+              - generic [ref=e71]: Vue.js
+              - generic [ref=e72]: Vue 3 生态、组件与最佳实践
+            - generic [ref=e74]:
+              - button "关注" [ref=e75]:
+                - generic [ref=e76]: 󰐕
+              - button "128" [ref=e78]:
+                - generic [ref=e79]: 󰭘
+          - generic [ref=e83] [cursor=pointer]:
+            - generic [ref=e84]: 󰓹
+            - generic [ref=e87]:
+              - generic [ref=e88]: Laravel
+              - generic [ref=e89]: PHP 框架 Laravel 开发经验
+            - generic [ref=e91]:
+              - button "关注" [ref=e92]:
+                - generic [ref=e93]: 󰐕
+              - button "96" [ref=e95]:
+                - generic [ref=e96]: 󰭘
+          - generic [ref=e100] [cursor=pointer]:
+            - generic [ref=e101]: 󰓹
+            - generic [ref=e104]:
+              - generic [ref=e105]: 数据库
+              - generic [ref=e106]: MySQL / SQLite / Redis 使用心得
+            - generic [ref=e108]:
+              - button "关注" [ref=e109]:
+                - generic [ref=e110]: 󰐕
+              - button "64" [ref=e112]:
+                - generic [ref=e113]: 󰭘
+          - generic [ref=e117] [cursor=pointer]:
+            - generic [ref=e118]: 󰓹
+            - generic [ref=e121]:
+              - generic [ref=e122]: DevOps
+              - generic [ref=e123]: 部署、CI/CD 与容器化
+            - generic [ref=e125]:
+              - button "关注" [ref=e126]:
+                - generic [ref=e127]: 󰐕
+              - button "45" [ref=e129]:
+                - generic [ref=e130]: 󰭘
+          - generic [ref=e134] [cursor=pointer]:
+            - generic [ref=e135]: 󰓹
+            - generic [ref=e138]:
+              - generic [ref=e139]: 前端工程化
+              - generic [ref=e140]: Vite、打包工具与性能优化
+            - generic [ref=e142]:
+              - button "关注" [ref=e143]:
+                - generic [ref=e144]: 󰐕
+              - button "33" [ref=e146]:
+                - generic [ref=e147]: 󰭘
+          - generic [ref=e151] [cursor=pointer]:
+            - generic [ref=e152]: 󰓹
+            - generic [ref=e155]:
+              - generic [ref=e156]: 开发者生活
+              - generic [ref=e157]: 效率工具与日常分享
+            - generic [ref=e159]:
+              - button "关注" [ref=e160]:
+                - generic [ref=e161]: 󰐕
+              - button "21" [ref=e163]:
+                - generic [ref=e164]: 󰭘
+        - button "下一页" [ref=e167] [cursor=pointer]:
+          - generic [ref=e168]: 󰅂
+      - generic [ref=e171]:
+        - generic [ref=e172]: 欢迎来到 MDForum
+        - generic [ref=e173]: 一个基于 Vue + Laravel 的极简开发者社区，在这里提问、写文章、结识同好。
+        - link "立即加入" [ref=e174] [cursor=pointer]:
+          - /url: /users/me
+          - generic [ref=e175]: 󰀔
+      - generic [ref=e178]:
+        - generic [ref=e181]:
+          - generic [ref=e182]: 󰓻
+          - generic [ref=e184]:
+            - generic [ref=e185]: "12"
+            - generic [ref=e186]: 话题
+        - generic [ref=e189]:
+          - generic [ref=e190]: 󰋗
+          - generic [ref=e192]:
+            - generic [ref=e193]: "48"
+            - generic [ref=e194]: 问题
+        - generic [ref=e197]:
+          - generic [ref=e198]: 󰈙
+          - generic [ref=e200]:
+            - generic [ref=e201]: "86"
+            - generic [ref=e202]: 文章
+        - generic [ref=e205]:
+          - generic [ref=e206]: 󰡉
+          - generic [ref=e208]:
+            - generic [ref=e209]: "256"
+            - generic [ref=e210]: 用户
+      - generic [ref=e211]:
+        - generic [ref=e213] [cursor=pointer]:
+          - generic [ref=e215]:
+            - generic [ref=e216]:
+              - generic [ref=e217]: 󰓻
+              - text: 浏览话题
+            - generic [ref=e218]: 发现感兴趣的主题
+          - link "前往 →" [ref=e220]:
+            - /url: /topics
+        - generic [ref=e223] [cursor=pointer]:
+          - generic [ref=e225]:
+            - generic [ref=e226]:
+              - generic [ref=e227]: 󰋗
+              - text: 提出问题
+            - generic [ref=e228]: 向社区寻求帮助
+          - link "前往 →" [ref=e230]:
+            - /url: /questions
+        - generic [ref=e233] [cursor=pointer]:
+          - generic [ref=e235]:
+            - generic [ref=e236]:
+              - generic [ref=e237]: 󰈙
+              - text: 阅读文章
+            - generic [ref=e238]: 查看深度技术内容
+          - link "前往 →" [ref=e240]:
+            - /url: /articles
+        - generic [ref=e243] [cursor=pointer]:
+          - generic [ref=e245]:
+            - generic [ref=e246]:
+              - generic [ref=e247]: 󰡉
+              - text: 结识伙伴
+            - generic [ref=e248]: 查看社区成员
+          - link "前往 →" [ref=e250]:
+            - /url: /users

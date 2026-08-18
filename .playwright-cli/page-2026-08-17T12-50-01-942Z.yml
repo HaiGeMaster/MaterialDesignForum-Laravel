@@ -1,0 +1,258 @@
+- generic [ref=e5]:
+  - banner [ref=e6]:
+    - generic [ref=e7]:
+      - button [ref=e8] [cursor=pointer]:
+        - generic [ref=e9]: 󰍜
+      - generic [ref=e12]:
+        - generic [ref=e13]: 󰊌
+        - text: MDForum
+      - button "切换到浅色模式" [active] [ref=e126] [cursor=pointer]:
+        - generic [ref=e15]: 󰖨
+      - link "登录 / 注册" [ref=e17] [cursor=pointer]:
+        - /url: /users/me
+        - generic [ref=e18]: 󰀄
+  - navigation [ref=e21]:
+    - list [ref=e23]:
+      - link "首页" [ref=e24] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e25]: 󰋜
+      - link "话题" [ref=e29] [cursor=pointer]:
+        - /url: /topics
+        - generic [ref=e30]: 󰓻
+      - link "问题" [ref=e34] [cursor=pointer]:
+        - /url: /questions
+        - generic [ref=e35]: 󰋗
+      - link "文章" [ref=e39] [cursor=pointer]:
+        - /url: /articles
+        - generic [ref=e40]: 󰈙
+      - separator [ref=e44]
+      - link "人脉" [ref=e45] [cursor=pointer]:
+        - /url: /users
+        - generic [ref=e46]: 󰡉
+  - main [ref=e50]:
+    - generic [ref=e53]:
+      - generic [ref=e54]:
+        - generic [ref=e55]: 󰓻
+        - generic [ref=e56]: 热门话题
+        - link "查看全部" [ref=e57] [cursor=pointer]:
+          - /url: /topics
+          - generic [ref=e59]: 󰅂
+      - generic [ref=e61]:
+        - button "上一页" [ref=e62] [cursor=pointer]:
+          - generic [ref=e63]: 󰅁
+        - generic [ref=e65]:
+          - generic [ref=e128] [cursor=pointer]:
+            - generic [ref=e129]: 󰓹
+            - generic [ref=e132]:
+              - generic [ref=e133]: Vue.js
+              - generic [ref=e134]: Vue 3 生态、组件与最佳实践
+            - generic [ref=e136]:
+              - button "关注" [ref=e137]:
+                - generic [ref=e138]: 󰐕
+              - button "128" [ref=e140]:
+                - generic [ref=e141]: 󰭘
+          - generic [ref=e145] [cursor=pointer]:
+            - generic [ref=e146]: 󰓹
+            - generic [ref=e149]:
+              - generic [ref=e150]: Laravel
+              - generic [ref=e151]: PHP 框架 Laravel 开发经验
+            - generic [ref=e153]:
+              - button "关注" [ref=e154]:
+                - generic [ref=e155]: 󰐕
+              - button "96" [ref=e157]:
+                - generic [ref=e158]: 󰭘
+          - generic [ref=e162] [cursor=pointer]:
+            - generic [ref=e163]: 󰓹
+            - generic [ref=e166]:
+              - generic [ref=e167]: 数据库
+              - generic [ref=e168]: MySQL / SQLite / Redis 使用心得
+            - generic [ref=e170]:
+              - button "关注" [ref=e171]:
+                - generic [ref=e172]: 󰐕
+              - button "64" [ref=e174]:
+                - generic [ref=e175]: 󰭘
+          - generic [ref=e179] [cursor=pointer]:
+            - generic [ref=e180]: 󰓹
+            - generic [ref=e183]:
+              - generic [ref=e184]: DevOps
+              - generic [ref=e185]: 部署、CI/CD 与容器化
+            - generic [ref=e187]:
+              - button "关注" [ref=e188]:
+                - generic [ref=e189]: 󰐕
+              - button "45" [ref=e191]:
+                - generic [ref=e192]: 󰭘
+          - generic [ref=e196] [cursor=pointer]:
+            - generic [ref=e197]: 󰓹
+            - generic [ref=e200]:
+              - generic [ref=e201]: 前端工程化
+              - generic [ref=e202]: Vite、打包工具与性能优化
+            - generic [ref=e204]:
+              - button "关注" [ref=e205]:
+                - generic [ref=e206]: 󰐕
+              - button "33" [ref=e208]:
+                - generic [ref=e209]: 󰭘
+          - generic [ref=e213] [cursor=pointer]:
+            - generic [ref=e214]: 󰓹
+            - generic [ref=e217]:
+              - generic [ref=e218]: 开发者生活
+              - generic [ref=e219]: 效率工具与日常分享
+            - generic [ref=e221]:
+              - button "关注" [ref=e222]:
+                - generic [ref=e223]: 󰐕
+              - button "21" [ref=e225]:
+                - generic [ref=e226]: 󰭘
+        - button "下一页" [ref=e66] [cursor=pointer]:
+          - generic [ref=e67]: 󰅂
+      - generic [ref=e73]:
+        - generic [ref=e75]:
+          - generic [ref=e76]:
+            - generic [ref=e77]: 󰈸
+            - generic [ref=e78]: 热门问题
+            - link "查看全部" [ref=e79] [cursor=pointer]:
+              - /url: /questions
+              - generic [ref=e81]: 󰅂
+          - list [ref=e229]:
+            - listitem [ref=e230]:
+              - generic [ref=e231]:
+                - generic [ref=e232]: How to set up a Laravel forum?
+                - generic [ref=e234]:
+                  - generic [ref=e235]: 󰍥
+                  - text: 0 个回答 · 2026-08-17
+            - listitem [ref=e236]:
+              - generic [ref=e237]:
+                - generic [ref=e238]: Best way to design a user profile page?
+                - generic [ref=e240]:
+                  - generic [ref=e241]: 󰍥
+                  - text: 0 个回答 · 2026-08-17
+            - listitem [ref=e242]:
+              - generic [ref=e243]:
+                - generic [ref=e244]: How to build a voting system for comments?
+                - generic [ref=e246]:
+                  - generic [ref=e247]: 󰍥
+                  - text: 0 个回答 · 2026-08-17
+            - listitem [ref=e248]:
+              - generic [ref=e249]:
+                - generic [ref=e250]: Recommended database schema for Q&A app?
+                - generic [ref=e252]:
+                  - generic [ref=e253]: 󰍥
+                  - text: 0 个回答 · 2026-08-17
+            - listitem [ref=e254]:
+              - generic [ref=e255]:
+                - generic [ref=e256]: How to handle notifications in Laravel?
+                - generic [ref=e258]:
+                  - generic [ref=e259]: 󰍥
+                  - text: 0 个回答 · 2026-08-17
+        - generic [ref=e88]:
+          - generic [ref=e89]:
+            - generic [ref=e90]: 󰅒
+            - generic [ref=e91]: 最新问题
+            - link "查看全部" [ref=e92] [cursor=pointer]:
+              - /url: /questions
+              - generic [ref=e94]: 󰅂
+          - list [ref=e260]:
+            - listitem [ref=e261]:
+              - generic [ref=e262]:
+                - generic [ref=e263]: How to set up a Laravel forum?
+                - generic [ref=e265]:
+                  - generic [ref=e266]: 󰍥
+                  - text: 0 个回答 · 2026-08-17
+            - listitem [ref=e267]:
+              - generic [ref=e268]:
+                - generic [ref=e269]: Best way to design a user profile page?
+                - generic [ref=e271]:
+                  - generic [ref=e272]: 󰍥
+                  - text: 0 个回答 · 2026-08-17
+            - listitem [ref=e273]:
+              - generic [ref=e274]:
+                - generic [ref=e275]: How to build a voting system for comments?
+                - generic [ref=e277]:
+                  - generic [ref=e278]: 󰍥
+                  - text: 0 个回答 · 2026-08-17
+            - listitem [ref=e279]:
+              - generic [ref=e280]:
+                - generic [ref=e281]: Recommended database schema for Q&A app?
+                - generic [ref=e283]:
+                  - generic [ref=e284]: 󰍥
+                  - text: 0 个回答 · 2026-08-17
+            - listitem [ref=e285]:
+              - generic [ref=e286]:
+                - generic [ref=e287]: How to handle notifications in Laravel?
+                - generic [ref=e289]:
+                  - generic [ref=e290]: 󰍥
+                  - text: 0 个回答 · 2026-08-17
+        - generic [ref=e101]:
+          - generic [ref=e102]:
+            - generic [ref=e103]: 󰈸
+            - generic [ref=e104]: 热门文章
+            - link "查看全部" [ref=e105] [cursor=pointer]:
+              - /url: /articles
+              - generic [ref=e107]: 󰅂
+          - list [ref=e291]:
+            - listitem [ref=e292]:
+              - generic [ref=e293]:
+                - generic [ref=e294]: MySQL 索引优化从入门到实战
+                - generic [ref=e296]:
+                  - generic [ref=e297]: 󰆂
+                  - text: 15 条评论 · 2026-07-28
+            - listitem [ref=e298]:
+              - generic [ref=e299]:
+                - generic [ref=e300]: Vue 3 Composition API 实战指南
+                - generic [ref=e302]:
+                  - generic [ref=e303]: 󰆂
+                  - text: 12 条评论 · 2026-07-20
+            - listitem [ref=e304]:
+              - generic [ref=e305]:
+                - generic [ref=e306]: Laravel 队列系统的正确打开方式
+                - generic [ref=e308]:
+                  - generic [ref=e309]: 󰆂
+                  - text: 9 条评论 · 2026-07-25
+            - listitem [ref=e310]:
+              - generic [ref=e311]:
+                - generic [ref=e312]: Vite 5 构建性能调优实践
+                - generic [ref=e314]:
+                  - generic [ref=e315]: 󰆂
+                  - text: 8 条评论 · 2026-08-05
+            - listitem [ref=e316]:
+              - generic [ref=e317]:
+                - generic [ref=e318]: 用 Docker 快速搭建本地开发环境
+                - generic [ref=e320]:
+                  - generic [ref=e321]: 󰆂
+                  - text: 6 条评论 · 2026-08-01
+        - generic [ref=e114]:
+          - generic [ref=e115]:
+            - generic [ref=e116]: 󰅒
+            - generic [ref=e117]: 最新文章
+            - link "查看全部" [ref=e118] [cursor=pointer]:
+              - /url: /articles
+              - generic [ref=e120]: 󰅂
+          - list [ref=e322]:
+            - listitem [ref=e323]:
+              - generic [ref=e324]:
+                - generic [ref=e325]: 写给后端同学的前端工程化入门
+                - generic [ref=e327]:
+                  - generic [ref=e328]: 󰆂
+                  - text: 5 条评论 · 2026-08-10
+            - listitem [ref=e329]:
+              - generic [ref=e330]:
+                - generic [ref=e331]: Vite 5 构建性能调优实践
+                - generic [ref=e333]:
+                  - generic [ref=e334]: 󰆂
+                  - text: 8 条评论 · 2026-08-05
+            - listitem [ref=e335]:
+              - generic [ref=e336]:
+                - generic [ref=e337]: 用 Docker 快速搭建本地开发环境
+                - generic [ref=e339]:
+                  - generic [ref=e340]: 󰆂
+                  - text: 6 条评论 · 2026-08-01
+            - listitem [ref=e341]:
+              - generic [ref=e342]:
+                - generic [ref=e343]: MySQL 索引优化从入门到实战
+                - generic [ref=e345]:
+                  - generic [ref=e346]: 󰆂
+                  - text: 15 条评论 · 2026-07-28
+            - listitem [ref=e347]:
+              - generic [ref=e348]:
+                - generic [ref=e349]: Laravel 队列系统的正确打开方式
+                - generic [ref=e351]:
+                  - generic [ref=e352]: 󰆂
+                  - text: 9 条评论 · 2026-07-25

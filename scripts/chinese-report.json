@@ -1,0 +1,46 @@
+{
+  "resources/js/views/NotificationsView.vue": [
+    {
+      "line": 8,
+      "text": "小明',"
+    },
+    {
+      "line": 9,
+      "text": "赞了你的文章《初识 Laravel 11》',"
+    },
+    {
+      "line": 16,
+      "text": "小红',"
+    },
+    {
+      "line": 17,
+      "text": "回复了你的问题"
+    },
+    {
+      "line": 17,
+      "text": "如何优雅地处理文件上传？"
+    },
+    {
+      "line": 24,
+      "text": "老王',"
+    },
+    {
+      "line": 25,
+      "text": "关注了你',"
+    }
+  ],
+  "resources/js/views/SettingsView.vue": [
+    {
+      "line": 46,
+      "text": "简体中文' },"
+    },
+    {
+      "line": 47,
+      "text": "繁體中文' },"
+    },
+    {
+      "line": 49,
+      "text": "日本語' },"
+    }
+  ]
+}
