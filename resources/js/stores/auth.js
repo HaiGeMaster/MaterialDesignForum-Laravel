@@ -14,7 +14,7 @@ export const useAuthStore = defineStore('auth', {
 
   getters: {
     isLoggedIn: (state) => Boolean(state.token),
-    userGroupName: (state) => state.user?.user_group?.name || '',
+    userGroupName: (state) => state.user?.user_group?.user_group_name || '',
   },
 
   actions: {

@@ -3,15 +3,13 @@ import { reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
 import { useUserStore } from '../stores/user'
+import { useProfileEditStore } from '../stores/profileEditDialog'
 import { useFeedback } from '../composables/useFeedback'
 import ImageUploadField from './ImageUploadField.vue'
+import { useDisplay } from 'vuetify'
+const { mobile } = useDisplay()
 
-const props = defineProps({
-  modelValue: { type: Boolean, default: false },
-  user: { type: Object, required: true },
-})
-
-const emit = defineEmits(['update:modelValue', 'saved'])
+const profileEdit = useProfileEditStore()
 
 const authStore = useAuthStore()
 const userStore = useUserStore()
@@ -32,11 +30,12 @@ const form = reactive({
 const formRef = ref(null)
 const saving = ref(false)
 
-// 打开对话框时用当前用户数据填充表单
+// 打开对话框时用 store.user 填充表单
 watch(
-  () => [props.modelValue, props.user],
-  ([visible, user]) => {
-    if (visible && user) {
+  () => profileEdit.model,
+  (visible) => {
+    if (visible && profileEdit.user) {
+      const user = profileEdit.user
       form.username = user.username ?? ''
       form.headline = user.headline ?? ''
       form.bio = user.bio ?? ''
@@ -47,7 +46,6 @@ watch(
       form.cover = user.cover ?? ''
     }
   },
-  { immediate: true },
 )
 
 const rules = {
@@ -59,7 +57,7 @@ const rules = {
 
 function close() {
   if (saving.value) return
-  emit('update:modelValue', false)
+  profileEdit.close()
 }
 
 async function save() {
@@ -82,8 +80,8 @@ async function save() {
     // 同步当前登录用户信息，个人主页即时刷新
     authStore.setUser(result.user)
     feedback(result.message || t('profileEdit.saved'), 'success')
-    emit('saved', result.user)
-    emit('update:modelValue', false)
+    profileEdit.emitSaved(result.user)
+    profileEdit.close()
   } catch (error) {
     feedback(error.message, 'error')
   } finally {
@@ -93,9 +91,10 @@ async function save() {
 </script>
 
 <template>
-  <v-dialog :model-value="modelValue" max-width="560" @update:model-value="(v) => emit('update:modelValue', v)">
+  <v-dialog :model-value="profileEdit.model" max-width="560"
+    @update:model-value="(v) => { if (!v) profileEdit.close() }" :fullscreen="mobile">
     <v-card >
-      <v-toolbar color="primary" density="comfortable" :title="$t('profileEdit.title')">
+      <v-toolbar  :title="$t('profileEdit.title')">
         <template #append>
           <v-btn icon="mdi-close" variant="text" @click="close" />
         </template>

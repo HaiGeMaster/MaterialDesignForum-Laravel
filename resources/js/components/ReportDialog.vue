@@ -101,11 +101,7 @@ async function submit() {
 
 <template>
   <v-dialog :model-value="modelValue" max-width="480" @update:model-value="emit('update:modelValue', $event)">
-    <v-card >
-      <v-card-title class="d-flex align-center pr-2">
-        <v-icon icon="mdi-flag-outline" color="error" class="mr-2" />
-        {{ $t('report.title') }}
-      </v-card-title>
+    <v-card :title="$t('report.title')" prepend-icon="mdi-flag-outline" :subtitle="$t('report.subtitle')">
       <v-card-subtitle>{{ $t('report.subtitle') }}</v-card-subtitle>
 
       <v-card-text>

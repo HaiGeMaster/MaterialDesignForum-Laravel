@@ -16,7 +16,7 @@ function switchLanguage(code) {
 </script>
 
 <template>
-  <v-menu location="bottom end" min-width="160">
+  <v-menu  min-width="160">
     <template #activator="{ props }">
       <v-btn
         icon

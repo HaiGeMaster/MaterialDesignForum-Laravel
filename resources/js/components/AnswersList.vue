@@ -3,11 +3,11 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import http from '../api'
 import AnswerItem from './AnswerItem.vue'
-import DeleteDialog from './DeleteDialog.vue'
 import InfiniteScroll from './InfiniteScroll.vue'
 import ListHeader from './ListHeader.vue'
 import { useAuthStore } from '../stores/auth'
 import { useEditorWindowStore } from '../stores/editorWindow'
+import { useDeleteDialogStore } from '../stores/deleteDialog'
 import { useFeedback } from '../composables/useFeedback'
 import { useInfiniteList } from '../composables/useInfiniteList'
 
@@ -18,6 +18,7 @@ const props = defineProps({
 const { t } = useI18n()
 const authStore = useAuthStore()
 const editorWindow = useEditorWindowStore()
+const deleteDialog = useDeleteDialogStore()
 const { show } = useFeedback()
 
 const sort = ref('-create_time')
@@ -58,31 +59,24 @@ function editAnswer(answer) {
 }
 
 // ---- 删除回答 ----
-const deleteDialog = ref(false)
-const deleting = ref(false)
 const deletingAnswer = ref(null)
 
 function askDelete(answer) {
   deletingAnswer.value = answer
-  deleteDialog.value = true
+  deleteDialog.open({
+    title: t('answersList.deleteTitle'),
+    text: t('answersList.deleteConfirm'),
+    onConfirm: confirmDelete,
+  })
 }
 
 async function confirmDelete() {
   if (!deletingAnswer.value) return
-  deleting.value = true
-  try {
-    await http.delete(`/answers/${deletingAnswer.value.answer_id}`)
-    const i = items.value.findIndex((a) => a.answer_id === deletingAnswer.value.answer_id)
-    if (i !== -1) items.value.splice(i, 1)
-    total.value = Math.max(0, total.value - 1)
-    show(t('answersList.deleted'), 'success')
-  } catch (error) {
-    show(error.message, 'error')
-  } finally {
-    deleting.value = false
-    deleteDialog.value = false
-    deletingAnswer.value = null
-  }
+  await http.delete(`/answers/${deletingAnswer.value.answer_id}`)
+  const i = items.value.findIndex((a) => a.answer_id === deletingAnswer.value.answer_id)
+  if (i !== -1) items.value.splice(i, 1)
+  total.value = Math.max(0, total.value - 1)
+  show(t('answersList.deleted'), 'success')
 }
 
 // ---- 发布 / 编辑回答后刷新 ----
@@ -134,14 +128,5 @@ onBeforeUnmount(() => window.removeEventListener('content:published', handleCont
       </div>
       <InfiniteScroll :loading="loading" :error="error" :finished="finished" @load="loadNext" @retry="retry" />
     </template>
-
-    <!-- 删除回答确认 -->
-    <DeleteDialog
-      v-model="deleteDialog"
-      :title="$t('answersList.deleteTitle')"
-      :text="$t('answersList.deleteConfirm')"
-      :loading="deleting"
-      @confirm="confirmDelete"
-    />
   </v-card>
 </template>

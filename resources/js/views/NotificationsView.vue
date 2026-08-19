@@ -4,22 +4,26 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import http from '../api'
 import { useAuthStore } from '../stores/auth'
+import { useDeleteDialogStore } from '../stores/deleteDialog'
 import { useFeedback } from '../composables/useFeedback'
 import NotificationItem from '../components/NotificationItem.vue'
 import InfiniteScroll from '../components/InfiniteScroll.vue'
-import DeleteDialog from '../components/DeleteDialog.vue'
+
+import { useDisplay } from 'vuetify'
+const { xs } = useDisplay()
 
 const { t } = useI18n()
 const router = useRouter()
 const authStore = useAuthStore()
 const { show } = useFeedback()
 
+const deleteDialog = useDeleteDialogStore()
+
 const notifications = ref([])
 const loading = ref(false)
 const error = ref(false)
 const page = ref(1)
 const finished = ref(false)
-const clearDialog = ref(false)
 const clearing = ref(false)
 
 async function load(reset = false) {
@@ -71,20 +75,20 @@ function retry() {
   load()
 }
 
+function askClearAll() {
+  deleteDialog.open({
+    title: t('notifications.clearAllTitle'),
+    text: t('notifications.clearAllConfirm'),
+    onConfirm: confirmClearAll,
+  })
+}
+
 async function confirmClearAll() {
-  clearing.value = true
-  try {
-    await http.delete('/notifications')
-    notifications.value = []
-    finished.value = true
-    window.dispatchEvent(new CustomEvent('notification:updated'))
-    show(t('notifications.clearAllSuccess'), 'success')
-  } catch (e) {
-    show(e.message, 'error')
-  } finally {
-    clearing.value = false
-    clearDialog.value = false
-  }
+  await http.delete('/notifications')
+  notifications.value = []
+  finished.value = true
+  window.dispatchEvent(new CustomEvent('notification:updated'))
+  show(t('notifications.clearAllSuccess'), 'success')
 }
 
 function goToSetting() {
@@ -101,20 +105,20 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="notifications-view">
-    <v-card class="mx-auto my-4" max-width="720" rounded="lg">
-      <v-toolbar color="surface" flat>
+  <v-container :class="xs ? 'pa-0' : 'px-4'" class="notifications-view" :style="$route.meta.maxWidth ? { maxWidth: `${$route.meta.maxWidth}px`, margin: '0 auto' } : {}">
+    <v-card class="mx-auto" max-width="720" rounded="lg">
+      <v-toolbar >
         <v-btn icon="mdi-arrow-left" variant="text" @click="router.back()" />
         <v-toolbar-title>{{ $t('notifications.title') }}</v-toolbar-title>
         <v-menu v-if="authStore.isLoggedIn">
           <template #activator="{ props }">
-            <v-btn icon="mdi-dots-horizontal" variant="text" v-bind="props" />
+            <v-btn icon="mdi-dots-vertical" variant="text" v-bind="props" />
           </template>
           <v-list density="compact" nav>
             <v-list-item
               :prepend-icon="'mdi-delete-sweep'"
               :title="$t('notifications.clearAll')"
-              @click="clearDialog = true"
+              @click="askClearAll"
             />
             <v-list-item
               :prepend-icon="'mdi-cog'"
@@ -168,13 +172,5 @@ onMounted(() => {
       </v-card-text>
     </v-card>
 
-    <!-- 清空全部通知确认 -->
-    <DeleteDialog
-      v-model="clearDialog"
-      :title="$t('notifications.clearAllTitle')"
-      :text="$t('notifications.clearAllConfirm')"
-      :loading="clearing"
-      @confirm="confirmClearAll"
-    />
-  </div>
+  </v-container>
 </template>

@@ -355,7 +355,7 @@ const toolbarBottom = computed(() => [
   display: flex;
   flex-direction: column;
   flex: none;
-  background: rgb(var(--v-theme-surface-variant), 0.3);
+  /* background: rgb(var(--v-theme-surface-variant), 0.3); */
 }
 
 .rich-editor__toolbar--top {

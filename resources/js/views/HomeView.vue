@@ -88,9 +88,9 @@ onMounted(fetchData)
 </script>
 
 <template>
-  <div>
+  <v-container   :style="$route.meta.maxWidth ? { maxWidth: `${$route.meta.maxWidth}px`,padding:'0'} : {}">
     <!-- 话题转轴 -->
-    <div class="d-flex align-center mb-3">
+    <div class="d-flex align-center mb-3 pa-4">
       <v-icon icon="mdi-tag-multiple" class="mr-2" />
       <span class="text-h6 font-weight-bold">{{ $t('home.hotTopics') }}</span>
       <v-spacer />
@@ -101,8 +101,8 @@ onMounted(fetchData)
     <TopicCarousel />
 
     <!-- 内容四栏：最多两列排布 -->
-    <v-row class="mt-2">
-      <v-col v-for="panel in panels" :key="panel.title" cols="12" md="6">
+    <v-row class="mt-2 px-4" >
+      <v-col v-for="panel in panels" :key="panel.title" cols="12" md="6" >
         <ContentListPanel
           :title="panel.title"
           :icon="panel.icon"
@@ -116,5 +116,5 @@ onMounted(fetchData)
         />
       </v-col>
     </v-row>
-  </div>
+  </v-container>
 </template>

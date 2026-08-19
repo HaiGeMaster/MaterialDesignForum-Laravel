@@ -92,11 +92,7 @@ async function submit() {
 
 <template>
   <v-dialog v-model="dialogOpen" max-width="560">
-    <v-card >
-      <v-card-title class="d-flex align-center pr-2">
-        <v-icon :icon="isEdit ? 'mdi-pencil-outline' : 'mdi-tag-plus-outline'" class="mr-2" />
-        {{ isEdit ? $t('topicDialog.titleEdit') : $t('topicDialog.titleNew') }}
-      </v-card-title>
+    <v-card :title="isEdit ? $t('topicDialog.titleEdit') : $t('topicDialog.titleNew')" :prepend-icon="isEdit ? 'mdi-pencil-outline' : 'mdi-tag-plus-outline'">
 
       <v-card-text>
         <v-form ref="formRef" @submit.prevent="submit">

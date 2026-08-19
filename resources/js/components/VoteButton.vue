@@ -84,7 +84,7 @@ async function toggleVote(type) {
 
 <template>
   <div class="d-inline-flex align-center">
-    <v-tooltip :text="$t('vote.up')" location="top">
+    <v-tooltip :text="$t('vote.up')" >
       <template v-slot:activator="{ props: tipProps }">
         <v-btn
           v-bind="tipProps"
@@ -111,7 +111,7 @@ async function toggleVote(type) {
       </template>
     </v-tooltip>
 
-    <v-tooltip :text="$t('vote.down')" location="top">
+    <v-tooltip :text="$t('vote.down')" >
       <template v-slot:activator="{ props: tipProps }">
         <v-btn
           v-bind="tipProps"

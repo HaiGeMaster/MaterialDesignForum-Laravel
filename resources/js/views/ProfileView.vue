@@ -9,6 +9,9 @@ import AuthForm from '../components/AuthForm.vue'
 import UserContentPanel from '../components/UserContentPanel.vue'
 import UserProfileCard from '../components/UserProfileCard.vue'
 
+import { useDisplay } from 'vuetify'
+const { xs } = useDisplay()
+
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const route = useRoute()
@@ -95,7 +98,7 @@ function handleMore(action) {
 </script>
 
 <template>
-  <div>
+  <v-container  :class="xs ? 'pa-0' : 'px-4'" :style="$route.meta.maxWidth ? { maxWidth: `${$route.meta.maxWidth}px`, margin: '0 auto' } : {}">
     <!-- 未登录且访问"me"或无法确认目标时：登录 / 注册 -->
     <AuthForm v-if="!isLoggedIn && !viewingOther"
       :loading="authStore.loading"
@@ -122,5 +125,5 @@ function handleMore(action) {
       <UserProfileCard v-if="currentUser" mode="self" :user="currentUser" />
       <UserContentPanel v-if="currentUser" class="mt-4" :user-id="currentUser.user_id" />
     </template>
-  </div>
+  </v-container>
 </template>

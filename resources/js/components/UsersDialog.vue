@@ -115,8 +115,8 @@ function isSelf(user) {
     max-width="530"
   >
     <v-card >
-      <v-toolbar density="comfortable">
-        <v-toolbar-title class="text-body-1 font-weight-bold text-truncate">
+      <v-toolbar >
+        <v-toolbar-title >
           {{ title }}
         </v-toolbar-title>
         <template #append>
@@ -136,7 +136,7 @@ function isSelf(user) {
           <template #prepend>
             <v-avatar size="44" color="primary" variant="tonal" class="mr-2">
               <v-img v-if="user.avatar" :src="user.avatar" cover />
-              <span v-else class="text-subtitle-1 font-weight-bold">
+              <span v-else >
                 {{ user.username?.slice(0, 1).toUpperCase() || '?' }}
               </span>
             </v-avatar>

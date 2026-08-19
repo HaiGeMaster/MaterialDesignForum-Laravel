@@ -15,6 +15,8 @@ const props = defineProps({
   itemType: { type: String, default: 'question' },
   /** 是否加载中 */
   loading: { type: Boolean, default: false },
+  /** 空状态文本（可选，未传时使用通用文案） */
+  emptyText: { type: String, default: '' },
 })
 
 const emit = defineEmits(['toggle-follow', 'more', 'open'])
@@ -35,7 +37,7 @@ const showEmpty = computed(() => !props.loading && props.items.length === 0)
     <!-- 顶部标题栏 -->
     <div class="d-flex align-center px-4 py-3 border-b-thin">
       <v-icon :icon="icon" color="primary" size="small" class="mr-2" />
-      <span class="text-subtitle-1 font-weight-bold">{{ title }}</span>
+      <span >{{ title }}</span>
       <v-spacer />
       <v-btn v-if="to" size="small" variant="text" :to="to" append-icon="mdi-chevron-right">
         {{ $t('content.viewAll') }}
@@ -64,7 +66,7 @@ const showEmpty = computed(() => !props.loading && props.items.length === 0)
       v-else
       icon="mdi-inbox-outline"
       :title="$t('content.emptyTitle', { title })"
-      :text="$t('content.emptyText')"
+      :text="emptyText || $t('content.emptyText')"
       class="pa-4"
     />
   </v-card>

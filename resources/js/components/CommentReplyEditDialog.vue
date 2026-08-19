@@ -2,7 +2,7 @@
 import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import http from '../api'
-import { useCommentReplyEditStore } from '../stores/commentReplyEdit'
+import { useCommentReplyEditStore } from '../stores/commentReplyEditDialog'
 import { useFeedback } from '../composables/useFeedback'
 
 const store = useCommentReplyEditStore()
@@ -26,21 +26,21 @@ watch(
 
 const title = computed(() =>
   store.type === 'reply'
-    ? t('commentReplyEdit.editReplyTitle')
-    : t('commentReplyEdit.editCommentTitle'),
+    ? t('commentReplyEditDialog.editReplyTitle')
+    : t('commentReplyEditDialog.editCommentTitle'),
 )
 
 async function save() {
   const text = content.value.trim()
   if (!text) {
-    show(t('commentReplyEdit.emptyContent'), 'warning')
+    show(t('commentReplyEditDialog.emptyContent'), 'warning')
     return
   }
   saving.value = true
   try {
     const url = store.type === 'reply' ? `/replies/${store.id}` : `/comments/${store.id}`
     const { data } = await http.put(url, { content: text })
-    show(t('commentReplyEdit.success'), 'success')
+    show(t('commentReplyEditDialog.success'), 'success')
     store.close()
     // 广播编辑完成事件，CommentItem / ReplyItem 监听后更新本地数据
     const eventName = store.type === 'reply' ? 'reply:edited' : 'comment:edited'
@@ -55,17 +55,13 @@ async function save() {
 
 <template>
   <v-dialog v-model="store.visible" max-width="520">
-    <v-card>
-      <v-card-title class="d-flex align-center pr-2">
-        <v-icon icon="mdi-pencil" color="primary" class="mr-2" />
-        {{ title }}
-      </v-card-title>
+    <v-card :title="title" prepend-icon="mdi-pencil">
 
       <v-card-text>
         <v-textarea
           ref="textareaRef"
           v-model="content"
-          :placeholder="t('commentReplyEdit.placeholder')"
+          :placeholder="t('commentReplyEditDialog.placeholder')"
           maxlength="1000"
           counter
           auto-grow
@@ -81,7 +77,7 @@ async function save() {
           {{ t('common.cancel') }}
         </v-btn>
         <v-btn color="primary" variant="tonal" :loading="saving" @click="save">
-          {{ t('commentReplyEdit.save') }}
+          {{ t('commentReplyEditDialog.save') }}
         </v-btn>
       </v-card-actions>
     </v-card>

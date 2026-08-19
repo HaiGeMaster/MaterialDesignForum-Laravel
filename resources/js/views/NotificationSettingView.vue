@@ -6,6 +6,9 @@ import http from '../api'
 import { useAuthStore } from '../stores/auth'
 import { useFeedback } from '../composables/useFeedback'
 
+import { useDisplay } from 'vuetify'
+const { xs } = useDisplay()
+
 const { t } = useI18n()
 const router = useRouter()
 const authStore = useAuthStore()
@@ -135,9 +138,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="notification-setting-view">
+  <v-container :class="xs ? 'px-0' : 'px-4'" class=" notification-setting-view" :style="$route.meta.maxWidth ? { maxWidth: `${$route.meta.maxWidth}px`, margin: '0 auto' } : {}">
     <v-card class="mx-auto my-4" max-width="720" rounded="lg">
-      <v-toolbar color="surface" flat>
+      <v-toolbar >
         <v-btn icon="mdi-arrow-left" variant="text" @click="router.back()" />
         <v-toolbar-title>{{ $t('notificationSetting.title') }}</v-toolbar-title>
         <v-btn
@@ -225,14 +228,14 @@ onMounted(() => {
         </v-table>
       </v-card-text>
     </v-card>
-  </div>
+  </v-container>
 </template>
 
 <style scoped>
 /* 分组标题行：浅色背景 + 主色文字，自动适配明暗主题 */
 .group-header td {
-  background: rgb(var(--v-theme-surface-variant));
-  color: rgb(var(--v-theme-primary));
+  background: rgb(var(--v-theme-surface-light));
+  /* color: rgb(var(--v-theme-primary)); */
   font-weight: 600;
   letter-spacing: 0.02em;
 }

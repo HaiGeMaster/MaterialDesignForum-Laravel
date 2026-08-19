@@ -2,10 +2,12 @@
 import { onMounted, ref } from 'vue'
 import http from '../api'
 import TopicCard from './TopicCard.vue'
+import { useDisplay } from 'vuetify'
 
 const topics = ref([])
 const loading = ref(false)
 const scroller = ref(null)
+const { xs } = useDisplay()
 
 async function fetchTopics() {
   loading.value = true
@@ -39,7 +41,9 @@ function scrollByCard(dir) {
 </script>
 
 <template>
-  <div class="topic-carousel">
+  <div class="topic-carousel " :class="
+  xs ? 'pl-3' : 'px-3'
+  ">
     <!-- 上一页按钮（仅在鼠标设备显示） -->
     <v-btn
       class="carousel-nav carousel-prev"
@@ -80,12 +84,13 @@ function scrollByCard(dir) {
 <style scoped>
 .topic-carousel {
   position: relative;
+
 }
 
 .carousel-track {
   --per-view: 4;
   display: flex;
-  gap: 16px;
+  gap: 18px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   padding: 4px 4px 8px;
@@ -99,6 +104,7 @@ function scrollByCard(dir) {
 }
 
 .topic-slide {
+    padding: 4px;
   /* min-width: 0 防止卡片内文字/按钮把固定宽度撑开，保证所有卡片宽度统一 */
   flex: 0 0 calc((100% - (var(--per-view) - 1) * 16px) / var(--per-view));
   min-width: 0;
@@ -106,7 +112,7 @@ function scrollByCard(dir) {
 }
 
 /* 触摸屏设备：隐藏上一页/下一页按钮，改为手指滑动 */
-@media (hover: none) and (pointer: coarse) {
+@media (hover: none) and (pointer: coarse) and (max-width: 600px) {
   .carousel-nav {
     display: none;
   }
@@ -141,10 +147,10 @@ function scrollByCard(dir) {
 }
 
 .carousel-prev {
-  left: -20px;
+  left: -8px;
 }
 
 .carousel-next {
-  right: -20px;
+  right: -8px;
 }
 </style>

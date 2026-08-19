@@ -81,7 +81,7 @@ function openDetail() {
 
 .topic-cover {
   height: 140px;
-  border-radius: 12px 12px 0 0;
+  /* border-radius: 12px 12px 0 0; */
   overflow: hidden;
 }
 </style>

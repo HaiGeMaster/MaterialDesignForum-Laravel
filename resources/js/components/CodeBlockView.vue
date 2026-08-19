@@ -8,7 +8,11 @@ const { t } = useI18n()
 const props = defineProps({
   node: { type: Object, required: true },
   updateAttributes: { type: Function, required: true },
+  editor: { type: Object, required: true },
 })
+
+// 只读渲染（ProseRenderer）时隐藏语言选择下拉，仅展示代码
+const isReadOnly = computed(() => !props.editor?.isEditable)
 
 // 语言友好名映射（未在表中的使用原名）
 const LANG_LABELS = {
@@ -67,6 +71,11 @@ const options = computed(() => {
 const knownValues = new Set(RAW_LANGS)
 const language = computed(() => props.node.attrs.language || '')
 
+// 只读模式下代码块栏展示的语言名（未知语言回退到默认文案）
+const languageLabel = computed(
+  () => LANG_LABELS[language.value] || language.value || t('codeBlock.label'),
+)
+
 // 下拉候选项：自动检测 + 全部语言 + 当前自定义语言（保证选中项可显示）
 const displayOptions = computed(() => {
   const list = [{ value: '', label: t('codeBlock.autoDetect') }, ...options.value]
@@ -86,9 +95,10 @@ function onChange(value) {
     <div class="code-block__bar" contenteditable="false">
       <span class="code-block__label">
         <v-icon icon="mdi-code-tags" size="small" />
-        <span>{{ $t('codeBlock.label') }}</span>
+        <span>{{ isReadOnly ? languageLabel : $t('codeBlock.label') }}</span>
       </span>
       <v-select
+        v-if="!isReadOnly"
         class="code-block__lang"
         :items="displayOptions"
         :model-value="language"

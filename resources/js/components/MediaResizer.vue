@@ -43,7 +43,10 @@ const aspectRatio = computed(() => {
   return w && h ? w / h : null
 })
 
-const showHandles = computed(() => (props.selected || hovered.value) && !dragging.value)
+// 只读渲染（ProseRenderer）时不显示缩放手柄
+const showHandles = computed(
+  () => props.editor?.isEditable && (props.selected || hovered.value) && !dragging.value,
+)
 
 const mediaStyle = computed(() => {
   const style = {}
@@ -53,6 +56,7 @@ const mediaStyle = computed(() => {
 })
 
 function selectNode() {
+  if (!props.editor?.isEditable) return
   const pos = props.getPos()
   if (typeof pos !== 'number') return
   props.editor.chain().focus().setNodeSelection(pos).run()
@@ -86,7 +90,10 @@ function onLoad() {
   }
   width.value = w
   height.value = h
-  props.updateAttributes({ width: w, height: h })
+  // 只读渲染时不写回节点属性
+  if (props.editor?.isEditable) {
+    props.updateAttributes({ width: w, height: h })
+  }
 }
 
 const MIN_SIZE = 24

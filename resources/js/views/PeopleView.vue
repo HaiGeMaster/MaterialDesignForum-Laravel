@@ -8,6 +8,9 @@ import { useFeedback } from '../composables/useFeedback'
 import InfiniteScroll from '../components/InfiniteScroll.vue'
 import PersonCard from '../components/PersonCard.vue'
 
+import { useDisplay } from 'vuetify'
+const { xs } = useDisplay()
+
 const route = useRoute()
 const router = useRouter()
 
@@ -28,6 +31,16 @@ const tab = computed(() => {
   if (!authStore.isLoggedIn) return 'recommend'
   const t = route.query.tab
   return t === 'following' || t === 'followers' ? t : 'recommend'
+})
+
+// 每个 tab 的空状态文案不同
+const emptyState = computed(() => {
+  const map = {
+    following: { icon: 'mdi-account-heart-outline', title: 'people.emptyFollowingTitle', text: 'people.emptyFollowingText' },
+    followers: { icon: 'mdi-account-multiple-outline', title: 'people.emptyFollowersTitle', text: 'people.emptyFollowersText' },
+    recommend: { icon: 'mdi-account-search', title: 'people.emptyRecommendTitle', text: 'people.emptyRecommendText' },
+  }
+  return map[tab.value] ?? map.recommend
 })
 
 async function refresh(reset = true) {
@@ -77,7 +90,7 @@ function openPlaceholder(action) {
 </script>
 
 <template>
-  <div>
+  <v-container  class="pa-4" :style="$route.meta.maxWidth ? { maxWidth: `${$route.meta.maxWidth}px`, margin: '0 auto' } : {}">
 
     <v-row v-if="users.length">
       <v-col v-for="u in users" :key="u.user_id" cols="6" sm="6" md="4" lg="3">
@@ -102,9 +115,9 @@ function openPlaceholder(action) {
 
     <v-empty-state
       v-else-if="!userStore.loading"
-      icon="mdi-account-search"
-      :title="$t('people.emptyTitle')"
-      :text="$t('people.emptyText')"
+      :icon="emptyState.icon"
+      :title="$t(emptyState.title)"
+      :text="$t(emptyState.text)"
     />
-  </div>
+  </v-container>
 </template>

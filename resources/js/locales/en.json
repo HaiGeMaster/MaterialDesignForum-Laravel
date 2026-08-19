@@ -170,7 +170,9 @@
     "registeredAt": "Joined {time}",
     "following": "Following {count}",
     "followers": "Followers {count}",
-    "message": "Message"
+    "message": "Message",
+    "uploadAvatar": "Upload avatar",
+    "uploadCover": "Upload cover"
   },
   "userContent": {
     "questions": "Questions",
@@ -314,7 +316,11 @@
   },
   "topics": {
     "emptyTitle": "No topics yet",
-    "emptyText": "Be the first to create a topic."
+    "emptyText": "Be the first to create a topic.",
+    "emptyFollowingTitle": "No followed topics yet",
+    "emptyFollowingText": "You haven't followed any topics. Updates to followed topics will show here.",
+    "emptyRecommendTitle": "No recommended topics yet",
+    "emptyRecommendText": "No topics to recommend right now. Create one first."
   },
   "list": {
     "writeArticle": "Write an article",
@@ -322,11 +328,29 @@
     "emptyArticlesTitle": "No articles yet",
     "emptyArticlesText": "No articles yet. Be the first to write one!",
     "emptyQuestionsTitle": "No questions yet",
-    "emptyQuestionsText": "Have a question? Ask it and discuss with others."
+    "emptyQuestionsText": "Have a question? Ask it and discuss with others.",
+    "emptyHotQuestionsTitle": "No hot questions yet",
+    "emptyHotQuestionsText": "No hot questions yet. Ask the first one!",
+    "emptyLatestQuestionsTitle": "No latest questions yet",
+    "emptyLatestQuestionsText": "No new questions have been posted.",
+    "emptyFollowingQuestionsTitle": "No followed questions yet",
+    "emptyFollowingQuestionsText": "You haven't followed any questions. Updates to followed questions will show here.",
+    "emptyHotArticlesTitle": "No hot articles yet",
+    "emptyHotArticlesText": "No hot articles yet. Write the first one!",
+    "emptyLatestArticlesTitle": "No latest articles yet",
+    "emptyLatestArticlesText": "No new articles have been published.",
+    "emptyFollowingArticlesTitle": "No followed articles yet",
+    "emptyFollowingArticlesText": "You haven't followed any articles. Updates to followed articles will show here."
   },
   "people": {
     "emptyTitle": "No users yet",
-    "emptyText": "No community members yet. Sign in to explore."
+    "emptyText": "No community members yet. Sign in to explore.",
+    "emptyFollowingTitle": "No people you follow yet",
+    "emptyFollowingText": "You haven't followed anyone. Discover interesting people.",
+    "emptyFollowersTitle": "No followers yet",
+    "emptyFollowersText": "No one follows you yet. Publish content to attract followers.",
+    "emptyRecommendTitle": "No recommended users yet",
+    "emptyRecommendText": "No one to recommend right now."
   },
   "notifications": {
     "markAllRead": "Mark all as read",
@@ -494,7 +518,11 @@
     "notFound": "Topic not found",
     "notFoundText": "This topic may have been deleted.",
     "deleteTitle": "Delete topic",
-    "deleteConfirm": "Delete the topic \"{name}\"? This cannot be undone."
+    "deleteConfirm": "Delete the topic \"{name}\"? This cannot be undone.",
+    "emptyArticlesTitle": "No articles in this topic yet",
+    "emptyArticlesText": "No one has published articles about this topic.",
+    "emptyQuestionsTitle": "No questions in this topic yet",
+    "emptyQuestionsText": "No one has asked questions about this topic."
   },
   "questionDetail": {
     "backToList": "Back to questions",
@@ -536,16 +564,26 @@
     "deleteTitle": "Delete comment",
     "deleteConfirm": "Delete this comment? This cannot be undone."
   },
+  "commentItem": {
+    "reply": "Reply",
+    "viewReplies": "View {count} replies",
+    "hideReplies": "Hide replies",
+    "showMoreReplies": "Show more replies"
+  },
   "commentDialog": {
     "button": "Comments"
   },
-  "commentReplyEdit": {
+  "commentReplyEditDialog": {
     "editCommentTitle": "Edit comment",
     "editReplyTitle": "Edit reply",
     "placeholder": "Edit content…",
     "emptyContent": "Content cannot be empty.",
     "save": "Save",
     "success": "Changes saved."
+  },
+  "replyItem": {
+    "replyTo": "replied",
+    "reply": "Reply"
   },
   "commentSheet": {
     "placeholder": "Write your comment…",

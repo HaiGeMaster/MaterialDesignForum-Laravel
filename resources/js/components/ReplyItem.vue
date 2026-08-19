@@ -2,11 +2,12 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import http from '../api'
-import DeleteDialog from './DeleteDialog.vue'
 import MoreActions from './MoreActions.vue'
+import UserMiniCard from './UserMiniCard.vue'
 import VoteButton from './VoteButton.vue'
 import { useAuthStore } from '../stores/auth'
 import { useReplySheetStore } from '../stores/replySheet'
+import { useDeleteDialogStore } from '../stores/deleteDialog'
 import { useFeedback } from '../composables/useFeedback'
 
 const props = defineProps({
@@ -19,16 +20,20 @@ const emit = defineEmits(['deleted'])
 const { t } = useI18n()
 const authStore = useAuthStore()
 const replySheet = useReplySheetStore()
+const deleteDialog = useDeleteDialogStore()
 const { show } = useFeedback()
-
-const deleteDialog = ref(false)
-const deleting = ref(false)
 
 const author = computed(() => props.reply.creator || {})
 const authorInitial = computed(() => (author.value.username || '?').slice(0, 1).toUpperCase())
 const targetUser = computed(() => props.reply.replyable_user || null)
-// 回复对回复（replyable_type === 'reply'）时展示“回复 @对方”
+// 回复对回复（replyable_type === 'reply'）时展示"回复 @对方"
 const showReplyTarget = computed(() => props.reply.replyable_type === 'reply' && targetUser.value)
+
+// 旧布局：时间旁显示用户上次登录位置（有则显示）
+const locationText = computed(() => {
+  const loc = author.value.last_login_location
+  return loc && String(loc).trim() !== '' ? ` · ${loc}` : ''
+})
 
 function timeText(time) {
   return time ? String(time).slice(0, 16).replace('T', ' ') : ''
@@ -52,18 +57,18 @@ function openReply() {
   })
 }
 
+function askDelete() {
+  deleteDialog.open({
+    title: t('commentSection.deleteReplyTitle'),
+    text: t('commentSection.deleteReplyConfirm'),
+    onConfirm: confirmDelete,
+  })
+}
+
 async function confirmDelete() {
-  deleting.value = true
-  try {
-    await http.delete(`/replies/${props.reply.reply_id}`)
-    show(t('commentSection.replyDeleted'), 'success')
-    emit('deleted')
-  } catch (error) {
-    show(error.message, 'error')
-  } finally {
-    deleting.value = false
-    deleteDialog.value = false
-  }
+  await http.delete(`/replies/${props.reply.reply_id}`)
+  show(t('commentSection.replyDeleted'), 'success')
+  emit('deleted')
 }
 
 // 编辑完成：用后端返回的最新数据覆盖本地对象（保持引用，触发响应式更新）
@@ -78,82 +83,93 @@ onBeforeUnmount(() => window.removeEventListener('reply:edited', handleReplyEdit
 </script>
 
 <template>
-  <div class="d-flex ga-2 px-2 py-1" @click.stop="openReply">
-    <v-avatar
-      size="28"
-      color="primary"
-      variant="tonal"
-      :to="author.user_id ? `/users/${author.user_id}` : undefined"
-      @click.stop
-    >
-      <v-img v-if="author.avatar" :src="author.avatar" cover />
-      <span v-else class="text-caption font-weight-bold text-primary">{{ authorInitial }}</span>
-    </v-avatar>
+  <!-- 参考旧项目布局：v-list-item 结构（头像 / 用户名(+回复对象) / 内容 / 操作区） -->
+  <v-list-item
+    rounded="lg"
+    active-class="text-primary"
+    class="py-3 reply-item"
+    @click="openReply"
+  >
+    <!-- 头像：点击弹出用户小卡片 -->
+    <template #prepend>
+      <v-menu
+        v-if="author.user_id"
+        :close-on-content-click="false"
+        offset="16"
+      >
+        <template #activator="{ props: menuProps }">
+          <v-avatar
+            size="36"
+            color="primary"
+            variant="tonal"
+            class="cursor-pointer"
+            v-bind="menuProps"
+            @click.stop="menuProps.onClick?.($event)"
+          >
+            <v-img v-if="author.avatar" :src="author.avatar" cover />
+            <span v-else class="text-body-2 font-weight-bold text-primary">{{ authorInitial }}</span>
+          </v-avatar>
+        </template>
+        <UserMiniCard :user="author" />
+      </v-menu>
+      <v-avatar v-else size="36" color="grey" variant="tonal">
+        <span class="text-body-2 font-weight-bold">?</span>
+      </v-avatar>
+    </template>
 
-    <div class="grow min-w-0">
-      <!-- 头部：用户名 / 回复 @对方 / 时间 -->
-      <div class="d-flex align-center ga-2 flex-wrap">
+    <!-- 标题：用户名（回复对回复时附带"回复 @对方"） -->
+    <v-list-item-title>
+      {{ author.username }}
+      <template v-if="showReplyTarget">
+        <span class="text-grey"> {{ t('replyItem.replyTo') }} </span>
         <router-link
-          :to="author.user_id ? `/users/${author.user_id}` : undefined"
-          class="text-subtitle-2 font-weight-medium text-primary text-decoration-none"
+          :to="targetUser.user_id ? `/users/${targetUser.user_id}` : undefined"
+          class="text-primary font-weight-medium text-decoration-none"
           @click.stop
         >
-          {{ author.username }}
+          @{{ targetUser.username }}
         </router-link>
-        <span v-if="showReplyTarget" class="text-body-2 text-medium-emphasis">
-          {{ $t('replyItem.replyTo') }}
-          <router-link
-            :to="targetUser.user_id ? `/users/${targetUser.user_id}` : undefined"
-            class="text-primary font-weight-medium text-decoration-none"
-            @click.stop
-          >
-            @{{ targetUser.username }}
-          </router-link>
-        </span>
-        <span class="text-caption text-medium-emphasis">{{ timeText(reply.create_time) }}</span>
-      </div>
+      </template>
+    </v-list-item-title>
 
-      <!-- 内容 -->
-      <div class="text-body-2 reply-item__content">
-        <span v-if="showReplyTarget" class="text-medium-emphasis">@{{ targetUser.username }} </span>
-        <span style="white-space: pre-wrap; word-break: break-word;">{{ reply.content }}</span>
+    <!-- 内容 -->
+    <v-list-item-subtitle class="mb-1 text-high-emphasis opacity-100">
+      <div
+        class="text-body-2 reply-item__content"
+        style="white-space: pre-wrap; word-break: break-word"
+      >
+        {{ reply.content }}
       </div>
+    </v-list-item-subtitle>
 
-      <!-- 操作：回复 / 赞同 / 更多 -->
-      <div class="d-flex align-center ga-1 mt-0.5">
-        <!-- <v-btn size="x-small" variant="text" class="text-none" density="comfortable" @click.stop="openReply">
-          <v-icon size="small" start>mdi-reply</v-icon>
-          {{ $t('replyItem.reply') }}
-        </v-btn> -->
-        <VoteButton
-          type="reply"
-          :item-id="reply.reply_id"
-          :up-count="Number(reply.vote_up_count || 0)"
-          :down-count="Number(reply.vote_down_count || 0)"
-          :my-vote="reply.my_vote || null"
-        />
-        <v-spacer />
-        <MoreActions
-          type="reply"
-          :item="reply"
-          location="top end"
-          @delete="deleteDialog = true"
-        />
-      </div>
-    </div>
+    <!-- 操作区：时间 / 投票 / 更多 -->
+    <v-list-item-action>
+      <v-list-item-subtitle class="text-high-emphasis">
+        {{ timeText(reply.create_time) }}{{ locationText }}
+      </v-list-item-subtitle>
 
-    <!-- 删除确认 -->
-    <DeleteDialog
-      v-model="deleteDialog"
-      :title="$t('commentSection.deleteReplyTitle')"
-      :text="$t('commentSection.deleteReplyConfirm')"
-      :loading="deleting"
-      @confirm="confirmDelete"
-    />
-  </div>
+      <v-spacer />
+
+      <VoteButton
+        type="reply"
+        :item-id="reply.reply_id"
+        :up-count="Number(reply.vote_up_count || 0)"
+        :down-count="Number(reply.vote_down_count || 0)"
+        :my-vote="reply.my_vote || null"
+      />
+      <MoreActions type="reply" :item="reply" @delete="askDelete" />
+    </v-list-item-action>
+  </v-list-item>
 </template>
 
 <style scoped>
+.reply-item {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+.reply-item:hover {
+  background-color: rgba(128, 128, 128, 0.06);
+}
 .reply-item__content {
   min-width: 0;
 }

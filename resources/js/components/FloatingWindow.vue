@@ -201,7 +201,7 @@ function close() {
         </span>
         <v-spacer />
         <!-- 手机上窗口默认全屏，隐藏最小化/最大化按钮 -->
-        <v-tooltip v-if="!isMobile" :text="minimized ? $t('floatingWindow.restore') : $t('floatingWindow.minimize')" location="top">
+        <v-tooltip v-if="!isMobile" :text="minimized ? $t('floatingWindow.restore') : $t('floatingWindow.minimize')" >
           <template #activator="{ props: tipProps }">
             <v-btn
               v-bind="tipProps"
@@ -214,7 +214,7 @@ function close() {
             </v-btn>
           </template>
         </v-tooltip>
-        <v-tooltip v-if="!isMobile" :text="maximized ? $t('floatingWindow.restore') : $t('floatingWindow.maximize')" location="top">
+        <v-tooltip v-if="!isMobile" :text="maximized ? $t('floatingWindow.restore') : $t('floatingWindow.maximize')" >
           <template #activator="{ props: tipProps }">
             <v-btn
               v-bind="tipProps"
@@ -227,7 +227,7 @@ function close() {
             </v-btn>
           </template>
         </v-tooltip>
-        <v-tooltip :text="$t('floatingWindow.close')" location="top">
+        <v-tooltip :text="$t('floatingWindow.close')" >
           <template #activator="{ props: tipProps }">
             <v-btn v-bind="tipProps" size="x-small" variant="text" icon @click.stop="close">
               <v-icon icon="mdi-window-close" size="small" />

@@ -1,10 +1,14 @@
 <script setup>
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { useDisplay } from "vuetify";
+import { useAuthStore } from "../stores/auth";
+import { useUserStore } from "../stores/user";
+import { useFeedback } from "../composables/useFeedback";
 import { useUsersDialogStore } from "../stores/usersDialog";
+import { useProfileEditStore } from "../stores/profileEditDialog";
 import FollowButton from "./FollowButton.vue";
 import MoreActions from "./MoreActions.vue";
-import ProfileEditDialog from "./ProfileEditDialog.vue";
 
 const props = defineProps({
     user: { type: Object, required: true },
@@ -13,44 +17,153 @@ const props = defineProps({
     following: { type: Boolean, default: false },
 });
 
-const emit = defineEmits(["toggle-follow", "more"]);
+const emit = defineEmits(["toggle-follow", "more", "saved"]);
 
 const { t } = useI18n();
+const { xs } = useDisplay();
+const authStore = useAuthStore();
+const userStore = useUserStore();
+const { show: feedback } = useFeedback();
 const usersDialog = useUsersDialogStore();
-const groupName = computed(() => props.user?.user_group?.name || t("userProfile.noGroup"));
+const profileEdit = useProfileEditStore();
+const groupName = computed(
+    () => props.user?.user_group?.user_group_name || t("userProfile.noGroup"),
+);
 const initial = computed(
     () => props.user?.username?.slice(0, 1).toUpperCase() || "?",
 );
 
-// 编辑个人资料对话框开关（self 模式）
-const editDialog = ref(false);
+// ---------- 封面 / 头像快捷上传（self 模式，悬浮显示） ----------
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const MAX_SIZE = 2 * 1024 * 1024; // 2MB，与后端 max:2048 保持一致
+
+const fileInput = ref(null);
+const pendingType = ref("cover");
+const uploadingType = ref("");
+
+function pick(type) {
+    pendingType.value = type;
+    fileInput.value?.click();
+}
+
+async function onFileChange(event) {
+    const file = event.target.files?.[0];
+    // 允许用户再次选择同一个文件
+    event.target.value = "";
+    if (!file) return;
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+        feedback(t("imageUpload.typeError"), "error");
+        return;
+    }
+    if (file.size > MAX_SIZE) {
+        feedback(t("imageUpload.sizeError"), "error");
+        return;
+    }
+
+    const type = pendingType.value;
+    uploadingType.value = type;
+    try {
+        const result = await userStore.uploadImage(type, file);
+        // 上传成功后立即保存并同步当前登录用户信息
+        const saved = await userStore.updateProfile({ [type]: result.url });
+        authStore.setUser(saved.user);
+        feedback(result.message || t("imageUpload.uploaded"), "success");
+        emit("saved", saved.user);
+    } catch (error) {
+        feedback(error.message, "error");
+    } finally {
+        uploadingType.value = "";
+    }
+}
 
 // 自定义更多项（内置的复制链接/分享/举报由 MoreActions 按权限自动生成）
 const moreItems = [{ title: t("userProfile.message"), icon: "mdi-message-outline" }];
 </script>
 
 <template>
-    <v-card >
-        <!-- 封面与头像：头像绝对定位，中心点正好落在封面底边 -->
+    <v-card>
+        <!-- 封面：头像+名字行整体以封面底边为锚 -->
         <div class="cover-wrap">
             <v-img v-if="user?.cover" :src="user.cover" height="240" cover />
             <div v-else class="bg-primary" style="height: 240px"></div>
-            <v-avatar size="96" color="secondary" class="border avatar-center">
-                <v-img v-if="user?.avatar" :src="user.avatar" cover />
-                <span v-else class="text-h4">{{ initial }}</span>
-            </v-avatar>
-        </div>
 
-        <v-card-text class="text-center pt-16">
-            <div class="text-h6 mt-3">{{ user?.username }}</div>
-            <div class="text-body-2 text-medium-emphasis mb-2">
-                {{ user?.headline || $t("userProfile.noHeadline") }}
+            <!--
+                头像+名字行：bottom: -48px（行高 96px），行中心点精确落在封面底边；
+                xs 居中 / 非 xs 靠左，名字垂直居中对齐头像中心
+            -->
+            <div
+                class="profile-row"
+                :class="xs ? 'profile-row--xs' : 'profile-row--left'"
+            >
+                <v-avatar
+                    size="96"
+                    color="secondary"
+                    class="border avatar-wrap"
+                >
+                    <v-img v-if="user?.avatar" :src="user.avatar" cover />
+                    <span v-else class="text-h4">{{ initial }}</span>
+                    <!-- 头像上传按钮：悬浮头像时显示，居中对齐头像 -->
+                    <v-btn
+                        v-if="mode === 'self'"
+                        class="avatar-upload-btn"
+                        icon="mdi-camera"
+                        size="x-small"
+                        variant="flat"
+                        color="primary"
+                        :title="$t('userProfile.uploadAvatar')"
+                        :loading="uploadingType === 'avatar'"
+                        @click.stop="pick('avatar')"
+                    />
+                </v-avatar>
+
+                <!-- 非 xs：名字与一句话在头像右侧 -->
+                <div v-if="!xs" class="text-start">
+                    <div class="profile-name">{{ user?.username }}</div>
+                    <div class="text-body-2 text-medium-emphasis">
+                        {{ user?.headline || $t("userProfile.noHeadline") }}
+                    </div>
+                </div>
             </div>
-            <v-chip size="small" color="primary" variant="tonal">
+
+            <!-- 封面上传按钮：悬浮封面时显示，位于右上角 -->
+            <v-btn
+                v-if="mode === 'self'"
+                class="cover-upload-btn"
+                icon="mdi-camera"
+                size="small"
+                variant="flat"
+                color="primary"
+                :title="$t('userProfile.uploadCover')"
+                :loading="uploadingType === 'cover'"
+                @click.stop="pick('cover')"
+            />
+            <v-chip
+                size="small"
+                color="primary"
+                variant="tonal"
+                class="group-chip"
+            >
                 {{ groupName }}
             </v-chip>
+        </div>
 
-            <v-list v-if="user" lines="one" density="compact" class="mt-2">
+        <v-card-text :class="xs ? 'text-center pt-16' : 'pt-16'">
+            <!-- xs：名字与一句话居中显示在头像下方 -->
+            <div v-if="xs">
+                <div class="profile-name">{{ user?.username }}</div>
+                <div class="text-body-2 text-medium-emphasis mb-2">
+                    {{ user?.headline || $t("userProfile.noHeadline") }}
+                </div>
+            </div>
+
+            <v-list
+                v-if="user"
+                lines="one"
+                density="compact"
+                class="mt-2"
+                :style="xs ? { margin: 'auto', width: 'auto' } : {}"
+            >
                 <v-list-item
                     v-if="user.blog"
                     prepend-icon="mdi-link"
@@ -82,7 +195,7 @@ const moreItems = [{ title: t("userProfile.message"), icon: "mdi-message-outline
                         v-if="mode === 'self'"
                         color="primary"
                         size="small"
-                        @click="editDialog = true"
+                        @click="profileEdit.open(user, { onSaved: (u) => emit('saved', u) })"
                         icon="mdi-pencil"
                     >
                     </v-btn>
@@ -135,7 +248,14 @@ const moreItems = [{ title: t("userProfile.message"), icon: "mdi-message-outline
             </div>
         </v-card-text>
 
-        <ProfileEditDialog v-model="editDialog" :user="user" />
+        <!-- 封面/头像上传用的隐藏文件选择 -->
+        <input
+            ref="fileInput"
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            class="d-none"
+            @change="onFileChange"
+        />
     </v-card>
 </template>
 
@@ -144,12 +264,69 @@ const moreItems = [{ title: t("userProfile.message"), icon: "mdi-message-outline
     position: relative;
 }
 
-.avatar-center {
-    /* 头像 96px，bottom 负半高使其中心点恰好对齐封面底边 */
+/* 头像+名字行：absolute 锚定封面底边。
+   bottom: -48px 且行高由 96px 头像决定，
+   行中心（头像中心）精确落在封面底边线上。 */
+.profile-row {
     position: absolute;
-    left: 50%;
     bottom: -48px;
-    transform: translateX(-50%);
     z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* xs：水平居中 */
+.profile-row--xs {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* 其他：靠左 */
+.profile-row--left {
+    left: 24px;
+}
+
+/* 用户名：显式加大加粗（不依赖 Vuetify typography 类） */
+.profile-name {
+    font-size: 28px !important;
+    font-weight: 700 !important;
+    line-height: 1.4;
+}
+
+.group-chip {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 1;
+}
+
+/* 封面上传按钮：悬浮封面区时显示，右上角 */
+.cover-upload-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.cover-wrap:hover .cover-upload-btn {
+    opacity: 1;
+}
+
+/* 头像上传按钮：悬浮头像时显示，居中对齐头像 */
+.avatar-upload-btn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.avatar-wrap:hover .avatar-upload-btn {
+    opacity: 1;
 }
 </style>

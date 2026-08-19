@@ -8,7 +8,7 @@ import { defineStore } from 'pinia'
  * 提交成功后派发 window CustomEvent('comment:edited' | 'reply:edited')，
  * 由 CommentItem / ReplyItem 监听后更新本地数据。
  */
-export const useCommentReplyEditStore = defineStore('commentReplyEdit', {
+export const useCommentReplyEditStore = defineStore('commentReplyEditDialog', {
   state: () => ({
     /** 编辑对话框是否显示 */
     visible: false,

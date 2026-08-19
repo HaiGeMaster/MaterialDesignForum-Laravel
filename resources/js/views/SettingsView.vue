@@ -7,6 +7,9 @@ import { useUserStore } from '../stores/user'
 import { useFeedback } from '../composables/useFeedback'
 import ImageUploadField from '../components/ImageUploadField.vue'
 
+import { useDisplay } from 'vuetify'
+const { xs } = useDisplay()
+
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const router = useRouter()
@@ -138,7 +141,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
+  <v-container  :class="xs ? 'px-0' : 'px-4'" :style="$route.meta.maxWidth ? { maxWidth: `${$route.meta.maxWidth}px`, margin: '0 auto' } : {}">
     <v-row justify="center">
       <v-col cols="12" md="10" lg="8">
         <!-- 设置选项列表 -->
@@ -286,5 +289,5 @@ onMounted(() => {
         </template>
       </v-col>
     </v-row>
-  </div>
+  </v-container>
 </template>

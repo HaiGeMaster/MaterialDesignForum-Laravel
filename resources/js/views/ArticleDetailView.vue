@@ -4,26 +4,28 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import http from '../api'
 import CommentSection from '../components/CommentSection.vue'
-import DeleteDialog from '../components/DeleteDialog.vue'
 import FollowButton from '../components/FollowButton.vue'
 import MoreActions from '../components/MoreActions.vue'
 import ProseRenderer from '../components/ProseRenderer.vue'
 import VoteButton from '../components/VoteButton.vue'
 import { useAuthStore } from '../stores/auth'
+import { useDeleteDialogStore } from '../stores/deleteDialog'
 import { useEditorWindowStore } from '../stores/editorWindow'
 import { useFeedback } from '../composables/useFeedback'
+
+import { useDisplay } from 'vuetify'
+const { xs } = useDisplay()
 
 const route = useRoute()
 const router = useRouter()
 const { show } = useFeedback()
 const { t } = useI18n()
 const authStore = useAuthStore()
+const deleteDialog = useDeleteDialogStore()
 const editorWindow = useEditorWindowStore()
 
 const article = ref(null)
 const loading = ref(false)
-const deleteDialog = ref(false)
-const deleting = ref(false)
 
 // 底部评论输入框发布成功后递增，强制评论区重新挂载加载最新数据
 const commentRefreshKey = ref(0)
@@ -77,19 +79,19 @@ function editArticle() {
 
 // ---- 删除 ----
 
+function askDelete() {
+  deleteDialog.open({
+    title: t('articleDetail.deleteTitle'),
+    text: t('articleDetail.deleteConfirm', { title: article.value?.title }),
+    onConfirm: confirmDelete,
+  })
+}
+
 async function confirmDelete() {
   if (!article.value) return
-  deleting.value = true
-  try {
-    await http.delete(`/articles/${article.value.article_id}`)
-    show(t('articleDetail.deleted'), 'success')
-    router.push('/articles')
-  } catch (error) {
-    show(error.message, 'error')
-  } finally {
-    deleting.value = false
-    deleteDialog.value = false
-  }
+  await http.delete(`/articles/${article.value.article_id}`)
+  show(t('articleDetail.deleted'), 'success')
+  router.push('/articles')
 }
 
 // ---- 发布/编辑完成后刷新 ----
@@ -125,21 +127,21 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div>
+  <v-container :class="xs ? 'px-0' : 'px-4'" :style="$route.meta.maxWidth ? { maxWidth: `${$route.meta.maxWidth}px`, margin: '0 auto' } : {}">
     <v-progress-linear v-if="loading && !article" indeterminate color="primary" class="mb-4" />
 
     <template v-if="article">
       <v-card  class="overflow-hidden">
         <!-- 应用栏：返回 / 标题 / 关注 -->
-        <v-toolbar flat color="surface">
+        <v-toolbar :title="article.title">
           <template v-slot:prepend>
             <v-btn icon variant="text" :title="$t('common.back')" @click="router.back()">
               <v-icon>mdi-arrow-left</v-icon>
             </v-btn>
           </template>
-          <v-toolbar-title class="font-weight-bold">
+          <!-- <v-toolbar-title class="font-weight-bold">
             <span class="d-block text-truncate">{{ article.title }}</span>
-          </v-toolbar-title>
+          </v-toolbar-title> -->
           <template v-slot:append>
             <FollowButton
               type="article"
@@ -175,7 +177,14 @@ onUnmounted(() => {
             </template>
           </v-list-item>
 
-          <!-- 话题标签（正文上方） -->
+          <!-- 正文 -->
+          <ProseRenderer
+            :content="article.content_rendered"
+            :empty-text="$t('articleDetail.emptyContent')"
+            class="mt-4"
+          />
+
+          <!-- 话题标签（正文下方） -->
           <div v-if="article.topics?.length" class="d-flex flex-wrap ga-1 mt-4">
             <router-link
               v-for="topic in article.topics"
@@ -189,12 +198,6 @@ onUnmounted(() => {
             </router-link>
           </div>
 
-          <!-- 正文 -->
-          <ProseRenderer
-            :content="article.content_rendered"
-            :empty-text="$t('articleDetail.emptyContent')"
-            class="mt-4"
-          />
         </v-card-text>
 
         <!-- 底部操作栏：点赞在左，更多操作在右 -->
@@ -210,9 +213,9 @@ onUnmounted(() => {
           <MoreActions
             type="article"
             :item="article"
-            location="top end"
+
             @edit="editArticle"
-            @delete="deleteDialog = true"
+            @delete="askDelete"
           />
         </v-card-actions>
       </v-card>
@@ -232,16 +235,7 @@ onUnmounted(() => {
       :title="$t('articleDetail.notFound')"
       :text="$t('articleDetail.notFoundText')"
     />
-
-    <!-- 删除确认 -->
-    <DeleteDialog
-      v-model="deleteDialog"
-      :title="$t('articleDetail.deleteTitle')"
-      :text="$t('articleDetail.deleteConfirm', { title: article?.title })"
-      :loading="deleting"
-      @confirm="confirmDelete"
-    />
-  </div>
+  </v-container>
 </template>
 
 

@@ -141,9 +141,9 @@ function onMenuVisibility(id, open) {
       <v-divider v-if="btn.type === 'divider'" vertical inset class="mx-1" />
 
       <!-- 文字颜色 -->
-      <v-tooltip v-else-if="btn.type === 'color'" :text="btn.title" location="top">
+      <v-tooltip v-else-if="btn.type === 'color'" :text="btn.title" >
         <template #activator="{ props: tipProps }">
-          <v-menu location="bottom" offset="6">
+          <v-menu  offset="6">
             <template #activator="{ props: menuProps }">
               <v-btn v-bind="{ ...menuProps, ...tipProps }" size="small" variant="text" icon>
                 <v-icon :icon="btn.icon" size="small" />
@@ -151,7 +151,7 @@ function onMenuVisibility(id, open) {
             </template>
             <v-card min-width="180" class="pa-2">
               <div class="d-flex flex-wrap ga-1">
-                <v-tooltip v-for="c in btn.colors" :key="c.value" :text="c.label" location="top">
+                <v-tooltip v-for="c in btn.colors" :key="c.value" :text="c.label" >
                   <template #activator="{ props: tipProps }">
                     <v-btn
                       v-bind="tipProps"
@@ -181,9 +181,9 @@ function onMenuVisibility(id, open) {
       </v-tooltip>
 
       <!-- 背景高亮 -->
-      <v-tooltip v-else-if="btn.type === 'highlight'" :text="btn.title" location="top">
+      <v-tooltip v-else-if="btn.type === 'highlight'" :text="btn.title" >
         <template #activator="{ props: tipProps }">
-          <v-menu location="bottom" offset="6">
+          <v-menu  offset="6">
             <template #activator="{ props: menuProps }">
               <v-btn v-bind="{ ...menuProps, ...tipProps }" size="small" variant="text" icon>
                 <v-icon :icon="btn.icon" size="small" />
@@ -191,7 +191,7 @@ function onMenuVisibility(id, open) {
             </template>
             <v-card min-width="180" class="pa-2">
               <div class="d-flex flex-wrap ga-1">
-                <v-tooltip v-for="c in btn.colors" :key="c.value" :text="c.label" location="top">
+                <v-tooltip v-for="c in btn.colors" :key="c.value" :text="c.label" >
                   <template #activator="{ props: tipProps }">
                     <v-btn
                       v-bind="tipProps"
@@ -221,9 +221,9 @@ function onMenuVisibility(id, open) {
       </v-tooltip>
 
       <!-- 字号 / 行距下拉 -->
-      <v-tooltip v-else-if="btn.type === 'select'" :text="btn.title" location="top">
+      <v-tooltip v-else-if="btn.type === 'select'" :text="btn.title" >
         <template #activator="{ props: tipProps }">
-          <v-menu location="bottom" offset="6">
+          <v-menu  offset="6">
             <template #activator="{ props: menuProps }">
               <v-btn
                 v-bind="{ ...menuProps, ...tipProps }"
@@ -252,11 +252,11 @@ function onMenuVisibility(id, open) {
       </v-tooltip>
 
       <!-- 功能分组菜单：合并同类按钮，点击弹出子项选择 -->
-      <v-tooltip v-else-if="btn.type === 'menu'" :text="btn.title" location="top">
+      <v-tooltip v-else-if="btn.type === 'menu'" :text="btn.title" >
         <template #activator="{ props: tipProps }">
           <v-menu
             v-model="openMenus[btn.id]"
-            location="bottom"
+
             offset="6"
             @update:model-value="onMenuVisibility(btn.id, $event)"
           >
@@ -323,7 +323,7 @@ function onMenuVisibility(id, open) {
       <v-tooltip
         v-else-if="btn.type === 'image'"
         :text="uploading === 'image' ? $t('editorUpload.uploadingImage') : btn.title"
-        location="top"
+
       >
         <template #activator="{ props: tipProps }">
           <v-btn
@@ -344,7 +344,7 @@ function onMenuVisibility(id, open) {
       <v-tooltip
         v-else-if="btn.type === 'video'"
         :text="uploading === 'video' ? $t('editorUpload.uploadingVideo') : btn.title"
-        location="top"
+
       >
         <template #activator="{ props: tipProps }">
           <v-btn
@@ -362,7 +362,7 @@ function onMenuVisibility(id, open) {
       </v-tooltip>
 
       <!-- 普通按钮 -->
-      <v-tooltip v-else :text="btn.title" location="top">
+      <v-tooltip v-else :text="btn.title" >
         <template #activator="{ props: tipProps }">
           <v-btn
             v-bind="tipProps"

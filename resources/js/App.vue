@@ -1,22 +1,22 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from './stores/auth'
 import { useFeedback } from './composables/useFeedback'
 import AppBar from './components/AppBar.vue'
 import AppDrawer from './components/AppDrawer.vue'
-import AppTabBar from './components/AppTabBar.vue'
 import RichTextEditorWindow from './components/RichTextEditorWindow.vue'
 import FloatingActionButton from './components/FloatingActionButton.vue'
 import UsersDialog from './components/UsersDialog.vue'
 import CommentReplySheet from './components/CommentReplySheet.vue'
 import CommentReplyEditDialog from './components/CommentReplyEditDialog.vue'
+import CommentDialog from './components/CommentDialog.vue'
+import DeleteDialog from './components/DeleteDialog.vue'
+import ProfileEditDialog from './components/ProfileEditDialog.vue'
 
 const authStore = useAuthStore()
 const { visible, text, color } = useFeedback()
 const { t } = useI18n()
-const route = useRoute()
 
 const drawer = ref(true)
 
@@ -24,13 +24,6 @@ const drawer = ref(true)
 function handleContentPublished(payload) {
   window.dispatchEvent(new CustomEvent('content:published', { detail: payload }))
 }
-
-// 页面内容容器宽度：路由 meta 可配置 maxWidth，未配置则通栏
-const containerStyle = computed(() =>
-  route.meta.maxWidth
-    ? { maxWidth: `${route.meta.maxWidth}px`, margin: '0 auto' }
-    : {},
-)
 
 function handleAuthUnauthorized() {
   authStore.setUser(null)
@@ -65,15 +58,11 @@ onBeforeUnmount(() => {
       <AppDrawer v-model="drawer" />
 
       <v-main scrollable>
-        <AppTabBar />
-
-        <v-container fluid class="pa-6" :style="containerStyle">
-          <router-view />
-        </v-container>
+        <router-view />
       </v-main>
     </v-layout>
 
-    <v-snackbar v-model="visible" :color="color" location="top" timeout="3000">
+    <v-snackbar v-model="visible" :color="color"  timeout="3000">
       {{ text }}
     </v-snackbar>
 
@@ -95,5 +84,14 @@ onBeforeUnmount(() => {
 
     <!-- 全局评论 / 回复编辑对话框：更多操作中的“编辑”打开 -->
     <CommentReplyEditDialog />
+
+    <!-- 全局删除确认对话框：任意删除操作统一调用 -->
+    <DeleteDialog />
+
+    <!-- 全局评论列表对话框：问题 / 回答等任意场景统一调用 -->
+    <CommentDialog />
+
+    <!-- 全局个人资料编辑对话框：任意场景统一调用 -->
+    <ProfileEditDialog />
   </v-app>
 </template>

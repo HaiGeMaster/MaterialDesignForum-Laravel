@@ -110,7 +110,7 @@ function clear() {
       @change="onFileChange"
     />
 
-    <div class="d-flex ga-2 mt-2">
+    <!-- <div class="d-flex ga-2 mt-2">
       <v-btn
         size="small"
         variant="tonal"
@@ -130,7 +130,7 @@ function clear() {
       >
         {{ $t('imageUpload.clear') }}
       </v-btn>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -139,7 +139,7 @@ function clear() {
   position: relative;
   overflow: hidden;
   cursor: pointer;
-  background-color: rgb(var(--v-theme-surface-variant));
+  /* background-color: rgb(var(--v-theme-surface-variant)); */
 }
 
 .image-upload-loading {
@@ -148,7 +148,7 @@ function clear() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(0, 0, 0, 0.45);
+  /* background-color: rgba(0, 0, 0, 0.45); */
 }
 
 .image-upload-object-cover {

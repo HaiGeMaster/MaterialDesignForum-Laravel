@@ -5,15 +5,19 @@ import { useI18n } from 'vue-i18n'
 import http from '../api'
 import { useFeedback } from '../composables/useFeedback'
 import ContentListPanel from '../components/ContentListPanel.vue'
-import DeleteDialog from '../components/DeleteDialog.vue'
 import FollowButton from '../components/FollowButton.vue'
 import MoreActions from '../components/MoreActions.vue'
 import TopicDialog from '../components/TopicDialog.vue'
+import { useDeleteDialogStore } from '../stores/deleteDialog'
+
+import { useDisplay } from 'vuetify'
+const { xs } = useDisplay()
 
 const route = useRoute()
 const router = useRouter()
 const { show } = useFeedback()
 const { t } = useI18n()
+const deleteDialog = useDeleteDialogStore()
 
 const topic = ref(null)
 const creator = ref(null)
@@ -30,8 +34,6 @@ function handleOpen(item) {
 const questions = ref([])
 const loading = ref(false)
 const activeTab = ref('articles')
-const deleteDialog = ref(false)
-const deleting = ref(false)
 const editDialog = ref(false)
 
 const gradientPalette = [
@@ -97,22 +99,18 @@ function onTopicSaved() {
 }
 
 function openDeleteDialog() {
-  deleteDialog.value = true
+  deleteDialog.open({
+    title: t('topicDetail.deleteTitle'),
+    text: t('topicDetail.deleteConfirm', { name: topic.value?.name }),
+    onConfirm: confirmDelete,
+  })
 }
 
 async function confirmDelete() {
   if (!topic.value) return
-  deleting.value = true
-  try {
-    await http.delete(`/topics/${topic.value.topic_id}`)
-    show(t('topicDetail.deleted'), 'success')
-    router.push('/topics')
-  } catch (error) {
-    show(error.message, 'error')
-  } finally {
-    deleting.value = false
-    deleteDialog.value = false
-  }
+  await http.delete(`/topics/${topic.value.topic_id}`)
+  show(t('topicDetail.deleted'), 'success')
+  router.push('/topics')
 }
 
 // 路由参数变化时重新加载（如同页跳转到其他话题）
@@ -121,7 +119,7 @@ onMounted(fetchTopic)
 </script>
 
 <template>
-  <div>
+  <v-container  :class="xs ? 'px-0' : 'px-4'" :style="$route.meta.maxWidth ? { maxWidth: `${$route.meta.maxWidth}px`, margin: '0 auto' } : {}">
     <div class="d-flex align-center mb-4">
       <v-btn size="small" variant="tonal" prepend-icon="mdi-arrow-left" to="/topics">
         {{ $t('topicDetail.backToList') }}
@@ -189,7 +187,7 @@ onMounted(fetchTopic)
               <MoreActions
                 type="topic"
                 :item="topic"
-                location="bottom end"
+
                 @edit="handleEdit"
                 @delete="openDeleteDialog"
               />
@@ -220,6 +218,7 @@ onMounted(fetchTopic)
               item-type="article"
               :items="articles"
               :loading="loading"
+              :empty-text="$t('topicDetail.emptyArticlesText')"
               @open="handleOpen"
             />
           </v-window-item>
@@ -230,6 +229,7 @@ onMounted(fetchTopic)
               item-type="question"
               :items="questions"
               :loading="loading"
+              :empty-text="$t('topicDetail.emptyQuestionsText')"
               @open="handleOpen"
             />
           </v-window-item>
@@ -244,18 +244,9 @@ onMounted(fetchTopic)
       :text="$t('topicDetail.notFoundText')"
     />
 
-    <!-- 删除话题确认 -->
-    <DeleteDialog
-      v-model="deleteDialog"
-      :title="$t('topicDetail.deleteTitle')"
-      :text="$t('topicDetail.deleteConfirm', { name: topic?.name })"
-      :loading="deleting"
-      @confirm="confirmDelete"
-    />
-
     <!-- 编辑话题对话框（MoreActions 的编辑操作打开） -->
     <TopicDialog v-model="editDialog" :topic="topic" @submit="onTopicSaved" />
-  </div>
+  </v-container>
 </template>
 
 <style scoped>

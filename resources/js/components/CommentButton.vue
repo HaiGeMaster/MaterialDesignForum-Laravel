@@ -9,7 +9,7 @@ const emit = defineEmits(['click'])
 </script>
 
 <template>
-  <v-tooltip :text="tooltip" location="top">
+  <v-tooltip :text="tooltip" >
     <template v-slot:activator="{ props: tipProps }">
       <v-btn v-bind="tipProps" icon size="small" variant="plain" @click="emit('click')">
         <v-badge

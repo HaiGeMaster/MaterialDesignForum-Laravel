@@ -2,19 +2,18 @@
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useDisplay } from 'vuetify'
 import http from '../api'
 import CommentItem from './CommentItem.vue'
 import InfiniteScroll from './InfiniteScroll.vue'
 import { useAuthStore } from '../stores/auth'
+import { useCommentDialogStore } from '../stores/commentDialog'
 import { useFeedback } from '../composables/useFeedback'
 import { useInfiniteList } from '../composables/useInfiniteList'
 
-const props = defineProps({
-  modelValue: { type: Boolean, default: false },
-  commentableType: { type: String, required: true },
-  commentableId: { type: [Number, String], required: true },
-})
-const emit = defineEmits(['update:modelValue', 'count-change'])
+const store = useCommentDialogStore()
+
+const { mobile } = useDisplay()
 
 const { t } = useI18n()
 const authStore = useAuthStore()
@@ -37,22 +36,22 @@ const { list: items, loading, error, finished, load, loadNext, retry } = useInfi
 async function fetchComments(page) {
   const { data } = await http.get('/comments', {
     params: {
-      commentable_type: props.commentableType,
-      commentable_id: props.commentableId,
+      commentable_type: store.commentableType,
+      commentable_id: store.commentableId,
       order: sort.value,
       page,
       per_page: 20,
     },
   })
   total.value = data.total ?? 0
-  emit('count-change', total.value)
+  store.emitCountChange(total.value)
   return { items: data.data || [], hasMore: data.current_page < data.last_page }
 }
 
 function handleDeleted(i) {
   items.value.splice(i, 1)
   total.value = Math.max(0, total.value - 1)
-  emit('count-change', total.value)
+  store.emitCountChange(total.value)
 }
 
 async function submit() {
@@ -66,8 +65,8 @@ async function submit() {
   submitting.value = true
   try {
     await http.post('/comments', {
-      commentable_type: props.commentableType,
-      commentable_id: props.commentableId,
+      commentable_type: store.commentableType,
+      commentable_id: store.commentableId,
       content: text,
     })
     content.value = ''
@@ -81,42 +80,43 @@ async function submit() {
 }
 
 watch(
-  () => props.modelValue,
+  () => store.model,
   (v) => {
     if (v) load(true)
   },
 )
 
 watch(
-  () => [props.commentableType, props.commentableId, sort.value],
+  () => [store.commentableType, store.commentableId, sort.value],
   () => {
-    if (props.modelValue) load(true)
+    if (store.model) load(true)
   },
 )
 </script>
 
 <template>
   <v-dialog
-    :model-value="modelValue"
-    @update:model-value="(v) => emit('update:modelValue', v)"
+    :model-value="store.model"
+    @update:model-value="(v) => { if (!v) store.close() }"
     max-width="760"
+    :fullscreen="mobile"
     scrollable
   >
     <v-card rounded="lg">
       <!-- 头部：标题 + 排序 + 关闭 -->
-      <v-toolbar density="compact" color="transparent">
-        <v-toolbar-title class="text-subtitle-1 font-weight-bold">
+      <v-toolbar >
+        <v-toolbar-title >
           {{ $t('commentDialog.title') }} ({{ total }})
         </v-toolbar-title>
         <template v-slot:append>
-          <v-menu :close-on-content-click="true" location="bottom end">
+          <v-menu :close-on-content-click="true" >
             <template v-slot:activator="{ props: menuProps }">
-              <v-btn v-bind="menuProps" variant="text" size="small" class="text-none">
-                <v-icon size="small" start>mdi-sort</v-icon>
+              <v-btn v-bind="menuProps" variant="text"  class="text-none">
+                <v-icon  start>mdi-sort</v-icon>
                 <span class="text-body-2">
                   {{ sortItems.find((i) => i.value === sort)?.label || sortItems[0]?.label }}
                 </span>
-                <v-icon size="small">mdi-chevron-down</v-icon>
+                <v-icon >mdi-chevron-down</v-icon>
               </v-btn>
             </template>
             <v-list density="compact" min-width="160">
@@ -130,7 +130,7 @@ watch(
               </v-list-item>
             </v-list>
           </v-menu>
-          <v-btn icon size="small" variant="text" @click="emit('update:modelValue', false)">
+          <v-btn icon  variant="text" @click="store.close()">
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </template>
@@ -195,7 +195,8 @@ watch(
 
 <style scoped>
 .comment-dialog__list {
-  max-height: 55vh;
+  /* max-height: 55vh; */
+  height: 100%;
   overflow-y: auto;
 }
 </style>

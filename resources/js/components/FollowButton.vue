@@ -78,19 +78,18 @@ async function handleToggle() {
   <!-- 圆形关注按钮：未关注显示空心星（primary 实心），已关注显示实心星（tonal 弱化） -->
   <v-tooltip
     :text="localFollowing ? $t('follow.unfollow') : $t('follow.follow')"
-    location="bottom"
+
   >
     <template v-slot:activator="{ props }">
       <v-btn
         v-bind="props"
         icon
         :size="size"
-        :color="localFollowing ? '' : 'primary'"
-        :variant="localFollowing ? 'tonal' : 'flat'"
+        variant="tonal"
         :loading="loading"
         @click.stop="handleToggle"
       >
-        <v-icon :icon="localFollowing ? 'mdi-star' : 'mdi-star-outline'" />
+        <v-icon :color="!localFollowing ? '' : 'primary'" :icon="localFollowing ? 'mdi-star' : 'mdi-star-outline'" />
       </v-btn>
     </template>
   </v-tooltip>

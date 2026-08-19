@@ -9,6 +9,9 @@ import { useFeedback } from '../composables/useFeedback'
 import { useInfiniteList } from '../composables/useInfiniteList'
 import { useAuthStore } from '../stores/auth'
 
+import { useDisplay } from 'vuetify'
+const { xs } = useDisplay()
+
 const { show } = useFeedback()
 const { t } = useI18n()
 
@@ -40,6 +43,16 @@ const tab = computed(() => {
   if (t === 'latest') return 'latest'
   if (t === 'following' && authStore.isLoggedIn) return 'following'
   return 'hot'
+})
+
+// 每个 tab 的空状态文案不同
+const emptyState = computed(() => {
+  const map = {
+    hot: { icon: 'mdi-fire', title: 'list.emptyHotArticlesTitle', text: 'list.emptyHotArticlesText' },
+    latest: { icon: 'mdi-clock-fast', title: 'list.emptyLatestArticlesTitle', text: 'list.emptyLatestArticlesText' },
+    following: { icon: 'mdi-account-heart-outline', title: 'list.emptyFollowingArticlesTitle', text: 'list.emptyFollowingArticlesText' },
+  }
+  return map[tab.value] ?? map.hot
 })
 
 const {
@@ -82,7 +95,7 @@ watch(tab, () => load(true))
 </script>
 
 <template>
-  <div>
+  <v-container  :class="xs ? 'pa-0' : 'px-4'" :style="$route.meta.maxWidth ? { maxWidth: `${$route.meta.maxWidth}px`, margin: '0 auto' } : {}">
     <v-progress-linear v-if="loading && !articles.length" indeterminate color="primary" class="mb-3" />
 
     <v-card v-if="articles.length"  class="overflow-hidden mb-3">
@@ -112,9 +125,9 @@ watch(tab, () => load(true))
 
     <v-empty-state
       v-if="!articles.length && !loading"
-      icon="mdi-file-document"
-      :title="$t('list.emptyArticlesTitle')"
-      :text="$t('list.emptyArticlesText')"
+      :icon="emptyState.icon"
+      :title="$t(emptyState.title)"
+      :text="$t(emptyState.text)"
     />
-  </div>
+  </v-container>
 </template>

@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
 import { useUsersDialogStore } from '../stores/usersDialog'
-import { useCommentReplyEditStore } from '../stores/commentReplyEdit'
+import { useCommentReplyEditStore } from '../stores/commentReplyEditDialog'
 import { useFeedback } from '../composables/useFeedback'
 import ReportDialog from './ReportDialog.vue'
 
@@ -31,7 +31,7 @@ const emit = defineEmits(['select', 'copy-link', 'share', 'report', 'edit', 'del
 
 const authStore = useAuthStore()
 const usersDialog = useUsersDialogStore()
-const commentReplyEdit = useCommentReplyEditStore()
+const commentReplyEditDialog = useCommentReplyEditStore()
 const { show: feedback } = useFeedback()
 const { t } = useI18n()
 
@@ -154,7 +154,7 @@ async function handleSelect(item) {
     case 'edit':
       // 评论 / 回复：内置打开全局编辑对话框（参照旧项目 comment-reply-edit-dialog）
       if (props.type === 'comment' || props.type === 'reply') {
-        commentReplyEdit.open({
+        commentReplyEditDialog.open({
           type: props.type,
           id: itemId.value,
           content: props.item.content,

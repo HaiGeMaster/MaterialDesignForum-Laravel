@@ -5,25 +5,29 @@ import { useI18n } from 'vue-i18n'
 import http from '../api'
 import AnswersList from '../components/AnswersList.vue'
 import CommentButton from '../components/CommentButton.vue'
-import CommentDialog from '../components/CommentDialog.vue'
-import DeleteDialog from '../components/DeleteDialog.vue'
 import FollowButton from '../components/FollowButton.vue'
 import MoreActions from '../components/MoreActions.vue'
 import ProseRenderer from '../components/ProseRenderer.vue'
 import { useAuthStore } from '../stores/auth'
+import { useCommentDialogStore } from '../stores/commentDialog'
+import { useDeleteDialogStore } from '../stores/deleteDialog'
 import { useEditorWindowStore } from '../stores/editorWindow'
 import { useFeedback } from '../composables/useFeedback'
+
+import { useDisplay } from 'vuetify'
+const { xs } = useDisplay()
 
 const route = useRoute()
 const router = useRouter()
 const { show } = useFeedback()
 const { t } = useI18n()
 const authStore = useAuthStore()
+const commentDialog = useCommentDialogStore()
+const deleteDialog = useDeleteDialogStore()
 const editorWindow = useEditorWindowStore()
 
 const question = ref(null)
 const loading = ref(false)
-const commentDialog = ref(false)
 
 // 评论数（操作栏按钮角标显示）
 const commentCount = computed(() => Number(question.value?.comment_count || 0))
@@ -32,9 +36,13 @@ function handleCommentCount(count) {
   if (question.value) question.value.comment_count = count
 }
 
-// 删除确认：null 不显示；'question' 删问题
-const deleteTarget = ref(null)
-const deleting = ref(false)
+function openComments() {
+  commentDialog.open({
+    commentableType: 'question',
+    commentableId: question.value?.question_id,
+    onCountChange: handleCommentCount,
+  })
+}
 
 // 作者信息（后端随详情返回 creator）
 const creator = computed(() => question.value?.creator || null)
@@ -88,38 +96,17 @@ function editQuestion() {
 // ---- 删除 ----
 
 function askDeleteQuestion() {
-  deleteTarget.value = 'question'
+  deleteDialog.open({
+    title: t('questionDetail.deleteQuestionTitle'),
+    text: t('questionDetail.deleteQuestionConfirm'),
+    onConfirm: confirmDelete,
+  })
 }
 
-// ---- 删除确认对话框（DeleteDialog）----
-
-const deleteTitle = computed(() => t('questionDetail.deleteQuestionTitle'))
-
-const deleteText = computed(() => t('questionDetail.deleteQuestionConfirm'))
-
-const deleteIcon = computed(() => 'mdi-delete-outline')
-
-// v-model 用布尔值，映射到底层 deleteTarget（'question' | null）
-const deleteDialogVisible = computed({
-  get: () => Boolean(deleteTarget.value),
-  set: (val) => {
-    if (!val) deleteTarget.value = null
-  },
-})
-
 async function confirmDelete() {
-  if (!deleteTarget.value) return
-  deleting.value = true
-  try {
-    await http.delete(`/questions/${question.value.question_id}`)
-    show(t('questionDetail.deleted'), 'success')
-    router.push('/questions')
-  } catch (error) {
-    show(error.message, 'error')
-  } finally {
-    deleting.value = false
-    deleteTarget.value = null
-  }
+  await http.delete(`/questions/${question.value.question_id}`)
+  show(t('questionDetail.deleted'), 'success')
+  router.push('/questions')
 }
 
 // ---- 发布/编辑完成后刷新 ----
@@ -146,22 +133,19 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div>
+  <v-container  :class="xs ? 'px-0' : 'px-4'" :style="$route.meta.maxWidth ? { maxWidth: `${$route.meta.maxWidth}px`, margin: '0 auto' } : {}">
     <v-progress-linear v-if="loading && !question" indeterminate color="primary" class="mb-4" />
 
     <template v-if="question">
       <!-- 问题主体 -->
       <v-card  class="overflow-hidden mb-4">
         <!-- 应用栏：返回 / 标题 / 关注 -->
-        <v-toolbar flat color="surface">
+        <v-toolbar :title="question.title">
           <template v-slot:prepend>
             <v-btn icon variant="text" :title="$t('common.back')" @click="router.back()">
               <v-icon>mdi-arrow-left</v-icon>
             </v-btn>
           </template>
-          <v-toolbar-title class="font-weight-bold">
-            <span class="d-block text-truncate">{{ question.title }}</span>
-          </v-toolbar-title>
           <template v-slot:append>
             <FollowButton
               type="question"
@@ -197,7 +181,14 @@ onUnmounted(() => {
             </template>
           </v-list-item>
 
-          <!-- 话题标签（正文上方） -->
+          <!-- 正文 -->
+          <ProseRenderer
+            :content="question.content_rendered"
+            :empty-text="$t('questionDetail.emptyContent')"
+            class="mt-4"
+          />
+
+          <!-- 话题标签（正文下方） -->
           <div v-if="question.topics?.length" class="d-flex flex-wrap ga-1 mt-4">
             <router-link
               v-for="topic in question.topics"
@@ -211,12 +202,6 @@ onUnmounted(() => {
             </router-link>
           </div>
 
-          <!-- 正文 -->
-          <ProseRenderer
-            :content="question.content_rendered"
-            :empty-text="$t('questionDetail.emptyContent')"
-            class="mt-4"
-          />
         </v-card-text>
 
         <!-- 底部操作栏：评论在左，更多操作在右 -->
@@ -224,13 +209,13 @@ onUnmounted(() => {
           <CommentButton
             :count="commentCount"
             :tooltip="$t('commentDialog.title')"
-            @click="commentDialog = true"
+            @click="openComments"
           />
           <v-spacer />
           <MoreActions
             type="question"
             :item="question"
-            location="top end"
+
             @edit="editQuestion"
             @delete="askDeleteQuestion"
           />
@@ -247,23 +232,5 @@ onUnmounted(() => {
       :title="$t('questionDetail.notFound')"
       :text="$t('questionDetail.notFoundText')"
     />
-
-    <!-- 删除确认 -->
-    <DeleteDialog
-      v-model="deleteDialogVisible"
-      :title="deleteTitle"
-      :text="deleteText"
-      :icon="deleteIcon"
-      :loading="deleting"
-      @confirm="confirmDelete"
-    />
-
-    <!-- 评论对话框 -->
-    <CommentDialog
-      v-model="commentDialog"
-      commentable-type="question"
-      :commentable-id="question?.question_id"
-      @count-change="handleCommentCount"
-    />
-  </div>
+  </v-container>
 </template>

@@ -170,7 +170,9 @@
     "registeredAt": "注册于 {time}",
     "following": "关注 {count}",
     "followers": "粉丝 {count}",
-    "message": "私信"
+    "message": "私信",
+    "uploadAvatar": "上传头像",
+    "uploadCover": "上传封面"
   },
   "userContent": {
     "questions": "提问",
@@ -314,7 +316,11 @@
   },
   "topics": {
     "emptyTitle": "暂无话题",
-    "emptyText": "成为第一个创建话题的人吧。"
+    "emptyText": "成为第一个创建话题的人吧。",
+    "emptyFollowingTitle": "暂无关注话题",
+    "emptyFollowingText": "你还没有关注任何话题，关注后的话题更新会显示在这里。",
+    "emptyRecommendTitle": "暂无推荐话题",
+    "emptyRecommendText": "暂时没有可推荐的话题，先创建一个吧。"
   },
   "list": {
     "writeArticle": "写文章",
@@ -322,11 +328,29 @@
     "emptyArticlesTitle": "暂无文章",
     "emptyArticlesText": "还没有人发表文章，快来写第一篇吧。",
     "emptyQuestionsTitle": "暂无问题",
-    "emptyQuestionsText": "有问题可以提出来，大家一起讨论。"
+    "emptyQuestionsText": "有问题可以提出来，大家一起讨论。",
+    "emptyHotQuestionsTitle": "暂无热门问题",
+    "emptyHotQuestionsText": "还没有热门问题，快提出第一个问题吧。",
+    "emptyLatestQuestionsTitle": "暂无最新问题",
+    "emptyLatestQuestionsText": "还没有新发布的问题。",
+    "emptyFollowingQuestionsTitle": "暂无关注问题",
+    "emptyFollowingQuestionsText": "你还没有关注任何问题，关注后的问题更新会显示在这里。",
+    "emptyHotArticlesTitle": "暂无热门文章",
+    "emptyHotArticlesText": "还没有热门文章，快来发表第一篇吧。",
+    "emptyLatestArticlesTitle": "暂无最新文章",
+    "emptyLatestArticlesText": "还没有新发布的文章。",
+    "emptyFollowingArticlesTitle": "暂无关注文章",
+    "emptyFollowingArticlesText": "你还没有关注任何文章，关注后的文章更新会显示在这里。"
   },
   "people": {
     "emptyTitle": "暂无用户",
-    "emptyText": "还没有社区成员，先登录看看吧。"
+    "emptyText": "还没有社区成员，先登录看看吧。",
+    "emptyFollowingTitle": "暂无关注的人",
+    "emptyFollowingText": "你还没有关注任何人，去发现感兴趣的人吧。",
+    "emptyFollowersTitle": "暂无粉丝",
+    "emptyFollowersText": "还没有人关注你，发布内容吸引粉丝吧。",
+    "emptyRecommendTitle": "暂无推荐用户",
+    "emptyRecommendText": "暂时没有可推荐的人。"
   },
   "notifications": {
     "markAllRead": "全部已读",
@@ -494,7 +518,11 @@
     "notFound": "话题不存在",
     "notFoundText": "该话题可能已被删除。",
     "deleteTitle": "删除话题",
-    "deleteConfirm": "确定要删除话题「{name}」吗？该操作不可撤销。"
+    "deleteConfirm": "确定要删除话题「{name}」吗？该操作不可撤销。",
+    "emptyArticlesTitle": "该话题下暂无文章",
+    "emptyArticlesText": "还没有人发布与这个话题相关的文章。",
+    "emptyQuestionsTitle": "该话题下暂无问题",
+    "emptyQuestionsText": "还没有人提出与这个话题相关的问题。"
   },
   "questionDetail": {
     "backToList": "返回问题列表",
@@ -545,7 +573,8 @@
   "commentItem": {
     "reply": "回复",
     "viewReplies": "查看 {count} 条回复",
-    "hideReplies": "收起回复"
+    "hideReplies": "收起回复",
+    "showMoreReplies": "加载更多回复"
   },
   "replyItem": {
     "replyTo": "回复",
@@ -577,7 +606,7 @@
     "deleteTitle": "删除回答",
     "deleteConfirm": "确定要删除这条回答吗？该操作不可撤销。"
   },
-  "commentReplyEdit": {
+  "commentReplyEditDialog": {
     "editCommentTitle": "编辑评论",
     "editReplyTitle": "编辑回复",
     "placeholder": "编辑内容…",

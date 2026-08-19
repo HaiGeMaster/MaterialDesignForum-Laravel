@@ -1,17 +1,21 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { useTheme } from 'vuetify'
+import { useDisplay, useTheme } from 'vuetify'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
 import { useFeedback } from '../composables/useFeedback'
 import http from '../api'
 import LanguageSwitcher from './LanguageSwitcher.vue'
+import AppTabBar from './AppTabBar.vue'
+import { useTabBar } from '../composables/useTabBar'
 
 const emit = defineEmits(['toggle-drawer'])
 
 const authStore = useAuthStore()
 const theme = useTheme()
+const { mobile } = useDisplay()
 const { t } = useI18n()
+const { visible: showTabBar } = useTabBar()
 
 // 未读通知数量（应用栏徽章），每 30 秒轮询一次
 const POLL_INTERVAL = 30 * 1000
@@ -145,9 +149,9 @@ onBeforeUnmount(() => {
     </v-btn>
 
     <template v-if="authStore.isLoggedIn">
-      <v-menu location="bottom end" min-width="200">
+      <v-menu  min-width="200">
         <template #activator="{ props }">
-          <v-btn variant="text" v-bind="props">
+          <v-btn v-if="!mobile" variant="text" v-bind="props">
             <v-avatar size="28" color="secondary" class="mr-2">
               <v-img
                 v-if="authStore.user?.avatar"
@@ -159,6 +163,17 @@ onBeforeUnmount(() => {
             </v-avatar>
             {{ authStore.user?.username }}
             <v-icon icon="mdi-chevron-down" size="small" class="ml-1" />
+          </v-btn>
+          <v-btn v-else icon variant="text" v-bind="props">
+            <v-avatar size="40" color="secondary">
+              <v-img
+                v-if="authStore.user?.avatar"
+                :src="authStore.user.avatar"
+                cover
+                class="cursor-pointer"
+              />
+              <span v-else class="text-caption">{{ userInitial() }}</span>
+            </v-avatar>
           </v-btn>
         </template>
         <v-list density="compact" nav>
@@ -175,5 +190,10 @@ onBeforeUnmount(() => {
     <v-btn v-else variant="tonal" to="/users/me" prepend-icon="mdi-account">
       {{ $t('appBar.loginRegister') }}
     </v-btn>
+
+    <!-- 路由页标签栏：渲染在应用栏扩展区，随应用栏固定；无 tab 时不渲染扩展区 -->
+    <template v-if="showTabBar" #extension>
+      <AppTabBar />
+    </template>
   </v-app-bar>
 </template>

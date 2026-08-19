@@ -47,7 +47,6 @@ function authorInitial(item) {
         v-if="item.creator"
         :model-value="active"
         :close-on-content-click="false"
-        location="start"
         offset="16"
         @update:model-value="(v) => emit('update:active', v)"
       >

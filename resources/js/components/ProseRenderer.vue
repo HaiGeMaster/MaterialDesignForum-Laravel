@@ -1,6 +1,16 @@
 <script setup>
-import { computed, ref, watch, nextTick } from 'vue'
-import { lowlight } from '../tiptap/lowlight'
+import { computed, watch } from 'vue'
+import { EditorContent, useEditor } from '@tiptap/vue-3'
+import StarterKit from '@tiptap/starter-kit'
+import Underline from '@tiptap/extension-underline'
+import { TextStyle, FontSize, LineHeight } from '@tiptap/extension-text-style'
+import { Color } from '@tiptap/extension-color'
+import Highlight from '@tiptap/extension-highlight'
+import Link from '@tiptap/extension-link'
+import TextAlign from '@tiptap/extension-text-align'
+import { Video } from '../tiptap/Video'
+import { ResizableImage } from '../tiptap/ResizableImage'
+import { CodeBlock } from '../tiptap/CodeBlock'
 
 defineOptions({ name: 'ProseRenderer' })
 
@@ -13,54 +23,54 @@ const props = defineProps({
   emptyIcon: { type: String, default: 'mdi-note-text-outline' },
 })
 
-const contentRef = ref(null)
-
 const hasContent = computed(() => {
   const html = props.content?.trim()
   return Boolean(html && html !== '<p></p>')
 })
 
-// 提取 tiptap 输出代码块的语言：<code class="language-xxx">
-function detectLanguage(el) {
-  const cls = [...el.classList].find((c) => c.startsWith('language-'))
-  if (!cls) return ''
-  return cls.slice('language-'.length).trim() || ''
-}
+// 只读渲染：与编辑端（RichTextEditor）保持一致的扩展配置，
+// editable 固定为 false，实现与编辑器完全相同的排版/高亮效果。
+const editor = useEditor({
+  content: props.content || '',
+  editable: false,
+  extensions: [
+    StarterKit.configure({
+      heading: { levels: [1, 2, 3] },
+      codeBlock: false,
+    }),
+    Underline,
+    TextStyle,
+    FontSize,
+    LineHeight,
+    Color,
+    Highlight.configure({ multicolor: true }),
+    ResizableImage,
+    Video,
+    CodeBlock,
+    Link.configure({
+      openOnClick: true,
+      autolink: true,
+      HTMLAttributes: { rel: 'noopener noreferrer nofollow', target: '_blank' },
+    }),
+    TextAlign.configure({ types: ['heading', 'paragraph'] }),
+  ],
+})
 
-// 对 v-html 内容里的代码块做语法高亮（lowlight）
-function highlightCode() {
-  const root = contentRef.value
-  if (!root) return
-  root.querySelectorAll('pre code').forEach((el) => {
-    if (el.dataset.highlighted) return
-    const lang = detectLanguage(el)
-    let html = ''
-    if (lang && lowlight.registered(lang)) {
-      html = lowlight.highlight(lang, el.textContent).value
-    } else if (!lang) {
-      // 未指定语言：自动检测
-      html = lowlight.highlightAuto(el.textContent).value
-    }
-    if (html) {
-      el.innerHTML = html
-    }
-    el.dataset.highlighted = 'true'
-  })
-}
-
+// 外部内容变化时同步进编辑器（setContent 默认不触发 onUpdate）
 watch(
   () => props.content,
-  async () => {
-    await nextTick()
-    highlightCode()
+  (val) => {
+    const ed = editor.value
+    if (ed && val !== ed.getHTML()) {
+      ed.commands.setContent(val || '', false)
+    }
   },
-  { immediate: true }
 )
 </script>
 
 <template>
   <div>
-    <div ref="contentRef" v-if="hasContent" class="prose" v-html="content" />
+    <EditorContent v-if="hasContent" class="prose" :editor="editor" />
     <v-empty-state v-else-if="emptyText" :icon="emptyIcon" :title="emptyText" />
   </div>
 </template>
@@ -72,6 +82,10 @@ watch(
   line-height: 1.8;
   color: rgb(var(--v-theme-on-surface));
   word-break: break-word;
+}
+
+.prose :deep(.ProseMirror) {
+  outline: none;
 }
 
 .prose :deep(h1),

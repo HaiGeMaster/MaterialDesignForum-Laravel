@@ -12,14 +12,19 @@ class GeoLocation
     /**
      * 根据 IP 返回归属地字符串（如「中国广东深圳市」）。
      *
-     * - 本地/无效 IP、查询失败时返回 null
+     * - 本地回环地址返回「本地」
+     * - 无效 IP、查询失败时返回 null
      * - 返回结果由 国家 + 省份 + 城市 拼接，空值自动省略
      */
     public static function location(?string $ip): ?string
     {
         $ip = trim((string) $ip);
 
-        if ($ip === '' || in_array($ip, ['127.0.0.1', '0.0.0.0', '::1'], true)) {
+        if (in_array($ip, ['127.0.0.1', '0.0.0.0', '::1'], true)) {
+            return 'Local';
+        }
+
+        if ($ip === '') {
             return null;
         }
 
