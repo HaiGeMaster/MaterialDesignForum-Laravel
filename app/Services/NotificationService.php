@@ -52,6 +52,7 @@ class NotificationService
     public const TYPE_FOLLOW_TOPIC_UPDATE = 'follow_topic_update';
     public const TYPE_FOLLOW_QUESTION_UPDATE = 'follow_question_update';
     public const TYPE_FOLLOW_ARTICLE_UPDATE = 'follow_article_update';
+    public const TYPE_REPORT_HANDLED = 'report_handled';
 
     /** 全部通知类型 */
     public const TYPES = [
@@ -79,6 +80,7 @@ class NotificationService
         self::TYPE_FOLLOW_TOPIC_UPDATE,
         self::TYPE_FOLLOW_QUESTION_UPDATE,
         self::TYPE_FOLLOW_ARTICLE_UPDATE,
+        self::TYPE_REPORT_HANDLED,
     ];
 
     /** 类型 → 中文文案模板（{value} 为用户名字符串，用于邮件正文 / 兜底展示） */
@@ -107,6 +109,7 @@ class NotificationService
         self::TYPE_FOLLOW_TOPIC_UPDATE => '您关注的话题有更新 {value}',
         self::TYPE_FOLLOW_QUESTION_UPDATE => '您关注的提问有更新 {value}',
         self::TYPE_FOLLOW_ARTICLE_UPDATE => '您关注的文章有更新 {value}',
+        self::TYPE_REPORT_HANDLED => '{value} 您的举报已处理',
     ];
 
     /** 用户通知设置在 user_option 表中的 name */

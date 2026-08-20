@@ -46,6 +46,10 @@ const isSelf = computed(() => {
   return String(props.item.user_id) === String(currentUserId.value)
 })
 
+// 当前用户用户组权限
+const userGroup = computed(() => authStore.user?.user_group || {})
+const isAdminUser = computed(() => Boolean(userGroup.value.is_admin))
+
 // 按类型取数据对象的 ID
 const itemId = computed(() => {
   if (!props.item) return null
@@ -79,6 +83,116 @@ const detailUrl = computed(() => {
   }
 })
 
+// ================== 权限检查：时间限制 ==================
+/**
+ * 将 Laravel datetime 序列化后的 ISO 8601 字符串安全转为毫秒时间戳。
+ * Laravel 输出格式如 "2026-08-20T22:07:10.000000Z"（6 位微秒），
+ * 部分浏览器引擎对超过 3 位的小数秒解析异常，这里截断到毫秒。
+ */
+function safeParseTime(value) {
+  if (!value) return NaN
+  if (typeof value === 'number') return value
+  // 截断微秒为毫秒：把 .000000Z → .000Z
+  const normalized = String(value).replace(/\.(\d{3})\d*(Z|[+-]\d{2}:\d{2})?$/, '.$1$2')
+  return Date.parse(normalized)
+}
+
+/** 检查编辑/删除时限是否已过，true=已过期不可操作 */
+function isTimeExpired(createTime, timeLimitMinutes) {
+  if (!timeLimitMinutes || Number(timeLimitMinutes) === 0) return false // 0 = 无限期
+  if (!createTime) return false
+  const created = safeParseTime(createTime)
+  if (Number.isNaN(created)) return false
+  const limitMs = Number(timeLimitMinutes) * 60 * 1000
+  console.log('created', created)
+  console.log('limitMs', limitMs)
+  console.log('now', Date.now())
+  console.log('created + limitMs', created + limitMs)
+  return Date.now() < created + limitMs
+}
+
+// ================== 权限检查：前置条件 ==================
+/** 检查是否存在阻碍编辑/删除的子内容（评论/回答/回复等），true=有阻碍不可操作 */
+function hasBlockingSubContent(type, item, isDelete = false) {
+  const prefix = isDelete ? 'ability_delete' : 'ability_edit'
+  const group = userGroup.value
+
+  switch (type) {
+    case 'topic': {
+      if (!group[`${prefix}_topic_only_no_article_or_question`]) return false
+      return (item.article_count > 0 || item.question_count > 0)
+    }
+    case 'question': {
+      if (group[`${prefix}_question_only_no_answer`] && (item.answer_count ?? 0) > 0) return true
+      if (group[`${prefix}_question_only_no_comment`] && (item.comment_count ?? 0) > 0) return true
+      return false
+    }
+    case 'article': {
+      if (!group[`${prefix}_article_only_no_comment`]) return false
+      return (item.comment_count ?? 0) > 0
+    }
+    case 'answer': {
+      if (!group[`${prefix}_answer_only_no_comment`]) return false
+      return (item.comment_count ?? 0) > 0
+    }
+    case 'comment': {
+      if (!group[`${prefix}_comment_only_no_reply`]) return false
+      return (item.reply_count ?? 0) > 0
+    }
+    case 'reply': {
+      if (!group[`${prefix}_reply_only_no_reply`]) return false
+      return (item.reply_count ?? 0) > 0
+    }
+  }
+  return false
+}
+
+// ================== 类型 → 权限字段映射 ==================
+const TYPE_PERM_MAP = {
+  topic:    { editAbility: 'ability_edit_own_topic',    deleteAbility: 'ability_delete_own_topic',    editTime: 'time_before_edit_topic',    deleteTime: 'time_before_delete_topic' },
+  question: { editAbility: 'ability_edit_own_question', deleteAbility: 'ability_delete_own_question', editTime: 'time_before_edit_question', deleteTime: 'time_before_delete_question' },
+  article:  { editAbility: 'ability_edit_own_article',  deleteAbility: 'ability_delete_own_article',  editTime: 'time_before_edit_article',  deleteTime: 'time_before_delete_article' },
+  answer:   { editAbility: 'ability_edit_own_answer',   deleteAbility: 'ability_delete_own_answer',   editTime: 'time_before_edit_answer',   deleteTime: 'time_before_delete_answer' },
+  comment:  { editAbility: 'ability_edit_own_comment',  deleteAbility: 'ability_delete_own_comment',  editTime: 'time_before_edit_comment',  deleteTime: 'time_before_delete_comment' },
+  reply:    { editAbility: 'ability_edit_own_reply',    deleteAbility: 'ability_delete_own_reply',    editTime: 'time_before_edit_reply',    deleteTime: 'time_before_delete_reply' },
+}
+
+// ================== 编辑权限 ==================
+const canEdit = computed(() => {
+  if (!props.item || !props.type || props.type === 'user') return false
+  // 管理员可编辑任意内容
+  // if (isAdminUser.value) return true
+  // 非管理员：仅本人 + 有权限 + 时限未过 + 前置条件满足
+  if (!isSelf.value) return false
+  const perm = TYPE_PERM_MAP[props.type]
+  if (!perm) return false
+  if (!userGroup.value[perm.editAbility]) return false
+  if (isTimeExpired(props.item.create_time, userGroup.value[perm.editTime])) return false
+  if (hasBlockingSubContent(props.type, props.item, false)) return false
+  return true
+})
+
+// ================== 删除权限 ==================
+const canDelete = computed(() => {
+  if (!props.item || !props.type || props.type === 'user') return false
+  // if (isAdminUser.value) return true
+  if (!isSelf.value) return false
+  const perm = TYPE_PERM_MAP[props.type]
+  if (!perm) return false
+  if (!userGroup.value[perm.deleteAbility]) return false
+  if (isTimeExpired(props.item.create_time, userGroup.value[perm.deleteTime])) return false
+  if (hasBlockingSubContent(props.type, props.item, true)) return false
+  return true
+})
+
+// ================== 举报权限 ==================
+const canReport = computed(() => {
+  if (!props.item || !props.type) return false
+  // if (isAdminUser.value) return false // 管理员不举报，直接后台处理
+  if (isSelf.value) return false // 不能举报自己
+  return true
+})
+
 // 内置操作：按权限规则自动生成
 const builtinItems = computed(() => {
   if (!props.withBuiltin || !props.item) return []
@@ -100,13 +214,15 @@ const builtinItems = computed(() => {
   }
 
   // 举报：非管理员且非本人
-  if (!props.isAdmin && !isSelf.value) {
+  if (canReport.value) {
     list.push({ title: t('moreActions.report'), icon: 'mdi-flag-outline', color: 'error', action: 'report' })
   }
 
-  // 编辑 / 删除：仅本人（用户资料走独立编辑入口，不在此列）
-  if (isSelf.value && props.type !== 'user') {
+  // 编辑 / 删除：基于权限检查（用户资料走独立编辑入口，不在此列）
+  if (canEdit.value) {
     list.push({ title: t('moreActions.edit'), icon: 'mdi-pencil', action: 'edit' })
+  }
+  if (canDelete.value) {
     list.push({ title: t('moreActions.delete'), icon: 'mdi-delete-outline', color: 'error', action: 'delete' })
   }
 
@@ -152,12 +268,17 @@ async function handleSelect(item) {
       emit('report', props.item)
       return
     case 'edit':
-      // 评论 / 回复：内置打开全局编辑对话框（参照旧项目 comment-reply-edit-dialog）
+      // 评论 / 回复：内置打开全局编辑对话框
       if (props.type === 'comment' || props.type === 'reply') {
+        const plural = props.type === 'comment' ? 'comments' : 'replies'
         commentReplyEditDialog.open({
           type: props.type,
           id: itemId.value,
           content: props.item.content,
+          // 管理员编辑他人内容时走管理端 API
+          apiBase: isAdminUser.value && !isSelf.value
+            ? `/admin/modules/${plural}`
+            : undefined,
         })
         return
       }

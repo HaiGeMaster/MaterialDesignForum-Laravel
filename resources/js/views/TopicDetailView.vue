@@ -152,7 +152,7 @@ onMounted(fetchTopic)
             <v-avatar
               size="28"
               color="primary"
-              variant="tonal"
+              
               class="cursor-pointer"
               @click="goCreator"
             >

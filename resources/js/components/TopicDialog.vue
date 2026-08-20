@@ -11,6 +11,8 @@ const props = defineProps({
   modelValue: { type: Boolean, default: false },
   /** 编辑模式传入话题对象；新建模式传 null */
   topic: { type: Object, default: null },
+  /** API 基础路径：管理员后台传 '/admin/modules/topics'，默认空走用户端 '/topics' */
+  apiBase: { type: String, default: '' },
 })
 
 const emit = defineEmits(['update:modelValue', 'submit'])
@@ -70,12 +72,16 @@ async function submit() {
 
     let data
     if (isEdit.value) {
-      const res = await http.put(`/topics/${props.topic.topic_id}`, payload)
+      const url = props.apiBase
+        ? `${props.apiBase}/${props.topic.topic_id}`
+        : `/topics/${props.topic.topic_id}`
+      const res = await http.put(url, payload)
       data = res.data
       show(t('topicDialog.updateSuccess'), 'success')
     } else {
       payload.user_id = authStore.user?.user_id
-      const res = await http.post('/topics', payload)
+      const url = props.apiBase || '/topics'
+      const res = await http.post(url, payload)
       data = res.data
       show(t('topicDialog.createSuccess'), 'success')
     }

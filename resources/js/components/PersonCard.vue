@@ -35,7 +35,7 @@ const moreItems = [{ title: t('userCard.message'), icon: 'mdi-message-outline' }
   >
     <!-- 上方居中头像 -->
     <div class="person-avatar d-flex align-center justify-center">
-      <v-avatar size="72" color="primary" variant="tonal">
+      <v-avatar size="72" color="primary" >
         <v-img v-if="person.avatar" :src="person.avatar" cover />
         <span v-else class="text-h4 font-weight-bold text-primary">{{ initial }}</span>
       </v-avatar>

@@ -8,6 +8,7 @@ import http from '../api'
 import LanguageSwitcher from './LanguageSwitcher.vue'
 import AppTabBar from './AppTabBar.vue'
 import { useTabBar } from '../composables/useTabBar'
+import { siteName } from '../themeConfig'
 
 const emit = defineEmits(['toggle-drawer'])
 
@@ -73,6 +74,20 @@ function toggleTheme() {
   localStorage.setItem('mdforum-theme', next)
 }
 
+// 圆形扩散过渡切换主题（View Transitions API）
+// 设置圆心为点击坐标，动画样式见 resources/css/app.css
+function handleThemeClick(event) {
+  document.documentElement.style.setProperty('--x', event.clientX + 'px')
+  document.documentElement.style.setProperty('--y', event.clientY + 'px')
+  if (document.startViewTransition) {
+    document.startViewTransition(() => {
+      toggleTheme()
+    })
+  } else {
+    toggleTheme()
+  }
+}
+
 const profilePath = computed(() =>
   authStore.isLoggedIn ? `/users/${authStore.user?.user_id}` : '/users/me',
 )
@@ -113,7 +128,7 @@ onBeforeUnmount(() => {
 
     <v-app-bar-title>
       <v-icon icon="mdi-forum" class="mr-2" />
-      MDForum
+      {{ siteName }}
     </v-app-bar-title>
 
     <v-spacer />
@@ -143,7 +158,7 @@ onBeforeUnmount(() => {
       icon
       variant="text"
       :title="isDark ? $t('appBar.switchLight') : $t('appBar.switchDark')"
-      @click="toggleTheme"
+      @click="handleThemeClick"
     >
       <v-icon :icon="isDark ? 'mdi-white-balance-sunny' : 'mdi-weather-night'" />
     </v-btn>
@@ -181,6 +196,12 @@ onBeforeUnmount(() => {
           <v-divider class="my-1" />
           <v-list-item :to="profilePath" prepend-icon="mdi-account" :title="$t('nav.profile')" />
           <v-list-item to="/settings" prepend-icon="mdi-cog" :title="$t('appBar.settings')" />
+          <v-list-item
+            v-if="authStore.canAccessAdmin"
+            href="/admin/"
+            prepend-icon="mdi-shield-crown-outline"
+            :title="$t('nav.admin')"
+          />
           <v-divider class="my-1" />
           <v-list-item prepend-icon="mdi-logout" :title="$t('appBar.logout')" @click="handleLogout" />
         </v-list>

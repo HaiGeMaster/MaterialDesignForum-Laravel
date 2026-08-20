@@ -44,7 +44,7 @@ function openDetail() {
 
     <!-- 左下角话题标题 -->
     <div class="pa-3">
-      <div class="text-subtitle-1 font-weight-bold text-truncate">{{ topic.name }}</div>
+      <div class="text-subtitle-1  text-truncate">{{ topic.name }}</div>
     </div>
 
     <!-- 底部操作栏：左关注圆钮，右关注人数 -->

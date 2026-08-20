@@ -125,7 +125,7 @@ function notificationIcon(item) {
       <v-avatar
         size="40"
         color="primary"
-        variant="tonal"
+        
         :to="sender.user_id ? `/users/${sender.user_id}` : undefined"
         @click.stop
       >

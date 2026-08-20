@@ -55,6 +55,17 @@ const mediaStyle = computed(() => {
   return style
 })
 
+function onMediaClick(ev) {
+  // 编辑模式下停止冒泡并选中节点。
+  // 只读模式（ProseRenderer）下，img 元素上已由 ProseRenderer 直接绑定
+  // Fancybox 预览的 click 处理器（并 stopPropagation），这里无需处理；
+  // 视频不接入灯箱，保留原生 controls/全屏，同样无需处理。
+  if (props.editor?.isEditable) {
+    ev.stopPropagation()
+  }
+  selectNode()
+}
+
 function selectNode() {
   if (!props.editor?.isEditable) return
   const pos = props.getPos()
@@ -148,7 +159,7 @@ function startResize(ev, dir) {
     ref="wrapper"
     class="media-resizer"
     :class="{ 'media-resizer--selected': selected }"
-    @click.stop="selectNode"
+    @click="onMediaClick"
     @mouseenter="hovered = true"
     @mouseleave="hovered = false"
   >

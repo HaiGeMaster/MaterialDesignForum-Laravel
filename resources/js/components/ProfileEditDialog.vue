@@ -1,13 +1,20 @@
 <script setup>
-import { reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
 import { useUserStore } from '../stores/user'
 import { useProfileEditStore } from '../stores/profileEditDialog'
 import { useFeedback } from '../composables/useFeedback'
-import ImageUploadField from './ImageUploadField.vue'
 import { useDisplay } from 'vuetify'
+import http from '../api'
 const { mobile } = useDisplay()
+
+const props = defineProps({
+  /** API 基础路径：管理员后台传 '/admin/modules/users'，默认空走用户端 '/user/profile' */
+  apiBase: { type: String, default: '' },
+})
+
+const emit = defineEmits(['saved'])
 
 const profileEdit = useProfileEditStore()
 
@@ -16,6 +23,9 @@ const userStore = useUserStore()
 const { show: feedback } = useFeedback()
 const { t } = useI18n()
 
+// 管理员模式：store.apiBase 优先于 prop
+const effectiveApiBase = computed(() => profileEdit.apiBase || props.apiBase)
+
 const form = reactive({
   username: '',
   headline: '',
@@ -23,8 +33,6 @@ const form = reactive({
   blog: '',
   company: '',
   location: '',
-  avatar: '',
-  cover: '',
 })
 
 const formRef = ref(null)
@@ -42,8 +50,6 @@ watch(
       form.blog = user.blog ?? ''
       form.company = user.company ?? ''
       form.location = user.location ?? ''
-      form.avatar = user.avatar ?? ''
-      form.cover = user.cover ?? ''
     }
   },
 )
@@ -73,14 +79,23 @@ async function save() {
       blog: form.blog,
       company: form.company,
       location: form.location,
-      avatar: form.avatar,
-      cover: form.cover,
     }
-    const result = await userStore.updateProfile(payload)
-    // 同步当前登录用户信息，个人主页即时刷新
-    authStore.setUser(result.user)
-    feedback(result.message || t('profileEdit.saved'), 'success')
-    profileEdit.emitSaved(result.user)
+
+    if (effectiveApiBase.value) {
+      // 管理员模式：PUT /admin/modules/users/{id}
+      const userId = profileEdit.user?.user_id
+      const { data } = await http.put(`${effectiveApiBase.value}/${userId}`, payload)
+      feedback(t('admin.editSaved'), 'success')
+      profileEdit.emitSaved(data)
+      emit('saved', data)
+    } else {
+      // 普通模式：更新自己的资料
+      const result = await userStore.updateProfile(payload)
+      authStore.setUser(result.user)
+      feedback(result.message || t('profileEdit.saved'), 'success')
+      profileEdit.emitSaved(result.user)
+      emit('saved', result.user)
+    }
     profileEdit.close()
   } catch (error) {
     feedback(error.message, 'error')
@@ -164,16 +179,6 @@ async function save() {
                 variant="outlined"
                 density="comfortable"
               />
-            </v-col>
-
-            <v-col cols="12" sm="6">
-              <div class="text-subtitle-2 mb-1">{{ $t('profileEdit.avatar') }}</div>
-              <ImageUploadField v-model="form.avatar" type="avatar" :label="$t('profileEdit.avatar')" preview-ratio="1" />
-            </v-col>
-
-            <v-col cols="12" sm="6">
-              <div class="text-subtitle-2 mb-1">{{ $t('profileEdit.cover') }}</div>
-              <ImageUploadField v-model="form.cover" type="cover" :label="$t('profileEdit.cover')" preview-ratio="16 / 6" />
             </v-col>
           </v-row>
         </v-form>

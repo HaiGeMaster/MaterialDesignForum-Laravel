@@ -15,6 +15,10 @@ export const useAuthStore = defineStore('auth', {
   getters: {
     isLoggedIn: (state) => Boolean(state.token),
     userGroupName: (state) => state.user?.user_group?.user_group_name || '',
+    canAccessAdmin: (state) => Boolean(
+      // state.user?.user_group?.is_admin
+      state.user?.user_group?.ability_admin_login,// || state.user?.user_group?.is_admin,
+    ),
   },
 
   actions: {
@@ -96,6 +100,16 @@ export const useAuthStore = defineStore('auth', {
       } finally {
         this.loading = false
       }
+    },
+
+    // 第三方 OAuth 回调落地：用后端返回的 token 直接落地登录，再拉取用户信息
+    async completeOAuthLogin(token) {
+      if (!token) return null
+
+      this.token = token
+      localStorage.setItem(TOKEN_KEY, token)
+      await this.fetchMe()
+      return this.user
     },
 
     // 通过已有 token 拉取当前用户（应用启动时恢复登录态）

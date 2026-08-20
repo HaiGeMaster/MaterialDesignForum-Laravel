@@ -29,6 +29,10 @@ const profileEdit = useProfileEditStore();
 const groupName = computed(
     () => props.user?.user_group?.user_group_name || t("userProfile.noGroup"),
 );
+const groupIcon = computed(
+    () => props.user?.user_group?.user_group_icon || "mdi-account",
+);
+const groupColor = computed(() => props.user?.user_group?.user_group_color || "");
 const initial = computed(
     () => props.user?.username?.slice(0, 1).toUpperCase() || "?",
 );
@@ -98,8 +102,7 @@ const moreItems = [{ title: t("userProfile.message"), icon: "mdi-message-outline
             >
                 <v-avatar
                     size="96"
-                    color="secondary"
-                    class="border avatar-wrap"
+                    class="border avatar-wrap elevation-2"
                 >
                     <v-img v-if="user?.avatar" :src="user.avatar" cover />
                     <span v-else class="text-h4">{{ initial }}</span>
@@ -139,11 +142,15 @@ const moreItems = [{ title: t("userProfile.message"), icon: "mdi-message-outline
                 @click.stop="pick('cover')"
             />
             <v-chip
-                size="small"
-                color="primary"
+                :color="groupColor || 'primary'"
                 variant="tonal"
                 class="group-chip"
             >
+                <v-icon
+                    v-if="groupIcon"
+                    :icon="groupIcon"
+                    class="mr-1"
+                />
                 {{ groupName }}
             </v-chip>
         </div>
@@ -193,7 +200,7 @@ const moreItems = [{ title: t("userProfile.message"), icon: "mdi-message-outline
                 <div class="d-flex align-center ga-3">
                     <v-btn
                         v-if="mode === 'self'"
-                        color="primary"
+                        variant="tonal"
                         size="small"
                         @click="profileEdit.open(user, { onSaved: (u) => emit('saved', u) })"
                         icon="mdi-pencil"

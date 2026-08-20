@@ -1,5 +1,6 @@
 <script setup>
-import { computed, watch } from 'vue'
+import { computed, watch, onBeforeUnmount } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { EditorContent, useEditor } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
@@ -8,6 +9,9 @@ import { Color } from '@tiptap/extension-color'
 import Highlight from '@tiptap/extension-highlight'
 import Link from '@tiptap/extension-link'
 import TextAlign from '@tiptap/extension-text-align'
+import { Fancybox } from '@fancyapps/ui'
+import '@fancyapps/ui/dist/fancybox/fancybox.css'
+import { zh_CN } from '@fancyapps/ui/dist/fancybox/l10n/zh_CN.js'
 import { Video } from '../tiptap/Video'
 import { ResizableImage } from '../tiptap/ResizableImage'
 import { CodeBlock } from '../tiptap/CodeBlock'
@@ -56,16 +60,93 @@ const editor = useEditor({
   ],
 })
 
-// 外部内容变化时同步进编辑器（setContent 默认不触发 onUpdate）
+// —— 富文本图片点击预览（fancyapps/ui Fancybox）——
+// 注意：不能用 Fancybox.bind 的容器事件委托 —— ProseMirror 点击图片/视频（atom 节点）
+// 时会在冒泡阶段调用 event.preventDefault()，Fancybox 的 fromEvent 检测到
+// defaultPrevented 就直接返回，灯箱永远打不开。
+// 因此改为直接在图片元素上绑定 click（preventDefault + stopPropagation 拦截冒泡），
+// 再手动调用 Fancybox.show() 打开灯箱。
+// 视频不接入灯箱：保留原生 controls，支持浏览器全屏播放。
+const { locale } = useI18n()
+
+const GALLERY_GROUP = 'prose-media-gallery'
+let lightboxObserver = null
+const boundImages = new WeakSet()
+
+// 收集同组图片并构造成 Fancybox slide 列表（可在灯箱内左右切换）
+function collectSlides() {
+  const dom = editor.value?.view?.dom
+  if (!dom) return []
+  return Array.from(dom.querySelectorAll(`[data-lightbox="${GALLERY_GROUP}"]`)).map((el) => ({
+    type: 'image',
+    src: el.currentSrc || el.src,
+    caption: el.getAttribute('alt') || undefined,
+  }))
+}
+
+function openLightbox(el) {
+  const dom = editor.value?.view?.dom
+  if (!dom) return
+  const items = Array.from(dom.querySelectorAll(`[data-lightbox="${GALLERY_GROUP}"]`))
+  const slides = collectSlides()
+  if (!slides.length) return
+  Fancybox.show(slides, {
+    startIndex: Math.max(0, items.indexOf(el)),
+    l10n: locale.value === 'zh' ? zh_CN : undefined,
+  })
+}
+
+function onImageClick(ev) {
+  // 拦截事件，避免冒泡到 ProseMirror 被 preventDefault，也避免它抢走选区
+  ev.preventDefault()
+  ev.stopPropagation()
+  openLightbox(ev.currentTarget)
+}
+
+// 给当前 DOM 中的图片打上分组标记并绑定点击（WeakSet 去重，避免重复绑定）
+function syncMedia() {
+  const dom = editor.value?.view?.dom
+  if (!dom) return
+  dom.querySelectorAll('img').forEach((el) => {
+    el.setAttribute('data-lightbox', GALLERY_GROUP)
+    if (!boundImages.has(el)) {
+      boundImages.add(el)
+      el.addEventListener('click', onImageClick)
+    }
+  })
+}
+
+function refreshLightbox() {
+  const dom = editor.value?.view?.dom
+  if (!dom) return
+  syncMedia()
+  // 内容变化会重建 NodeView（img/video 元素被替换），用 MutationObserver 保持绑定
+  lightboxObserver?.disconnect()
+  lightboxObserver = new MutationObserver(syncMedia)
+  lightboxObserver.observe(dom, { childList: true, subtree: true })
+}
+
+// 外部内容变化时同步进编辑器（setContent 默认不触发 onUpdate），并刷新媒体预览
 watch(
   () => props.content,
   (val) => {
     const ed = editor.value
     if (ed && val !== ed.getHTML()) {
       ed.commands.setContent(val || '', false)
+      refreshLightbox()
     }
   },
 )
+
+// 编辑器就绪后绑定灯箱；语言切换时更新灯箱文案
+watch(editor, (ed) => {
+  if (ed) refreshLightbox()
+})
+watch(locale, () => refreshLightbox())
+
+onBeforeUnmount(() => {
+  lightboxObserver?.disconnect()
+})
 </script>
 
 <template>
@@ -143,6 +224,11 @@ watch(
   max-width: 100%;
   height: auto;
   border-radius: 8px;
+}
+
+/* 富文本内的图片可点击预览（视频保留原生播放/全屏，不接入灯箱） */
+.prose :deep(.media-resizer img) {
+  cursor: zoom-in;
 }
 
 .prose :deep(code) {

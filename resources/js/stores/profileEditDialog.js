@@ -19,12 +19,15 @@ export const useProfileEditStore = defineStore('profileEditDialog', {
     user: null,
     /** 保存成功回调 */
     onSaved: null,
+    /** API 基础路径：管理员后台传 '/admin/modules/users'，默认空走用户端 '/user/profile' */
+    apiBase: '',
   }),
 
   actions: {
-    open(user, { onSaved = null } = {}) {
+    open(user, { onSaved = null, apiBase = '' } = {}) {
       this.user = user
       this.onSaved = onSaved
+      this.apiBase = apiBase
       this.model = true
     },
 
@@ -32,6 +35,7 @@ export const useProfileEditStore = defineStore('profileEditDialog', {
       this.model = false
       this.user = null
       this.onSaved = null
+      this.apiBase = ''
     },
 
     emitSaved(user) {

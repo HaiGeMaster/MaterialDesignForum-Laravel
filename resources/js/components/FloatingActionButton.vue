@@ -6,6 +6,7 @@ import { useAuthStore } from '../stores/auth'
 import { useFeedback } from '../composables/useFeedback'
 import CommentSheet from './CommentSheet.vue'
 import TopicDialog from './TopicDialog.vue'
+import UserGroupDialog from './UserGroupDialog.vue'
 import { useEditorWindowStore } from '../stores/editorWindow'
 
 const route = useRoute()
@@ -31,6 +32,7 @@ onBeforeUnmount(() => {
 })
 
 const topicDialog = ref(false)
+const userGroupDialog = ref(false)
 const commentSheet = ref(false)
 const editorWindow = useEditorWindowStore()
 
@@ -58,10 +60,20 @@ const pageConfig = {
     labelKey: 'floatingAction.writeComment',
     icon: 'mdi-comment-plus-outline',
   },
+  // 管理员用户组管理页：悬浮按钮变为「新建用户组」
+  'admin-user-groups': {
+    labelKey: 'admin.newUserGroup',
+    icon: 'mdi-account-plus-outline',
+  },
 }
 
-// 话题 / 问题 / 文章列表页及问题详情页显示
-const current = computed(() => pageConfig[route.name])
+// 话题 / 问题 / 文章列表页、问题详情页、管理员用户组页显示
+const current = computed(() => {
+  if (route.name === 'admin-module' && route.params.module === 'user-groups') {
+    return pageConfig['admin-user-groups']
+  }
+  return pageConfig[route.name]
+})
 const visible = computed(() => Boolean(current.value))
 
 // 点击：未登录先引导登录；按页面打开对应创建入口
@@ -87,6 +99,9 @@ function handleClick() {
   } else if (route.name === 'article-detail') {
     // 文章详情页：打开底部评论输入框
     commentSheet.value = true
+  } else if (route.name === 'admin-module' && route.params.module === 'user-groups') {
+    // 管理员用户组管理页：打开新建用户组对话框
+    userGroupDialog.value = true
   }
 }
 
@@ -94,6 +109,12 @@ function handleClick() {
 function onTopicCreated(data) {
   topicDialog.value = false
   router.push(`/topics/${data.topic_id}`)
+}
+
+// 用户组创建成功：刷新当前页数据（AdminModuleView 监听 window 事件）
+function onUserGroupCreated(data) {
+  userGroupDialog.value = false
+  window.dispatchEvent(new CustomEvent('user-group:created', { detail: data }))
 }
 </script>
 
@@ -118,6 +139,9 @@ function onTopicCreated(data) {
 
       <!-- 新建话题对话框（仅话题页使用） -->
       <TopicDialog v-model="topicDialog" @submit="onTopicCreated" />
+
+      <!-- 新建用户组对话框（管理员用户组管理页使用） -->
+      <UserGroupDialog v-model="userGroupDialog" @submit="onUserGroupCreated" />
 
       <!-- 文章详情页：底部评论输入框 -->
       <CommentSheet

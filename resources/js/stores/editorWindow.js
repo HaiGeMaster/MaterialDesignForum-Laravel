@@ -29,6 +29,8 @@ export const useEditorWindowStore = defineStore('editorWindow', {
     topics: [],
     /** 发布请求进行中 */
     loading: false,
+    /** API 基础路径：管理员后台传 '/admin/modules/questions' 等，默认空走用户端 */
+    apiBase: '',
   }),
 
   getters: {
@@ -86,8 +88,9 @@ export const useEditorWindowStore = defineStore('editorWindow', {
      * @param {string} [payload.title] 初始标题（编辑回显）
      * @param {string} [payload.content] 初始内容（编辑回显）
      * @param {Array} [payload.topics] 已选话题对象列表（编辑回显）
+     * @param {string} [payload.apiBase] 管理员后台 API 路径前缀
      */
-    openEditor({ mode, action = 'create', targetId = null, questionId = null, title = '', content = '', topics = [] }) {
+    openEditor({ mode, action = 'create', targetId = null, questionId = null, title = '', content = '', topics = [], apiBase = '' }) {
       this.mode = mode
       this.action = action
       this.targetId = targetId
@@ -95,6 +98,7 @@ export const useEditorWindowStore = defineStore('editorWindow', {
       this.title = title
       this.content = content
       this.topics = Array.isArray(topics) ? topics.slice() : []
+      this.apiBase = apiBase
       this.loading = false
       this.open = true
     },
@@ -104,6 +108,7 @@ export const useEditorWindowStore = defineStore('editorWindow', {
       this.open = false
       this.loading = false
       this.topics = []
+      this.apiBase = ''
     },
   },
 })

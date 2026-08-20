@@ -110,55 +110,59 @@ class UserController extends Controller
 
     /**
      * 指定用户的提问列表
+     *
+     * 带 page 参数时分页返回，否则保持完整数组（兼容旧调用）。
      */
-    public function questions(User $user)
+    public function questions(Request $request, User $user)
     {
-        return response()->json(
-            Question::query()
-                ->where('user_id', $user->user_id)
-                ->whereNull('delete_time')
-                ->orderByDesc('question_id')
-                ->get()
-        );
+        $query = Question::query()
+            ->where('user_id', $user->user_id)
+            ->whereNull('delete_time')
+            ->orderByDesc('question_id');
+
+        return response()->json($this->paginateOrGet($query, $request)[0]);
     }
 
     /**
      * 指定用户的文章列表
+     *
+     * 带 page 参数时分页返回，否则保持完整数组（兼容旧调用）。
      */
-    public function articles(User $user)
+    public function articles(Request $request, User $user)
     {
-        return response()->json(
-            Article::query()
-                ->where('user_id', $user->user_id)
-                ->whereNull('delete_time')
-                ->orderByDesc('article_id')
-                ->get()
-        );
+        $query = Article::query()
+            ->where('user_id', $user->user_id)
+            ->whereNull('delete_time')
+            ->orderByDesc('article_id');
+
+        return response()->json($this->paginateOrGet($query, $request)[0]);
     }
 
     /**
      * 指定用户的回答列表
      *
-     * 附带回答问题标题，便于前端展示。
+     * 附带回答问题标题，便于前端展示；
+     * 带 page 参数时分页返回，否则保持完整数组（兼容旧调用）。
      */
-    public function answers(User $user)
+    public function answers(Request $request, User $user)
     {
-        $answers = Answer::query()
+        $query = Answer::query()
             ->where('user_id', $user->user_id)
             ->whereNull('delete_time')
-            ->orderByDesc('answer_id')
-            ->get();
+            ->orderByDesc('answer_id');
+
+        [$result, $collection] = $this->paginateOrGet($query, $request);
 
         // 补充每个回答所属问题的标题
         $questionTitles = Question::query()
-            ->whereIn('question_id', $answers->pluck('question_id'))
+            ->whereIn('question_id', $collection->pluck('question_id'))
             ->pluck('title', 'question_id');
 
-        $answers->each(function ($answer) use ($questionTitles) {
+        $collection->each(function ($answer) use ($questionTitles) {
             $answer->question_title = $questionTitles[$answer->question_id] ?? null;
         });
 
-        return response()->json($answers);
+        return response()->json($result);
     }
 
     /**

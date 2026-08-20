@@ -35,4 +35,28 @@ return [
         ],
     ],
 
+    // 第三方 OAuth 登录：GitHub
+    'github' => [
+        'client_id' => env('GITHUB_CLIENT_ID'),
+        'client_secret' => env('GITHUB_CLIENT_SECRET'),
+        'redirect' => env('GITHUB_REDIRECT_URI', env('APP_URL') . '/oauth/callback/github'),
+    ],
+
+    // 第三方 OAuth 登录：Google
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI', env('APP_URL') . '/oauth/callback/google'),
+    ],
+
+    // 第三方 OAuth 登录：Microsoft（Azure AD v2.0，由 socialiteproviders/microsoft 提供）
+    'microsoft' => [
+        'client_id' => env('MICROSOFT_CLIENT_ID'),
+        'client_secret' => env('MICROSOFT_CLIENT_SECRET'),
+        'redirect' => env('MICROSOFT_REDIRECT_URI', env('APP_URL') . '/oauth/callback/microsoft'),
+        // Azure 租户：与 .env 中的 MICROSOFT_TENANT_ID 保持一致（.env 里既有 MICROSOFT_TENANT_ID 也有 MICROSOFT_TENANT）
+        'tenant' => env('MICROSOFT_TENANT_ID', env('MICROSOFT_TENANT', 'common')),
+        'login_url' => 'https://login.microsoftonline.com/' . env('MICROSOFT_TENANT_ID', env('MICROSOFT_TENANT', 'common')),
+    ],
+
 ];

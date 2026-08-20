@@ -312,6 +312,7 @@ const toolbarBottom = computed(() => [
       { type: 'link', icon: 'mdi-link-variant', title: t('editor.link') },
       { type: 'image', icon: 'mdi-image-outline', title: t('editor.image') },
       { type: 'video', icon: 'mdi-video-outline', title: t('editor.video') },
+      { type: 'library', icon: 'mdi-image-multiple-outline', title: t('editor.fromLibrary') },
     ],
   },
 ])

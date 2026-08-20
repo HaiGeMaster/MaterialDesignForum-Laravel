@@ -102,16 +102,19 @@ async function handlePublish() {
     const common = { content_markdown: html, content_rendered: html }
     let url, method, payload
 
+    // 管理员后台模式：apiBase 指向 '/admin/modules/questions' 等
+    const base = store.apiBase || { question: '/questions', article: '/articles', answer: '/answers' }[store.mode]
+
     if (store.mode === 'question') {
-      url = isEditing.value ? `/questions/${store.targetId}` : '/questions'
+      url = isEditing.value ? `${base}/${store.targetId}` : base
       method = isEditing.value ? 'put' : 'post'
       payload = { title: store.title.trim(), topic_ids: store.topics.map((t) => t.topic_id), ...common }
     } else if (store.mode === 'article') {
-      url = isEditing.value ? `/articles/${store.targetId}` : '/articles'
+      url = isEditing.value ? `${base}/${store.targetId}` : base
       method = isEditing.value ? 'put' : 'post'
       payload = { title: store.title.trim(), topic_ids: store.topics.map((t) => t.topic_id), ...common }
     } else {
-      url = isEditing.value ? `/answers/${store.targetId}` : '/answers'
+      url = isEditing.value ? `${base}/${store.targetId}` : base
       method = isEditing.value ? 'put' : 'post'
       payload = { question_id: store.questionId, ...common }
     }

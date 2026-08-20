@@ -14,6 +14,7 @@ const routes = [
   { path: '/users', name: 'users', component: () => import('../views/PeopleView.vue'), meta: { titleKey: 'route.users', maxWidth: 1080 } },
   { path: '/notifications', name: 'notifications', component: () => import('../views/NotificationsView.vue'), meta: { titleKey: 'route.notifications', maxWidth: 1080 } },
   { path: '/notifications/setting', name: 'notification-setting', component: () => import('../views/NotificationSettingView.vue'), meta: { titleKey: 'route.notificationSetting', maxWidth: 1080 } },
+  { path: '/oauth/callback', name: 'oauth-callback', component: () => import('../views/OAuthCallbackView.vue'), meta: { titleKey: 'route.oauthCallback' } },
   { path: '/settings', name: 'settings', component: () => import('../views/SettingsView.vue'), meta: { titleKey: 'route.settings', requiresAuth: true } },
 ]
 
@@ -23,13 +24,14 @@ const router = createRouter({
 })
 
 // 登录守卫：requiresAuth 路由未登录时重定向到登录页
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   if (to.meta.requiresAuth) {
     const authStore = useAuthStore()
     if (!authStore.isLoggedIn) {
       return { path: '/users/me', query: { redirect: to.fullPath } }
     }
   }
+
 })
 
 router.afterEach((to) => {

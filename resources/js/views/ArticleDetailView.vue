@@ -159,7 +159,7 @@ onUnmounted(() => {
             :to="creator?.user_id ? `/users/${creator.user_id}` : undefined"
           >
             <template v-slot:prepend>
-              <v-avatar size="40" color="primary" variant="tonal">
+              <v-avatar size="40" color="primary" >
                 <v-img v-if="creator?.avatar" :src="creator.avatar" cover />
                 <span v-else class="text-body-2 font-weight-bold text-primary">{{ creatorInitial }}</span>
               </v-avatar>

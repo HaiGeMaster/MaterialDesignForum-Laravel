@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
+import { siteIcpBeian, siteGonganBeian } from '../themeConfig'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: true },
@@ -35,6 +36,7 @@ const accountNavItems = computed(() => {
   }
   return items
 })
+
 </script>
 
 <template>
@@ -62,6 +64,18 @@ const accountNavItems = computed(() => {
         :title="item.title"
         exact
       />
+
     </v-list>
+
+    <template v-slot:append>
+      <div v-if="siteIcpBeian || siteGonganBeian" class="pa-3 text-caption text-medium-emphasis">
+        <div v-if="siteIcpBeian" class="mb-1">
+          {{ $t('footer.icpBeian') }}: {{ siteIcpBeian }}
+        </div>
+        <div v-if="siteGonganBeian">
+          {{ $t('footer.gonganBeian') }}: {{ siteGonganBeian }}
+        </div>
+      </div>
+    </template>
   </v-navigation-drawer>
 </template>

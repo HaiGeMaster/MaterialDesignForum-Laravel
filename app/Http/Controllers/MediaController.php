@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Media;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
@@ -90,7 +91,8 @@ class MediaController extends Controller
     /**
      * 当前登录用户的媒体库列表（仅本人可见）
      *
-     * 支持 ?type=image|video 过滤，按上传时间倒序。
+     * 支持 ?type=image|video 过滤，按上传时间倒序；
+     * 带 page 参数时分页返回，否则保持原有上限完整返回（兼容旧调用）。
      */
     public function index(Request $request, User $user)
     {
@@ -110,6 +112,46 @@ class MediaController extends Controller
             $query->where('type', $request->query('type'));
         }
 
-        return response()->json($query->limit(500)->get());
+        // 不分页时保留原有 500 条上限
+        if (! $request->has('page')) {
+            $query->limit(500);
+        }
+
+        return response()->json($this->paginateOrGet($query, $request)[0]);
+    }
+
+    /**
+     * 批量删除媒体（仅本人），同时删除物理文件。
+     *
+     * 入参：media_ids 数组；返回实际删除数量。
+     */
+    public function destroy(Request $request)
+    {
+        $data = $request->validate([
+            'media_ids' => ['required', 'array'],
+            'media_ids.*' => ['required', 'integer'],
+        ]);
+
+        /** @var User $user */
+        $user = $request->user();
+
+        $ids = array_unique(array_map('intval', $data['media_ids']));
+
+        $mediaList = Media::query()
+            ->where('user_id', $user->user_id)
+            ->whereIn('media_id', $ids)
+            ->get();
+
+        $deleted = 0;
+        foreach ($mediaList as $media) {
+            Storage::disk('public')->delete($media->path);
+            $media->delete();
+            $deleted++;
+        }
+
+        return response()->json([
+            'message' => "已删除 {$deleted} 个文件。",
+            'deleted' => $deleted,
+        ]);
     }
 }

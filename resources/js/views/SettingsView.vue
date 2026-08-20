@@ -1,11 +1,11 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
 import { useUserStore } from '../stores/user'
 import { useFeedback } from '../composables/useFeedback'
-import ImageUploadField from '../components/ImageUploadField.vue'
+import http from '../api'
 
 import { useDisplay } from 'vuetify'
 const { xs } = useDisplay()
@@ -13,12 +13,13 @@ const { xs } = useDisplay()
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const router = useRouter()
+const route = useRoute()
 const { show: feedback } = useFeedback()
 const { t } = useI18n()
 
 const isLoggedIn = computed(() => authStore.isLoggedIn)
 
-// 当前展示的区块：list=选项列表 / profile=编辑个人资料 / password=修改密码
+// 当前展示的区块：list=选项列表 / profile=编辑个人资料 / password=修改密码 / oauth=第三方绑定
 const section = ref('list')
 
 // 未登录直接回登录页
@@ -29,72 +30,6 @@ watch(
   },
   { immediate: true },
 )
-
-// ---------- 编辑个人资料 ----------
-const profileFormRef = ref()
-const profileForm = reactive({
-  username: '',
-  email: '',
-  avatar: '',
-  cover: '',
-  headline: '',
-  bio: '',
-  blog: '',
-  company: '',
-  location: '',
-  language: 'zh_CN',
-})
-
-const languageOptions = [
-  { value: 'zh_CN', label: '简体中文' },
-  { value: 'zh_TW', label: '繁體中文' },
-  { value: 'en_US', label: 'English' },
-  { value: 'ja_JP', label: '日本語' },
-]
-
-const rules = {
-  required: (v) => !!v || t('settings.rules.required'),
-  email: (v) => !v || /.+@.+\..+/.test(v) || t('settings.rules.email'),
-  username: (v) => !v || v.length >= 2 || t('settings.rules.username'),
-}
-
-function syncProfileForm() {
-  const u = authStore.user
-  if (!u) return
-  profileForm.username = u.username || ''
-  profileForm.email = u.email || ''
-  profileForm.avatar = u.avatar || ''
-  profileForm.cover = u.cover || ''
-  profileForm.headline = u.headline || ''
-  profileForm.bio = u.bio || ''
-  profileForm.blog = u.blog || ''
-  profileForm.company = u.company || ''
-  profileForm.location = u.location || ''
-  profileForm.language = u.language || 'zh_CN'
-}
-
-async function handleUpdateProfile() {
-  const { valid } = await profileFormRef.value.validate()
-  if (!valid) return
-  try {
-    const result = await userStore.updateProfile({
-      username: profileForm.username || undefined,
-      email: profileForm.email || undefined,
-      avatar: profileForm.avatar || null,
-      cover: profileForm.cover || null,
-      headline: profileForm.headline || null,
-      bio: profileForm.bio || null,
-      blog: profileForm.blog || null,
-      company: profileForm.company || null,
-      location: profileForm.location || null,
-      language: profileForm.language || 'zh_CN',
-    })
-    authStore.setUser(result.user)
-    feedback(result.message || t('settings.profileUpdated'), 'success')
-  } catch (error) {
-    feedback(error.message, 'error')
-  }
-}
 
 // ---------- 修改密码 ----------
 const passwordFormRef = ref()
@@ -128,15 +63,98 @@ async function handleUpdatePassword() {
   }
 }
 
-watch(
-  () => authStore.user,
-  (u) => {
-    if (u) syncProfileForm()
-  },
-)
+// ---------- 第三方账号绑定 ----------
+const OAUTH_META = {
+  github: { icon: 'mdi-github', label: 'GitHub' },
+  google: { icon: 'mdi-google', label: 'Google' },
+  microsoft: { icon: 'mdi-microsoft', label: 'Microsoft' },
+}
+
+const oauthLoading = ref(false)
+const oauthUnbinding = ref(null)
+// 后端已启用的 provider 列表（决定能展示几个绑定入口）
+const enabledProviders = ref([])
+// 当前用户已绑定的记录：[{ oauth_id, oauth_name, oauth_user_id, oauth_user_name, oauth_user_email }]
+const oauthBindings = ref([])
+
+const oauthRows = computed(() => {
+  return enabledProviders.value.map((provider) => {
+    const meta = OAUTH_META[provider] || { icon: 'mdi-account', label: provider }
+    const bound = oauthBindings.value.find((b) => b.oauth_name === provider)
+    return {
+      provider,
+      icon: meta.icon,
+      label: meta.label,
+      bound,
+    }
+  })
+})
+
+async function loadEnabledProviders() {
+  try {
+    const { data } = await http.get('/oauth/providers')
+    enabledProviders.value = Array.isArray(data?.providers) ? data.providers : []
+  } catch (e) {
+    enabledProviders.value = []
+  }
+}
+
+async function loadOauthBindings() {
+  oauthLoading.value = true
+  try {
+    const { data } = await http.get('/user/oauth')
+    oauthBindings.value = Array.isArray(data?.data) ? data.data : []
+  } catch (e) {
+    oauthBindings.value = []
+  } finally {
+    oauthLoading.value = false
+  }
+}
+
+// 发起绑定：跳到后端，由后端 302 到第三方授权页
+// 注意：整页跳转浏览器不会带 Authorization 头，必须把 token 作为 query 参数传给后端兜底解析
+function bindProvider(provider) {
+  const token = authStore.token
+  if (!token) {
+    feedback(t('oauth.errors.auth_required'), 'error')
+    router.replace('/users/me')
+    return
+  }
+  window.location.href = `/oauth/redirect/${provider}?mode=bind&token=${encodeURIComponent(token)}`
+}
+
+async function unbindProvider(row) {
+  if (!row?.bound) return
+  oauthUnbinding.value = row.provider
+  try {
+    await http.delete(`/user/oauth/${row.bound.oauth_id}`)
+    oauthBindings.value = oauthBindings.value.filter((b) => b.oauth_id !== row.bound.oauth_id)
+    feedback(t('oauth.unbindSuccess', { provider: row.label }), 'success')
+  } catch (e) {
+    feedback(e.message, 'error')
+  } finally {
+    oauthUnbinding.value = null
+  }
+}
+
+// 从回调 URL 读取 ?bound=provider / ?error=... 提示用户绑定结果
+function consumeCallbackQuery() {
+  const bound = route.query.bound
+  const errorReason = route.query.error
+  if (bound) {
+    const meta = OAUTH_META[bound] || { label: bound }
+    feedback(t('oauth.bindSuccess', { provider: meta.label }), 'success')
+    router.replace({ query: {} })
+  } else if (errorReason) {
+    feedback(t(`oauth.errors.${errorReason}`, { defaultValue: t('oauth.errors.default') }), 'error')
+    router.replace({ query: {} })
+  }
+}
 
 onMounted(() => {
-  if (authStore.user) syncProfileForm()
+  loadEnabledProviders()
+  loadOauthBindings()
+  consumeCallbackQuery()
 })
 </script>
 
@@ -146,22 +164,13 @@ onMounted(() => {
       <v-col cols="12" md="10" lg="8">
         <!-- 设置选项列表 -->
         <template v-if="section === 'list'">
-          <v-card >
-            <v-card-title >
+          <v-card prepend-icon="mdi-cog-outline" :title="$t('settings.title')">
+            <!-- <v-card-title >
               <v-icon icon="mdi-cog-outline" />
               {{ $t('settings.title') }}
-            </v-card-title>
+            </v-card-title> -->
             <v-divider />
             <v-list>
-              <v-list-item
-                prepend-icon="mdi-account-edit"
-                :title="$t('settings.editProfile')"
-                :subtitle="$t('settings.editProfileSub')"
-                append-icon="mdi-chevron-right"
-                class="pa-4"
-                @click="section = 'profile'"
-              />
-              <v-divider />
               <v-list-item
                 prepend-icon="mdi-shield-lock"
                 :title="$t('settings.changePassword')"
@@ -170,13 +179,22 @@ onMounted(() => {
                 class="pa-4"
                 @click="section = 'password'"
               />
+              <v-divider />
+              <v-list-item
+                prepend-icon="mdi-account-network-outline"
+                :title="$t('oauth.bindingsTitle')"
+                :subtitle="$t('oauth.bindingsSub')"
+                append-icon="mdi-chevron-right"
+                class="pa-4"
+                @click="section = 'oauth'"
+              />
             </v-list>
           </v-card>
         </template>
 
-        <!-- 编辑个人资料 -->
-        <template v-else-if="section === 'profile'">
-          <v-card >
+        <!-- 第三方账号绑定 -->
+        <template v-else-if="section === 'oauth'">
+          <v-card>
             <v-card-title>
               <v-btn
                 icon="mdi-arrow-left"
@@ -185,56 +203,57 @@ onMounted(() => {
                 class="mr-1"
                 @click="section = 'list'"
               />
-              <v-icon icon="mdi-account-edit" class="mr-2" />
-              {{ $t('settings.editProfile') }}
+              <v-icon icon="mdi-account-network-outline" class="mr-2" />
+              {{ $t('oauth.bindingsTitle') }}
             </v-card-title>
             <v-divider />
             <v-card-text>
-              <v-form ref="profileFormRef" @submit.prevent="handleUpdateProfile">
-                <v-row>
-                  <v-col cols="12" sm="6">
-                    <v-text-field v-model="profileForm.username" :label="$t('settings.username')" :rules="[rules.username]" />
-                  </v-col>
-                  <v-col cols="12" sm="6">
-                    <v-text-field v-model="profileForm.email" :label="$t('settings.email')" type="email" :rules="[rules.required, rules.email]" />
-                  </v-col>
-                  <v-col cols="12" sm="6">
-                    <div class="text-subtitle-2 mb-1">{{ $t('settings.avatar') }}</div>
-                    <ImageUploadField v-model="profileForm.avatar" type="avatar" :label="$t('settings.avatar')" preview-ratio="1" />
-                  </v-col>
-                  <v-col cols="12" sm="6">
-                    <div class="text-subtitle-2 mb-1">{{ $t('settings.cover') }}</div>
-                    <ImageUploadField v-model="profileForm.cover" type="cover" :label="$t('settings.cover')" preview-ratio="16 / 6" />
-                  </v-col>
-                  <v-col cols="12">
-                    <v-text-field v-model="profileForm.headline" :label="$t('settings.headline')" counter="40" maxlength="40" />
-                  </v-col>
-                  <v-col cols="12">
-                    <v-textarea v-model="profileForm.bio" :label="$t('settings.bio')" counter="160" maxlength="160" rows="3" />
-                  </v-col>
-                  <v-col cols="12" sm="6">
-                    <v-text-field v-model="profileForm.blog" :label="$t('settings.blog')" prepend-inner-icon="mdi-link" />
-                  </v-col>
-                  <v-col cols="12" sm="6">
-                    <v-text-field v-model="profileForm.company" :label="$t('settings.company')" />
-                  </v-col>
-                  <v-col cols="12" sm="6">
-                    <v-text-field v-model="profileForm.location" :label="$t('settings.location')" />
-                  </v-col>
-                  <v-col cols="12" sm="6">
-                    <v-select
-                      v-model="profileForm.language"
-                      :items="languageOptions"
-                      item-title="label"
-                      item-value="value"
-                      :label="$t('settings.language')"
-                    />
-                  </v-col>
-                </v-row>
-                <v-btn type="submit" color="primary" prepend-icon="mdi-content-save" :loading="userStore.loading">
-                  {{ $t('settings.saveProfile') }}
-                </v-btn>
-              </v-form>
+              <v-progress-linear v-if="oauthLoading" indeterminate color="primary" class="mb-4" />
+
+              <div v-if="!oauthRows.length && !oauthLoading" class="text-body-2 text-medium-emphasis py-4">
+                {{ $t('oauth.noProvidersConfigured') }}
+              </div>
+
+              <v-list lines="two" class="px-0">
+                <template v-for="(row, idx) in oauthRows" :key="row.provider">
+                  <v-divider v-if="idx" />
+                  <v-list-item class="px-0">
+                    <template #prepend>
+                      <v-avatar color="secondary">
+                        <v-icon :icon="row.icon" />
+                      </v-avatar>
+                    </template>
+                    <v-list-item-title>{{ row.label }}</v-list-item-title>
+                    <v-list-item-subtitle>
+                      <template v-if="row.bound">
+                        {{ $t('oauth.boundAs', { name: row.bound.oauth_user_name || row.bound.oauth_user_email || row.bound.oauth_user_id }) }}
+                      </template>
+                      <template v-else>
+                        {{ $t('oauth.notBound') }}
+                      </template>
+                    </v-list-item-subtitle>
+                    <template #append>
+                      <v-btn
+                        v-if="row.bound"
+                        color="error"
+                        variant="text"
+                        :loading="oauthUnbinding === row.provider"
+                        @click="unbindProvider(row)"
+                      >
+                        {{ $t('oauth.unbind') }}
+                      </v-btn>
+                      <v-btn
+                        v-else
+                        color="primary"
+                        variant="tonal"
+                        @click="bindProvider(row.provider)"
+                      >
+                        {{ $t('oauth.bind') }}
+                      </v-btn>
+                    </template>
+                  </v-list-item>
+                </template>
+              </v-list>
             </v-card-text>
           </v-card>
         </template>

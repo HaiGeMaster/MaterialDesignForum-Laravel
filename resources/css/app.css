@@ -7,3 +7,28 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+/* —— 主题切换的圆形扩散动画（View Transitions API）——
+   由 AppBar 的 handleThemeClick 设置 --x/--y 并调用 document.startViewTransition */
+
+/* 圆形动画：从点击处扩散铺满 */
+@keyframes clip {
+    from {
+        clip-path: circle(0% at var(--x) var(--y));
+    }
+
+    to {
+        clip-path: circle(100% at var(--x) var(--y));
+    }
+}
+
+/* 旧画面不播放动画，直接消失 */
+::view-transition-old(root) {
+    animation: none;
+}
+
+/* 新画面以圆形扩散方式出现 */
+::view-transition-new(root) {
+    mix-blend-mode: normal;
+    animation: clip 0.5s ease-in;
+}

@@ -38,9 +38,12 @@ async function save() {
   }
   saving.value = true
   try {
-    const url = store.type === 'reply' ? `/replies/${store.id}` : `/comments/${store.id}`
+    const url = store.apiBase
+      ? `${store.apiBase}/${store.id}`
+      : store.type === 'reply' ? `/replies/${store.id}` : `/comments/${store.id}`
     const { data } = await http.put(url, { content: text })
     show(t('commentReplyEditDialog.success'), 'success')
+    store.emitSaved(data)
     store.close()
     // 广播编辑完成事件，CommentItem / ReplyItem 监听后更新本地数据
     const eventName = store.type === 'reply' ? 'reply:edited' : 'comment:edited'

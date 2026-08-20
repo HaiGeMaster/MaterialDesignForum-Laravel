@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Token;
 use App\Models\User;
 use App\Support\GeoLocation;
+use App\Support\IssuesTokens;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -12,6 +13,8 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    use IssuesTokens;
+
     /**
      * 注册并自动登录
      *
@@ -192,23 +195,6 @@ class AuthController extends Controller
 
         return response()->json([
             'user' => $user,
-        ]);
-    }
-
-    /**
-     * 为用户生成一个唯一的登录令牌
-     */
-    private function createToken(User $user, Request $request): Token
-    {
-        do {
-            $tokenString = Str::random(50);
-        } while (Token::whereKey($tokenString)->exists());
-
-        return Token::create([
-            'token' => $tokenString,
-            'user_id' => $user->user_id,
-            'device' => mb_substr((string) $request->userAgent(), 0, 600),
-            'expire_time' => now()->addDays(7),
         ]);
     }
 }

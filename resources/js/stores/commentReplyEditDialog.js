@@ -18,6 +18,10 @@ export const useCommentReplyEditStore = defineStore('commentReplyEditDialog', {
     id: null,
     /** 当前内容（打开时回显到输入框） */
     content: '',
+    /** API 基础路径：管理员后台传 '/admin/modules/comments' 或 '/admin/modules/replies'，默认空走用户端 */
+    apiBase: '',
+    /** 保存成功回调（管理员后台传入，用于刷新表格） */
+    onSaved: null,
   }),
   actions: {
     open(payload) {
@@ -25,6 +29,14 @@ export const useCommentReplyEditStore = defineStore('commentReplyEditDialog', {
     },
     close() {
       this.visible = false
+      this.apiBase = ''
+      this.onSaved = null
+    },
+    /** 保存成功后调用回调 */
+    emitSaved(data) {
+      if (typeof this.onSaved === 'function') {
+        this.onSaved(data)
+      }
     },
   },
 })

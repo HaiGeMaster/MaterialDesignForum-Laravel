@@ -134,7 +134,7 @@ function isSelf(user) {
           @click="goProfile(user)"
         >
           <template #prepend>
-            <v-avatar size="44" color="primary" variant="tonal" class="mr-2">
+            <v-avatar size="44" color="primary"  class="mr-2">
               <v-img v-if="user.avatar" :src="user.avatar" cover />
               <span v-else >
                 {{ user.username?.slice(0, 1).toUpperCase() || '?' }}

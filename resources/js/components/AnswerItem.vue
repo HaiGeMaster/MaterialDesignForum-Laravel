@@ -70,7 +70,7 @@ function openComments() {
           <v-avatar
             size="36"
             color="primary"
-            variant="tonal"
+            
             class="cursor-pointer"
             v-bind="menuProps"
             @click.stop="menuProps.onClick?.($event)"
@@ -81,7 +81,7 @@ function openComments() {
         </template>
         <UserMiniCard :user="author" />
       </v-menu>
-      <v-avatar v-else size="36" color="grey" variant="tonal">
+      <v-avatar v-else size="36" color="grey" >
         <span class="text-body-2 font-weight-bold">?</span>
       </v-avatar>
     </template>

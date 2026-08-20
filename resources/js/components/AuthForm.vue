@@ -1,8 +1,10 @@
 <script setup>
-import { onUnmounted, reactive, ref } from 'vue'
+import { onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
 import { useFeedback } from '../composables/useFeedback'
+import http from '../api'
+import OAuthSocialButtons from './OAuthSocialButtons.vue'
 
 defineProps({
   loading: { type: Boolean, default: false },
@@ -38,6 +40,9 @@ const codeSending = ref(false)
 const codeCooldown = ref(0)
 let codeTimer = null
 
+// 后端启用的 OAuth 提供方（仅显示后端已配置 client_id/secret 的图标按钮）
+const oauthProviders = ref([])
+
 const rules = {
   required: (v) => !!v || t('auth.rules.required'),
   email: (v) => !v || /.+@.+\..+/.test(v) || t('auth.rules.email'),
@@ -64,6 +69,11 @@ async function handleResetPassword() {
   const { valid } = await resetFormRef.value.validate()
   if (!valid) return
   emit('reset-password', { ...resetForm })
+}
+
+// 跳转到后端 OAuth 重定向端点（浏览器整页跳转，由后端再 302 到第三方授权页）
+function loginWithOAuth(provider) {
+  window.location.href = `/oauth/redirect/${provider}`
 }
 
 function startCooldown() {
@@ -104,6 +114,19 @@ async function handleSendCode() {
   }
 }
 
+async function loadOAuthProviders() {
+  try {
+    const { data } = await http.get('/oauth/providers')
+    oauthProviders.value = Array.isArray(data?.providers) ? data.providers : []
+  } catch (e) {
+    oauthProviders.value = []
+  }
+}
+
+onMounted(() => {
+  loadOAuthProviders()
+})
+
 onUnmounted(() => {
   if (codeTimer) clearInterval(codeTimer)
 })
@@ -139,6 +162,7 @@ onUnmounted(() => {
         <v-btn type="submit" color="primary" block class="mt-2" :loading="loading">
           {{ $t('auth.login') }}
         </v-btn>
+        <OAuthSocialButtons v-if="oauthProviders.length" :providers="oauthProviders" @select="loginWithOAuth" />
       </v-form>
 
       <!-- 注册 -->
@@ -197,6 +221,7 @@ onUnmounted(() => {
         <v-btn type="submit" color="primary" block class="mt-2" :loading="loading">
           {{ $t('auth.register') }}
         </v-btn>
+        <OAuthSocialButtons v-if="oauthProviders.length" :providers="oauthProviders" @select="loginWithOAuth" />
       </v-form>
 
       <!-- 找回密码 -->
