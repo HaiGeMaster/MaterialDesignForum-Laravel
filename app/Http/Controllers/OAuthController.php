@@ -105,7 +105,7 @@ class OAuthController extends Controller
         }
 
         $user = $token->user;
-        if (! $user || $user->disable_time) {
+        if (! $user || $user->disable_time || ! $user->canLoginNormally()) {
             return null;
         }
 
@@ -195,6 +195,11 @@ class OAuthController extends Controller
                     return $this->frontendError('/oauth/callback', 'user_disabled');
                 }
 
+                // 用户组 ability_normal_login=false 时禁止 OAuth 登录
+                if (! $user->canLoginNormally()) {
+                    return $this->frontendError('/oauth/callback', 'user_group_login_disabled');
+                }
+
                 $this->touchLogin($user, $request);
                 $token = $this->createToken($user, $request);
 
@@ -208,6 +213,12 @@ class OAuthController extends Controller
 
             // 3. 创建新用户 + 写入绑定 + 登录
             $user = $this->createNewUserFromOAuth($request, $email, $name);
+
+            // 默认用户组若被关闭登录权限，新建的 OAuth 用户也不能登录
+            if (! $user->canLoginNormally()) {
+                return $this->frontendError('/oauth/callback', 'user_group_login_disabled');
+            }
+
             $this->createBinding($user->user_id, $provider, $oauthUserId, $email, $name, $raw);
             $this->touchLogin($user, $request);
             $token = $this->createToken($user, $request);

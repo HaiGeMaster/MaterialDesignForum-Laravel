@@ -50,6 +50,10 @@ class ReplyController extends Controller
      */
     public function store(Request $request)
     {
+        if (! $request->user()->hasAbility('ability_create_reply')) {
+            return response()->json(['message' => '该用户组无发表回复权限。'], 403);
+        }
+
         $validated = $request->validate([
             'replyable_id' => 'required|integer',
             'replyable_type' => 'required|string|in:comment,reply',
@@ -69,6 +73,11 @@ class ReplyController extends Controller
 
         // 递增父评论的回复计数
         Comment::query()->whereKey($validated['replyable_comment_id'])->increment('reply_count');
+
+        // 若回复的是另一条回复，同步父回复的 reply_count 冗余字段
+        if ($validated['replyable_type'] === 'reply') {
+            Reply::query()->whereKey($validated['replyable_id'])->increment('reply_count');
+        }
 
         // 发送回复通知（comment_reply / reply_reply）
         $this->notifyReplyCreated($reply);
@@ -113,10 +122,22 @@ class ReplyController extends Controller
             return response()->json(['message' => 'Forbidden.'], 403);
         }
 
+        // 删除前先记录回复目标类型，用于递减父回复的 reply_count
+        $wasReplyToReply = $reply->replyable_type === 'reply';
+        $parentReplyId = $wasReplyToReply ? (int) $reply->replyable_id : 0;
+
         Comment::query()
             ->whereKey($reply->replyable_comment_id)
             ->where('reply_count', '>', 0)
             ->decrement('reply_count');
+
+        // 若被删除的是"对回复的回复"，同步递减父回复的 reply_count
+        if ($wasReplyToReply && $parentReplyId > 0) {
+            Reply::query()
+                ->whereKey($parentReplyId)
+                ->where('reply_count', '>', 0)
+                ->decrement('reply_count');
+        }
 
         $reply->delete();
 

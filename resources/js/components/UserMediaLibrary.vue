@@ -4,7 +4,9 @@ import { useI18n } from 'vue-i18n'
 import http from '../api'
 import { useFeedback } from '../composables/useFeedback'
 import { useInfiniteList } from '../composables/useInfiniteList'
+import { useDeleteDialogStore } from '../stores/deleteDialog'
 import InfiniteScroll from './InfiniteScroll.vue'
+import MediaPreviewDialog from './MediaPreviewDialog.vue'
 
 const props = defineProps({
     /** 用户 ID */
@@ -102,20 +104,26 @@ function downloadSelected() {
     feedback(t('userContent.downloadStarted', { count: items.length }), 'success')
 }
 
-// —— 批量删除 ——
-const deleteDialog = ref(false)
-const deleting = ref(false)
+// —— 批量删除：复用全局 DeleteDialog（App.vue 已挂载）——
+const deleteDialog = useDeleteDialogStore()
 
 function openDeleteDialog() {
     if (!selectedCount.value) {
         feedback(t('userContent.noSelection'), 'error')
         return
     }
-    deleteDialog.value = true
+    deleteDialog.open({
+        title: t('userContent.deleteConfirmTitle'),
+        text: t('userContent.deleteConfirmText', { count: selectedCount.value }),
+        icon: 'mdi-delete-alert-outline',
+        confirmText: t('userContent.confirm'),
+        cancelText: t('userContent.cancel'),
+        onConfirm: confirmDelete,
+    })
 }
 
+// 删除成功后对话框由 store 自动关闭；失败时保持打开以便重试（符合全局约定）
 async function confirmDelete() {
-    deleting.value = true
     try {
         const { data } = await http.delete('/media', {
             data: { media_ids: [...selectedIds.value] },
@@ -124,11 +132,9 @@ async function confirmDelete() {
         media.value = media.value.filter((m) => !deletedIds.has(m.media_id))
         exitSelection()
         feedback(t('userContent.deleted', { count: data.deleted ?? 0 }), 'success')
-    } catch {
+    } catch (e) {
         feedback(t('userContent.deleteFailed'), 'error')
-    } finally {
-        deleting.value = false
-        deleteDialog.value = false
+        throw e
     }
 }
 
@@ -283,49 +289,8 @@ function mediaDate(item) {
         <v-empty-state v-else-if="!loading" icon="mdi-image-multiple-outline"
             :title="$t('userContent.emptyMediaTitle')" :text="$t('userContent.emptyMediaText')" class="pa-4" />
 
-        <!-- 删除确认 -->
-        <v-dialog v-model="deleteDialog" max-width="420">
-            <v-card>
-                <v-card-title class="d-flex align-center">
-                    <v-icon icon="mdi-delete-alert-outline" color="error" class="mr-2" />
-                    {{ $t('userContent.deleteConfirmTitle') }}
-                </v-card-title>
-                <v-card-text class="text-body-2">
-                    {{ $t('userContent.deleteConfirmText', { count: selectedCount }) }}
-                </v-card-text>
-                <v-card-actions>
-                    <v-spacer />
-                    <v-btn variant="text" :disabled="deleting" @click="deleteDialog = false">
-                        {{ $t('userContent.cancel') }}
-                    </v-btn>
-                    <v-btn color="error" variant="flat" :loading="deleting" @click="confirmDelete">
-                        {{ $t('userContent.confirm') }}
-                    </v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
-
         <!-- 媒体预览 -->
-        <v-dialog v-model="previewOpen" max-width="880" scrollable>
-            <v-card style="margin-top: 40px;">
-                <v-toolbar>
-                    <template #prepend>
-                        <v-btn icon="mdi-image-outline"></v-btn>
-                    </template>
-                    <v-toolbar-title>
-                        {{ preview?.filename }}
-                    </v-toolbar-title>
-                    <template #append>
-                        <v-btn icon="mdi-close" variant="text" @click="previewOpen = false" />
-                    </template>
-                </v-toolbar>
-                <v-card-text class="pa-0 bg-black">
-                    <v-img v-if="preview?.type === 'image'" :src="preview.url" max-height="70vh" contain />
-                    <video v-else :src="preview?.url" controls autoplay class="d-block w-100 mx-auto"
-                        style="max-height: 70vh" />
-                </v-card-text>
-            </v-card>
-        </v-dialog>
+        <MediaPreviewDialog v-model="previewOpen" :item="preview" />
     </div>
 </template>
 

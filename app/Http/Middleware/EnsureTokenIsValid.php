@@ -61,6 +61,11 @@ class EnsureTokenIsValid
             return response()->json(['message' => '未认证：该账号已被禁用。'], 401);
         }
 
+        // 用户组 ability_normal_login=false 时拒绝继续会话
+        if (! $user->canLoginNormally()) {
+            return response()->json(['message' => '未认证：该用户组已被禁止登录。'], 401);
+        }
+
         // 将当前用户注入认证体系，后续可用 $request->user() / Auth::user() 获取
         Auth::setUser($user);
 

@@ -48,6 +48,10 @@ class TopicController extends Controller
 
     public function store(Request $request)
     {
+        if (! $request->user()->hasAbility('ability_create_topic')) {
+            return response()->json(['message' => '该用户组无创建话题权限。'], 403);
+        }
+
         $topic = Topic::create($request->all());
         return response()->json($topic, 201);
     }

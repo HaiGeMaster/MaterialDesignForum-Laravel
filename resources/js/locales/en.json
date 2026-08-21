@@ -831,6 +831,7 @@
     "notifications": "Notifications",
     "notificationSetting": "Notification settings",
     "oauthCallback": "Signing in",
+    "install": "Installer",
     "settings": "Account settings",
     "admin": "Admin dashboard"
   },
@@ -856,10 +857,109 @@
       "no_provider_id": "Third-party provider did not return a user id.",
       "no_email": "Provider did not return an email; cannot create an account.",
       "user_disabled": "This account is disabled.",
+      "user_group_login_disabled": "This user group is not allowed to sign in.",
       "auth_required": "You must be signed in to bind a third-party account.",
       "already_bound": "This third-party account is already bound to another user.",
       "invalid_callback": "Invalid callback parameters.",
       "fetch_me_failed": "Failed to fetch user info, please sign in again."
+    }
+  },
+  "install": {
+    "title": "MDForum Installer",
+    "steps": {
+      "requirements": "Requirements",
+      "database": "Database",
+      "app": "App Config",
+      "admin": "Admin Account",
+      "done": "Done"
+    },
+    "requirements": {
+      "warning": "Some requirements did not pass. Please fix them before continuing.",
+      "success": "All requirements passed. You may proceed with installation.",
+      "loadFailed": "Requirements check failed",
+      "labels": {
+        "php_version": "PHP version ≥ 8.2",
+        "pdo_mysql": "PDO MySQL extension",
+        "openssl": "OpenSSL extension",
+        "mbstring": "Mbstring extension",
+        "fileinfo": "Fileinfo extension",
+        "env_writable": ".env file writable",
+        "storage_writable": "storage directory writable",
+        "bootstrap_cache_writable": "bootstrap/cache directory writable"
+      },
+      "status": {
+        "enabled": "Enabled",
+        "disabled": "Disabled",
+        "writable": "Writable",
+        "not_writable": "Not writable",
+        "version": "Version"
+      }
+    },
+    "database": {
+      "hint": "Enter MySQL connection details. The installer will test the connection first, then write it to .env.",
+      "host": "Database host",
+      "port": "Port",
+      "name": "Database name",
+      "username": "Username",
+      "password": "Password",
+      "saved": "Database configuration saved",
+      "saveFailed": "Save failed",
+      "testAndSave": "Test & save"
+    },
+    "app": {
+      "hint": "Set the application name, timezone and mailer. Mail settings can be fine-tuned in the admin later; pick \"Log\" for local development.",
+      "appName": "Application name",
+      "appUrl": "Site URL (optional)",
+      "appUrlHint": "e.g. https://example.com. Used for mail links and OAuth callbacks. Leave empty to keep the .env default.",
+      "timezone": "Timezone",
+      "mailDivider": "Mail configuration (optional)",
+      "mailMailer": "Mailer",
+      "mailHost": "SMTP host",
+      "mailPort": "Port",
+      "mailUsername": "SMTP username",
+      "mailPassword": "SMTP password",
+      "mailFromAddress": "From address",
+      "mailFromName": "From name",
+      "mailEncryption": "Encryption",
+      "saved": "App configuration saved",
+      "saveFailed": "Save failed",
+      "save": "Save config",
+      "mailers": {
+        "log": "Log (dev only)",
+        "smtp": "SMTP",
+        "sendmail": "Sendmail"
+      },
+      "encryption": {
+        "none": "None",
+        "ssl": "SSL",
+        "tls": "TLS"
+      }
+    },
+    "admin": {
+      "hint": "Clicking \"Run install\" will run database migrations, insert default data and create the admin account you enter here.",
+      "username": "Admin username",
+      "usernameHint": "3-30 letters / digits / underscores",
+      "email": "Admin email",
+      "password": "Password",
+      "passwordHint": "At least 6 characters",
+      "passwordConfirm": "Confirm password",
+      "passwordMismatch": "The two passwords do not match",
+      "runInstall": "Run install"
+    },
+    "done": {
+      "success": "Installation succeeded!",
+      "adminCreated": "An admin account has been created. Sign in with:",
+      "username": "Username",
+      "email": "Email",
+      "goLogin": "Go to sign-in"
+    },
+    "actions": {
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "errors": {
+      "installFailed": "Installation failed",
+      "installSuccess": "Installation succeeded"
     }
   },
   "topicDetail": {

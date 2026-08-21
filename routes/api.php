@@ -9,6 +9,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\FollowController;
+use App\Http\Controllers\InstallerController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OAuthController;
@@ -21,6 +22,15 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserGroupController;
 use App\Http\Controllers\VoteController;
 use Illuminate\Support\Facades\Route;
+
+// 首次安装部署接口（不需要认证；controller 内部通过 installed.lock 防止重复安装）
+Route::prefix('install')->group(function () {
+    Route::get('/status', [InstallerController::class, 'status']);          // 安装状态查询（公开）
+    Route::get('/requirements', [InstallerController::class, 'requirements']);
+    Route::post('/database', [InstallerController::class, 'database']);
+    Route::post('/app', [InstallerController::class, 'app']);
+    Route::post('/run', [InstallerController::class, 'run']);
+});
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);

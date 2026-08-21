@@ -15,6 +15,7 @@ const routes = [
   { path: '/notifications', name: 'notifications', component: () => import('../views/NotificationsView.vue'), meta: { titleKey: 'route.notifications', maxWidth: 1080 } },
   { path: '/notifications/setting', name: 'notification-setting', component: () => import('../views/NotificationSettingView.vue'), meta: { titleKey: 'route.notificationSetting', maxWidth: 1080 } },
   { path: '/oauth/callback', name: 'oauth-callback', component: () => import('../views/OAuthCallbackView.vue'), meta: { titleKey: 'route.oauthCallback' } },
+  { path: '/install', name: 'install', component: () => import('../views/InstallView.vue'), meta: { titleKey: 'route.install' } },
   { path: '/settings', name: 'settings', component: () => import('../views/SettingsView.vue'), meta: { titleKey: 'route.settings', requiresAuth: true } },
 ]
 

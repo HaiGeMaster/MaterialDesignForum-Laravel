@@ -831,6 +831,7 @@
     "notifications": "通知",
     "notificationSetting": "通知设置",
     "oauthCallback": "登录中",
+    "install": "安装向导",
     "settings": "个人设置",
     "admin": "管理后台"
   },
@@ -856,10 +857,109 @@
       "no_provider_id": "未取得第三方账号标识。",
       "no_email": "第三方未返回邮箱，无法创建账号。",
       "user_disabled": "该账号已被禁用，无法登录。",
+      "user_group_login_disabled": "该用户组已被禁止登录。",
       "auth_required": "需要登录后才能绑定第三方账号。",
       "already_bound": "该第三方账号已被其他用户绑定。",
       "invalid_callback": "回调参数无效。",
       "fetch_me_failed": "获取用户信息失败，请重新登录。"
+    }
+  },
+  "install": {
+    "title": "MDForum 安装向导",
+    "steps": {
+      "requirements": "环境检查",
+      "database": "数据库",
+      "app": "应用配置",
+      "admin": "管理员账号",
+      "done": "完成"
+    },
+    "requirements": {
+      "warning": "部分环境检查未通过，请修复后再继续。",
+      "success": "所有环境检查均已通过，可以继续安装。",
+      "loadFailed": "环境检查失败",
+      "labels": {
+        "php_version": "PHP 版本 ≥ 8.2",
+        "pdo_mysql": "PDO MySQL 扩展",
+        "openssl": "OpenSSL 扩展",
+        "mbstring": "Mbstring 扩展",
+        "fileinfo": "Fileinfo 扩展",
+        "env_writable": ".env 文件可写",
+        "storage_writable": "storage 目录可写",
+        "bootstrap_cache_writable": "bootstrap/cache 目录可写"
+      },
+      "status": {
+        "enabled": "已启用",
+        "disabled": "未启用",
+        "writable": "可写",
+        "not_writable": "不可写",
+        "version": "版本"
+      }
+    },
+    "database": {
+      "hint": "请填写 MySQL 数据库连接信息，系统会先测试连接，成功后写入 .env 配置。",
+      "host": "数据库主机",
+      "port": "端口",
+      "name": "数据库名",
+      "username": "用户名",
+      "password": "密码",
+      "saved": "数据库配置已保存",
+      "saveFailed": "保存失败",
+      "testAndSave": "测试并保存"
+    },
+    "app": {
+      "hint": "设置应用名称、时区与邮件发送方式。邮件功能可稍后在后台再细调，开发环境选\"日志\"即可。",
+      "appName": "应用名称",
+      "appUrl": "本站域名地址（可选）",
+      "appUrlHint": "如 https://example.com，用于生成邮件链接与 OAuth 回调。留空则保持 .env 默认值。",
+      "timezone": "时区",
+      "mailDivider": "邮件配置（可选）",
+      "mailMailer": "邮件驱动",
+      "mailHost": "SMTP 主机",
+      "mailPort": "端口",
+      "mailUsername": "SMTP 用户名",
+      "mailPassword": "SMTP 密码",
+      "mailFromAddress": "发件地址",
+      "mailFromName": "发件人名称",
+      "mailEncryption": "加密方式",
+      "saved": "应用配置已保存",
+      "saveFailed": "保存失败",
+      "save": "保存配置",
+      "mailers": {
+        "log": "日志（开发调试）",
+        "smtp": "SMTP",
+        "sendmail": "Sendmail"
+      },
+      "encryption": {
+        "none": "无",
+        "ssl": "SSL",
+        "tls": "TLS"
+      }
+    },
+    "admin": {
+      "hint": "点击\"执行安装\"将执行数据库迁移、插入默认数据并创建此处填写的管理员账号。",
+      "username": "管理员用户名",
+      "usernameHint": "3-30 位字母/数字/下划线",
+      "email": "管理员邮箱",
+      "password": "密码",
+      "passwordHint": "至少 6 位",
+      "passwordConfirm": "确认密码",
+      "passwordMismatch": "两次输入的密码不一致",
+      "runInstall": "执行安装"
+    },
+    "done": {
+      "success": "安装成功！",
+      "adminCreated": "管理员账号已创建，请使用以下信息登录：",
+      "username": "用户名",
+      "email": "邮箱",
+      "goLogin": "前往登录"
+    },
+    "actions": {
+      "prev": "上一步",
+      "next": "下一步"
+    },
+    "errors": {
+      "installFailed": "安装失败",
+      "installSuccess": "安装成功"
     }
   },
   "topicDetail": {

@@ -52,4 +52,39 @@ class User extends Authenticatable
     {
         return $this->hasMany(Token::class, 'user_id', 'user_id');
     }
+
+    /**
+     * 该用户所在用户组是否允许前台登录。
+     *
+     * 取自 user_group.ability_normal_login 字段：
+     * - true  → 允许登录
+     * - false → 不允许登录（即使密码/token 正确也会被拒绝）
+     *
+     * 内部会按需加载 userGroup 关联，避免外部漏 load 导致误判。
+     */
+    public function canLoginNormally(): bool
+    {
+        if (! $this->relationLoaded('userGroup')) {
+            $this->load('userGroup');
+        }
+
+        return (bool) ($this->userGroup->ability_normal_login ?? false);
+    }
+
+    /**
+     * 通用用户组权限检查（用于 ability_create_* / ability_edit_own_* 等字段）。
+     *
+     * 注意：本方法不与 Laravel Gate 系统互通，仅为 user_group 表的布尔字段提供便捷访问，
+     * 因此不占用 Authenticatable 自带的 can() 方法名。
+     *
+     * @param  string  $ability  user_group 表字段名，如 'ability_create_article'
+     */
+    public function hasAbility(string $ability): bool
+    {
+        if (! $this->relationLoaded('userGroup')) {
+            $this->load('userGroup');
+        }
+
+        return (bool) ($this->userGroup->{$ability} ?? false);
+    }
 }

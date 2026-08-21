@@ -7,6 +7,7 @@ use App\Models\Follow;
 use App\Models\Question;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AnswerController extends Controller
 {
@@ -53,6 +54,10 @@ class AnswerController extends Controller
      */
     public function store(Request $request)
     {
+        if (! $request->user()->hasAbility('ability_create_answer')) {
+            return response()->json(['message' => '该用户组无发表回答权限。'], 403);
+        }
+
         $validated = $request->validate([
             'question_id' => 'required|integer|exists:question,question_id',
             'content_markdown' => 'required|string',
@@ -65,6 +70,16 @@ class AnswerController extends Controller
             'content_markdown' => $validated['content_markdown'],
             'content_rendered' => $validated['content_rendered'],
         ]);
+
+        // 同步问题冗余统计：递增 answer_count、刷新 last_answer_time
+        // 注意：Answer 模型 $timestamps=false，$answer->create_time 为 null，
+        // 这里用 now() 取当前时间（与 MySQL 默认 CURRENT_TIMESTAMP 一致）
+        Question::query()
+            ->whereKey($validated['question_id'])
+            ->update([
+                'answer_count' => DB::raw('answer_count + 1'),
+                'last_answer_time' => now(),
+            ]);
 
         // 发送回答通知（question_answer + 关注推送）
         $this->notifyAnswerCreated($answer);
@@ -132,6 +147,12 @@ class AnswerController extends Controller
         }
 
         $answer->delete();
+
+        // 同步问题冗余统计：递减 answer_count（不小于 0）
+        Question::query()
+            ->whereKey($answer->question_id)
+            ->where('answer_count', '>', 0)
+            ->decrement('answer_count');
 
         // 回答被删除时通知回答作者（answer_delete；作者本人删除时自动跳过）
         NotificationService::send(

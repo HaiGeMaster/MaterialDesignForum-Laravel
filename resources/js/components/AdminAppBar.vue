@@ -1,9 +1,10 @@
 <script setup>
-import { computed, onMounted } from 'vue'
-import { useDisplay, useTheme } from 'vuetify'
+import { computed } from 'vue'
+import { useDisplay } from 'vuetify'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
 import LanguageSwitcher from './LanguageSwitcher.vue'
+import ThemeToggle from './ThemeToggle.vue'
 import { siteName } from '../themeConfig'
 
 const emit = defineEmits(['toggle-drawer'])
@@ -11,7 +12,6 @@ const emit = defineEmits(['toggle-drawer'])
 const authStore = useAuthStore()
 const { mobile } = useDisplay()
 const { t } = useI18n()
-const theme = useTheme()
 
 const profilePath = computed(() => `/users/${authStore.user?.user_id}`)
 
@@ -24,35 +24,6 @@ async function handleLogout() {
   window.location.assign('/')
 }
 
-// ---------- 主题切换（与前台逻辑一致） ----------
-const isDark = computed(() => theme.current.value?.dark ?? false)
-
-function toggleTheme() {
-  const next = isDark.value ? 'light' : 'dark'
-  theme.change(next)
-  localStorage.setItem('mdforum-theme', next)
-}
-
-// 圆形扩散过渡切换主题（View Transitions API），与前台体验一致
-function handleThemeClick(event) {
-  document.documentElement.style.setProperty('--x', event.clientX + 'px')
-  document.documentElement.style.setProperty('--y', event.clientY + 'px')
-  if (document.startViewTransition) {
-    document.startViewTransition(() => {
-      toggleTheme()
-    })
-  } else {
-    toggleTheme()
-  }
-}
-
-// 应用启动时同步本地保存的主题选择（避免后台每次进入都用系统默认）
-onMounted(() => {
-  const saved = localStorage.getItem('mdforum-theme')
-  if (saved === 'light' || saved === 'dark') {
-    theme.change(saved)
-  }
-})
 </script>
 
 <template>
@@ -68,14 +39,7 @@ onMounted(() => {
     <LanguageSwitcher />
 
     <!-- 深色模式切换 -->
-    <v-btn
-      icon
-      variant="text"
-      :title="$t('appBar.switchTheme')"
-      @click="handleThemeClick"
-    >
-      <v-icon :icon="isDark ? 'mdi-weather-night' : 'mdi-white-balance-sunny'" />
-    </v-btn>
+    <ThemeToggle />
 
     <v-menu min-width="220">
       <template #activator="{ props }">

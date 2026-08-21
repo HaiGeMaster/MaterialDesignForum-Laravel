@@ -13,6 +13,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // 全局最外层：缺 .env / APP_KEY 或未安装时进入安装模式，避免 MissingAppKeyException 500
+        $middleware->prepend(\App\Http\Middleware\CheckInstallStatus::class);
+
         $middleware->alias([
             'auth.token' => \App\Http\Middleware\EnsureTokenIsValid::class,
             'ability' => \App\Http\Middleware\CheckAbility::class,

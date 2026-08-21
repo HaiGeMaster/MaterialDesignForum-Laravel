@@ -99,16 +99,13 @@ function safeParseTime(value) {
 
 /** 检查编辑/删除时限是否已过，true=已过期不可操作 */
 function isTimeExpired(createTime, timeLimitMinutes) {
-  if (!timeLimitMinutes || Number(timeLimitMinutes) === 0) return false // 0 = 无限期
+  const limit = Number(timeLimitMinutes)
+  if (!limit || limit === 0) return false // 0 = 无限期
   if (!createTime) return false
   const created = safeParseTime(createTime)
   if (Number.isNaN(created)) return false
-  const limitMs = Number(timeLimitMinutes) * 60 * 1000
-  console.log('created', created)
-  console.log('limitMs', limitMs)
-  console.log('now', Date.now())
-  console.log('created + limitMs', created + limitMs)
-  return Date.now() < created + limitMs
+  const limitMs = limit * 60 * 1000
+  return Date.now() > created + limitMs
 }
 
 // ================== 权限检查：前置条件 ==================
@@ -158,11 +155,10 @@ const TYPE_PERM_MAP = {
 }
 
 // ================== 编辑权限 ==================
+// 注意：本组件仅处理本人内容的编辑/删除，管理员编辑他人内容请走后台模块。
 const canEdit = computed(() => {
   if (!props.item || !props.type || props.type === 'user') return false
-  // 管理员可编辑任意内容
-  // if (isAdminUser.value) return true
-  // 非管理员：仅本人 + 有权限 + 时限未过 + 前置条件满足
+  // 仅本人 + 有权限 + 时限未过 + 前置条件满足（管理员亦同）
   if (!isSelf.value) return false
   const perm = TYPE_PERM_MAP[props.type]
   if (!perm) return false
@@ -175,7 +171,6 @@ const canEdit = computed(() => {
 // ================== 删除权限 ==================
 const canDelete = computed(() => {
   if (!props.item || !props.type || props.type === 'user') return false
-  // if (isAdminUser.value) return true
   if (!isSelf.value) return false
   const perm = TYPE_PERM_MAP[props.type]
   if (!perm) return false
@@ -188,7 +183,7 @@ const canDelete = computed(() => {
 // ================== 举报权限 ==================
 const canReport = computed(() => {
   if (!props.item || !props.type) return false
-  // if (isAdminUser.value) return false // 管理员不举报，直接后台处理
+  if (isAdminUser.value) return false // 管理员不举报，直接后台处理
   if (isSelf.value) return false // 不能举报自己
   return true
 })

@@ -41,7 +41,9 @@ http.interceptors.response.use(
       window.dispatchEvent(new CustomEvent('auth:unauthorized'))
     }
 
-    return Promise.reject(new Error(message))
+    // 保留原始 error 对象（含 response.status 等元信息），仅覆盖 message
+    error.message = message
+    return Promise.reject(error)
   }
 )
 

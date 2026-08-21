@@ -48,6 +48,10 @@ class CommentController extends Controller
      */
     public function store(Request $request)
     {
+        if (! $request->user()->hasAbility('ability_create_comment')) {
+            return response()->json(['message' => '该用户组无发表评论权限。'], 403);
+        }
+
         $validated = $request->validate([
             'commentable_type' => 'required|string|in:article,question,answer',
             'commentable_id' => 'required|integer',

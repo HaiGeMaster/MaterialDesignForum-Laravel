@@ -105,6 +105,13 @@ class AuthController extends Controller
             ]);
         }
 
+        // 用户组 ability_normal_login=false 时禁止登录
+        if (! $user->canLoginNormally()) {
+            throw ValidationException::withMessages([
+                'email' => ['该用户组已被禁止登录。'],
+            ]);
+        }
+
         $user->last_login_time = now();
         $user->last_login_ip = $request->ip() ?: '127.0.0.1';
         $user->last_login_location = GeoLocation::location($request->ip());
@@ -144,6 +151,13 @@ class AuthController extends Controller
         if ($user->disable_time) {
             throw ValidationException::withMessages([
                 'email' => ['该账号已被禁用。'],
+            ]);
+        }
+
+        // 用户组 ability_normal_login=false 时禁止登录（即使找回密码也不自动登录）
+        if (! $user->canLoginNormally()) {
+            throw ValidationException::withMessages([
+                'email' => ['该用户组已被禁止登录。'],
             ]);
         }
 
