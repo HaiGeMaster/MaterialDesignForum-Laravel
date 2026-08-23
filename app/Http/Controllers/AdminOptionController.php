@@ -84,18 +84,14 @@ class AdminOptionController extends Controller
             'MAIL_MAILER' => ['required', 'string', 'max:30'],
             'MAIL_HOST' => ['required', 'string', 'max:255'],
             'MAIL_PORT' => ['required', 'integer', 'between:1,65535'],
-            'MAIL_ENCRYPTION' => ['nullable', 'in:,ssl,tls'],
+            'MAIL_SCHEME' => ['nullable', 'in:,smtps,smtp'],
             'MAIL_USERNAME' => ['nullable', 'string', 'max:255'],
             'MAIL_PASSWORD' => ['nullable', 'string', 'max:255'],
             'MAIL_FROM_ADDRESS' => ['required', 'email', 'max:255'],
             'MAIL_FROM_NAME' => ['required', 'string', 'max:255'],
         ]);
 
-        $scheme = match ($validated['MAIL_ENCRYPTION'] ?? '') {
-            'ssl' => 'smtps',
-            'tls' => 'smtp',
-            default => '',
-        };
+        $scheme = $validated['MAIL_SCHEME'] ?? '';
         $values = [
             'MAIL_MAILER' => $validated['MAIL_MAILER'],
             'MAIL_HOST' => $validated['MAIL_HOST'],
@@ -238,7 +234,7 @@ class AdminOptionController extends Controller
             'MAIL_MAILER' => (string) config('mail.default', 'smtp'),
             'MAIL_HOST' => (string) config('mail.mailers.smtp.host', ''),
             'MAIL_PORT' => (string) config('mail.mailers.smtp.port', '2525'),
-            'MAIL_ENCRYPTION' => $scheme === 'smtps' ? 'ssl' : ($scheme === 'smtp' ? 'tls' : ''),
+            'MAIL_SCHEME' => $scheme,
             'MAIL_USERNAME' => (string) config('mail.mailers.smtp.username', ''),
             'MAIL_PASSWORD' => '',
             'password_set' => $password !== '',

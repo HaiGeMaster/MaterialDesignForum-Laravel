@@ -690,6 +690,13 @@
     "loginTitle": "Please sign in",
     "loginText": "Sign in to view your notifications."
   },
+  "notificationBell": {
+    "title": "New notification",
+    "newNotification": "You have a new notification",
+    "newNotificationCount": "You have {count} new notifications",
+    "permissionPrompt": "Enable browser notifications so you won't miss new messages when you're away",
+    "permissionEnable": "Enable"
+  },
   "notificationType": {
     "user_follow": "followed you",
     "topic_follow": "followed a topic",

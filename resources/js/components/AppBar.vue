@@ -56,7 +56,7 @@ async function handleLogout() {
       <v-menu  min-width="200">
         <template #activator="{ props }">
           <v-btn v-if="!mobile" variant="text" v-bind="props">
-            <v-avatar size="28" color="secondary" class="mr-2">
+            <v-avatar size="28"  class="mr-2">
               <v-img
                 v-if="authStore.user?.avatar"
                 :src="authStore.user.avatar"
@@ -69,7 +69,7 @@ async function handleLogout() {
             <v-icon icon="mdi-chevron-down" size="small" class="ml-1" />
           </v-btn>
           <v-btn v-else icon variant="text" v-bind="props">
-            <v-avatar size="40" color="secondary">
+            <v-avatar size="40" >
               <v-img
                 v-if="authStore.user?.avatar"
                 :src="authStore.user.avatar"

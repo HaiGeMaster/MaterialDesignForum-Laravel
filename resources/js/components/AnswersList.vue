@@ -43,6 +43,10 @@ async function fetchAnswers(page) {
       per_page: 10,
     },
   })
+  if (Array.isArray(data)) {
+    total.value = data.length
+    return { items: data, hasMore: false }
+  }
   total.value = data.total ?? 0
   return { items: data.data || [], hasMore: data.current_page < data.last_page }
 }

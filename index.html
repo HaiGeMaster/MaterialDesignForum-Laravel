@@ -167,6 +167,8 @@
         <h3>配置伪静态（URL 重写）</h3>
         <p>Nginx：</p>
         <pre>location / {
+    try_files $uri $uri/ /index.php$is_args$args;
+    或
     try_files $uri $uri/ /index.php?$query_string;
 }</pre>
         <p style="margin-top:8px">Apache：确保 <code>public/.htaccess</code> 包含：</p>

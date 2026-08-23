@@ -47,6 +47,19 @@ return [
             'report' => false,
         ],
 
+        /*
+         * 用户上传文件（头像 / 封面 / 富文本媒体）直接存放在 public/uploads 目录下，
+         * 无需 storage:link 符号链接，nginx 可直接服务。
+         */
+        'uploads' => [
+            'driver' => 'local',
+            'root' => public_path(),
+            'url' => '',
+            'visibility' => 'public',
+            'throw' => false,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

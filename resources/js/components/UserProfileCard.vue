@@ -82,7 +82,7 @@ async function onFileChange(event) {
 }
 
 // 自定义更多项（内置的复制链接/分享/举报由 MoreActions 按权限自动生成）
-const moreItems = [{ title: t("userProfile.message"), icon: "mdi-message-outline" }];
+// const moreItems = [{ title: t("userProfile.message"), icon: "mdi-message-outline" }];
 </script>
 
 <template>
@@ -100,9 +100,9 @@ const moreItems = [{ title: t("userProfile.message"), icon: "mdi-message-outline
                 class="profile-row"
                 :class="xs ? 'profile-row--xs' : 'profile-row--left'"
             >
-                <v-avatar
+                <v-avatar border
                     size="96"
-                    class="border avatar-wrap elevation-2"
+                    class=" avatar-wrap elevation-2"
                 >
                     <v-img v-if="user?.avatar" :src="user.avatar" cover />
                     <span v-else class="text-h4">{{ initial }}</span>
@@ -249,9 +249,9 @@ const moreItems = [{ title: t("userProfile.message"), icon: "mdi-message-outline
                 <MoreActions
                     type="user"
                     :item="user"
-                    :items="moreItems"
-                    @select="(item) => emit('more', item.title)"
                 />
+                    <!-- :items="moreItems"
+                    @select="(item) => emit('more', item.title)" -->
             </div>
         </v-card-text>
 
@@ -299,6 +299,7 @@ const moreItems = [{ title: t("userProfile.message"), icon: "mdi-message-outline
     font-size: 28px !important;
     font-weight: 700 !important;
     line-height: 1.4;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
 }
 
 .group-chip {

@@ -219,7 +219,7 @@ onMounted(() => {
                   <v-divider v-if="idx" />
                   <v-list-item class="px-0">
                     <template #prepend>
-                      <v-avatar color="secondary">
+                      <v-avatar >
                         <v-icon :icon="row.icon" />
                       </v-avatar>
                     </template>

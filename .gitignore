@@ -18,6 +18,7 @@
 /public/fonts-manifest.dev.json
 /public/hot
 /public/storage
+/public/uploads
 /storage/*.key
 /storage/pail
 /vendor
@@ -27,3 +28,4 @@ Homestead.yaml
 Thumbs.db
 
 新建文件夹
+.env.bak

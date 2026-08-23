@@ -17,7 +17,7 @@ const loading = ref(false)
 
 const forms = reactive({
   info: { site_name: '', site_description: '', site_keywords: '', site_icp_beian: '', site_gongan_beian: '', default_language: 'zh' },
-  mail: { MAIL_MAILER: 'smtp', MAIL_HOST: '', MAIL_PORT: '465', MAIL_ENCRYPTION: 'ssl', MAIL_USERNAME: '', MAIL_PASSWORD: '', password_set: false, MAIL_FROM_ADDRESS: '', MAIL_FROM_NAME: '' },
+  mail: { MAIL_MAILER: 'smtp', MAIL_HOST: '', MAIL_PORT: '465', MAIL_SCHEME: 'smtps', MAIL_USERNAME: '', MAIL_PASSWORD: '', password_set: false, MAIL_FROM_ADDRESS: '', MAIL_FROM_NAME: '' },
   oauth: { GITHUB_CLIENT_ID: '', GITHUB_CLIENT_SECRET: '', GITHUB_SECRET_SET: false, GOOGLE_CLIENT_ID: '', GOOGLE_CLIENT_SECRET: '', GOOGLE_SECRET_SET: false, MICROSOFT_CLIENT_ID: '', MICROSOFT_CLIENT_SECRET: '', MICROSOFT_SECRET_SET: false },
   theme: { current: 'light', lightPrimary: '#1867C0', lightSecondary: '#48A9A6', lightAccent: '#FB8C00', darkPrimary: '#2196F3', darkSecondary: '#54B6B2', darkAccent: '#FB8C00' },
 })
@@ -190,7 +190,7 @@ onMounted(() => {
         <v-text-field v-model="forms.mail.MAIL_MAILER" :label="$t('admin.mailer')" />
         <v-text-field v-model="forms.mail.MAIL_HOST" :label="$t('admin.smtpHost')" />
         <v-text-field v-model="forms.mail.MAIL_PORT" :label="$t('admin.smtpPort')" />
-        <v-select v-model="forms.mail.MAIL_ENCRYPTION" :items="[{ title: 'NULL', value: '' }, { title: 'SSL', value: 'ssl' }, { title: 'TLS', value: 'tls' }]" :label="$t('admin.smtpEncryption')" />
+        <v-select v-model="forms.mail.MAIL_SCHEME" :items="[{ title: 'NULL', value: '' }, { title: 'SSL', value: 'smtps' }, { title: 'TLS', value: 'smtp' }]" :label="$t('admin.smtpEncryption')" />
         <v-text-field v-model="forms.mail.MAIL_USERNAME" :label="$t('admin.smtpUsername')" />
         <v-text-field v-model="forms.mail.MAIL_PASSWORD" type="password" :label="$t('admin.smtpPassword')" :hint="forms.mail.password_set ? $t('admin.passwordKeepHint') : ''" persistent-hint />
         <v-text-field v-model="forms.mail.MAIL_FROM_ADDRESS" :label="$t('admin.mailFromAddress')" />

@@ -127,11 +127,12 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <v-container :class="xs ? 'px-0' : 'px-4'" :style="$route.meta.maxWidth ? { maxWidth: `${$route.meta.maxWidth}px`, margin: '0 auto' } : {}">
+  <v-container :class="xs ? 'px-0' : 'px-4'"
+    :style="$route.meta.maxWidth ? { maxWidth: `${$route.meta.maxWidth}px`, margin: '0 auto' } : {}">
     <v-progress-linear v-if="loading && !article" indeterminate color="primary" class="mb-4" />
 
     <template v-if="article">
-      <v-card  class="overflow-hidden">
+      <v-card class="overflow-hidden">
         <!-- 应用栏：返回 / 标题 / 关注 -->
         <v-toolbar :title="article.title">
           <template v-slot:prepend>
@@ -143,23 +144,16 @@ onUnmounted(() => {
             <span class="d-block text-truncate">{{ article.title }}</span>
           </v-toolbar-title> -->
           <template v-slot:append>
-            <FollowButton
-              type="article"
-              :target-id="article.article_id"
-              :following="isFollowing"
-              @toggle-follow="toggleFollow"
-            />
+            <FollowButton type="article" :target-id="article.article_id" :following="isFollowing"
+              @toggle-follow="toggleFollow" />
           </template>
         </v-toolbar>
 
         <v-card-text class="pa-4 pa-md-6">
           <!-- 作者信息：头像 / 姓名 / 个性签名 / 发布时间 -->
-          <v-list-item
-            class="px-0"
-            :to="creator?.user_id ? `/users/${creator.user_id}` : undefined"
-          >
+          <v-list-item class="px-0" :to="creator?.user_id ? `/users/${creator.user_id}` : undefined">
             <template v-slot:prepend>
-              <v-avatar size="40" color="primary" >
+              <v-avatar size="40" color="primary">
                 <v-img v-if="creator?.avatar" :src="creator.avatar" cover />
                 <span v-else class="text-body-2 font-weight-bold text-primary">{{ creatorInitial }}</span>
               </v-avatar>
@@ -178,21 +172,18 @@ onUnmounted(() => {
           </v-list-item>
 
           <!-- 正文 -->
-          <ProseRenderer
-            :content="article.content_rendered"
-            :empty-text="$t('articleDetail.emptyContent')"
-            class="mt-4"
-          />
+          <ProseRenderer :content="article.content_rendered" :empty-text="$t('articleDetail.emptyContent')"
+            class="mt-4" />
 
           <!-- 话题标签（正文下方） -->
           <div v-if="article.topics?.length" class="d-flex flex-wrap ga-1 mt-4">
-            <router-link
-              v-for="topic in article.topics"
-              :key="topic.topic_id"
-              :to="`/topics/${topic.topic_id}`"
-              class="text-decoration-none"
-            >
-              <v-chip size="small" variant="tonal" prepend-icon="mdi-tag-outline">
+            <router-link v-for="topic in article.topics" :key="topic.topic_id" :to="`/topics/${topic.topic_id}`"
+              class="text-decoration-none">
+              <v-chip size="small" variant="tonal">
+                <v-avatar start>
+                  <v-img :src="topic.cover">
+                  </v-img>
+                </v-avatar>
                 {{ topic.name }}
               </v-chip>
             </router-link>
@@ -202,40 +193,19 @@ onUnmounted(() => {
 
         <!-- 底部操作栏：点赞在左，更多操作在右 -->
         <v-card-actions class="d-flex align-center px-4 py-2 border-t-thin">
-          <VoteButton
-            type="article"
-            :item-id="article.article_id"
-            :up-count="Number(article.vote_up_count || 0)"
-            :down-count="Number(article.vote_down_count || 0)"
-            :my-vote="article.my_vote || null"
-          />
+          <VoteButton type="article" :item-id="article.article_id" :up-count="Number(article.vote_up_count || 0)"
+            :down-count="Number(article.vote_down_count || 0)" :my-vote="article.my_vote || null" />
           <v-spacer />
-          <MoreActions
-            type="article"
-            :item="article"
-
-            @edit="editArticle"
-            @delete="askDelete"
-          />
+          <MoreActions type="article" :item="article" @edit="editArticle" @delete="askDelete" />
         </v-card-actions>
       </v-card>
 
       <!-- 评论区 -->
-      <CommentSection
-        :key="commentRefreshKey"
-        commentable-type="article"
-        :commentable-id="article.article_id"
-        class="mt-4"
-      />
+      <CommentSection :key="commentRefreshKey" commentable-type="article" :commentable-id="article.article_id"
+        class="mt-4" />
     </template>
 
-    <v-empty-state
-      v-else-if="!loading"
-      icon="mdi-file-document-outline"
-      :title="$t('articleDetail.notFound')"
-      :text="$t('articleDetail.notFoundText')"
-    />
+    <v-empty-state v-else-if="!loading" icon="mdi-file-document-outline" :title="$t('articleDetail.notFound')"
+      :text="$t('articleDetail.notFoundText')" />
   </v-container>
 </template>
-
-

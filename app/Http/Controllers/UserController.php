@@ -189,8 +189,8 @@ class UserController extends Controller
         $extension = $file->getClientOriginalExtension() ?: 'jpg';
         $filename = Str::random(24).'.'.$extension;
 
-        // 保存到 storage/app/public/uploads/{avatar|cover}
-        $path = $file->storeAs('uploads/'.$data['type'], $filename, 'public');
+        // 保存到 public/uploads/{avatar|cover}
+        $path = $file->storeAs('uploads/'.$data['type'], $filename, 'uploads');
 
         // 图片 token（image 表主键，可用于后续查询/管理）
         $key = Str::random(24);
@@ -219,7 +219,7 @@ class UserController extends Controller
         return response()->json([
             'message' => '上传成功。',
             'key' => $key,
-            'url' => '/storage/'.$path,
+            'url' => '/'.$path,
             'path' => $path,
             'type' => $data['type'],
         ]);

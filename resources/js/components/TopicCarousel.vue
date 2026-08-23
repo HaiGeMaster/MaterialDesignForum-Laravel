@@ -104,7 +104,7 @@ function scrollByCard(dir) {
 }
 
 .topic-slide {
-    padding: 4px;
+    padding: 3px;
   /* min-width: 0 防止卡片内文字/按钮把固定宽度撑开，保证所有卡片宽度统一 */
   flex: 0 0 calc((100% - (var(--per-view) - 1) * 16px) / var(--per-view));
   min-width: 0;

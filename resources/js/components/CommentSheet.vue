@@ -73,10 +73,13 @@ async function submit() {
   }
   submitting.value = true
   try {
-    const { data } = await http.post('/comments', {
+    const body = new URLSearchParams({
       commentable_type: props.commentableType,
-      commentable_id: props.commentableId,
+      commentable_id: String(props.commentableId),
       content: text,
+    })
+    const { data } = await http.post('/comments', body, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     })
     // 通知详情页刷新评论区（与 content:published 事件风格一致）
     window.dispatchEvent(

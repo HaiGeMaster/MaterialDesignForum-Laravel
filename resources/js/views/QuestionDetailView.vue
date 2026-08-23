@@ -196,7 +196,11 @@ onUnmounted(() => {
               :to="`/topics/${topic.topic_id}`"
               class="text-decoration-none"
             >
-              <v-chip size="small" variant="tonal" prepend-icon="mdi-tag-outline">
+              <v-chip size="small" variant="tonal">
+                <v-avatar start>
+                  <v-img :src="topic.cover">
+                  </v-img>
+                </v-avatar>
                 {{ topic.name }}
               </v-chip>
             </router-link>

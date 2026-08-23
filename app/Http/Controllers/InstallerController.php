@@ -33,7 +33,7 @@ class InstallerController extends Controller
         'DB_CONNECTION', 'DB_HOST', 'DB_PORT', 'DB_DATABASE', 'DB_USERNAME', 'DB_PASSWORD',
         'APP_TIMEZONE', 'APP_LOCALE',
         'MAIL_MAILER', 'MAIL_HOST', 'MAIL_PORT', 'MAIL_USERNAME', 'MAIL_PASSWORD',
-        'MAIL_FROM_ADDRESS', 'MAIL_FROM_NAME', 'MAIL_ENCRYPTION',
+        'MAIL_FROM_ADDRESS', 'MAIL_FROM_NAME', 'MAIL_SCHEME',
     ];
 
     public function __construct()
@@ -81,6 +81,8 @@ class InstallerController extends Controller
      */
     public function requirements()
     {
+        $envReady = $this->ensureEnvFile();
+
         $checks = [
             'php_version' => [
                 'label'   => 'PHP 版本 ≥ 8.2',
@@ -114,8 +116,8 @@ class InstallerController extends Controller
             ],
             'env_writable' => [
                 'label'   => '.env 文件可写',
-                'pass'     => $this->envFileWritable(),
-                'status'  => $this->envFileWritable() ? 'writable' : 'not_writable',
+                'pass'     => $envReady,
+                'status'  => $envReady ? 'writable' : 'not_writable',
                 'detail'  => '',
             ],
             'storage_writable' => [
@@ -197,7 +199,7 @@ class InstallerController extends Controller
             'mail_password'   => ['nullable', 'string', 'max:200'],
             'mail_from_address' => ['nullable', 'email', 'max:200'],
             'mail_from_name'   => ['nullable', 'string', 'max:100'],
-            'mail_encryption'  => ['nullable', 'string', 'in:ssl,tls,null'],
+            'mail_scheme'      => ['nullable', 'string', 'in:smtps,smtp,'],
         ]);
 
         $env = [
@@ -220,7 +222,7 @@ class InstallerController extends Controller
                 'MAIL_PASSWORD'    => $data['mail_password'] ?? '',
                 'MAIL_FROM_ADDRESS' => $data['mail_from_address'] ?? '',
                 'MAIL_FROM_NAME'   => $data['mail_from_name'] ?? ($data['app_name'] ?? 'MDForum'),
-                'MAIL_ENCRYPTION'  => ($data['mail_encryption'] ?? 'null') === 'null' ? 'null' : $data['mail_encryption'],
+                'MAIL_SCHEME'      => $data['mail_scheme'] ?? '',
             ]);
         }
 
@@ -491,10 +493,24 @@ class InstallerController extends Controller
     {
         $path = base_path('.env');
         if (! file_exists($path)) {
-            // .env 不存在时检查是否能创建（目录可写即可）
             return is_writable(base_path());
         }
         return is_writable($path);
+    }
+
+    private function ensureEnvFile(): bool
+    {
+        $path = base_path('.env');
+        if (file_exists($path)) {
+            return $this->envFileWritable();
+        }
+
+        $template = base_path('.env.example');
+        if (! is_readable($template) || ! is_writable(base_path())) {
+            return false;
+        }
+
+        return copy($template, $path) && $this->envFileWritable();
     }
 
     /**

@@ -34,12 +34,12 @@ function openSetting(key) {
 
 <template>
   <v-container class="options-page py-6 px-4 px-md-8">
-    <div class="options-heading mb-6">
+    <!-- <div class="options-heading mb-6">
       <div>
         <div class="text-overline text-primary font-weight-bold">MDForum / ADMIN / OPTIONS</div>
         <h1 class="text-h4 font-weight-bold mt-1">{{ $t('admin.manageSettings') }}</h1>
       </div>
-    </div>
+    </div> -->
 
     <div v-for="group in settingGroups" :key="group.title" class="mb-5">
       <h2 class="text-subtitle-1 font-weight-bold px-1 mb-2">{{ group.title }}</h2>

@@ -42,7 +42,7 @@ const appForm = reactive({
   mail_password: '',
   mail_from_address: '',
   mail_from_name: '',
-  mail_encryption: 'tls',
+  mail_scheme: 'smtps',
 })
 
 const adminForm = reactive({
@@ -73,11 +73,11 @@ const mailMailerOptions = computed(() => [
   { value: 'sendmail', title: t('install.app.mailers.sendmail') },
 ])
 
-// 加密方式选项
-const mailEncryptionOptions = computed(() => [
-  { value: 'null', title: t('install.app.encryption.none') },
-  { value: 'ssl', title: t('install.app.encryption.ssl') },
-  { value: 'tls', title: t('install.app.encryption.tls') },
+// 加密方案选项
+const mailSchemeOptions = computed(() => [
+  { value: '', title: t('install.app.encryption.none') },
+  { value: 'smtps', title: t('install.app.encryption.ssl') },
+  { value: 'smtp', title: t('install.app.encryption.tls') },
 ])
 
 // 步骤进度数据
@@ -169,27 +169,45 @@ const canProceedFromRequirements = computed(() => requirements.value.all_pass)
 <template>
   <v-container class="d-flex align-center justify-center" style="min-height: 80vh">
     <v-card width="720" max-width="100%" elevation="8" rounded="lg">
-      <v-card-title class="text-h5 font-weight-bold pa-6">
+
+      <v-toolbar>
+        <template v-slot:prepend>
+          <v-btn icon="mdi-tune-vertical">
+          </v-btn>
+
+        </template>
+        <v-toolbar-title>
+          {{ t('install.title') }}
+        </v-toolbar-title>
+        <template v-slot:append>
+
+          <LanguageSwitcher />
+        </template>
+      </v-toolbar>
+
+      <!-- <v-card-title class="text-h5 font-weight-bold pa-6">
         <v-icon class="mr-2">mdi-tune-vertical</v-icon>
         {{ t('install.title') }}
-        <!-- <v-spacer /> -->
         
-      </v-card-title>
+      </v-card-title> -->
 
       <v-divider />
 
       <v-card-text class="pa-6">
         <!-- 步骤进度条 -->
         <div class="d-flex align-center justify-space-between mb-6 px-2">
-          <div v-for="(s, i) in steps" :key="s.n" class="d-flex flex-column align-center" style="flex: 1; position: relative;">
+          <div v-for="(s, i) in steps" :key="s.n" class="d-flex flex-column align-center"
+            style="flex: 1; position: relative;">
             <v-avatar :color="step > s.n ? 'success' : step === s.n ? 'primary' : 'grey-lighten-2'" size="32">
               <v-icon v-if="step > s.n" size="20">mdi-check</v-icon>
               <span v-else>{{ s.n }}</span>
             </v-avatar>
-            <div class="text-caption mt-2 text-center" :class="step === s.n ? 'text-primary font-weight-bold' : 'text-medium-emphasis'">
+            <div class="text-caption mt-2 text-center"
+              :class="step === s.n ? 'text-primary font-weight-bold' : 'text-medium-emphasis'">
               {{ s.label }}
             </div>
-            <v-divider v-if="i < steps.length - 1" class="position-absolute" style="top: 16px; left: 60%; right: -40%;" />
+            <v-divider v-if="i < steps.length - 1" class="position-absolute"
+              style="top: 16px; left: 60%; right: -40%;" />
           </div>
         </div>
 
@@ -230,15 +248,20 @@ const canProceedFromRequirements = computed(() => requirements.value.all_pass)
           <v-form @submit.prevent="saveDatabase">
             <v-row>
               <v-col cols="12" sm="8">
-                <v-text-field v-model="dbForm.host" :label="t('install.database.host')" prepend-inner-icon="mdi-server" />
+                <v-text-field v-model="dbForm.host" :label="t('install.database.host')"
+                  prepend-inner-icon="mdi-server" />
               </v-col>
               <v-col cols="12" sm="4">
-                <v-text-field v-model.number="dbForm.port" type="number" :label="t('install.database.port')" prepend-inner-icon="mdi-door" />
+                <v-text-field v-model.number="dbForm.port" type="number" :label="t('install.database.port')"
+                  prepend-inner-icon="mdi-door" />
               </v-col>
             </v-row>
-            <v-text-field v-model="dbForm.database" :label="t('install.database.name')" prepend-inner-icon="mdi-database" class="mb-3" />
-            <v-text-field v-model="dbForm.username" :label="t('install.database.username')" prepend-inner-icon="mdi-account" class="mb-3" />
-            <v-text-field v-model="dbForm.password" type="password" :label="t('install.database.password')" prepend-inner-icon="mdi-lock" />
+            <v-text-field v-model="dbForm.database" :label="t('install.database.name')"
+              prepend-inner-icon="mdi-database" class="mb-3" />
+            <v-text-field v-model="dbForm.username" :label="t('install.database.username')"
+              prepend-inner-icon="mdi-account" class="mb-3" />
+            <v-text-field v-model="dbForm.password" type="password" :label="t('install.database.password')"
+              prepend-inner-icon="mdi-lock" />
           </v-form>
         </div>
 
@@ -248,17 +271,21 @@ const canProceedFromRequirements = computed(() => requirements.value.all_pass)
             {{ t('install.app.hint') }}
           </p>
 
-          <v-text-field v-model="appForm.app_name" :label="t('install.app.appName')" prepend-inner-icon="mdi-tag" class="mb-3" />
+          <v-text-field v-model="appForm.app_name" :label="t('install.app.appName')" prepend-inner-icon="mdi-tag"
+            class="mb-3" />
 
-          <v-text-field v-model="appForm.app_url" :label="t('install.app.appUrl')" prepend-inner-icon="mdi-web" :hint="t('install.app.appUrlHint')" persistent-hint class="mb-3" />
+          <v-text-field v-model="appForm.app_url" :label="t('install.app.appUrl')" prepend-inner-icon="mdi-web"
+            :hint="t('install.app.appUrlHint')" persistent-hint class="mb-3" />
 
-          <v-select v-model="appForm.timezone" :items="timezoneOptions" :label="t('install.app.timezone')" prepend-inner-icon="mdi-clock-outline" class="mb-3" />
+          <v-select v-model="appForm.timezone" :items="timezoneOptions" :label="t('install.app.timezone')"
+            prepend-inner-icon="mdi-clock-outline" class="mb-3" />
 
           <v-divider class="my-4">
             <template #default><span class="text-caption">{{ t('install.app.mailDivider') }}</span></template>
           </v-divider>
 
-          <v-select v-model="appForm.mail_mailer" :items="mailMailerOptions" item-value="value" item-title="title" :label="t('install.app.mailMailer')" prepend-inner-icon="mdi-email" class="mb-3" />
+          <v-select v-model="appForm.mail_mailer" :items="mailMailerOptions" item-value="value" item-title="title"
+            :label="t('install.app.mailMailer')" prepend-inner-icon="mdi-email" class="mb-3" />
 
           <template v-if="appForm.mail_mailer === 'smtp'">
             <v-row>
@@ -285,7 +312,8 @@ const canProceedFromRequirements = computed(() => requirements.value.all_pass)
                 <v-text-field v-model="appForm.mail_from_name" :label="t('install.app.mailFromName')" />
               </v-col>
             </v-row>
-            <v-select v-model="appForm.mail_encryption" :items="mailEncryptionOptions" item-value="value" item-title="title" :label="t('install.app.mailEncryption')" />
+            <v-select v-model="appForm.mail_scheme" :items="mailSchemeOptions" item-value="value" item-title="title"
+              :label="t('install.app.mailEncryption')" />
           </template>
         </div>
 
@@ -295,13 +323,18 @@ const canProceedFromRequirements = computed(() => requirements.value.all_pass)
             {{ t('install.admin.hint') }}
           </v-alert>
 
-          <v-text-field v-model="adminForm.username" :label="t('install.admin.username')" prepend-inner-icon="mdi-account-circle" :hint="t('install.admin.usernameHint')" persistent-hint class="mb-3" />
+          <v-text-field v-model="adminForm.username" :label="t('install.admin.username')"
+            prepend-inner-icon="mdi-account-circle" :hint="t('install.admin.usernameHint')" persistent-hint
+            class="mb-3" />
 
-          <v-text-field v-model="adminForm.email" :label="t('install.admin.email')" prepend-inner-icon="mdi-email" class="mb-3" />
+          <v-text-field v-model="adminForm.email" :label="t('install.admin.email')" prepend-inner-icon="mdi-email"
+            class="mb-3" />
 
-          <v-text-field v-model="adminForm.password" type="password" :label="t('install.admin.password')" prepend-inner-icon="mdi-lock" :hint="t('install.admin.passwordHint')" persistent-hint class="mb-3" />
+          <v-text-field v-model="adminForm.password" type="password" :label="t('install.admin.password')"
+            prepend-inner-icon="mdi-lock" :hint="t('install.admin.passwordHint')" persistent-hint class="mb-3" />
 
-          <v-text-field v-model="adminForm.password_confirmation" type="password" :label="t('install.admin.passwordConfirm')" prepend-inner-icon="mdi-lock-check" />
+          <v-text-field v-model="adminForm.password_confirmation" type="password"
+            :label="t('install.admin.passwordConfirm')" prepend-inner-icon="mdi-lock-check" />
         </div>
 
         <!-- Step 5: 完成 -->
@@ -335,13 +368,13 @@ const canProceedFromRequirements = computed(() => requirements.value.all_pass)
       <v-divider />
 
       <v-card-actions class="pa-4">
-        <LanguageSwitcher />
         <v-btn v-if="step > 1 && step < 5" variant="text" @click="step--">
           <v-icon class="mr-1">mdi-arrow-left</v-icon>
           {{ t('install.actions.prev') }}
         </v-btn>
         <v-spacer />
-        <v-btn v-if="step === 1" color="primary" :loading="loading" :disabled="!canProceedFromRequirements" @click="step = 2">
+        <v-btn v-if="step === 1" color="primary" :loading="loading" :disabled="!canProceedFromRequirements"
+          @click="step = 2">
           {{ t('install.actions.next') }}
           <v-icon class="ml-1">mdi-arrow-right</v-icon>
         </v-btn>

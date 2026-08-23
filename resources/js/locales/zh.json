@@ -690,6 +690,13 @@
     "loginTitle": "请先登录",
     "loginText": "登录后即可查看你的通知。"
   },
+  "notificationBell": {
+    "title": "新通知",
+    "newNotification": "你收到了新的通知",
+    "newNotificationCount": "你有 {count} 条新通知",
+    "permissionPrompt": "开启浏览器通知，离开页面时也不会错过新消息",
+    "permissionEnable": "开启通知"
+  },
   "notificationType": {
     "user_follow": "关注了你",
     "topic_follow": "关注了话题",

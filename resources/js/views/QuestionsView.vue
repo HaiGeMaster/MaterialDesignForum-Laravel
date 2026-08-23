@@ -65,6 +65,7 @@ const {
   retry,
 } = useInfiniteList(async (page) => {
   const { data } = await http.get('/questions', { params: { tab: tab.value, page } })
+  if (Array.isArray(data)) return { items: data, hasMore: false }
   return { items: data.data ?? [], hasMore: data.current_page < data.last_page }
 })
 
@@ -99,7 +100,7 @@ watch(tab, () => load(true))
     <v-progress-linear v-if="loading && !questions.length" indeterminate color="primary" class="mb-3" />
 
     <v-card v-if="questions.length"  class="overflow-hidden mb-3">
-      <v-list lines="two">
+      <v-list lines="two" style="padding: 0">
         <ContentListItem
           v-for="q in questions"
           :key="q.question_id"

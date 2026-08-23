@@ -23,6 +23,10 @@ class ResolveOptionalUser
 {
     public function handle(Request $request, Closure $next): Response
     {
+        if ($request->is('api/install/*')) {
+            return $next($request);
+        }
+
         $header = $request->header('Authorization', '');
 
         if (preg_match('/Bearer\s+(.+)/i', $header, $matches)) {

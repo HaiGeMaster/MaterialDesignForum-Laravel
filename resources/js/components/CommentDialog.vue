@@ -34,6 +34,9 @@ const sortItems = computed(() => [
 const { list: items, loading, error, finished, load, loadNext, retry } = useInfiniteList(fetchComments)
 
 async function fetchComments(page) {
+  if (!store.commentableType || store.commentableId == null) {
+    return { items: [], hasMore: false }
+  }
   const { data } = await http.get('/comments', {
     params: {
       commentable_type: store.commentableType,
@@ -43,6 +46,11 @@ async function fetchComments(page) {
       per_page: 20,
     },
   })
+  if (Array.isArray(data)) {
+    total.value = data.length
+    store.emitCountChange(total.value)
+    return { items: data, hasMore: false }
+  }
   total.value = data.total ?? 0
   store.emitCountChange(total.value)
   return { items: data.data || [], hasMore: data.current_page < data.last_page }
@@ -64,10 +72,13 @@ async function submit() {
   }
   submitting.value = true
   try {
-    await http.post('/comments', {
+    const body = new URLSearchParams({
       commentable_type: store.commentableType,
-      commentable_id: store.commentableId,
+      commentable_id: String(store.commentableId),
       content: text,
+    })
+    await http.post('/comments', body, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     })
     content.value = ''
     show(t('commentSheet.success'), 'success')

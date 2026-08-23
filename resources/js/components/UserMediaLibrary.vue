@@ -290,7 +290,7 @@ function mediaDate(item) {
             :title="$t('userContent.emptyMediaTitle')" :text="$t('userContent.emptyMediaText')" class="pa-4" />
 
         <!-- 媒体预览 -->
-        <MediaPreviewDialog v-model="previewOpen" :item="preview" />
+        <MediaPreviewDialog v-model:open="previewOpen" :item="preview" />
     </div>
 </template>
 

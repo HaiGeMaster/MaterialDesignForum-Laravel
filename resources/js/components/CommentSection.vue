@@ -29,6 +29,9 @@ const title = computed(() => `${t('commentSection.title')} (${total.value})`)
 const { list: items, loading, error, finished, load, loadNext, retry } = useInfiniteList(fetchComments)
 
 async function fetchComments(page) {
+  if (!props.commentableType || props.commentableId == null) {
+    return { items: [], hasMore: false }
+  }
   const { data } = await http.get('/comments', {
     params: {
       commentable_type: props.commentableType,
@@ -38,6 +41,11 @@ async function fetchComments(page) {
       per_page: 20,
     },
   })
+  if (Array.isArray(data)) {
+    total.value = data.length
+    emit('count-change', total.value)
+    return { items: data, hasMore: false }
+  }
   total.value = data.total ?? 0
   emit('count-change', total.value)
   return { items: data.data || [], hasMore: data.current_page < data.last_page }

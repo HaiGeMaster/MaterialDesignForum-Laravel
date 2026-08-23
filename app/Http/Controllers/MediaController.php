@@ -19,7 +19,7 @@ class MediaController extends Controller
     /**
      * 上传媒体（图片 / 视频）
      *
-     * 文件保存至 storage/app/public/uploads/media/{image|video}，
+     * 文件保存至 public/uploads/media/{image|video}，
      * 并将元数据写入 media 表，返回可访问 URL 供编辑器插入。
      */
     public function upload(Request $request)
@@ -54,8 +54,8 @@ class MediaController extends Controller
         $extension = $file->getClientOriginalExtension() ?: ($type === 'image' ? 'jpg' : 'mp4');
         $filename = Str::random(24).'.'.$extension;
 
-        // 保存到 storage/app/public/uploads/media/{image|video}
-        $path = $file->storeAs('uploads/media/'.$type, $filename, 'public');
+        // 保存到 public/uploads/media/{image|video}
+        $path = $file->storeAs('uploads/media/'.$type, $filename, 'uploads');
 
         // 图片读取原始尺寸；视频尺寸未知时记为 0
         $width = 0;
@@ -72,7 +72,7 @@ class MediaController extends Controller
             'type' => $type,
             'filename' => $file->getClientOriginalName(),
             'path' => $path,
-            'url' => '/storage/'.$path,
+            'url' => '/'.$path,
             'mime' => $file->getMimeType(),
             'size' => $file->getSize(),
             'width' => (int) $width,
@@ -144,7 +144,7 @@ class MediaController extends Controller
 
         $deleted = 0;
         foreach ($mediaList as $media) {
-            Storage::disk('public')->delete($media->path);
+            Storage::disk('uploads')->delete($media->path);
             $media->delete();
             $deleted++;
         }

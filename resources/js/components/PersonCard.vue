@@ -23,7 +23,7 @@ const isSelf = computed(
 )
 
 // 自定义更多项（内置的复制链接/分享/举报由 MoreActions 按权限自动生成）
-const moreItems = [{ title: t('userCard.message'), icon: 'mdi-message-outline' }]
+// const moreItems = [{ title: t('userCard.message'), icon: 'mdi-message-outline' }]
 </script>
 
 <template>
@@ -66,9 +66,9 @@ const moreItems = [{ title: t('userCard.message'), icon: 'mdi-message-outline' }
       <MoreActions
         type="user"
         :item="person"
-        :items="moreItems"
-        @select="(item) => emit('more', person, item.title)"
       />
+        <!-- :items="moreItems"
+        @select="(item) => emit('more', person, item.title)" -->
     </v-card-actions>
   </v-card>
 </template>

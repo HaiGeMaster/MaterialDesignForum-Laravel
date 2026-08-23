@@ -36,6 +36,7 @@ const {
   retry,
 } = useInfiniteList(async (page) => {
   const { data } = await http.get('/topics', { params: { tab: tab.value, page } })
+  if (Array.isArray(data)) return { items: data, hasMore: false }
   return { items: data.data ?? [], hasMore: data.current_page < data.last_page }
 })
 
