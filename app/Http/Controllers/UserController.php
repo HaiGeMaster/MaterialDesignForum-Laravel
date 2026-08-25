@@ -27,7 +27,13 @@ class UserController extends Controller
     {
         $tab = $request->query('tab', 'recommend');
 
-        $query = User::query();
+        $query = User::query()->whereNull('disable_time');
+
+        // 用户名搜索（@提及自动补全使用）
+        $q = trim((string) $request->query('q', ''));
+        if ($q !== '') {
+            $query->where('username', 'like', $q . '%');
+        }
 
         /** @var \App\Models\User|null $user */
         $user = $request->user();
@@ -166,17 +172,19 @@ class UserController extends Controller
     }
 
     /**
-     * 上传个人资料图片（头像 / 封面）
+     * 上传图片（头像 / 用户封面 / 话题封面等）
      *
      * 校验图片类型与大小后存入 storage/app/public/uploads/{type}，
-     * 返回可访问的相对 URL，由前端随 updateProfile 一并保存到 user 表。
-     * 该接口受路由层 CheckAbility:ability_edit_own_info 权限保护。
+     * 返回可访问的相对 URL。
+     * 可选参数 context 区分关联场景（默认 user），item_id 指定关联 ID。
      */
     public function uploadImage(Request $request)
     {
         $data = $request->validate([
             'type' => ['required', 'in:avatar,cover'],
             'file' => ['required', 'image', 'mimes:jpeg,jpg,png,webp,gif', 'max:2048'],
+            'context' => ['sometimes', 'string', 'in:user,topic'],
+            'item_id' => ['sometimes', 'integer'],
         ]);
 
         /** @var User $user */
@@ -192,33 +200,36 @@ class UserController extends Controller
         // 保存到 public/uploads/{avatar|cover}
         $path = $file->storeAs('uploads/'.$data['type'], $filename, 'uploads');
 
-        // 图片 token（image 表主键，可用于后续查询/管理）
-        $key = Str::random(24);
-
         // 读取原始尺寸
-        [$width, $height] = array_pad(
-            (function () use ($file) {
-                $size = @getimagesize($file->getRealPath());
-                return is_array($size) ? [$size[0], $size[1]] : [0, 0];
-            })(),
-            2,
-            0
-        );
+        $size = @getimagesize($file->getRealPath());
+        [$width, $height] = is_array($size) ? [$size[0], $size[1]] : [0, 0];
 
-        // 在 image 表登记图片元数据（token / 原始文件名 / 尺寸 / 上传者）
-        DB::table('image')->insert([
-            'key' => $key,
+        // 根据 context 确定关联类型与关联 ID
+        $context = $data['context'] ?? 'user';
+        if ($context === 'topic') {
+            $itemType = 'topic_cover';
+            $itemId = $data['item_id'] ?? 0;
+        } else {
+            $itemType = $data['type'] === 'avatar' ? 'user_avatar' : 'user_cover';
+            $itemId = $user->user_id;
+        }
+
+        \App\Models\Media::create([
+            'user_id' => $user->user_id,
+            'type' => 'image',
             'filename' => $file->getClientOriginalName(),
+            'path' => $path,
+            'url' => '/'.$path,
+            'mime' => $file->getMimeType(),
+            'size' => $file->getSize(),
             'width' => (int) $width,
             'height' => (int) $height,
-            'item_type' => $data['type'], // avatar / cover
-            'item_id' => 0,
-            'user_id' => $user->user_id,
+            'item_type' => $itemType,
+            'item_id' => $itemId,
         ]);
 
         return response()->json([
             'message' => '上传成功。',
-            'key' => $key,
             'url' => '/'.$path,
             'path' => $path,
             'type' => $data['type'],

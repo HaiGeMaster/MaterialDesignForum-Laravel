@@ -16,7 +16,59 @@ const props = defineProps({
 const { t } = useI18n()
 const { show: feedback } = useFeedback()
 
-// 媒体库：无限滚动分页加载
+// —— 筛选状态 ——
+const filterItemType = ref('')
+const filterDateFrom = ref('')
+const filterDateTo = ref('')
+const searchQuery = ref('')
+const showFilters = ref(false)
+
+// 关联类型选项
+const itemTypeOptions = [
+    { value: '', label: 'mediaFilter.allTypes' },
+    { value: 'question', label: 'mediaFilter.question' },
+    { value: 'answer', label: 'mediaFilter.answer' },
+    { value: 'article', label: 'mediaFilter.article' },
+    { value: 'user_cover', label: 'mediaFilter.userCover' },
+    { value: 'user_avatar', label: 'mediaFilter.userAvatar' },
+    { value: 'topic_cover', label: 'mediaFilter.topicCover' },
+]
+
+// 是否有筛选条件
+const hasFilters = computed(() =>
+    filterItemType.value || filterDateFrom.value || filterDateTo.value || searchQuery.value
+)
+
+// 是否有高级筛选条件（日期/搜索）—— 用于漏斗按钮高亮
+const hasAdvancedFilters = computed(() =>
+    filterDateFrom.value || filterDateTo.value || searchQuery.value
+)
+
+// 构建筛选参数
+function buildFilterParams(page) {
+    const params = { page }
+    if (filterItemType.value) params.item_type = filterItemType.value
+    if (filterDateFrom.value) params.date_from = filterDateFrom.value
+    if (filterDateTo.value) params.date_to = filterDateTo.value
+    if (searchQuery.value.trim()) params.search = searchQuery.value.trim()
+    return params
+}
+
+// 重置筛选并重新加载
+function applyFilters() {
+    load(true)
+}
+
+// 清除所有筛选条件
+function clearFilters() {
+    filterItemType.value = ''
+    filterDateFrom.value = ''
+    filterDateTo.value = ''
+    searchQuery.value = ''
+    load(true)
+}
+
+// 媒体库：无限滚动分页加载（带筛选参数）
 const {
     list: media,
     loading,
@@ -26,12 +78,19 @@ const {
     loadNext,
     retry,
 } = useInfiniteList(async (page) => {
-    const { data } = await http.get(`/users/${props.userId}/media`, { params: { page } })
+    const { data } = await http.get(`/users/${props.userId}/media`, {
+        params: buildFilterParams(page),
+    })
     return { items: data.data ?? [], hasMore: data.current_page < data.last_page }
 })
 
 // 挂载即加载（父级 v-window-item 惰性渲染，天然实现 tab 懒加载）
 onMounted(() => load(true))
+
+// 筛选条件变化时自动重新加载
+watch([filterItemType, filterDateFrom, filterDateTo], () => {
+    load(true)
+})
 
 // —— 视图切换（网格 / 列表），偏好持久化到 localStorage ——
 const viewMode = ref(localStorage.getItem('mediaViewMode') || 'grid')
@@ -72,6 +131,14 @@ function toggleSelectAll() {
 function exitSelection() {
     selectionMode.value = false
     selectedIds.value = new Set()
+}
+
+function toggleSelectionMode() {
+    if (selectionMode.value) {
+        exitSelection()
+    } else {
+        selectionMode.value = true
+    }
 }
 
 function handleItemClick(item) {
@@ -183,36 +250,84 @@ function mediaDate(item) {
 
 <template>
     <div>
-        <!-- 工具栏：标题 + 批量操作 + 视图切换 -->
+        <!-- 工具栏：标题 + 高级筛选按钮 + 批量操作 + 视图切换 -->
         <v-toolbar density="comfortable" color="transparent" flat>
             <v-toolbar-title class="text-subtitle-2 text-medium-emphasis">
                 {{ selectionMode ? t('userContent.selectedCount', { count: selectedCount }) : $t('userContent.media') }}
             </v-toolbar-title>
             <v-spacer />
 
-            <template v-if="selectionMode" #append>
-                <v-btn variant="text"  :prepend-icon="allSelected ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline'"
-                    @click="toggleSelectAll">
-                    {{ allSelected ? $t('userContent.deselectAll') : $t('userContent.selectAll') }}
-                </v-btn>
-                <v-btn icon="mdi-download"  variant="text" color="primary" :title="$t('userContent.download')"
-                    :disabled="!selectedCount" @click="downloadSelected" />
-                <v-btn icon="mdi-delete-outline"  variant="text" color="error" :title="$t('userContent.delete')"
-                    :disabled="!selectedCount" @click="openDeleteDialog" />
-                <v-btn icon="mdi-close"  variant="text" :title="$t('userContent.exitSelect')"
-                    @click="exitSelection" />
-            </template>
-            <template v-else #append>
-                <v-btn-toggle v-model="viewMode" density="comfortable" color="primary" variant="outlined" divided>
-                    <v-btn icon="mdi-view-grid-outline" value="grid"
-                        :title="$t('userContent.gridView')" />
-                    <v-btn icon="mdi-view-list-outline" value="list"
-                        :title="$t('userContent.listView')" />
-                </v-btn-toggle>
-                <v-btn icon="mdi-checkbox-multiple-outline"  variant="text"
-                    :title="$t('userContent.selectMode')" class="ml-1" @click="selectionMode = true" />
+            <template #append>
+                <!-- 非选择模式：筛选 + 视图切换 -->
+                <template v-if="!selectionMode">
+                    <v-btn icon="mdi-filter-variant" variant="text" :title="$t('mediaFilter.advanced')"
+                        :color="hasAdvancedFilters ? 'primary' : undefined" @click="showFilters = !showFilters" />
+                    <v-btn-toggle v-model="viewMode" density="comfortable" color="primary" variant="outlined" divided>
+                        <v-btn icon="mdi-view-grid-outline" value="grid" :title="$t('userContent.gridView')" />
+                        <v-btn icon="mdi-view-list-outline" value="list" :title="$t('userContent.listView')" />
+                    </v-btn-toggle>
+                </template>
+                <!-- 选择模式：批量操作 -->
+                <template v-else>
+                    <v-btn variant="text"
+                        :prepend-icon="allSelected ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline'"
+                        @click="toggleSelectAll">
+                        {{ allSelected ? $t('userContent.deselectAll') : $t('userContent.selectAll') }}
+                    </v-btn>
+                    <v-btn icon="mdi-download" variant="text" color="primary" :title="$t('userContent.download')"
+                        :disabled="!selectedCount" @click="downloadSelected" />
+                    <v-btn icon="mdi-delete-outline" variant="text" color="error" :title="$t('userContent.delete')"
+                        :disabled="!selectedCount" @click="openDeleteDialog" />
+                </template>
+                <!-- 选择模式切换（始终可见） -->
+                <v-btn icon="mdi-checkbox-multiple-outline" variant="text"
+                    :title="selectionMode ? $t('userContent.exitSelect') : $t('userContent.selectMode')"
+                    :color="selectionMode ? 'primary' : undefined" class="ml-1"
+                    @click="toggleSelectionMode" />
             </template>
         </v-toolbar>
+
+        <!-- 关联类型筛选（常驻显示，放在 toolbar 外避免下拉菜单被裁） -->
+        <div v-if="!selectionMode" class="media-type-filter-row px-4 pb-2">
+            <v-select v-model="filterItemType" :items="itemTypeOptions" item-title="label" item-value="value"
+                :label="$t('mediaFilter.itemType')" density="compact" variant="outlined" hide-details clearable
+                class="media-filter-select">
+                <template v-slot:item="{ item, props: itemProps }">
+                    <v-list-item v-bind="itemProps" :title="$t(item.raw.label)" />
+                </template>
+                <template v-slot:selection="{ item }">
+                    {{ $t(item.raw.label) }}
+                </template>
+            </v-select>
+        </div>
+
+        <!-- 高级筛选栏（日期 + 搜索） -->
+        <v-expand-transition>
+            <div v-if="showFilters && !selectionMode" class="media-filters pa-3 pt-0">
+                <div class="d-flex flex-wrap ga-3 align-end">
+                    <!-- 日期范围 -->
+                    <v-text-field v-model="filterDateFrom" :label="$t('mediaFilter.dateFrom')" type="date"
+                        density="compact" variant="outlined" hide-details clearable class="media-filter-date" />
+                    <v-text-field v-model="filterDateTo" :label="$t('mediaFilter.dateTo')" type="date" density="compact"
+                        variant="outlined" hide-details clearable class="media-filter-date" />
+
+                    <!-- 文件名搜索 -->
+                    <v-text-field v-model="searchQuery" :label="$t('mediaFilter.searchFilename')"
+                        prepend-inner-icon="mdi-magnify" density="compact" variant="outlined" hide-details clearable
+                        @keyup.enter="applyFilters" class="media-filter-search" />
+
+                    <!-- 操作按钮 -->
+                    <div class="d-flex ga-1">
+                        <v-btn size="small" variant="tonal" color="primary" @click="applyFilters">
+                            {{ $t('mediaFilter.apply') }}
+                        </v-btn>
+                        <v-btn v-if="hasFilters" size="small" variant="text" @click="clearFilters">
+                            {{ $t('mediaFilter.clear') }}
+                        </v-btn>
+                    </div>
+                </div>
+            </div>
+        </v-expand-transition>
 
         <!-- 网格视图 -->
         <div v-if="media.length && viewMode === 'grid'" class="media-grid pa-4">
@@ -240,7 +355,7 @@ function mediaDate(item) {
                         <div class="text-body-2 text-truncate" :title="item.filename">{{ item.filename }}</div>
                         <div class="text-caption text-medium-emphasis">
                             {{ item.type === 'image' ? $t('userContent.image') : $t('userContent.video') }} · {{
-                            formatSize(item.size) }} · {{ mediaDate(item) }}
+                                formatSize(item.size) }} · {{ mediaDate(item) }}
                         </div>
                     </v-card-text>
                 </v-card>
@@ -269,25 +384,19 @@ function mediaDate(item) {
                 <v-list-item-title class="text-truncate">{{ item.filename }}</v-list-item-title>
                 <v-list-item-subtitle class="text-caption">
                     {{ item.type === 'image' ? $t('userContent.image') : $t('userContent.video') }} · {{
-                    formatSize(item.size) }} · {{ mediaDate(item) }}
+                        formatSize(item.size) }} · {{ mediaDate(item) }}
                 </v-list-item-subtitle>
                 <template #append>
-                    <v-btn v-if="!selectionMode" icon="mdi-link-variant"  variant="text"
+                    <v-btn v-if="!selectionMode" icon="mdi-link-variant" variant="text"
                         :title="$t('userContent.copyLink')" @click.stop="copyLink(item)" />
                 </template>
             </v-list-item>
         </v-list>
 
-        <InfiniteScroll
-            v-if="media.length"
-            :loading="loading"
-            :error="error"
-            :finished="finished"
-            @load="loadNext"
-            @retry="retry"
-        />
-        <v-empty-state v-else-if="!loading" icon="mdi-image-multiple-outline"
-            :title="$t('userContent.emptyMediaTitle')" :text="$t('userContent.emptyMediaText')" class="pa-4" />
+        <InfiniteScroll v-if="media.length" :loading="loading" :error="error" :finished="finished" @load="loadNext"
+            @retry="retry" />
+        <v-empty-state v-else-if="!loading" icon="mdi-image-multiple-outline" :title="$t('userContent.emptyMediaTitle')"
+            :text="$t('userContent.emptyMediaText')" class="pa-4" />
 
         <!-- 媒体预览 -->
         <MediaPreviewDialog v-model:open="previewOpen" :item="preview" />
@@ -295,6 +404,32 @@ function mediaDate(item) {
 </template>
 
 <style scoped>
+/* —— 筛选栏 —— */
+.media-type-filter-row {
+    display: flex;
+    align-items: center;
+}
+
+.media-filters {
+    border-bottom: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
+}
+
+.media-filter-select {
+    min-width: 160px;
+    max-width: 200px;
+}
+
+.media-filter-date {
+    min-width: 140px;
+    max-width: 170px;
+}
+
+.media-filter-search {
+    min-width: 180px;
+    max-width: 260px;
+    flex: 1;
+}
+
 .media-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));

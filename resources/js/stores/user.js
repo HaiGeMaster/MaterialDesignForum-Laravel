@@ -112,8 +112,8 @@ export const useUserStore = defineStore('user', {
       }
     },
 
-    // 上传个人资料图片（avatar / cover）
-    async uploadImage(type, file) {
+    // 上传图片（avatar / cover），可选 context 和 itemId 区分关联场景
+    async uploadImage(type, file, { context, itemId } = {}) {
       this.uploading = true
       this.error = ''
 
@@ -121,6 +121,8 @@ export const useUserStore = defineStore('user', {
         const formData = new FormData()
         formData.append('type', type)
         formData.append('file', file)
+        if (context) formData.append('context', context)
+        if (itemId != null) formData.append('item_id', itemId)
         const { data } = await http.post('/user/upload', formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
         })

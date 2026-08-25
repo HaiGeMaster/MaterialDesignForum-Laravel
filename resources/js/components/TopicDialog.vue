@@ -131,6 +131,8 @@ async function submit() {
             v-model="cover"
             type="cover"
             preview-ratio="16 / 6"
+            context="topic"
+            :item-id="props.topic?.topic_id"
             :label="$t('topicDialog.cover')"
           />
         </v-form>

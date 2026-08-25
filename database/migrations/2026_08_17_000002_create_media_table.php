@@ -19,10 +19,13 @@ return new class extends Migration
             $table->unsignedBigInteger('size')->default(0)->comment('文件大小(字节)');
             $table->unsignedInteger('width')->default(0)->comment('原始宽度');
             $table->unsignedInteger('height')->default(0)->comment('原始高度');
+            $table->char('item_type', 20)->nullable()->comment('关联类型：question、answer、article、user_cover、user_avatar、topic_cover');
+            $table->integer('item_id')->default(0)->comment('关联ID：问题ID/回答ID/文章ID/用户ID');
             $table->timestamp('create_time')->useCurrent()->comment('上传时间');
 
             $table->index(['user_id', 'type']);
             $table->index(['user_id', 'create_time']);
+            $table->index(['item_type', 'item_id']);
         });
     }
 

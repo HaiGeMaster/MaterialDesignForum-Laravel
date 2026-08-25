@@ -1,7 +1,8 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { EditorContent, useEditor } from '@tiptap/vue-3'
+import { EditorContent, useEditor, VueRenderer } from '@tiptap/vue-3'
+import { BubbleMenu } from '@tiptap/extension-bubble-menu'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import Underline from '@tiptap/extension-underline'
@@ -14,6 +15,15 @@ import RichTextEditorToolbarRow from './RichTextEditorToolbarRow.vue'
 import { Video } from '../tiptap/Video'
 import { ResizableImage } from '../tiptap/ResizableImage'
 import { CodeBlock } from '../tiptap/CodeBlock'
+import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table'
+import TaskList from '@tiptap/extension-task-list'
+import TaskItem from '@tiptap/extension-task-item'
+import { Details, DetailsSummary, DetailsContent } from '@tiptap/extension-details'
+import Subscript from '@tiptap/extension-subscript'
+import Superscript from '@tiptap/extension-superscript'
+import Mention from '@tiptap/extension-mention'
+import CharacterCount from '@tiptap/extension-character-count'
+import MentionSuggestion from './MentionSuggestion.vue'
 
 const props = defineProps({
   /** 编辑器 HTML 内容（v-model 双向绑定） */
@@ -54,6 +64,38 @@ const editor = useEditor({
       HTMLAttributes: { rel: 'noopener noreferrer nofollow', target: '_blank' },
     }),
     TextAlign.configure({ types: ['heading', 'paragraph'] }),
+    Table.configure({ resizable: true }),
+    TableRow,
+    TableCell,
+    TableHeader,
+    TaskList,
+    TaskItem.configure({ nested: true }),
+    Details,
+    DetailsSummary,
+    DetailsContent,
+    Subscript,
+    Superscript,
+    Mention.configure({
+      suggestion: {
+        render: () => {
+          let component
+          return {
+            onStart: (props) => {
+              component = new VueRenderer(MentionSuggestion, { props, editor: props.editor })
+              if (!props.clientRect) return
+              props.decorationNode?.appendChild(component.element)
+            },
+            onUpdate(props) { component.updateProps(props) },
+            onKeyDown(props) {
+              if (props.event.key === 'Escape') { component.destroy(); return true }
+              return component.ref?.[props.event.key]?.()
+            },
+            onExit() { component.destroy() },
+          }
+        },
+      },
+    }),
+    CharacterCount,
   ],
   onUpdate: ({ editor }) => {
     emit('update:modelValue', editor.getHTML())
@@ -130,6 +172,18 @@ const toolbarTop = computed(() => [
         title: t('editor.strike'),
         active: () => editor.value?.isActive('strike'),
         action: () => editor.value?.chain().focus().toggleStrike().run(),
+      },
+      {
+        icon: 'mdi-format-subscript',
+        title: t('editor.subscript'),
+        active: () => editor.value?.isActive('subscript'),
+        action: () => editor.value?.chain().focus().toggleSubscript().run(),
+      },
+      {
+        icon: 'mdi-format-superscript',
+        title: t('editor.superscript'),
+        active: () => editor.value?.isActive('superscript'),
+        action: () => editor.value?.chain().focus().toggleSuperscript().run(),
       },
       {
         icon: 'mdi-code-tags',
@@ -253,6 +307,12 @@ const toolbarBottom = computed(() => [
         active: () => editor.value?.isActive('orderedList'),
         action: () => editor.value?.chain().focus().toggleOrderedList().run(),
       },
+      {
+        icon: 'mdi-checkbox-marked-outline',
+        title: t('editor.taskList'),
+        active: () => editor.value?.isActive('taskList'),
+        action: () => editor.value?.chain().focus().toggleTaskList().run(),
+      },
     ],
   },
   {
@@ -302,6 +362,13 @@ const toolbarBottom = computed(() => [
     title: t('editor.horizontalRule'),
     action: () => editor.value?.chain().focus().setHorizontalRule().run(),
   },
+  // {
+  //   type: 'button',
+  //   icon: 'mdi-chevron-down-box-outline',
+  //   title: t('editor.details'),
+  //   active: () => editor.value?.isActive('details'),
+  //   action: () => editor.value?.chain().focus().setDetails().run(),
+  // },
   { type: 'divider' },
   {
     type: 'menu',
@@ -312,10 +379,69 @@ const toolbarBottom = computed(() => [
       { type: 'link', icon: 'mdi-link-variant', title: t('editor.link') },
       { type: 'image', icon: 'mdi-image-outline', title: t('editor.image') },
       { type: 'video', icon: 'mdi-video-outline', title: t('editor.video') },
+      { type: 'table', icon: 'mdi-table-plus', title: t('editor.table.insert') },
       { type: 'library', icon: 'mdi-image-multiple-outline', title: t('editor.fromLibrary') },
     ],
   },
 ])
+
+// 表格操作菜单（仅在光标位于表格内时显示）
+const tableMenu = computed(() => ({
+  type: 'menu',
+  id: 'table',
+  icon: 'mdi-table',
+  title: t('editor.table.menu'),
+  visible: () => editor.value?.isActive('table'),
+  items: [
+    {
+      icon: 'mdi-table-row-plus-after',
+      title: t('editor.table.insertRowAfter'),
+      action: () => editor.value?.chain().focus().addRowAfter().run(),
+    },
+    {
+      icon: 'mdi-table-row-plus-before',
+      title: t('editor.table.insertRowBefore'),
+      action: () => editor.value?.chain().focus().addRowBefore().run(),
+    },
+    {
+      icon: 'mdi-table-column-plus-after',
+      title: t('editor.table.insertColAfter'),
+      action: () => editor.value?.chain().focus().addColumnAfter().run(),
+    },
+    {
+      icon: 'mdi-table-column-plus-before',
+      title: t('editor.table.insertColBefore'),
+      action: () => editor.value?.chain().focus().addColumnBefore().run(),
+    },
+    {
+      icon: 'mdi-table-row-remove',
+      title: t('editor.table.deleteRow'),
+      action: () => editor.value?.chain().focus().deleteRow().run(),
+    },
+    {
+      icon: 'mdi-table-column-remove',
+      title: t('editor.table.deleteCol'),
+      action: () => editor.value?.chain().focus().deleteColumn().run(),
+    },
+    {
+      icon: 'mdi-format-header-1',
+      title: t('editor.table.toggleHeaderRow'),
+      active: () => editor.value?.isActive('table', { withHeaderRow: true }),
+      action: () => editor.value?.chain().focus().toggleHeaderRow().run(),
+    },
+    {
+      icon: 'mdi-format-header-pound',
+      title: t('editor.table.toggleHeaderCol'),
+      active: () => editor.value?.isActive('table', { withHeaderColumn: true }),
+      action: () => editor.value?.chain().focus().toggleHeaderColumn().run(),
+    },
+    {
+      icon: 'mdi-table-remove',
+      title: t('editor.table.deleteTable'),
+      action: () => editor.value?.chain().focus().deleteTable().run(),
+    },
+  ],
+}))
 </script>
 
 <template>
@@ -331,12 +457,36 @@ const toolbarBottom = computed(() => [
     <!-- 编辑区 -->
     <EditorContent class="rich-editor__content" :editor="editor" />
 
+    <!-- 悬浮格式化工具栏：选中文本时出现 -->
+    <BubbleMenu
+      v-if="editor"
+      :editor="editor"
+      :tippy-options="{ duration: 100 }"
+      :should-show="({ editor: e }) => !e.isActive('image') && !e.isActive('video') && !e.isEmpty"
+    >
+      <v-card class="d-flex align-center pa-1" density="compact" elevation="4">
+        <v-btn size="x-small" icon variant="text" :color="editor.isActive('bold') ? 'primary' : undefined" @click="editor.chain().focus().toggleBold().run()"><v-icon icon="mdi-format-bold" size="small" /></v-btn>
+        <v-btn size="x-small" icon variant="text" :color="editor.isActive('italic') ? 'primary' : undefined" @click="editor.chain().focus().toggleItalic().run()"><v-icon icon="mdi-format-italic" size="small" /></v-btn>
+        <v-btn size="x-small" icon variant="text" :color="editor.isActive('underline') ? 'primary' : undefined" @click="editor.chain().focus().toggleUnderline().run()"><v-icon icon="mdi-format-underline" size="small" /></v-btn>
+        <v-btn size="x-small" icon variant="text" :color="editor.isActive('strike') ? 'primary' : undefined" @click="editor.chain().focus().toggleStrike().run()"><v-icon icon="mdi-format-strikethrough-variant" size="small" /></v-btn>
+        <v-btn size="x-small" icon variant="text" :color="editor.isActive('code') ? 'primary' : undefined" @click="editor.chain().focus().toggleCode().run()"><v-icon icon="mdi-code-tags" size="small" /></v-btn>
+        <v-divider vertical inset class="mx-1" />
+        <v-btn size="x-small" icon variant="text" :color="editor.isActive('blockquote') ? 'primary' : undefined" @click="editor.chain().focus().toggleBlockquote().run()"><v-icon icon="mdi-format-quote-close" size="small" /></v-btn>
+      </v-card>
+    </BubbleMenu>
+
     <!-- 下栏工具栏：发布按钮（最左侧）+ 段落排版与插入 -->
     <div class="rich-editor__toolbar rich-editor__toolbar--bottom">
       <div v-if="$slots.publish" class="rich-editor__publish-slot">
         <slot name="publish" />
       </div>
       <RichTextEditorToolbarRow :buttons="toolbarBottom" :editor="editor" :refresh="refresh" />
+      <RichTextEditorToolbarRow v-if="editor?.isActive('table')" :buttons="[tableMenu]" :editor="editor" :refresh="refresh" />
+    </div>
+
+    <!-- 字数统计 -->
+    <div v-if="editor" class="rich-editor__status">
+      {{ t('editor.charCount.characters', { count: editor.storage.characterCount.characters() }) }}
     </div>
   </div>
 </template>
@@ -465,5 +615,111 @@ const toolbarBottom = computed(() => [
   border: none;
   border-top: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
   margin: 12px 0;
+}
+
+/* 表格 */
+.rich-editor__content :deep(.ProseMirror table) {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 8px 0;
+  overflow: visible;
+}
+
+.rich-editor__content :deep(.ProseMirror table td),
+.rich-editor__content :deep(.ProseMirror table th) {
+  border: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
+  padding: 6px 10px;
+  min-width: 60px;
+  vertical-align: top;
+  position: relative;
+}
+
+.rich-editor__content :deep(.ProseMirror table th) {
+  background: rgb(var(--v-theme-surface-variant), 0.3);
+  font-weight: 600;
+}
+
+.rich-editor__content :deep(.ProseMirror table .selectedCell:after) {
+  background: rgb(var(--v-theme-primary), 0.08);
+  content: '';
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 2;
+}
+
+.rich-editor__content :deep(.ProseMirror table .column-resize-handle) {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: -2px;
+  width: 4px;
+  background-color: rgb(var(--v-theme-primary));
+  pointer-events: none;
+}
+
+/* 折叠面板 */
+.rich-editor__content :deep(.ProseMirror details) {
+  border: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
+  border-radius: 6px;
+  margin: 8px 0;
+}
+
+.rich-editor__content :deep(.ProseMirror details summary) {
+  padding: 6px 10px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.rich-editor__content :deep(.ProseMirror details[open] summary) {
+  border-bottom: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
+}
+
+.rich-editor__content :deep(.ProseMirror details > :not(summary)) {
+  padding: 6px 10px;
+}
+
+/* @提及 */
+.rich-editor__content :deep(.ProseMirror .mention) {
+  color: rgb(var(--v-theme-primary));
+  font-weight: 500;
+}
+
+/* 任务列表 */
+.rich-editor__content :deep(.ProseMirror ul[data-type="taskList"]) {
+  list-style: none;
+  padding-left: 0;
+}
+
+.rich-editor__content :deep(.ProseMirror ul[data-type="taskList"] li) {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.rich-editor__content :deep(.ProseMirror ul[data-type="taskList"] li label) {
+  margin-top: 3px;
+}
+
+.rich-editor__content :deep(.ProseMirror ul[data-type="taskList"] li div) {
+  flex: 1;
+}
+
+.rich-editor__content :deep(.ProseMirror ul[data-type="taskList"] li[data-checked="true"] div > p) {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+/* 字数统计 */
+.rich-editor__status {
+  display: flex;
+  justify-content: flex-end;
+  padding: 2px 8px;
+  font-size: 11px;
+  color: rgb(var(--v-theme-on-surface), 0.4);
+  border-top: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
 }
 </style>

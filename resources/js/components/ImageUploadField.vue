@@ -14,6 +14,10 @@ const props = defineProps({
   label: { type: String, default: '' },
   // 预览区域宽高比，如头像 '1'，封面 '16 / 6'
   previewRatio: { type: String, default: '1' },
+  // 关联场景（如 'topic'），透传给上传接口
+  context: { type: String, default: '' },
+  // 关联 ID（如话题 ID），透传给上传接口
+  itemId: { type: [Number, String], default: null },
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -50,7 +54,10 @@ async function onFileChange(event) {
   // 先本地预览，再上传
   localPreview.value = URL.createObjectURL(file)
   try {
-    const result = await userStore.uploadImage(props.type, file)
+    const result = await userStore.uploadImage(props.type, file, {
+      context: props.context || undefined,
+      itemId: props.itemId != null ? props.itemId : undefined,
+    })
     emit('update:modelValue', result.url)
     feedback(result.message || t('imageUpload.uploaded'), 'success')
   } catch (error) {

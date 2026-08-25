@@ -30,7 +30,7 @@ async function handleLogout() {
   <v-app-bar color="surface" elevation="1">
     <v-app-bar-nav-icon @click="emit('toggle-drawer')" />
     <v-app-bar-title>
-      <v-icon icon="mdi-shield-crown-outline" class="mr-2" />
+      <!-- <v-icon icon="mdi-shield-crown-outline" class="mr-2" /> -->
       {{ siteName }} Admin
     </v-app-bar-title>
     <v-spacer />

@@ -138,6 +138,10 @@ function onMenuClick(id, item) {
   openMenus.value[id] = false
   if (item.type === 'image') return insertImage()
   if (item.type === 'video') return insertVideo()
+  if (item.type === 'table') {
+    props.editor?.chain().focus().insertTable({ rows: 3, cols: 3 }).run()
+    return
+  }
   if (item.type === 'library') {
     if (!auth.user?.user_id) {
       show(t('editor.libraryNoSelection'), 'error')
@@ -158,12 +162,13 @@ function onMenuVisibility(id, open) {
 <template>
   <div class="rich-editor__toolbar-row">
     <template v-for="(btn, i) in buttons" :key="i">
+      <template v-if="btn.visible ? btn.visible() : true">
       <v-divider v-if="btn.type === 'divider'" vertical inset class="mx-1" />
 
       <!-- 文字颜色 -->
       <v-tooltip v-else-if="btn.type === 'color'" :text="btn.title" >
         <template #activator="{ props: tipProps }">
-          <v-menu  offset="6">
+          <v-menu   offset="6">
             <template #activator="{ props: menuProps }">
               <v-btn v-bind="{ ...menuProps, ...tipProps }" size="small" variant="text" icon>
                 <v-icon :icon="btn.icon" size="small" />
@@ -203,7 +208,7 @@ function onMenuVisibility(id, open) {
       <!-- 背景高亮 -->
       <v-tooltip v-else-if="btn.type === 'highlight'" :text="btn.title" >
         <template #activator="{ props: tipProps }">
-          <v-menu  offset="6">
+          <v-menu   offset="6">
             <template #activator="{ props: menuProps }">
               <v-btn v-bind="{ ...menuProps, ...tipProps }" size="small" variant="text" icon>
                 <v-icon :icon="btn.icon" size="small" />
@@ -243,7 +248,7 @@ function onMenuVisibility(id, open) {
       <!-- 字号 / 行距下拉 -->
       <v-tooltip v-else-if="btn.type === 'select'" :text="btn.title" >
         <template #activator="{ props: tipProps }">
-          <v-menu  offset="6">
+          <v-menu   offset="6">
             <template #activator="{ props: menuProps }">
               <v-btn
                 v-bind="{ ...menuProps, ...tipProps }"
@@ -274,7 +279,7 @@ function onMenuVisibility(id, open) {
       <!-- 功能分组菜单：合并同类按钮，点击弹出子项选择 -->
       <v-tooltip v-else-if="btn.type === 'menu'" :text="btn.title" >
         <template #activator="{ props: tipProps }">
-          <v-menu
+          <v-menu 
             v-model="openMenus[btn.id]"
 
             offset="6"
@@ -396,6 +401,7 @@ function onMenuVisibility(id, open) {
           </v-btn>
         </template>
       </v-tooltip>
+      </template>
     </template>
 
     <input ref="imageInput" type="file" accept="image/*" multiple hidden @change="onImageChange" />
@@ -404,7 +410,7 @@ function onMenuVisibility(id, open) {
     <span class="d-none">{{ refresh }}</span>
 
     <!-- 从媒体库插入 -->
-    <MediaLibraryDialog v-model="libraryOpen" :editor="editor" />
+    <MediaLibraryDialog v-model:open="libraryOpen" :editor="editor" />
   </div>
 </template>
 

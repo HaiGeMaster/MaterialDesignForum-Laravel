@@ -91,7 +91,12 @@ class MediaController extends Controller
     /**
      * 当前登录用户的媒体库列表（仅本人可见）
      *
-     * 支持 ?type=image|video 过滤，按上传时间倒序；
+     * 支持筛选参数：
+     *  - type       : image | video（媒体类型）
+     *  - item_type  : question / answer / article / user_cover / user_avatar / topic_cover
+     *  - search     : 模糊搜索文件名
+     *  - date_from  : 上传时间起始（YYYY-MM-DD）
+     *  - date_to    : 上传时间截止（YYYY-MM-DD）
      * 带 page 参数时分页返回，否则保持原有上限完整返回（兼容旧调用）。
      */
     public function index(Request $request, User $user)
@@ -110,6 +115,24 @@ class MediaController extends Controller
 
         if ($request->query('type')) {
             $query->where('type', $request->query('type'));
+        }
+
+        // 关联类型筛选
+        if ($request->query('item_type')) {
+            $query->where('item_type', $request->query('item_type'));
+        }
+
+        // 文件名模糊搜索
+        if ($request->query('search')) {
+            $query->where('filename', 'like', '%' . $request->query('search') . '%');
+        }
+
+        // 日期范围筛选
+        if ($request->query('date_from')) {
+            $query->whereDate('create_time', '>=', $request->query('date_from'));
+        }
+        if ($request->query('date_to')) {
+            $query->whereDate('create_time', '<=', $request->query('date_to'));
         }
 
         // 不分页时保留原有 500 条上限

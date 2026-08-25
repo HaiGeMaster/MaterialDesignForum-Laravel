@@ -217,10 +217,12 @@ onMounted(() => {
               <tr v-for="item in group.items" :key="item.name">
                 <td class="text-body-2">{{ $t(`notificationTypeName.${item.name}`) }}</td>
                 <td class="text-center">
-                  <v-checkbox v-model="item.web_message" density="compact" hide-details class="d-inline-flex" />
+                  <v-checkbox v-model="item.web_message" 
+                    color="primary" density="compact" hide-details class="d-inline-flex" />
                 </td>
                 <td class="text-center">
-                  <v-checkbox v-model="item.email_message" density="compact" hide-details class="d-inline-flex" />
+                  <v-checkbox v-model="item.email_message" 
+                    color="primary" density="compact" hide-details class="d-inline-flex" />
                 </td>
               </tr>
             </template>

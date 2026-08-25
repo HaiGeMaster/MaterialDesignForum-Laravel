@@ -29,6 +29,9 @@ const editorWindow = useEditorWindowStore()
 const question = ref(null)
 const loading = ref(false)
 
+// 当前是否处于单个回答详情模式（路由含 answer_id）
+const targetAnswerId = computed(() => route.params.answer_id || null)
+
 // 评论数（操作栏按钮角标显示）
 const commentCount = computed(() => Number(question.value?.comment_count || 0))
 
@@ -226,8 +229,28 @@ onUnmounted(() => {
         </v-card-actions>
       </v-card>
 
+      <!-- 单个回答模式：返回查看全部回答 -->
+       <v-btn v-if="targetAnswerId" block
+          variant="tonal"
+          color="primary"
+          :to="{ name: 'question-detail', params: { question_id: route.params.question_id } }"
+        >
+          {{ $t('answersList.viewAllAnswers') }}
+        </v-btn>
+
       <!-- 回答列表（自取数据：排序 / 分页 / 编辑 / 删除） -->
-      <AnswersList :question-id="question.question_id" />
+      <AnswersList :question-id="question.question_id" :answer-id="targetAnswerId" />
+
+      <!-- 单个回答模式：返回查看全部回答 -->
+      <!-- <div v-if="targetAnswerId" class="text-center my-4">
+        <v-btn
+          variant="tonal"
+          color="primary"
+          :to="{ name: 'question-detail', params: { question_id: route.params.question_id } }"
+        >
+          {{ $t('answersList.viewAllAnswers') }}
+        </v-btn>
+      </div> -->
     </template>
 
     <v-empty-state

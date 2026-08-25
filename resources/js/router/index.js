@@ -8,6 +8,9 @@ const routes = [
   { path: '/topics/:topic_id', name: 'topic-detail', component: () => import('../views/TopicDetailView.vue'), meta: { titleKey: 'route.topicDetail', maxWidth: 860 } },
   { path: '/questions', name: 'questions', component: () => import('../views/QuestionsView.vue'), meta: { titleKey: 'route.questions', maxWidth: 860 } },
   { path: '/questions/:question_id', name: 'question-detail', component: () => import('../views/QuestionDetailView.vue'), meta: { titleKey: 'route.questionDetail', maxWidth: 860 } },
+  
+  { path: '/questions/:question_id/answers/:answer_id', name: 'question-answer-detail', component: () => import('../views/QuestionDetailView.vue'), meta: { titleKey: 'route.questionDetail', maxWidth: 860 } },
+  
   { path: '/articles', name: 'articles', component: () => import('../views/ArticlesView.vue'), meta: { titleKey: 'route.articles', maxWidth: 860 } },
   { path: '/articles/:article_id', name: 'article-detail', component: () => import('../views/ArticleDetailView.vue'), meta: { titleKey: 'route.articleDetail', maxWidth: 860 } },
   { path: '/users/:user_id', name: 'user', component: () => import('../views/ProfileView.vue'), meta: { titleKey: 'route.user', maxWidth: 860 } },

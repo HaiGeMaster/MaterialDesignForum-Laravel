@@ -36,6 +36,7 @@
     "switchLanguage": "切换语言",
     "switchLight": "切换到浅色模式",
     "switchDark": "切换到深色模式",
+    "switchTheme": "切换主题",
     "settings": "设置",
     "returnHome": "返回前台",
     "notifications": "通知",
@@ -330,6 +331,23 @@
     "cancel": "取消",
     "confirm": "删除"
   },
+  "mediaFilter": {
+    "title": "筛选",
+    "advanced": "高级筛选",
+    "itemType": "关联类型",
+    "allTypes": "全部类型",
+    "question": "问题",
+    "answer": "回答",
+    "article": "文章",
+    "userCover": "用户封面",
+    "userAvatar": "用户头像",
+    "topicCover": "话题封面",
+    "dateFrom": "开始日期",
+    "dateTo": "结束日期",
+    "searchFilename": "搜索文件名",
+    "apply": "应用",
+    "clear": "清除筛选"
+  },
   "imageUpload": {
     "previewAlt": "图片预览",
     "clickToSelect": "点击选择{label}",
@@ -396,6 +414,8 @@
     "italic": "斜体",
     "underline": "下划线",
     "strike": "删除线",
+    "subscript": "下标",
+    "superscript": "上标",
     "inlineCode": "行内代码",
     "textStyle": "文本样式",
     "heading": "标题",
@@ -421,15 +441,30 @@
     "h3": "三级标题",
     "bulletList": "无序列表",
     "orderedList": "有序列表",
+    "taskList": "任务列表",
     "alignLeft": "左对齐",
     "alignCenter": "居中",
     "alignRight": "右对齐",
     "quote": "引用",
     "codeBlock": "代码块",
     "horizontalRule": "分割线",
+    "details": "折叠面板",
     "link": "插入链接",
     "image": "插入图片",
     "video": "插入视频",
+    "table": {
+      "insert": "插入表格",
+      "menu": "表格",
+      "insertRowBefore": "上方插入行",
+      "insertRowAfter": "下方插入行",
+      "insertColBefore": "左侧插入列",
+      "insertColAfter": "右侧插入列",
+      "deleteRow": "删除行",
+      "deleteCol": "删除列",
+      "deleteTable": "删除表格",
+      "toggleHeaderRow": "切换表头行",
+      "toggleHeaderCol": "切换表头列"
+    },
     "fontSizeLabel": "字号",
     "lineHeightLabel": "行距",
     "default": "默认",
@@ -450,6 +485,13 @@
       "blue": "蓝色",
       "purple": "紫色",
       "gray": "灰色"
+    },
+    "mention": {
+      "noResult": "未找到用户"
+    },
+    "charCount": {
+      "characters": "字符：{count}",
+      "words": "词数：{count}"
     }
   },
   "home": {
@@ -533,6 +575,15 @@
     "siteInfoDescription": "站点名称、描述、关键词、备案和默认语言",
     "themeSettings": "主题设置",
     "themeSettingsDescription": "前台主题模式与明暗主题颜色",
+    "defaultTheme": "默认主题",
+    "builtinThemes": "内置主题",
+    "customThemes": "自定义主题",
+    "newTheme": "新建主题",
+    "themeName": "主题名称",
+    "darkMode": "深色模式",
+    "lightMode": "浅色模式",
+    "noCustomThemes": "暂无自定义主题",
+    "themeNameExists": "该主题名称已存在",
     "mailSettings": "邮件设置",
     "mailSettingsDescription": "SMTP 主机、账号、密码、端口和发件人信息",
     "oauthSettings": "第三方登录",
@@ -1068,7 +1119,8 @@
     "sortVotes": "最多点赞",
     "deleted": "回答已删除",
     "deleteTitle": "删除回答",
-    "deleteConfirm": "确定要删除这条回答吗？该操作不可撤销。"
+    "deleteConfirm": "确定要删除这条回答吗？该操作不可撤销。",
+    "viewAllAnswers": "查看所有回答"
   },
   "commentReplyEditDialog": {
     "editCommentTitle": "编辑评论",
@@ -1083,5 +1135,9 @@
     "publish": "发布",
     "success": "评论发布成功。",
     "loginFirst": "请先登录后再发表评论。"
+  },
+  "themeDialog": {
+    "title": "选择主题",
+    "system": "跟随系统"
   }
 }

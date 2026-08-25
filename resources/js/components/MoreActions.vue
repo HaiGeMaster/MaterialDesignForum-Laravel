@@ -78,6 +78,12 @@ const detailUrl = computed(() => {
       return `${origin}/questions/${itemId.value}`
     case 'article':
       return `${origin}/articles/${itemId.value}`
+    case 'answer':
+      // 回答链接：/questions/{question_id}/answers/{answer_id}
+      if (props.item?.question_id) {
+        return `${origin}/questions/${props.item.question_id}/answers/${itemId.value}`
+      }
+      return ''
     default:
       return ''
   }

@@ -13,6 +13,8 @@ import { useInfiniteList } from '../composables/useInfiniteList'
 
 const props = defineProps({
   questionId: { type: [Number, String], required: true },
+  /** 指定回答 ID：传入后仅加载该回答，不显示排序 / 分页 */
+  answerId: { type: [Number, String], default: null },
 })
 
 const { t } = useI18n()
@@ -30,11 +32,20 @@ const sortItems = computed(() => [
   { value: '-vote_count', label: t('answersList.sortVotes') },
 ])
 
-const title = computed(() => `${t('answersList.title')} (${total.value})`)
+const title = computed(() => {
+  if (props.answerId) return t('answersList.title')
+  return `${t('answersList.title')} (${total.value})`
+})
 
 const { list: items, loading, error, finished, load, loadNext, retry } = useInfiniteList(fetchAnswers)
 
 async function fetchAnswers(page) {
+  // 单个回答模式：直接通过 /answers/:id 获取指定回答
+  if (props.answerId) {
+    const { data } = await http.get(`/answers/${props.answerId}`)
+    const item = Array.isArray(data) ? data[0] : data
+    return { items: item ? [item] : [], hasMore: false }
+  }
   const { data } = await http.get('/answers', {
     params: {
       question_id: props.questionId,
@@ -92,7 +103,7 @@ function handleContentPublished(e) {
 }
 
 watch(
-  () => [props.questionId, sort.value],
+  () => [props.questionId, props.answerId, sort.value],
   () => load(true),
 )
 
@@ -105,7 +116,8 @@ onBeforeUnmount(() => window.removeEventListener('content:published', handleCont
 
 <template>
   <v-card id="answers" class="mt-4">
-    <ListHeader :title="title" :sort="sort" :sort-items="sortItems" @update:sort="(v) => (sort = v)" />
+    <ListHeader v-if="!answerId" :title="title" :sort="sort" :sort-items="sortItems" @update:sort="(v) => (sort = v)" />
+    <ListHeader v-else :title="title" />
 
     <v-divider />
 

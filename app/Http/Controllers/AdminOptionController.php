@@ -9,6 +9,9 @@ class AdminOptionController extends Controller
 {
     private const THEME_DEFAULTS = [
         'theme' => 'light',
+        'default_theme' => 'light',
+        'available_themes' => ['light', 'dark'],
+        'custom_themes' => [],
         'colors' => [
             'light' => ['primary' => '#1867C0', 'secondary' => '#48A9A6', 'accent' => '#FB8C00'],
             'dark' => ['primary' => '#2196F3', 'secondary' => '#54B6B2', 'accent' => '#FB8C00'],
@@ -23,24 +26,45 @@ class AdminOptionController extends Controller
     public function updateTheme(Request $request)
     {
         $validated = $request->validate([
-            'theme' => ['required', 'in:light,dark'],
-            'colors' => ['required', 'array'],
-            'colors.light' => ['required', 'array'],
-            'colors.dark' => ['required', 'array'],
-            'colors.light.primary' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
-            'colors.light.secondary' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
-            'colors.light.accent' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
-            'colors.dark.primary' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
-            'colors.dark.secondary' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
-            'colors.dark.accent' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'theme' => ['nullable', 'string', 'max:50'],
+            'default_theme' => ['nullable', 'string', 'max:50'],
+            'available_themes' => ['nullable', 'array'],
+            'available_themes.*' => ['string', 'max:50'],
+            'custom_themes' => ['nullable', 'array'],
+            'custom_themes.*.name' => ['required', 'string', 'max:50'],
+            'custom_themes.*.dark' => ['required', 'boolean'],
+            'custom_themes.*.colors' => ['required', 'array'],
+            'custom_themes.*.colors.primary' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'custom_themes.*.colors.secondary' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'custom_themes.*.colors.accent' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'colors' => ['nullable', 'array'],
+            'colors.light' => ['nullable', 'array'],
+            'colors.dark' => ['nullable', 'array'],
+            'colors.light.primary' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'colors.light.secondary' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'colors.light.accent' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'colors.dark.primary' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'colors.dark.secondary' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'colors.dark.accent' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
         ]);
 
-        DB::table('option')->updateOrInsert(['name' => 'theme'], ['value' => $validated['theme']]);
-        DB::table('option')->updateOrInsert([
-            'name' => 'theme_color',
-        ], [
-            'value' => json_encode($validated['colors'], JSON_UNESCAPED_SLASHES),
-        ]);
+        $defaultTheme = $validated['default_theme'] ?? $validated['theme'] ?? 'light';
+        $availableThemes = $validated['available_themes'] ?? ['light', 'dark'];
+        $customThemes = $validated['custom_themes'] ?? [];
+
+        DB::table('option')->updateOrInsert(['name' => 'theme'], ['value' => $defaultTheme]);
+        DB::table('option')->updateOrInsert(['name' => 'default_theme'], ['value' => $defaultTheme]);
+        DB::table('option')->updateOrInsert(['name' => 'available_themes'], ['value' => implode(',', $availableThemes)]);
+        DB::table('option')->updateOrInsert(['name' => 'custom_themes'], ['value' => json_encode($customThemes, JSON_UNESCAPED_SLASHES)]);
+
+        // 兼容旧版 theme_color 存储
+        if (isset($validated['colors'])) {
+            DB::table('option')->updateOrInsert([
+                'name' => 'theme_color',
+            ], [
+                'value' => json_encode($validated['colors'], JSON_UNESCAPED_SLASHES),
+            ]);
+        }
 
         return response()->json(['is_set' => true] + $this->themeData());
     }
@@ -185,12 +209,24 @@ class AdminOptionController extends Controller
     private function themeData(): array
     {
         $rows = DB::table('option')->whereIn('name', [
-            'theme', 'theme_color', 'site_name', 'site_icp_beian', 'site_gongan_beian',
+            'theme', 'theme_color', 'default_theme', 'available_themes', 'custom_themes',
+            'site_name', 'site_icp_beian', 'site_gongan_beian',
         ])->pluck('value', 'name');
         $colors = json_decode($rows['theme_color'] ?? '', true);
+        $customThemes = json_decode($rows['custom_themes'] ?? '[]', true);
+        $availableThemesRaw = $rows['available_themes'] ?? '';
+
+        $defaultTheme = $rows['default_theme'] ?? $rows['theme'] ?? 'light';
+        if (!in_array($defaultTheme, ['light', 'dark', 'system'], true)) {
+            // 允许任意自定义主题名
+            $defaultTheme = $defaultTheme;
+        }
 
         return [
-            'theme' => in_array($rows['theme'] ?? '', ['light', 'dark'], true) ? $rows['theme'] : 'light',
+            'theme' => $defaultTheme,
+            'default_theme' => $defaultTheme,
+            'available_themes' => $availableThemesRaw !== '' ? array_filter(explode(',', $availableThemesRaw)) : ['light', 'dark'],
+            'custom_themes' => is_array($customThemes) ? $customThemes : [],
             'colors' => is_array($colors)
                 ? array_replace_recursive(self::THEME_DEFAULTS['colors'], $colors)
                 : self::THEME_DEFAULTS['colors'],

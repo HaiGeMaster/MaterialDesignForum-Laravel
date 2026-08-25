@@ -40,7 +40,7 @@ async function handleLogout() {
     <v-app-bar-nav-icon @click="emit('toggle-drawer')" />
 
     <v-app-bar-title>
-      <v-icon icon="mdi-forum" class="mr-2" />
+      <!-- <v-icon icon="mdi-forum" class="mr-2" /> -->
       {{ siteName }}
     </v-app-bar-title>
 
