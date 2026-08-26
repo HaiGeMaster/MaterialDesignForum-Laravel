@@ -138,6 +138,7 @@ function handleClose() {
 
 <template>
   <FloatingWindow
+    appbarDensity="compact"
     v-if="store.open"
     :title="t(meta.titleKey)"
     :icon="meta.icon"

@@ -211,8 +211,10 @@ onBeforeUnmount(() => {
   border-left: 3px solid rgb(var(--v-theme-primary));
   margin: 0.75em 0;
   padding: 0.25em 1em;
-  color: rgb(var(--v-theme-on-surface-variant));
-  background: rgb(var(--v-theme-surface-variant));
+  /* color: rgb(var(--v-theme-on-surface-variant));
+  background: rgb(var(--v-theme-surface-variant)); */
+  background: rgb(var(--v-theme-on-surface-variant));
+  color: rgb(var(--v-theme-surface-variant));
 }
 
 .prose :deep(a) {
@@ -232,6 +234,8 @@ onBeforeUnmount(() => {
 }
 
 .prose :deep(code) {
+  color: rgb(var(--v-theme-on-surface-variant));
+  
   background: rgb(var(--v-theme-surface-variant));
   border-radius: 4px;
   padding: 0.1em 0.4em;

@@ -485,9 +485,9 @@ const tableMenu = computed(() => ({
     </div>
 
     <!-- 字数统计 -->
-    <div v-if="editor" class="rich-editor__status">
+    <!-- <div v-if="editor" class="rich-editor__status">
       {{ t('editor.charCount.characters', { count: editor.storage.characterCount.characters() }) }}
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -581,7 +581,11 @@ const tableMenu = computed(() => ({
   margin: 8px 0;
   padding-left: 12px;
   border-left: 3px solid rgb(var(--v-theme-primary));
-  color: rgb(var(--v-theme-on-surface), 0.7);
+
+  /* color: rgb(var(--v-theme-on-surface), 0.7); */
+  background: rgb(var(--v-theme-on-surface-variant));
+  
+  color: rgb(var(--v-theme-surface-variant));
 }
 
 /* 代码块的 pre/code 由 CodeBlockView 负责样式，这里排除避免冲突（仅行内 code 生效） */
@@ -593,10 +597,14 @@ const tableMenu = computed(() => ({
 }
 
 .rich-editor__content :deep(.ProseMirror code:not(.code-block__code)) {
+  
+  color: rgb(var(--v-theme-on-surface-variant));
+  background: rgb(var(--v-theme-surface-variant));
+
   padding: 1px 4px;
   border-radius: 4px;
   font-size: 0.9em;
-  background: rgb(var(--v-theme-surface-variant), 0.5);
+  /* background: rgb(var(--v-theme-surface-variant), 0.5); */
 }
 
 .rich-editor__content :deep(.ProseMirror h1) {

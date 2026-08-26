@@ -40,6 +40,12 @@ const props = defineProps({
       return Math.max(MARGIN, window.innerHeight - p.height - MARGIN)
     },
   },
+  /** 是否显示侧边导航栏 */
+  showDrawer: { type: Boolean, default: false },
+  /** 应用栏密度 */
+  appbarDensity: { type: String, default: 'default' },
+  /** 是否显示应用栏扩展区域 */
+  appbarExtended: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['close'])
@@ -57,6 +63,7 @@ const minimized = ref(false)
 const maximized = ref(false)
 const interacting = ref(false)
 const isMobile = ref(false)
+const drawer = ref(false)
 const x = ref(props.x)
 const y = ref(props.y)
 const w = ref(props.width)
@@ -113,10 +120,16 @@ function startDrag(e) {
   // 最大化/移动端全屏状态下不可拖动；最小化时仅剩标题栏，仍可拖动；点击按钮不触发
   if (maximized.value || isMobile.value) return
   if (e.target.closest('button')) return
-  drag = { type: 'move', startX: e.clientX, startY: e.clientY, ox: x.value, oy: y.value }
+  // 兼容触摸事件与鼠标事件
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY
+  drag = { type: 'move', startX: clientX, startY: clientY, ox: x.value, oy: y.value }
   interacting.value = true
-  document.addEventListener('mousemove', onMouseMove)
-  document.addEventListener('mouseup', onMouseUp)
+  // 鼠标事件通过 document 监听器跟踪；触摸事件由模板 @touchmove / @touchend 处理
+  if (!e.touches) {
+    document.addEventListener('mousemove', onMouseMove)
+    document.addEventListener('mouseup', onMouseUp)
+  }
 }
 
 // —— 缩放（右下角手柄）——
@@ -154,6 +167,21 @@ onBeforeUnmount(() => {
   document.removeEventListener('mousemove', onMouseMove)
   document.removeEventListener('mouseup', onMouseUp)
 })
+
+// —— 触摸拖动 ——
+function onTouchMove(e) {
+  if (!drag || drag.type !== 'move') return
+  const touch = e.touches[0]
+  x.value = clamp(drag.ox + (touch.clientX - drag.startX), MARGIN, window.innerWidth - (minimized.value ? MIN_WIDTH : w.value) - MARGIN)
+  y.value = clamp(drag.oy + (touch.clientY - drag.startY), MARGIN, window.innerHeight - BAR_HEIGHT - MARGIN)
+}
+
+function onTouchEnd() {
+  drag = null
+  interacting.value = false
+  document.removeEventListener('touchmove', onTouchMove)
+  document.removeEventListener('touchend', onTouchEnd)
+}
 
 // —— 窗口控制 ——
 function toggleMinimize() {
@@ -193,55 +221,70 @@ function close() {
       :style="windowStyle"
       @mousedown="focusWindow"
     >
-      <!-- 顶部应用栏：左图标+名称，右最小化/最大化/关闭 -->
-      <div class="floating-window__bar" @mousedown.prevent="startDrag">
-        <v-icon :icon="icon" size="small" class="text-primary mr-1" />
-        <span class="text-subtitle-2 font-weight-medium text-truncate">
-          {{ title || $t('floatingWindow.defaultTitle') }}
-        </span>
-        <v-spacer />
-        <!-- 手机上窗口默认全屏，隐藏最小化/最大化按钮 -->
-        <v-tooltip v-if="!isMobile" :text="minimized ? $t('floatingWindow.restore') : $t('floatingWindow.minimize')" >
-          <template #activator="{ props: tipProps }">
-            <v-btn
-              v-bind="tipProps"
-              size="x-small"
-              variant="text"
-              icon
-              @click.stop="toggleMinimize"
-            >
-              <v-icon :icon="minimized ? 'mdi-window-restore' : 'mdi-minus'" size="small" />
-            </v-btn>
-          </template>
-        </v-tooltip>
-        <v-tooltip v-if="!isMobile" :text="maximized ? $t('floatingWindow.restore') : $t('floatingWindow.maximize')" >
-          <template #activator="{ props: tipProps }">
-            <v-btn
-              v-bind="tipProps"
-              size="x-small"
-              variant="text"
-              icon
-              @click.stop="toggleMaximize"
-            >
-              <v-icon :icon="maximized ? 'mdi-window-restore' : 'mdi-window-maximize'" size="small" />
-            </v-btn>
-          </template>
-        </v-tooltip>
-        <v-tooltip :text="$t('floatingWindow.close')" >
-          <template #activator="{ props: tipProps }">
-            <v-btn v-bind="tipProps" size="x-small" variant="text" icon @click.stop="close">
-              <v-icon icon="mdi-window-close" size="small" />
-            </v-btn>
-          </template>
-        </v-tooltip>
-      </div>
+      <v-card rounded="lg" width="100%" height="100%" style="overflow: hidden;">
+        <v-layout style="height: inherit">
+          <v-app-bar
+            class="bg-surface-light"
+            elevation="0"
+            :density="appbarDensity"
+            @mousedown="startDrag"
+            @touchstart="startDrag"
+            @touchmove.prevent="onTouchMove"
+            @touchend="onTouchEnd"
+            @dblclick="toggleMaximize"
+          >
+            <v-app-bar-nav-icon v-if="showDrawer" variant="text" @click.stop="drawer = !drawer" />
 
-      <!-- 内容区域（插槽） -->
-      <div v-show="!minimized" class="floating-window__content">
-        <slot />
-      </div>
+            <v-icon v-if="icon" style="margin-left: 16px;">{{ icon }}</v-icon>
 
-      <!-- 右下角缩放手柄（手机上全屏不可缩放） -->
+            <v-app-bar-title :style="{ marginLeft: icon ? '16px' : '' }">
+              {{ title || $t('floatingWindow.defaultTitle') }}
+            </v-app-bar-title>
+
+            <slot name="appbar_append" />
+
+            <v-btn icon @click="toggleMinimize">
+              <v-icon>{{ minimized ? 'mdi-window-restore' : 'mdi-minus' }}</v-icon>
+              <v-tooltip activator="parent" location="left">{{
+                minimized ? $t('floatingWindow.restore') : $t('floatingWindow.minimize')
+              }}</v-tooltip>
+            </v-btn>
+
+            <v-btn v-show="!isMobile" icon @click="toggleMaximize">
+              <v-icon>{{ maximized ? 'mdi-window-restore' : 'mdi-window-maximize' }}</v-icon>
+              <v-tooltip activator="parent" location="left">{{
+                maximized ? $t('floatingWindow.restore') : $t('floatingWindow.maximize')
+              }}</v-tooltip>
+            </v-btn>
+
+            <v-btn icon @click="close">
+              <v-icon>mdi-close</v-icon>
+              <v-tooltip activator="parent" location="left">{{ $t('floatingWindow.close') }}</v-tooltip>
+            </v-btn>
+
+            <template v-if="appbarExtended" v-slot:extension>
+              <slot name="appbar_extension" />
+            </template>
+          </v-app-bar>
+
+          <v-navigation-drawer
+            v-if="showDrawer"
+            v-model="drawer"
+            :location="isMobile ? 'bottom' : undefined"
+            temporary
+          >
+            <slot name="drawer_list" />
+          </v-navigation-drawer>
+
+          <v-main style="height: 100%;" v-show="!minimized">
+            <slot name="content">
+              <slot />
+            </slot>
+          </v-main>
+        </v-layout>
+      </v-card>
+
+      <!-- 右下角缩放手柄（最小化/全屏/移动端时隐藏） -->
       <div
         v-show="!minimized && !maximized && !isMobile"
         class="floating-window__resize"
@@ -279,22 +322,23 @@ function close() {
   border: none;
 }
 
-/* 顶部应用栏 */
-.floating-window__bar {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  flex: none;
-  height: 36px;
-  padding: 0 4px 0 12px;
-  background: rgb(var(--v-theme-primary), 0.08);
-  border-bottom: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
-  cursor: move;
-  user-select: none;
+/* 右下角缩放手柄 */
+.floating-window__resize {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 18px;
+  height: 18px;
+  cursor: nwse-resize;
+  z-index: 1;
+  background:
+    linear-gradient(135deg, transparent 50%, rgb(var(--v-theme-on-surface), 0.35) 50%);
+  border-radius: 0 0 10px 0;
 }
 
-.floating-window__bar :deep(.v-btn) {
-  cursor: pointer;
+.floating-window__resize:hover {
+  background:
+    linear-gradient(135deg, transparent 50%, rgb(var(--v-theme-primary), 0.6) 50%);
 }
 
 /* 内容区 */
@@ -302,22 +346,6 @@ function close() {
   flex: 1;
   min-height: 0;
   overflow: auto;
-}
-
-/* 右下角缩放手柄 */
-.floating-window__resize {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 16px;
-  height: 16px;
-  cursor: nwse-resize;
-  background: linear-gradient(
-    135deg,
-    transparent 50%,
-    rgb(var(--v-theme-primary), 0.35) 50%
-  );
-  border-radius: 0 0 10px 0;
 }
 
 /* 出现 / 关闭：缩放 + 淡入 */
