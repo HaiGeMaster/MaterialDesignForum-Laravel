@@ -83,6 +83,10 @@ Route::middleware('auth.token')->group(function () {
     Route::get('/admin/overview', [AdminDashboardController::class, 'overview'])
         ->middleware('ability:ability_admin_login');
 
+    // 单图数据：切换图表时间范围时仅查询对应一张表，避免重复跑全量 overview
+    Route::get('/admin/chart', [AdminDashboardController::class, 'chart'])
+        ->middleware('ability:ability_admin_login');
+
     Route::middleware('ability:ability_admin_manage_option')->group(function () {
         Route::put('/admin/options/theme', [AdminOptionController::class, 'updateTheme']);
         Route::get('/admin/options/mail', [AdminOptionController::class, 'mail']);
@@ -97,93 +101,22 @@ Route::middleware('auth.token')->group(function () {
         Route::put('/admin/options/update-source', [AdminOptionController::class, 'updateUpdateSource']);
     });
 
-    // 后台模块数据预览：每个模块对应自身的管理权限中间件
-    Route::get('/admin/modules/{module:topics}', [AdminModuleController::class, 'index'])
-        ->middleware('ability:ability_admin_manage_topic');
-    Route::get('/admin/modules/{module:questions}', [AdminModuleController::class, 'index'])
-        ->middleware('ability:ability_admin_manage_question');
-    Route::get('/admin/modules/{module:answers}', [AdminModuleController::class, 'index'])
-        ->middleware('ability:ability_admin_manage_answer');
-    Route::get('/admin/modules/{module:articles}', [AdminModuleController::class, 'index'])
-        ->middleware('ability:ability_admin_manage_article');
-    Route::get('/admin/modules/{module:comments}', [AdminModuleController::class, 'index'])
-        ->middleware('ability:ability_admin_manage_comment');
-    Route::get('/admin/modules/{module:replies}', [AdminModuleController::class, 'index'])
-        ->middleware('ability:ability_admin_manage_reply');
-    Route::get('/admin/modules/{module:user-groups}', [AdminModuleController::class, 'index'])
+    // 后台模块数据预览 / 详情 / 编辑 / 删除：所有模块共用同一路由
+    // 权限由 ability:module:* 中间件按 {module} 路由参数动态映射到对应 ability_admin_manage_* 字段。
+    // 注意：不能使用 {module:topics} 这类写法——Laravel 13 中 {param:value} 表示隐式模型绑定字段，
+    // 且同 URI 的多个路由会在 RouteCollection 中互相覆盖，导致只有最后一条生效、权限校验错乱。
+    Route::get('/admin/modules/{module}', [AdminModuleController::class, 'index'])
+        ->middleware('ability:module:index');
+    Route::get('/admin/modules/{module}/{id}', [AdminModuleController::class, 'show'])
+        ->where('id', '[0-9]+')->middleware('ability:module:show');
+    Route::put('/admin/modules/{module}/{id}', [AdminModuleController::class, 'update'])
+        ->where('id', '[0-9]+')->middleware('ability:module:update');
+    Route::delete('/admin/modules/{module}/{id}', [AdminModuleController::class, 'destroy'])
+        ->where('id', '[0-9]+')->middleware('ability:module:destroy');
+
+    // 创建接口：仅用户组模块开放（其他模块创建走前台）
+    Route::post('/admin/modules/user-groups', [AdminModuleController::class, 'store'])
         ->middleware('ability:ability_admin_manage_user_group');
-    Route::get('/admin/modules/{module:users}', [AdminModuleController::class, 'index'])
-        ->middleware('ability:ability_admin_manage_user');
-    Route::get('/admin/modules/{module:reports}', [AdminModuleController::class, 'index'])
-        ->middleware('ability:ability_admin_manage_report');
-
-    // 后台模块单条详情（用于举报对话框展示举报对象内容等）
-    Route::get('/admin/modules/{module:topics}/{id}', [AdminModuleController::class, 'show'])
-        ->where('id', '[0-9]+')->middleware('ability:ability_admin_manage_topic');
-    Route::get('/admin/modules/{module:questions}/{id}', [AdminModuleController::class, 'show'])
-        ->where('id', '[0-9]+')->middleware('ability:ability_admin_manage_question');
-    Route::get('/admin/modules/{module:answers}/{id}', [AdminModuleController::class, 'show'])
-        ->where('id', '[0-9]+')->middleware('ability:ability_admin_manage_answer');
-    Route::get('/admin/modules/{module:articles}/{id}', [AdminModuleController::class, 'show'])
-        ->where('id', '[0-9]+')->middleware('ability:ability_admin_manage_article');
-    Route::get('/admin/modules/{module:comments}/{id}', [AdminModuleController::class, 'show'])
-        ->where('id', '[0-9]+')->middleware('ability:ability_admin_manage_comment');
-    Route::get('/admin/modules/{module:replies}/{id}', [AdminModuleController::class, 'show'])
-        ->where('id', '[0-9]+')->middleware('ability:ability_admin_manage_reply');
-    Route::get('/admin/modules/{module:user-groups}/{id}', [AdminModuleController::class, 'show'])
-        ->where('id', '[0-9]+')->middleware('ability:ability_admin_manage_user_group');
-    Route::get('/admin/modules/{module:users}/{id}', [AdminModuleController::class, 'show'])
-        ->where('id', '[0-9]+')->middleware('ability:ability_admin_manage_user');
-    Route::get('/admin/modules/{module:reports}/{id}', [AdminModuleController::class, 'show'])
-        ->where('id', '[0-9]+')->middleware('ability:ability_admin_manage_report');
-
-    // 后台模块单条编辑 / 删除：每个模块用对应的 ability 中间件
-    // reports 模块暂时只读（路由也注册但 controller 内会拒绝），便于前端统一处理
-    Route::put('/admin/modules/{module:topics}/{id}', [AdminModuleController::class, 'update'])
-        ->where('id', '[0-9]+')->middleware('ability:ability_admin_manage_topic');
-    Route::delete('/admin/modules/{module:topics}/{id}', [AdminModuleController::class, 'destroy'])
-        ->where('id', '[0-9]+')->middleware('ability:ability_admin_manage_topic');
-
-    Route::put('/admin/modules/{module:questions}/{id}', [AdminModuleController::class, 'update'])
-        ->where('id', '[0-9]+')->middleware('ability:ability_admin_manage_question');
-    Route::delete('/admin/modules/{module:questions}/{id}', [AdminModuleController::class, 'destroy'])
-        ->where('id', '[0-9]+')->middleware('ability:ability_admin_manage_question');
-
-    Route::put('/admin/modules/{module:answers}/{id}', [AdminModuleController::class, 'update'])
-        ->where('id', '[0-9]+')->middleware('ability:ability_admin_manage_answer');
-    Route::delete('/admin/modules/{module:answers}/{id}', [AdminModuleController::class, 'destroy'])
-        ->where('id', '[0-9]+')->middleware('ability:ability_admin_manage_answer');
-
-    Route::put('/admin/modules/{module:articles}/{id}', [AdminModuleController::class, 'update'])
-        ->where('id', '[0-9]+')->middleware('ability:ability_admin_manage_article');
-    Route::delete('/admin/modules/{module:articles}/{id}', [AdminModuleController::class, 'destroy'])
-        ->where('id', '[0-9]+')->middleware('ability:ability_admin_manage_article');
-
-    Route::put('/admin/modules/{module:comments}/{id}', [AdminModuleController::class, 'update'])
-        ->where('id', '[0-9]+')->middleware('ability:ability_admin_manage_comment');
-    Route::delete('/admin/modules/{module:comments}/{id}', [AdminModuleController::class, 'destroy'])
-        ->where('id', '[0-9]+')->middleware('ability:ability_admin_manage_comment');
-
-    Route::put('/admin/modules/{module:replies}/{id}', [AdminModuleController::class, 'update'])
-        ->where('id', '[0-9]+')->middleware('ability:ability_admin_manage_reply');
-    Route::delete('/admin/modules/{module:replies}/{id}', [AdminModuleController::class, 'destroy'])
-        ->where('id', '[0-9]+')->middleware('ability:ability_admin_manage_reply');
-
-    Route::post('/admin/modules/{module:user-groups}', [AdminModuleController::class, 'store'])
-        ->middleware('ability:ability_admin_manage_user_group');
-    Route::put('/admin/modules/{module:user-groups}/{id}', [AdminModuleController::class, 'update'])
-        ->where('id', '[0-9]+')->middleware('ability:ability_admin_manage_user_group');
-    Route::delete('/admin/modules/{module:user-groups}/{id}', [AdminModuleController::class, 'destroy'])
-        ->where('id', '[0-9]+')->middleware('ability:ability_admin_manage_user_group');
-
-    Route::put('/admin/modules/{module:users}/{id}', [AdminModuleController::class, 'update'])
-        ->where('id', '[0-9]+')->middleware('ability:ability_admin_manage_user');
-    Route::delete('/admin/modules/{module:users}/{id}', [AdminModuleController::class, 'destroy'])
-        ->where('id', '[0-9]+')->middleware('ability:ability_admin_manage_user');
-
-    // 举报处理：仅允许更新处理状态，不支持删除
-    Route::put('/admin/modules/{module:reports}/{id}', [AdminModuleController::class, 'update'])
-        ->where('id', '[0-9]+')->middleware('ability:ability_admin_manage_report');
 });
 
 // 批量查询当前用户对若干目标的关注状态（未登录时全部返回 false）

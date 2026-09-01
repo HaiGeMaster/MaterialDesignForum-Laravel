@@ -164,12 +164,27 @@ onMounted(() => {
       <v-col cols="12" md="10" lg="8">
         <!-- 设置选项列表 -->
         <template v-if="section === 'list'">
-          <v-card rounded="lg" prepend-icon="mdi-cog-outline" :title="$t('settings.title')">
+          <v-card rounded="lg" >
+
+
+            <v-toolbar :title="$t('settings.title')">
+                <template #prepend>
+                <v-btn icon variant="text" @click="router.back()">
+                    <v-icon>mdi-arrow-left</v-icon>
+                    <v-tooltip activator="parent" location="right">
+                    {{ $t('common.back') }}
+                    </v-tooltip>
+                </v-btn>
+                </template>
+                <template #append>
+                </template>
+            </v-toolbar>
+
             <!-- <v-card-title >
               <v-icon icon="mdi-cog-outline" />
               {{ $t('settings.title') }}
             </v-card-title> -->
-            <v-divider />
+            <!-- <v-divider /> -->
             <v-list>
               <v-list-item
                 prepend-icon="mdi-shield-lock"
@@ -195,7 +210,21 @@ onMounted(() => {
         <!-- 第三方账号绑定 -->
         <template v-else-if="section === 'oauth'">
           <v-card rounded="lg" >
-            <v-card-title>
+
+            <v-toolbar :title="$t('oauth.bindingsTitle')">
+                <template #prepend>
+                <v-btn icon variant="text" @click="section = 'list'">
+                    <v-icon>mdi-arrow-left</v-icon>
+                    <v-tooltip activator="parent" location="right">
+                    {{ $t('common.back') }}
+                    </v-tooltip>
+                </v-btn>
+                </template>
+                <template #append>
+                </template>
+            </v-toolbar>
+
+            <!-- <v-card-title>
               <v-btn
                 icon="mdi-arrow-left"
                 size="small"
@@ -206,7 +235,7 @@ onMounted(() => {
               <v-icon icon="mdi-account-network-outline" class="mr-2" />
               {{ $t('oauth.bindingsTitle') }}
             </v-card-title>
-            <v-divider />
+            <v-divider /> -->
             <v-card-text>
               <v-progress-linear v-if="oauthLoading" indeterminate color="primary" class="mb-4" />
 
@@ -261,7 +290,21 @@ onMounted(() => {
         <!-- 修改密码 -->
         <template v-else>
           <v-card rounded="lg" >
-            <v-card-title>
+
+            <v-toolbar :title="$t('settings.changePassword')">
+                <template #prepend>
+                <v-btn icon variant="text" @click="section = 'list'">
+                    <v-icon>mdi-arrow-left</v-icon>
+                    <v-tooltip activator="parent" location="right">
+                    {{ $t('common.back') }}
+                    </v-tooltip>
+                </v-btn>
+                </template>
+                <template #append>
+                </template>
+            </v-toolbar>
+
+            <!-- <v-card-title>
               <v-btn
                 icon="mdi-arrow-left"
                 size="small"
@@ -272,7 +315,7 @@ onMounted(() => {
               <v-icon icon="mdi-shield-lock" class="mr-2" />
               {{ $t('settings.changePassword') }}
             </v-card-title>
-            <v-divider />
+            <v-divider /> -->
             <v-card-text>
               <v-form ref="passwordFormRef" @submit.prevent="handleUpdatePassword">
                 <v-text-field

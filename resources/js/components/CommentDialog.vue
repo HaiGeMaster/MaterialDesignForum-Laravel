@@ -116,7 +116,7 @@ watch(
     <v-card rounded="lg" >
       <!-- 头部：标题 + 排序 + 关闭 -->
       <v-toolbar :title="`${$t('commentDialog.title')} (${total})`">
-        <template #prepend>
+        <!-- <template #prepend>
           <v-btn icon variant="text" @click="store.close()">
             <v-icon>
               mdi-close
@@ -125,7 +125,7 @@ watch(
               {{ $t('common.cancel') }}
             </v-tooltip>
           </v-btn>
-        </template>
+        </template> -->
         <template v-slot:append>
           <v-menu :close-on-content-click="true" >
             <template v-slot:activator="{ props: menuProps }">
@@ -148,6 +148,16 @@ watch(
               </v-list-item>
             </v-list>
           </v-menu>
+
+
+          <v-btn icon variant="text" @click="store.close()">
+            <v-icon>
+              mdi-close
+            </v-icon>
+            <v-tooltip activator="parent" location="left">
+              {{ $t('common.cancel') }}
+            </v-tooltip>
+          </v-btn>
         </template>
       </v-toolbar>
 

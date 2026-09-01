@@ -14,6 +14,7 @@ use App\Models\UserGroup;
 use App\Services\NotificationService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 /**
  * 管理后台通用模块列表接口
@@ -42,7 +43,7 @@ class AdminModuleController extends Controller
         'topics' => [
             'model'        => Topic::class,
             'search'       => ['name', 'description'],
-            'sortable'     => ['topic_id', 'user_id', 'follower_count', 'article_count', 'question_count', 'create_time'],
+            'sortable'     => ['topic_id', 'user_id', 'follower_count', 'article_count', 'question_count', 'create_time', 'update_time'],
             'relations'    => [],
             'soft_delete'  => true,
             'update_fields' => ['name', 'description'],
@@ -51,7 +52,7 @@ class AdminModuleController extends Controller
         'questions' => [
             'model'        => Question::class,
             'search'       => ['title'],
-            'sortable'     => ['question_id', 'user_id', 'answer_count', 'vote_count', 'create_time', 'last_answer_time'],
+            'sortable'     => ['question_id', 'user_id', 'comment_count', 'answer_count', 'follower_count', 'vote_count', 'vote_up_count', 'vote_down_count', 'create_time', 'last_answer_time', 'update_time'],
             'relations'    => [],
             'soft_delete' => true,
             'update_fields' => ['title', 'content_markdown', 'content_rendered'],
@@ -60,7 +61,7 @@ class AdminModuleController extends Controller
         'answers' => [
             'model'        => Answer::class,
             'search'       => ['content_markdown'],
-            'sortable'     => ['answer_id', 'question_id', 'user_id', 'vote_count', 'create_time'],
+            'sortable'     => ['answer_id', 'question_id', 'user_id', 'comment_count', 'vote_count', 'vote_up_count', 'vote_down_count', 'create_time', 'update_time'],
             'relations'    => [],
             'soft_delete' => true,
             'update_fields' => ['content_markdown', 'content_rendered'],
@@ -69,7 +70,7 @@ class AdminModuleController extends Controller
         'articles' => [
             'model'        => Article::class,
             'search'       => ['title'],
-            'sortable'     => ['article_id', 'user_id', 'comment_count', 'vote_count', 'create_time'],
+            'sortable'     => ['article_id', 'user_id', 'comment_count', 'follower_count', 'vote_count', 'vote_up_count', 'vote_down_count', 'create_time', 'update_time'],
             'relations'    => [],
             'soft_delete' => true,
             'update_fields' => ['title', 'content_markdown', 'content_rendered'],
@@ -78,7 +79,7 @@ class AdminModuleController extends Controller
         'comments' => [
             'model'        => Comment::class,
             'search'       => ['content'],
-            'sortable'     => ['comment_id', 'user_id', 'reply_count', 'vote_count', 'create_time'],
+            'sortable'     => ['comment_id', 'user_id', 'reply_count', 'vote_count', 'vote_up_count', 'vote_down_count', 'create_time', 'update_time'],
             'relations'    => [],
             'soft_delete' => true,
             'update_fields' => ['content'],
@@ -87,7 +88,7 @@ class AdminModuleController extends Controller
         'replies' => [
             'model'        => Reply::class,
             'search'       => ['content'],
-            'sortable'     => ['reply_id', 'user_id', 'reply_count', 'vote_count', 'create_time'],
+            'sortable'     => ['reply_id', 'user_id', 'reply_count', 'vote_count', 'vote_up_count', 'vote_down_count', 'create_time', 'update_time'],
             'relations'    => [],
             'soft_delete' => true,
             'update_fields' => ['content'],
@@ -96,7 +97,7 @@ class AdminModuleController extends Controller
         'user-groups' => [
             'model'        => UserGroup::class,
             'search'       => ['user_group_name', 'user_group_description'],
-            'sortable'     => ['user_group_id', 'user_group_user_count', 'is_admin', 'create_time'],
+            'sortable'     => ['user_group_id', 'user_group_user_count', 'is_admin', 'create_time', 'update_time'],
             'relations'    => [],
             'soft_delete' => true,
             'update_fields' => [
@@ -139,7 +140,7 @@ class AdminModuleController extends Controller
         'users' => [
             'model'        => User::class,
             'search'       => ['username', 'email'],
-            'sortable'     => ['user_id', 'username', 'follower_count', 'create_time', 'last_login_time'],
+            'sortable'     => ['user_id', 'username', 'follower_count', 'followee_count', 'following_topic_count', 'following_article_count', 'following_question_count', 'article_count', 'question_count', 'answer_count', 'comment_count', 'reply_count', 'notification_unread', 'create_time', 'last_login_time', 'update_time', 'disable_time'],
             'relations'    => ['userGroup'],
             'soft_delete' => false,
             'update_fields' => ['username', 'email', 'user_group_id', 'headline', 'bio', 'blog', 'company', 'location', 'language'],
@@ -225,12 +226,28 @@ class AdminModuleController extends Controller
             }
         }
 
+        // replies 模块额外预取“回复目标用户”的用户名（replyable_user_id）
+        $replyableUsernames = [];
+        if ($module === 'replies') {
+            $replyableUserIds = $collection->pluck('replyable_user_id')->filter()->unique()->values()->all();
+            if (! empty($replyableUserIds)) {
+                $replyableUsernames = User::query()
+                    ->whereIn('user_id', $replyableUserIds)
+                    ->pluck('username', 'user_id');
+            }
+        }
+
         $items = $collection->map(function ($item) use ($module, $usernames) {
             $array = $item->toArray();
 
             // 把预取到的 username 附到每行
             if ($module !== 'user-groups' && ! empty($array['user_id'])) {
                 $array['username'] = $usernames[$array['user_id']] ?? null;
+            }
+
+            // replies 模块附上回复目标用户的用户名
+            if ($module === 'replies' && ! empty($array['replyable_user_id'])) {
+                $array['replyable_username'] = $replyableUsernames[$array['replyable_user_id']] ?? null;
             }
 
             // users 模块把关联用户组名扁平化
@@ -395,7 +412,7 @@ class AdminModuleController extends Controller
 
         $resultText = $newState === 1
             ? '您的举报已处理：违规内容已处理'
-            : '您的举报已处理：未发现违规，不予处理';
+            : __('messages.http_adminmodule_1');
 
         // 根据举报对象类型补齐通知上下文（用于前端跳转）
         $context = [

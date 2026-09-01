@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useTheme } from 'vuetify'
 import { useI18n } from 'vue-i18n'
 import { BUILTIN_THEMES } from '../plugins/vuetify'
@@ -8,7 +8,7 @@ import { availableThemes, defaultTheme, resolveTheme } from '../themeConfig'
 const theme = useTheme()
 const { t } = useI18n()
 
-const dialog = ref(false)
+const menu = ref(false)
 
 // 当前用户存储的主题偏好（可能是 'system'）
 const storedTheme = ref(localStorage.getItem('mdforum-theme') || defaultTheme.value || 'system')
@@ -51,7 +51,7 @@ function selectTheme(name) {
   } else {
     theme.change(actual)
   }
-  dialog.value = false
+  menu.value = false
 }
 
 // 监听系统主题变化（仅在 system 模式下生效）
@@ -81,68 +81,34 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <!-- 触发按钮 -->
-  <v-btn
-    icon
-    variant="text"
-    :title="$t('appBar.switchTheme')"
-    @click="dialog = true"
-  >
-    <v-icon :icon="currentIcon" />
-  </v-btn>
-
-  <!-- 主题选择对话框 -->
-  <v-dialog v-model="dialog" max-width="480" scrollable>
-    <v-card rounded="lg" >
-      <v-card-title class="d-flex align-center pa-4 pb-2">
-        <v-icon icon="mdi-palette-outline" class="me-2" />
-        {{ $t('themeDialog.title') }}
-      </v-card-title>
-
-      <v-card-text class="pa-3 pt-1">
-        <v-row dense>
-          <!-- System 选项 -->
-          <v-col cols="6" sm="4">
-            <v-card
-              :variant="storedTheme === 'system' ? 'tonal' : 'outlined'"
-              :color="storedTheme === 'system' ? 'primary' : undefined"
-              class="theme-card cursor-pointer"
-              @click="selectTheme('system')"
-            >
-              <v-card-text class="text-center pa-4">
-                <v-icon size="32" class="mb-2">mdi-theme-light-dark</v-icon>
-                <div class="text-caption font-weight-medium">{{ $t('themeDialog.system') }}</div>
-              </v-card-text>
-            </v-card>
-          </v-col>
-
-          <!-- 各主题选项 -->
-          <v-col v-for="th in themeList" :key="th.name" cols="6" sm="4">
-            <v-theme-provider :theme="th.name" reset>
-              <v-card
-                :variant="storedTheme === th.name ? 'tonal' : 'outlined'"
-                :color="storedTheme === th.name ? 'primary' : undefined"
-                class="theme-card cursor-pointer"
-                @click="selectTheme(th.name)"
-              >
-                <v-card-text class="text-center pa-4">
-                  <v-icon size="32" class="mb-2">{{ th.icon }}</v-icon>
-                  <div class="text-caption font-weight-medium">{{ th.label }}</div>
-                </v-card-text>
-              </v-card>
-            </v-theme-provider>
-          </v-col>
-        </v-row>
-      </v-card-text>
-    </v-card>
-  </v-dialog>
+  <v-menu min-width="200">
+    <template #activator="{ props }">
+      <v-btn
+        icon
+        variant="text"
+        v-bind="props"
+        :title="$t('appBar.switchTheme')"
+      >
+        <v-icon :icon="currentIcon" />
+      </v-btn>
+    </template>
+    <v-list density="compact" nav>
+      <!-- System 选项 -->
+      <v-list-item
+        :active="storedTheme === 'system'"
+        :prepend-icon="storedTheme === 'system' ? 'mdi-check' : 'mdi-theme-light-dark'"
+        :title="$t('themeDialog.system')"
+        @click="selectTheme('system')"
+      />
+      <!-- 各主题选项 -->
+      <v-list-item
+        v-for="th in themeList"
+        :key="th.name"
+        :active="storedTheme === th.name"
+        :prepend-icon="storedTheme === th.name ? 'mdi-check' : th.icon"
+        :title="th.label"
+        @click="selectTheme(th.name)"
+      />
+    </v-list>
+  </v-menu>
 </template>
-
-<style scoped>
-.theme-card {
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-.theme-card:hover {
-  transform: translateY(-2px);
-}
-</style>

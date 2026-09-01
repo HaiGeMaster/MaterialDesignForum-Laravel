@@ -160,6 +160,8 @@ abstract class Controller
 
         $authors = User::query()
             ->whereIn($userKeyColumn, $authorIds)
+            // 预加载用户组（仅取前端徽章所需的标识字段），供 creator.user_group 使用
+            ->with('userGroup:user_group_id,user_group_name,user_group_icon,user_group_color,user_group_icon_show')
             ->get()
             ->keyBy($userKeyColumn);
 

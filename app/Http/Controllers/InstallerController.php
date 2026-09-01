@@ -42,7 +42,7 @@ class InstallerController extends Controller
         // status() 方法例外：它本身就是为了查询安装状态，必须对未安装/已安装两种情况都返回
         $action = request()->route()?->getActionMethod();
         if ($action !== 'status' && file_exists($this->lockPath())) {
-            abort(403, '系统已安装，禁止再次执行安装程序。');
+            abort(403, __('messages.http_installer_1'));
         }
     }
 
@@ -85,49 +85,49 @@ class InstallerController extends Controller
 
         $checks = [
             'php_version' => [
-                'label'   => 'PHP 版本 ≥ 8.2',
+                'label'   => __('messages.http_installer_2'),
                 'pass'     => version_compare(PHP_VERSION, '8.2.0', '>='),
                 'status'  => 'version',
                 'detail'  => 'PHP ' . PHP_VERSION,
             ],
             'pdo_mysql' => [
-                'label'   => 'PDO MySQL 扩展',
+                'label'   => __('messages.http_installer_3'),
                 'pass'     => extension_loaded('pdo_mysql'),
                 'status'  => extension_loaded('pdo_mysql') ? 'enabled' : 'disabled',
                 'detail'  => '',
             ],
             'openssl' => [
-                'label'   => 'OpenSSL 扩展',
+                'label'   => __('messages.http_installer_4'),
                 'pass'     => extension_loaded('openssl'),
                 'status'  => extension_loaded('openssl') ? 'enabled' : 'disabled',
                 'detail'  => '',
             ],
             'mbstring' => [
-                'label'   => 'Mbstring 扩展',
+                'label'   => __('messages.http_installer_5'),
                 'pass'     => extension_loaded('mbstring'),
                 'status'  => extension_loaded('mbstring') ? 'enabled' : 'disabled',
                 'detail'  => '',
             ],
             'fileinfo' => [
-                'label'   => 'Fileinfo 扩展',
+                'label'   => __('messages.http_installer_6'),
                 'pass'     => extension_loaded('fileinfo'),
                 'status'  => extension_loaded('fileinfo') ? 'enabled' : 'disabled',
                 'detail'  => '',
             ],
             'env_writable' => [
-                'label'   => '.env 文件可写',
+                'label'   => __('messages.http_installer_7'),
                 'pass'     => $envReady,
                 'status'  => $envReady ? 'writable' : 'not_writable',
                 'detail'  => '',
             ],
             'storage_writable' => [
-                'label'   => 'storage 目录可写',
+                'label'   => __('messages.http_installer_8'),
                 'pass'     => is_writable(storage_path()),
                 'status'  => is_writable(storage_path()) ? 'writable' : 'not_writable',
                 'detail'  => '',
             ],
             'bootstrap_cache_writable' => [
-                'label'   => 'bootstrap/cache 目录可写',
+                'label'   => __('messages.http_installer_9'),
                 'pass'     => is_writable(base_path('bootstrap/cache')),
                 'status'  => is_writable(base_path('bootstrap/cache')) ? 'writable' : 'not_writable',
                 'detail'  => '',
@@ -166,7 +166,7 @@ class InstallerController extends Controller
             $pdo->exec("SELECT 1");
         } catch (PDOException $e) {
             return response()->json([
-                'message' => '数据库连接失败：' . $e->getMessage(),
+                'message' => __('messages.http_installer_10') . $e->getMessage(),
             ], 422);
         }
 
@@ -179,7 +179,7 @@ class InstallerController extends Controller
             'DB_PASSWORD'    => $data['password'] ?? '',
         ]);
 
-        return response()->json(['message' => '数据库连接成功，配置已保存。']);
+        return response()->json(['message' => __('messages.http_installer_11')]);
     }
 
     /**
@@ -228,7 +228,7 @@ class InstallerController extends Controller
 
         $this->updateEnv($env);
 
-        return response()->json(['message' => '应用配置已保存。']);
+        return response()->json(['message' => __('messages.http_installer_12')]);
     }
 
     /**
@@ -269,7 +269,7 @@ class InstallerController extends Controller
                 ->exists();
             if ($exists) {
                 return response()->json([
-                    'message' => '管理员账号或邮箱已存在，请更换后重试。',
+                    'message' => __('messages.http_installer_13'),
                 ], 422);
             }
 
@@ -316,7 +316,7 @@ class InstallerController extends Controller
             Artisan::call('route:clear');
 
             return response()->json([
-                'message'   => '安装成功！请使用刚才的管理员账号登录。',
+                'message'   => __('messages.http_installer_14'),
                 'admin'     => [
                     'username' => $user->username,
                     'email'    => $user->email,
@@ -324,7 +324,7 @@ class InstallerController extends Controller
             ]);
         } catch (Throwable $e) {
             return response()->json([
-                'message' => '安装失败：' . $e->getMessage(),
+                'message' => __('messages.http_installer_15') . $e->getMessage(),
                 'trace'   => $e->getTraceAsString(),
             ], 500);
         }
@@ -524,7 +524,7 @@ class InstallerController extends Controller
 
         foreach ($values as $key => $value) {
             if (! in_array($key, self::ENV_KEYS, true)) {
-                throw new RuntimeException("不允许写入的 .env 键：{$key}");
+                throw new RuntimeException(__('messages.http_installer_16', ['key' => $key]));
             }
 
             // 值含空格或特殊字符时用双引号包裹
@@ -544,7 +544,7 @@ class InstallerController extends Controller
         }
 
         if (file_put_contents($path, $content, LOCK_EX) === false) {
-            throw new RuntimeException("无法写入 .env 文件：{$path}");
+            throw new RuntimeException(__('messages.http_installer_17', ['path' => $path]));
         }
     }
 

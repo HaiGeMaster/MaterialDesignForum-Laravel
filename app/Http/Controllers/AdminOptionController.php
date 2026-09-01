@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Http;
 
 class AdminOptionController extends Controller
 {
+    // private const DEFAULT_UPDATE_SOURCE = 'https://www.xbedrock.com/version.json';
+    private const DEFAULT_UPDATE_SOURCE = 'http://localhost:8000/version.json';
+
     private const THEME_DEFAULTS = [
         'theme' => 'light',
         'default_theme' => 'light',
@@ -226,29 +229,20 @@ class AdminOptionController extends Controller
     public function checkUpdate()
     {
         $current = (string) config('app.version', '1.0.0');
-        $source = (string) DB::table('settings')->where('name', 'update_source')->value('value');
-
-        if ($source === '') {
-            return response()->json([
-                'is_update' => false,
-                'source_configured' => false,
-                'check_failed' => false,
-                'current_version' => $current,
-                'latest_version' => null,
-                'download_url' => null,
-            ]);
-        }
+        $source = $this->effectiveUpdateSource();
 
         try {
             $payload = Http::timeout(8)->acceptJson()->get($source)->throw()->json();
         } catch (\Throwable) {
             return response()->json([
                 'is_update' => false,
-                'source_configured' => true,
                 'check_failed' => true,
                 'current_version' => $current,
                 'latest_version' => null,
                 'download_url' => null,
+                'changelog' => '',
+                'source' => $source,
+                'is_custom_source' => $this->customUpdateSource() !== '',
             ]);
         }
 
@@ -258,19 +252,21 @@ class AdminOptionController extends Controller
 
         return response()->json([
             'is_update' => $latest !== '' && version_compare($latest, $current, '>'),
-            'source_configured' => true,
             'check_failed' => false,
             'current_version' => $current,
             'latest_version' => $latest !== '' ? $latest : null,
             'download_url' => $downloadUrl !== '' ? $downloadUrl : null,
             'changelog' => $changelog,
+            'source' => $source,
+            'is_custom_source' => $this->customUpdateSource() !== '',
         ]);
     }
 
     public function updateSource()
     {
         return response()->json([
-            'update_source' => (string) DB::table('settings')->where('name', 'update_source')->value('value'),
+            'update_source' => $this->effectiveUpdateSource(),
+            'is_custom' => $this->customUpdateSource() !== '',
         ]);
     }
 
@@ -280,15 +276,33 @@ class AdminOptionController extends Controller
             'update_source' => ['nullable', 'url', 'max:500'],
         ]);
 
+        $value = (string) ($validated['update_source'] ?? '');
+        // 与默认值相同视为不保存自定义值，等价于"使用默认源"
+        if ($value === self::DEFAULT_UPDATE_SOURCE) {
+            $value = '';
+        }
+
         DB::table('settings')->updateOrInsert(
             ['name' => 'update_source'],
-            ['value' => (string) ($validated['update_source'] ?? '')],
+            ['value' => $value],
         );
 
         return response()->json([
             'is_set' => true,
-            'update_source' => (string) ($validated['update_source'] ?? ''),
+            'update_source' => $this->effectiveUpdateSource(),
+            'is_custom' => $value !== '',
         ]);
+    }
+
+    private function customUpdateSource(): string
+    {
+        return (string) DB::table('settings')->where('name', 'update_source')->value('value');
+    }
+
+    private function effectiveUpdateSource(): string
+    {
+        $custom = $this->customUpdateSource();
+        return $custom !== '' ? $custom : self::DEFAULT_UPDATE_SOURCE;
     }
 
     private function themeData(): array

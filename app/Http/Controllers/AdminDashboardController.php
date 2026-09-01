@@ -73,6 +73,29 @@ class AdminDashboardController extends Controller
         ]);
     }
 
+    // 单图数据接口：切换时间范围时只查询当前图表对应的一张表，避免重复跑全量 overview。
+    public function chart(Request $request)
+    {
+        $key = $request->query('key');
+        if (! array_key_exists($key, self::TABLES)) {
+            return response()->json(['error' => 'invalid_key'], 400);
+        }
+
+        [$start, $end] = $this->resolveRange($request->query('range', 'last_7_days'));
+
+        $query = DB::table($key)
+            ->selectRaw('DATE(create_time) as date, COUNT(*) as count')
+            ->whereBetween('create_time', [$start, $end]);
+        if ($key !== 'user') {
+            $query->whereNull('delete_time');
+        }
+        $daily = $query->groupByRaw('DATE(create_time)')->pluck('count', 'date');
+
+        return response()->json([
+            'recent' => $this->fillDailyCounts($daily, $start, $end),
+        ]);
+    }
+
     private function resolveRange(string $range): array
     {
         $today = Carbon::today();

@@ -31,7 +31,7 @@ function select(provider) {
         v-for="provider in providers"
         :key="provider"
         icon
-        variant="outlined"
+        variant="text"
         size="large"
         :title="items[provider]?.label || provider"
         :aria-label="items[provider]?.label || provider"

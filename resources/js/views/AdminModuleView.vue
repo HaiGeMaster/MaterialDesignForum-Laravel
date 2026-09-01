@@ -134,89 +134,203 @@ const COLUMN_PRESETS = {
 function makeHeaders() {
   const m = moduleName.value
   if (!m) return []
+  // 用户组权限列：标题复用 UserGroupDialog 的权限翻译 key（userGroupDialog.fields.*）
+  const ability = (key, title) => ({ key, title, align: 'center', sortable: false, width: '88px' })
+  const timeLimit = (key, title) => ({ key, title, align: 'end', sortable: false, width: '96px' })
+
   const def = ({
     topics: [
       { key: 'topic_id', title: 'admin.fields.id', align: 'start', sortable: true, width: '80px' },
       { key: 'name', title: 'admin.fields.topicName', align: 'start', sortable: false },
       { key: 'username', title: 'admin.fields.creator', align: 'start', sortable: false },
-      { key: 'follower_count', title: 'admin.fields.followers', align: 'end', sortable: true, width: '100px' },
-      { key: 'article_count', title: 'admin.fields.articles', align: 'end', sortable: true, width: '100px' },
-      { key: 'question_count', title: 'admin.fields.questions', align: 'end', sortable: true, width: '100px' },
-      { key: 'create_time', title: 'admin.fields.createdAt', align: 'end', sortable: true, width: '170px' },
+      { key: 'description', title: 'admin.fields.description', align: 'start', sortable: false },
+      { key: 'article_count', title: 'admin.fields.articles', align: 'end', sortable: true, width: '90px' },
+      { key: 'question_count', title: 'admin.fields.questions', align: 'end', sortable: true, width: '90px' },
+      { key: 'follower_count', title: 'admin.fields.followers', align: 'end', sortable: true, width: '90px' },
+      { key: 'create_time', title: 'admin.fields.createdAt', align: 'end', sortable: true, width: '160px' },
+      { key: 'update_time', title: 'admin.fields.updatedAt', align: 'end', sortable: true, width: '160px' },
       COLUMN_PRESETS.actions,
     ],
     questions: [
       { key: 'question_id', title: 'admin.fields.id', align: 'start', sortable: true, width: '80px' },
       { key: 'title', title: 'admin.fields.title', align: 'start', sortable: false },
       { key: 'username', title: 'admin.fields.creator', align: 'start', sortable: false },
-      { key: 'answer_count', title: 'admin.fields.answers', align: 'end', sortable: true, width: '100px' },
-      { key: 'vote_count', title: 'admin.fields.votes', align: 'end', sortable: true, width: '100px' },
-      { key: 'create_time', title: 'admin.fields.createdAt', align: 'end', sortable: true, width: '170px' },
+      { key: 'comment_count', title: 'admin.fields.comments', align: 'end', sortable: true, width: '90px' },
+      { key: 'answer_count', title: 'admin.fields.answers', align: 'end', sortable: true, width: '90px' },
+      { key: 'follower_count', title: 'admin.fields.followers', align: 'end', sortable: true, width: '90px' },
+      { key: 'vote_count', title: 'admin.fields.votes', align: 'end', sortable: true, width: '90px' },
+      { key: 'vote_up_count', title: 'admin.fields.voteUps', align: 'end', sortable: true, width: '90px' },
+      { key: 'vote_down_count', title: 'admin.fields.voteDowns', align: 'end', sortable: true, width: '90px' },
+      { key: 'create_time', title: 'admin.fields.createdAt', align: 'end', sortable: true, width: '160px' },
+      { key: 'update_time', title: 'admin.fields.updatedAt', align: 'end', sortable: true, width: '160px' },
       COLUMN_PRESETS.actions,
     ],
     answers: [
       { key: 'answer_id', title: 'admin.fields.id', align: 'start', sortable: true, width: '80px' },
-      { key: 'question_id', title: 'admin.fields.questionId', align: 'start', sortable: true, width: '110px' },
+      { key: 'question_id', title: 'admin.fields.questionId', align: 'start', sortable: true, width: '90px' },
       { key: 'username', title: 'admin.fields.creator', align: 'start', sortable: false },
-      { key: 'vote_count', title: 'admin.fields.votes', align: 'end', sortable: true, width: '100px' },
-      { key: 'create_time', title: 'admin.fields.createdAt', align: 'end', sortable: true, width: '170px' },
+      { key: 'content_markdown', title: 'admin.fields.content', align: 'start', sortable: false },
+      { key: 'comment_count', title: 'admin.fields.comments', align: 'end', sortable: true, width: '90px' },
+      { key: 'vote_count', title: 'admin.fields.votes', align: 'end', sortable: true, width: '90px' },
+      { key: 'vote_up_count', title: 'admin.fields.voteUps', align: 'end', sortable: true, width: '90px' },
+      { key: 'vote_down_count', title: 'admin.fields.voteDowns', align: 'end', sortable: true, width: '90px' },
+      { key: 'create_time', title: 'admin.fields.createdAt', align: 'end', sortable: true, width: '160px' },
+      { key: 'update_time', title: 'admin.fields.updatedAt', align: 'end', sortable: true, width: '160px' },
       COLUMN_PRESETS.actions,
     ],
     articles: [
       { key: 'article_id', title: 'admin.fields.id', align: 'start', sortable: true, width: '80px' },
       { key: 'title', title: 'admin.fields.title', align: 'start', sortable: false },
       { key: 'username', title: 'admin.fields.creator', align: 'start', sortable: false },
-      { key: 'comment_count', title: 'admin.fields.comments', align: 'end', sortable: true, width: '100px' },
-      { key: 'vote_count', title: 'admin.fields.votes', align: 'end', sortable: true, width: '100px' },
-      { key: 'create_time', title: 'admin.fields.createdAt', align: 'end', sortable: true, width: '170px' },
+      { key: 'comment_count', title: 'admin.fields.comments', align: 'end', sortable: true, width: '90px' },
+      { key: 'follower_count', title: 'admin.fields.followers', align: 'end', sortable: true, width: '90px' },
+      { key: 'vote_count', title: 'admin.fields.votes', align: 'end', sortable: true, width: '90px' },
+      { key: 'vote_up_count', title: 'admin.fields.voteUps', align: 'end', sortable: true, width: '90px' },
+      { key: 'vote_down_count', title: 'admin.fields.voteDowns', align: 'end', sortable: true, width: '90px' },
+      { key: 'create_time', title: 'admin.fields.createdAt', align: 'end', sortable: true, width: '160px' },
+      { key: 'update_time', title: 'admin.fields.updatedAt', align: 'end', sortable: true, width: '160px' },
       COLUMN_PRESETS.actions,
     ],
     comments: [
       { key: 'comment_id', title: 'admin.fields.id', align: 'start', sortable: true, width: '80px' },
-      { key: 'commentable_type', title: 'admin.fields.targetType', align: 'start', sortable: false, width: '110px' },
-      { key: 'commentable_id', title: 'admin.fields.targetId', align: 'start', sortable: false, width: '110px' },
+      { key: 'commentable_type', title: 'admin.fields.targetType', align: 'start', sortable: false, width: '100px' },
+      { key: 'commentable_id', title: 'admin.fields.targetId', align: 'start', sortable: false, width: '90px' },
       { key: 'username', title: 'admin.fields.creator', align: 'start', sortable: false },
       { key: 'content', title: 'admin.fields.content', align: 'start', sortable: false },
-      { key: 'vote_count', title: 'admin.fields.votes', align: 'end', sortable: true, width: '100px' },
-      { key: 'create_time', title: 'admin.fields.createdAt', align: 'end', sortable: true, width: '170px' },
+      { key: 'reply_count', title: 'admin.fields.replies', align: 'end', sortable: true, width: '90px' },
+      { key: 'vote_count', title: 'admin.fields.votes', align: 'end', sortable: true, width: '90px' },
+      { key: 'vote_up_count', title: 'admin.fields.voteUps', align: 'end', sortable: true, width: '90px' },
+      { key: 'vote_down_count', title: 'admin.fields.voteDowns', align: 'end', sortable: true, width: '90px' },
+      { key: 'create_time', title: 'admin.fields.createdAt', align: 'end', sortable: true, width: '160px' },
+      { key: 'update_time', title: 'admin.fields.updatedAt', align: 'end', sortable: true, width: '160px' },
       COLUMN_PRESETS.actions,
     ],
     replies: [
       { key: 'reply_id', title: 'admin.fields.id', align: 'start', sortable: true, width: '80px' },
-      { key: 'replyable_type', title: 'admin.fields.targetType', align: 'start', sortable: false, width: '110px' },
-      { key: 'replyable_id', title: 'admin.fields.targetId', align: 'start', sortable: false, width: '110px' },
+      { key: 'replyable_type', title: 'admin.fields.targetType', align: 'start', sortable: false, width: '100px' },
+      { key: 'replyable_id', title: 'admin.fields.targetId', align: 'start', sortable: false, width: '90px' },
+      { key: 'replyable_username', title: 'admin.fields.replyTargetUser', align: 'start', sortable: false },
+      { key: 'replyable_comment_id', title: 'admin.fields.parentCommentId', align: 'start', sortable: false, width: '100px' },
       { key: 'username', title: 'admin.fields.creator', align: 'start', sortable: false },
       { key: 'content', title: 'admin.fields.content', align: 'start', sortable: false },
-      { key: 'vote_count', title: 'admin.fields.votes', align: 'end', sortable: true, width: '100px' },
-      { key: 'create_time', title: 'admin.fields.createdAt', align: 'end', sortable: true, width: '170px' },
+      { key: 'reply_count', title: 'admin.fields.replies', align: 'end', sortable: true, width: '90px' },
+      { key: 'vote_count', title: 'admin.fields.votes', align: 'end', sortable: true, width: '90px' },
+      { key: 'vote_up_count', title: 'admin.fields.voteUps', align: 'end', sortable: true, width: '90px' },
+      { key: 'vote_down_count', title: 'admin.fields.voteDowns', align: 'end', sortable: true, width: '90px' },
+      { key: 'create_time', title: 'admin.fields.createdAt', align: 'end', sortable: true, width: '160px' },
+      { key: 'update_time', title: 'admin.fields.updatedAt', align: 'end', sortable: true, width: '160px' },
       COLUMN_PRESETS.actions,
     ],
     'user-groups': [
       { key: 'user_group_id', title: 'admin.fields.id', align: 'start', sortable: true, width: '80px' },
       { key: 'user_group_name', title: 'admin.fields.userGroupName', align: 'start', sortable: false },
-      { key: 'user_group_user_count', title: 'admin.fields.userCount', align: 'end', sortable: true, width: '120px' },
-      { key: 'is_admin', title: 'admin.fields.isAdmin', align: 'center', sortable: true, width: '100px' },
-      { key: 'create_time', title: 'admin.fields.createdAt', align: 'end', sortable: true, width: '170px' },
+      { key: 'user_group_description', title: 'admin.fields.description', align: 'start', sortable: false },
+      { key: 'user_group_icon', title: 'admin.fields.icon', align: 'center', sortable: false, width: '80px' },
+      { key: 'user_group_icon_show', title: 'admin.fields.iconShow', align: 'center', sortable: false, width: '88px' },
+      { key: 'user_group_color', title: 'admin.fields.color', align: 'center', sortable: false, width: '88px' },
+      { key: 'user_group_user_count', title: 'admin.fields.userCount', align: 'end', sortable: true, width: '90px' },
+      { key: 'is_admin', title: 'admin.fields.isAdmin', align: 'center', sortable: true, width: '88px' },
+      ability('ability_normal_login', 'userGroupDialog.fields.normalLogin'),
+      ability('ability_admin_login', 'userGroupDialog.fields.adminLogin'),
+      ability('ability_admin_manage_user_group', 'userGroupDialog.fields.manageUserGroup'),
+      ability('ability_admin_manage_user', 'userGroupDialog.fields.manageUser'),
+      ability('ability_admin_manage_topic', 'userGroupDialog.fields.manageTopic'),
+      ability('ability_admin_manage_question', 'userGroupDialog.fields.manageQuestion'),
+      ability('ability_admin_manage_article', 'userGroupDialog.fields.manageArticle'),
+      ability('ability_admin_manage_comment', 'userGroupDialog.fields.manageComment'),
+      ability('ability_admin_manage_answer', 'userGroupDialog.fields.manageAnswer'),
+      ability('ability_admin_manage_reply', 'userGroupDialog.fields.manageReply'),
+      ability('ability_admin_manage_report', 'userGroupDialog.fields.manageReport'),
+      ability('ability_admin_manage_option', 'userGroupDialog.fields.manageOption'),
+      ability('ability_create_article', 'userGroupDialog.fields.createArticle'),
+      ability('ability_create_question', 'userGroupDialog.fields.createQuestion'),
+      ability('ability_create_answer', 'userGroupDialog.fields.createAnswer'),
+      ability('ability_create_comment', 'userGroupDialog.fields.createComment'),
+      ability('ability_create_reply', 'userGroupDialog.fields.createReply'),
+      ability('ability_create_topic', 'userGroupDialog.fields.createTopic'),
+      ability('ability_edit_own_article', 'userGroupDialog.fields.editOwnArticle'),
+      ability('ability_edit_own_question', 'userGroupDialog.fields.editOwnQuestion'),
+      ability('ability_edit_own_answer', 'userGroupDialog.fields.editOwnAnswer'),
+      ability('ability_edit_own_comment', 'userGroupDialog.fields.editOwnComment'),
+      ability('ability_edit_own_reply', 'userGroupDialog.fields.editOwnReply'),
+      ability('ability_edit_own_topic', 'userGroupDialog.fields.editOwnTopic'),
+      ability('ability_delete_own_article', 'userGroupDialog.fields.deleteOwnArticle'),
+      ability('ability_delete_own_question', 'userGroupDialog.fields.deleteOwnQuestion'),
+      ability('ability_delete_own_answer', 'userGroupDialog.fields.deleteOwnAnswer'),
+      ability('ability_delete_own_comment', 'userGroupDialog.fields.deleteOwnComment'),
+      ability('ability_delete_own_reply', 'userGroupDialog.fields.deleteOwnReply'),
+      ability('ability_delete_own_topic', 'userGroupDialog.fields.deleteOwnTopic'),
+      timeLimit('time_before_edit_article', 'userGroupDialog.fields.editArticle'),
+      timeLimit('time_before_edit_question', 'userGroupDialog.fields.editQuestion'),
+      timeLimit('time_before_edit_answer', 'userGroupDialog.fields.editAnswer'),
+      timeLimit('time_before_edit_comment', 'userGroupDialog.fields.editComment'),
+      timeLimit('time_before_edit_reply', 'userGroupDialog.fields.editReply'),
+      timeLimit('time_before_edit_topic', 'userGroupDialog.fields.editTopic'),
+      timeLimit('time_before_delete_article', 'userGroupDialog.fields.deleteArticle'),
+      timeLimit('time_before_delete_question', 'userGroupDialog.fields.deleteQuestion'),
+      timeLimit('time_before_delete_answer', 'userGroupDialog.fields.deleteAnswer'),
+      timeLimit('time_before_delete_comment', 'userGroupDialog.fields.deleteComment'),
+      timeLimit('time_before_delete_reply', 'userGroupDialog.fields.deleteReply'),
+      timeLimit('time_before_delete_topic', 'userGroupDialog.fields.deleteTopic'),
+      ability('ability_edit_article_only_no_comment', 'userGroupDialog.fields.editArticleNoComment'),
+      ability('ability_edit_question_only_no_answer', 'userGroupDialog.fields.editQuestionNoAnswer'),
+      ability('ability_edit_answer_only_no_comment', 'userGroupDialog.fields.editAnswerNoComment'),
+      ability('ability_edit_question_only_no_comment', 'userGroupDialog.fields.editQuestionNoComment'),
+      ability('ability_edit_comment_only_no_reply', 'userGroupDialog.fields.editCommentNoReply'),
+      ability('ability_edit_reply_only_no_reply', 'userGroupDialog.fields.editReplyNoReply'),
+      ability('ability_edit_topic_only_no_article_or_question', 'userGroupDialog.fields.editTopicNoContent'),
+      ability('ability_delete_article_only_no_comment', 'userGroupDialog.fields.deleteArticleNoComment'),
+      ability('ability_delete_question_only_no_answer', 'userGroupDialog.fields.deleteQuestionNoAnswer'),
+      ability('ability_delete_answer_only_no_comment', 'userGroupDialog.fields.deleteAnswerNoComment'),
+      ability('ability_delete_question_only_no_comment', 'userGroupDialog.fields.deleteQuestionNoComment'),
+      ability('ability_delete_comment_only_no_reply', 'userGroupDialog.fields.deleteCommentNoReply'),
+      ability('ability_delete_reply_only_no_reply', 'userGroupDialog.fields.deleteReplyNoReply'),
+      ability('ability_delete_topic_only_no_article_or_question', 'userGroupDialog.fields.deleteTopicNoContent'),
+      ability('ability_edit_own_info', 'userGroupDialog.fields.editOwnInfo'),
+      ability('ability_vote', 'userGroupDialog.fields.vote'),
+      { key: 'create_time', title: 'admin.fields.createdAt', align: 'end', sortable: true, width: '160px' },
+      { key: 'update_time', title: 'admin.fields.updatedAt', align: 'end', sortable: true, width: '160px' },
       COLUMN_PRESETS.actions,
     ],
     users: [
       { key: 'user_id', title: 'admin.fields.id', align: 'start', sortable: true, width: '80px' },
       { key: 'username', title: 'admin.fields.username', align: 'start', sortable: true },
       { key: 'email', title: 'admin.fields.email', align: 'start', sortable: false },
-      { key: 'user_group_name', title: 'admin.fields.userGroup', align: 'start', sortable: false, width: '160px' },
-      { key: 'follower_count', title: 'admin.fields.followers', align: 'end', sortable: true, width: '100px' },
-      { key: 'last_login_time', title: 'admin.fields.lastLogin', align: 'end', sortable: true, width: '170px' },
-      { key: 'create_time', title: 'admin.fields.createdAt', align: 'end', sortable: true, width: '170px' },
+      { key: 'user_group_name', title: 'admin.fields.userGroup', align: 'start', sortable: false, width: '140px' },
+      { key: 'create_ip', title: 'admin.fields.createIp', align: 'start', sortable: false, width: '110px' },
+      { key: 'create_location', title: 'admin.fields.createLocation', align: 'start', sortable: false, width: '130px' },
+      { key: 'last_login_time', title: 'admin.fields.lastLogin', align: 'end', sortable: true, width: '160px' },
+      { key: 'last_login_ip', title: 'admin.fields.lastLoginIp', align: 'start', sortable: false, width: '110px' },
+      { key: 'last_login_location', title: 'admin.fields.lastLoginLocation', align: 'start', sortable: false, width: '130px' },
+      { key: 'follower_count', title: 'admin.fields.followers', align: 'end', sortable: true, width: '90px' },
+      { key: 'followee_count', title: 'admin.fields.followees', align: 'end', sortable: true, width: '90px' },
+      { key: 'following_topic_count', title: 'admin.fields.followingTopics', align: 'end', sortable: true, width: '100px' },
+      { key: 'following_article_count', title: 'admin.fields.followingArticles', align: 'end', sortable: true, width: '100px' },
+      { key: 'following_question_count', title: 'admin.fields.followingQuestions', align: 'end', sortable: true, width: '100px' },
+      { key: 'article_count', title: 'admin.fields.articles', align: 'end', sortable: true, width: '90px' },
+      { key: 'question_count', title: 'admin.fields.questions', align: 'end', sortable: true, width: '90px' },
+      { key: 'answer_count', title: 'admin.fields.answers', align: 'end', sortable: true, width: '90px' },
+      { key: 'comment_count', title: 'admin.fields.comments', align: 'end', sortable: true, width: '90px' },
+      { key: 'reply_count', title: 'admin.fields.replies', align: 'end', sortable: true, width: '90px' },
+      { key: 'notification_unread', title: 'admin.fields.unreadNotifications', align: 'end', sortable: true, width: '100px' },
+      { key: 'headline', title: 'admin.fields.headline', align: 'start', sortable: false },
+      { key: 'bio', title: 'admin.fields.bio', align: 'start', sortable: false },
+      { key: 'blog', title: 'admin.fields.blog', align: 'start', sortable: false },
+      { key: 'company', title: 'admin.fields.company', align: 'start', sortable: false },
+      { key: 'location', title: 'admin.fields.location', align: 'start', sortable: false },
+      { key: 'create_time', title: 'admin.fields.createdAt', align: 'end', sortable: true, width: '160px' },
+      { key: 'update_time', title: 'admin.fields.updatedAt', align: 'end', sortable: true, width: '160px' },
+      { key: 'disable_time', title: 'admin.fields.disabledAt', align: 'end', sortable: true, width: '160px' },
       COLUMN_PRESETS.actions,
     ],
     reports: [
       { key: 'report_id', title: 'admin.fields.id', align: 'start', sortable: true, width: '80px' },
-      { key: 'reportable_type', title: 'admin.fields.targetType', align: 'start', sortable: false, width: '110px' },
-      { key: 'reportable_id', title: 'admin.fields.targetId', align: 'start', sortable: false, width: '110px' },
       { key: 'username', title: 'admin.fields.reporter', align: 'start', sortable: false },
+      { key: 'reportable_type', title: 'admin.fields.targetType', align: 'start', sortable: false, width: '100px' },
+      { key: 'reportable_id', title: 'admin.fields.targetId', align: 'start', sortable: false, width: '90px' },
       { key: 'reason', title: 'admin.fields.reason', align: 'start', sortable: false },
-      { key: 'report_handle_state', title: 'admin.fields.handleState', align: 'center', sortable: true, width: '120px' },
-      { key: 'create_time', title: 'admin.fields.createdAt', align: 'end', sortable: true, width: '170px' },
+      { key: 'report_handle_state', title: 'admin.fields.handleState', align: 'center', sortable: true, width: '110px' },
+      { key: 'create_time', title: 'admin.fields.createdAt', align: 'end', sortable: true, width: '160px' },
       COLUMN_PRESETS.actions,
     ],
   })
@@ -225,6 +339,22 @@ function makeHeaders() {
 }
 
 const headers = computed(() => makeHeaders())
+
+// 布尔型列（is_admin / user_group_icon_show / ability_*）：统一渲染为“是/否”芯片
+const boolHeaders = computed(() =>
+  headers.value.filter(
+    (h) => h.key === 'is_admin' || h.key === 'user_group_icon_show' || h.key.startsWith('ability_'),
+  ),
+)
+
+// 需要截断显示的长文本列（统一渲染为单行省略）
+const truncateTextKeys = ['content_markdown', 'user_group_description', 'headline', 'bio', 'blog', 'company', 'location']
+
+// 布尔列 / 长文本列对应的动态插槽名（供模板 v-for 渲染 item.<key> 插槽）
+const boolSlotNames = computed(() => boolHeaders.value.map((h) => `item.${h.key}`))
+const truncateSlotNames = computed(() => truncateTextKeys.map((k) => `item.${k}`))
+// 由插槽名（item.<key>）反解出字段 key
+const slotKey = (name) => String(name).replace(/^item\./, '')
 
 // ================== 表格状态 ==================
 const items = ref([])
@@ -340,6 +470,12 @@ watch(
 function onRowClick(_event, { item }) {
   // vuetify 4: item slot 解构里的 item 直接就是原始数据（不再需要 .raw）
   if (!item) return
+  // 点击行默认打开对应编辑对话框
+  if (moduleEditable.value) {
+    openEditDialog(item)
+    return
+  }
+  // 不可编辑模块：回退为打开前台详情
   const to = moduleMeta.value?.itemTo?.(item)
   if (to) openInNewTab(to)
 }
@@ -565,13 +701,20 @@ onBeforeUnmount(() => {
           </h1>
         </template> -->
         <template #append>
-          <div class="d-flex align-center" style="gap: 12px;">
+          <div class="d-flex align-center" style="gap: 12px;max-width: 600px;width: 100%;">
             <v-text-field v-model="searchInput" density="compact" variant="outlined" prepend-inner-icon="mdi-magnify"
               :placeholder="$t('admin.searchPlaceholder')" hide-details clearable style="max-width: 320px;"
               @update:model-value="applySearch"
               @click:clear="() => { search = ''; searchInput = ''; page = 1; loadItems() }" />
-            <v-btn variant="tonal" color="primary" prepend-icon="mdi-refresh" :loading="loading" @click="refresh">
+            <!-- <v-btn variant="tonal" color="primary" prepend-icon="mdi-refresh" :loading="loading" @click="refresh">
               {{ $t('admin.refresh') }}
+            </v-btn> -->
+
+            <v-btn icon variant="text" :loading="loading" @click="refresh">
+              <v-icon>mdi-refresh</v-icon>
+              <v-tooltip activator="parent" location="left">
+                {{ $t('admin.refresh') }}
+              </v-tooltip>
             </v-btn>
           </div>
         </template>
@@ -615,9 +758,18 @@ onBeforeUnmount(() => {
         <template #[`item.reportable_type`]="{ item }">
           {{ targetTypeLabel(item?.reportable_type) }}
         </template>
-        <template #[`item.is_admin`]="{ item }">
-          <v-chip v-if="item?.is_admin" color="error" size="small" label>{{ $t('admin.yes') }}</v-chip>
-          <v-chip v-else color="grey" size="small" label variant="outlined">{{ $t('admin.no') }}</v-chip>
+        <template v-for="name in boolSlotNames" :key="name" v-slot:[name]="{ item }">
+          <div class="d-flex justify-center">
+            <v-chip v-if="item[slotKey(name)]" color="success" size="small" label>{{ $t('admin.yes')
+            }}</v-chip>
+            <v-chip v-else color="grey" size="small" label variant="outlined">{{ $t('admin.no') }}</v-chip>
+          </div>
+        </template>
+        <template #[`item.replyable_username`]="{ item }">
+          <span v-if="item?.replyable_username" class="text-primary font-weight-medium">
+            {{ item.replyable_username }}
+          </span>
+          <span v-else>—</span>
         </template>
         <template #[`item.report_handle_state`]="{ item }">
           <v-chip :color="reportState(item?.report_handle_state).color" size="small" label>
@@ -627,8 +779,36 @@ onBeforeUnmount(() => {
         <template #[`item.create_time`]="{ item }">
           <span class="text-no-wrap">{{ formatDate(item?.create_time) }}</span>
         </template>
+        <template #[`item.update_time`]="{ item }">
+          <span class="text-no-wrap">{{ formatDate(item?.update_time) }}</span>
+        </template>
+        <template #[`item.disable_time`]="{ item }">
+          <span class="text-no-wrap">{{ formatDate(item?.disable_time) }}</span>
+        </template>
         <template #[`item.last_login_time`]="{ item }">
           <span class="text-no-wrap">{{ formatDate(item?.last_login_time) }}</span>
+        </template>
+        <template #[`item.user_group_icon`]="{ item }">
+          <v-icon v-if="item?.user_group_icon?.startsWith('mdi-')">{{ item.user_group_icon }}</v-icon>
+          <span v-else>{{ item?.user_group_icon || '—' }}</span>
+        </template>
+        <template #[`item.user_group_color`]="{ item }">
+          <div class="d-flex align-center justify-center" style="gap: 6px;">
+            <v-avatar v-if="item?.user_group_color" :color="item.user_group_color" size="18" class="color-swatch" />
+            <span v-if="item?.user_group_color" class="text-caption text-medium-emphasis">{{
+              item.user_group_color }}</span>
+            <span v-else>—</span>
+          </div>
+        </template>
+        <template #[`item.description`]="{ item }">
+          <div class="text-truncate" style="max-width: 240px;">
+            {{ item?.description || '—' }}
+          </div>
+        </template>
+        <template v-for="name in truncateSlotNames" :key="name" v-slot:[name]="{ item }">
+          <div class="text-truncate" style="max-width: 220px;">
+            {{ item[slotKey(name)] || '—' }}
+          </div>
         </template>
         <template #[`item.actions`]="{ item }">
           <div class="d-flex justify-end" style="gap: 4px;">
@@ -673,5 +853,9 @@ onBeforeUnmount(() => {
 .data-table-card {
   /* border-radius: 12px; */
   overflow: hidden;
+}
+
+.color-swatch {
+  border: 1px solid rgba(127, 127, 127, 0.4);
 }
 </style>

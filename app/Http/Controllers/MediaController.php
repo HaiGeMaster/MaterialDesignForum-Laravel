@@ -80,7 +80,7 @@ class MediaController extends Controller
         ]);
 
         return response()->json([
-            'message' => '上传成功。',
+            'message' => __('messages.http_media_1'),
             'media' => $media,
             'url' => $media->url,
             'path' => $media->path,
@@ -105,7 +105,7 @@ class MediaController extends Controller
 
         // 媒体库仅本人可查看
         if (! $current || (int) $current->user_id !== (int) $user->user_id) {
-            return response()->json(['message' => '无权查看该用户的媒体库。'], 403);
+            return response()->json(['message' => __('messages.http_media_2')], 403);
         }
 
         $query = Media::query()
@@ -173,7 +173,7 @@ class MediaController extends Controller
         }
 
         return response()->json([
-            'message' => "已删除 {$deleted} 个文件。",
+            'message' => __('messages.http_media_3', ['deleted' => $deleted]),
             'deleted' => $deleted,
         ]);
     }

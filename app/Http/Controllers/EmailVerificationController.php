@@ -57,7 +57,7 @@ class EmailVerificationController extends Controller
         $this->sendCode($email, self::CACHE_KEY_PREFIX . $email, 'register');
 
         return response()->json([
-            'message' => '验证码已发送，请查收邮箱。',
+            'message' => __('messages.http_emailverification_1'),
         ]);
     }
 
@@ -84,7 +84,7 @@ class EmailVerificationController extends Controller
         $this->sendCode($email, self::RESET_KEY_PREFIX . $email, 'reset');
 
         return response()->json([
-            'message' => '验证码已发送，请查收邮箱。',
+            'message' => __('messages.http_emailverification_1'),
         ]);
     }
 
@@ -95,7 +95,7 @@ class EmailVerificationController extends Controller
      */
     public static function verify(string $email, string $code): void
     {
-        self::verifyCode($email, $code, self::CACHE_KEY_PREFIX, '注册验证码');
+        self::verifyCode($email, $code, self::CACHE_KEY_PREFIX, __('messages.http_emailverification_2'));
     }
 
     /**
@@ -105,7 +105,7 @@ class EmailVerificationController extends Controller
      */
     public static function verifyReset(string $email, string $code): void
     {
-        self::verifyCode($email, $code, self::RESET_KEY_PREFIX, '找回密码验证码');
+        self::verifyCode($email, $code, self::RESET_KEY_PREFIX, __('messages.http_emailverification_3'));
     }
 
     /**
@@ -143,7 +143,7 @@ class EmailVerificationController extends Controller
         );
 
         Mail::to($email)->send(
-            new EmailVerificationCode($code, config('app.name', '论坛'), $purpose)
+            new EmailVerificationCode($code, config('app.name', __('messages.http_emailverification_4')), $purpose)
         );
     }
 

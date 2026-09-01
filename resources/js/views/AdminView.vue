@@ -70,8 +70,8 @@ async function updateChartRange(item, range) {
     chartRanges.value[item.key] = range
     chartLoading.value[item.key] = true
     try {
-        const { data } = await http.get('/admin/overview', { params: { range } })
-        recent.value = { ...recent.value, [item.key]: data.recent?.[item.key] || [] }
+        const { data } = await http.get('/admin/chart', { params: { key: item.key, range } })
+        recent.value = { ...recent.value, [item.key]: data.recent || [] }
     } catch (error) {
         hasError.value = true
     } finally {
@@ -86,7 +86,7 @@ onMounted(fetchOverview)
     <v-container class="admin-page py-6 px-4 px-md-8">
         <section class="admin-hero mb-6">
             <div>
-                <div class="text-overline text-primary font-weight-bold">MDForum / ADMIN</div>
+                <!-- <div class="text-overline text-primary font-weight-bold">MDForum / ADMIN</div> -->
                 <h1 class="text-h4 text-md-h3 font-weight-bold mt-1">{{ $t('admin.title') }}</h1>
                 <p class="text-body-1 text-medium-emphasis mt-2">{{ $t('admin.welcome', {
                     username:
@@ -145,8 +145,9 @@ onMounted(fetchOverview)
 
 <style scoped>
 .admin-page {
-    min-height: 100%;
-    width: 1080px;
+    /* min-height: 100%;
+    width: 1080px; */
+    max-width: 1080px;
 }
 
 .admin-hero {

@@ -5,8 +5,13 @@ import router from './router'
 import vuetify from './plugins/vuetify'
 import { i18n } from './i18n'
 import { loadThemeConfig } from './themeConfig'
+// import { WatermarkPlugin } from '@watermarkify/vue'
+// import { watermark } from 'watermark-dom'
 
+// watermark({ content: '管理员·张三', watermark: '#admin-watermark' })
 const app = createApp(App)
+
+// app.use(WatermarkPlugin)
 
 app.use(createPinia())
 app.use(router)

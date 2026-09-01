@@ -232,7 +232,7 @@ class UserController extends Controller
         ]);
 
         return response()->json([
-            'message' => '上传成功。',
+            'message' => __('messages.http_media_1'),
             'url' => '/'.$path,
             'path' => $path,
             'type' => $data['type'],
@@ -269,7 +269,7 @@ class UserController extends Controller
         $user->save();
 
         return response()->json([
-            'message' => '个人资料已更新。',
+            'message' => __('messages.http_user_1'),
             'user' => $user->load('userGroup'),
         ]);
     }
@@ -299,6 +299,6 @@ class UserController extends Controller
         $user->update_time = now();
         $user->save();
 
-        return response()->json(['message' => '密码修改成功。']);
+        return response()->json(['message' => __('messages.http_user_2')]);
     }
 }

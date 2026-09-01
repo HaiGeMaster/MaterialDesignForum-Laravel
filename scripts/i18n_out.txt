@@ -1,0 +1,9 @@
+扫描目录: app, routes
+扫描文件: 51
+提取字符串: 0，跳过（数组 key / 比较等不安全位置）: 40，跳过 heredoc: 0
+生成语言文件:
+  - D:/Administrator/Documents/Vue/MDForumLaravel/lang/zh/messages.php (0 条)
+  - D:/Administrator/Documents/Vue/MDForumLaravel/lang/en/messages.php (0 条)
+
+预览模式完成。如确认无误，可执行：php scripts/extract_i18n.php --apply
+

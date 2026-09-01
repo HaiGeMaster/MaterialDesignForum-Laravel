@@ -21,22 +21,17 @@ const settingGroups = computed(() => [
     title: t('admin.aboutApplication'),
     items: [
       { key: 'about', title: t('admin.about'), description: t('admin.aboutDescription'), icon: 'mdi-information-outline' },
-      { key: 'updates', title: t('admin.checkUpdates'), description: t('admin.checkUpdatesDescription'), icon: 'mdi-update' },
+      { key: 'qqGroup', title: t('admin.joinQQGroup'), description: t('admin.joinQQGroupDescription'), icon: 'mdi-qqchat' },
     ],
   },
 ])
 
 const LINK_KEYS = ['info', 'theme', 'mail', 'oauth']
+const EXTERNAL_LINKS = { qqGroup: 'https://qm.qq.com/q/EjJWTbyudy' }
 
 const aboutDialog = ref(false)
 const aboutLoading = ref(false)
 const aboutData = ref(null)
-const updateLoading = ref(false)
-const updateResult = ref(null)
-const sourceDialog = ref(false)
-const sourceLoading = ref(false)
-const sourceSaving = ref(false)
-const sourceUrl = ref('')
 
 const aboutRows = computed(() => {
   const data = aboutData.value
@@ -52,16 +47,16 @@ const aboutRows = computed(() => {
 })
 
 function openSetting(key) {
+  if (EXTERNAL_LINKS[key]) {
+    window.open(EXTERNAL_LINKS[key], '_blank', 'noopener')
+    return
+  }
   if (LINK_KEYS.includes(key)) {
     router.push(`/options/${key}`)
     return
   }
   if (key === 'about') {
     openAbout()
-    return
-  }
-  if (key === 'updates') {
-    checkUpdate()
   }
 }
 
@@ -76,49 +71,6 @@ async function openAbout() {
     aboutData.value = null
   } finally {
     aboutLoading.value = false
-  }
-}
-
-async function checkUpdate() {
-  if (updateLoading.value) return
-  updateLoading.value = true
-  updateResult.value = null
-  try {
-    const { data } = await http.get('/admin/options/update')
-    updateResult.value = data
-  } catch {
-    updateResult.value = { check_failed: true }
-  } finally {
-    updateLoading.value = false
-  }
-}
-
-async function openSourceDialog() {
-  sourceDialog.value = true
-  if (sourceLoading.value) return
-  sourceLoading.value = true
-  try {
-    const { data } = await http.get('/admin/options/update-source')
-    sourceUrl.value = data.update_source || ''
-  } catch {
-    sourceUrl.value = ''
-  } finally {
-    sourceLoading.value = false
-  }
-}
-
-async function saveSource() {
-  if (sourceSaving.value) return
-  sourceSaving.value = true
-  try {
-    await http.put('/admin/options/update-source', { update_source: sourceUrl.value.trim() })
-    sourceDialog.value = false
-    updateResult.value = null
-    await checkUpdate()
-  } catch {
-    // 校验失败时由表单错误提示处理
-  } finally {
-    sourceSaving.value = false
   }
 }
 </script>
@@ -145,39 +97,9 @@ async function saveSource() {
                 </v-avatar>
               </template>
               <v-list-item-title>{{ item.title }}</v-list-item-title>
-              <v-list-item-subtitle v-if="item.key === 'updates' && updateLoading" class="text-primary">
-                {{ $t('admin.updateChecking') }}
-              </v-list-item-subtitle>
-              <v-list-item-subtitle v-else-if="item.key === 'updates' && updateResult"
-                :class="updateResult.is_update ? 'text-warning' : 'text-medium-emphasis'">
-                <template v-if="!updateResult.source_configured">
-                  {{ $t('admin.updateSourceNotConfigured') }}
-                  <a class="source-link" href="javascript:void(0)" @click.stop="openSourceDialog">{{ $t('admin.configureSource') }}</a>
-                </template>
-                <template v-else-if="updateResult.check_failed">
-                  {{ $t('admin.updateCheckFailed') }}
-                  <a class="source-link" href="javascript:void(0)" @click.stop="openSourceDialog">{{ $t('admin.configureSource') }}</a>
-                </template>
-                <template v-else>
-                  {{ $t('admin.currentVersion') }}: v{{ updateResult.current_version }}
-                  <template v-if="updateResult.latest_version">
-                    · {{ $t('admin.latestVersion') }}: v{{ updateResult.latest_version }}
-                  </template>
-                  <template v-if="updateResult.latest_version && !updateResult.is_update">
-                    · {{ $t('admin.upToDate') }}
-                  </template>
-                  <template v-if="updateResult.is_update">
-                    ·
-                    <a :href="updateResult.download_url || '#'" target="_blank" rel="noopener" @click.stop>
-                      {{ $t('admin.downloadLatest') }}
-                    </a>
-                  </template>
-                </template>
-              </v-list-item-subtitle>
-              <v-list-item-subtitle v-else>{{ item.description }}</v-list-item-subtitle>
+              <v-list-item-subtitle>{{ item.description }}</v-list-item-subtitle>
               <template #append>
-                <v-progress-circular v-if="item.key === 'updates' && updateLoading" indeterminate size="20" width="2" />
-                <v-icon v-else icon="mdi-chevron-right" />
+                <v-icon icon="mdi-chevron-right" />
               </template>
             </v-list-item>
           </template>
@@ -205,51 +127,10 @@ async function saveSource() {
         <v-card-actions>
           <span class="text-caption text-medium-emphasis px-4">
             {{ $t('admin.appCopyright', { year: aboutData?.year || new Date().getFullYear() }) }}
+            <a href="https://github.com/HaiGeMaster">HaiGeMaster</a>
           </span>
           <v-spacer />
           <v-btn variant="tonal" @click="aboutDialog = false">{{ $t('admin.close') }}</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <v-dialog v-model="sourceDialog" max-width="520">
-      <v-card rounded="lg" >
-        <v-card-title class="d-flex align-center">
-          <v-icon icon="mdi-webhook" class="mr-2" color="primary" />
-          {{ $t('admin.updateSource') }}
-        </v-card-title>
-        <v-divider />
-        <v-card-text>
-          <v-skeleton-loader v-if="sourceLoading" type="paragraph" />
-          <template v-else>
-            <v-text-field
-              v-model="sourceUrl"
-              :label="$t('admin.updateSource')"
-              :placeholder="$t('admin.updateSourcePlaceholder')"
-              :hint="$t('admin.updateSourceHint')"
-              persistent-hint
-              type="url"
-              density="comfortable"
-              clearable
-              hide-details="auto"
-              class="mb-2"
-            />
-            <v-alert type="info" variant="tonal" density="compact" class="mb-2">
-              {{ $t('admin.updateSourceFormatHint') }}
-            </v-alert>
-          </template>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn variant="tonal" @click="sourceDialog = false">{{ $t('admin.cancel') }}</v-btn>
-          <v-btn
-            color="primary"
-            :loading="sourceSaving"
-            :disabled="sourceLoading"
-            @click="saveSource"
-          >
-            {{ $t('admin.save') }}
-          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -265,14 +146,5 @@ async function saveSource() {
 .options-card {
   overflow: hidden;
   /* border-radius: 12px; */
-}
-
-.source-link {
-  color: rgb(var(--v-theme-primary));
-  text-decoration: none;
-}
-
-.source-link:hover {
-  text-decoration: underline;
 }
 </style>

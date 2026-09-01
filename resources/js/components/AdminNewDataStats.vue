@@ -104,8 +104,8 @@ function changeRange(value) {
     <v-card-text>
       <div class="chart-wrap">
         <v-progress-linear v-if="loading" indeterminate color="primary" class="chart-loading" />
-        <div v-else-if="!data.length" class="chart-empty">{{ $t('admin.noData') }}</div>
-        <VChart v-else :option="chartOption" autoresize class="chart" />
+        <div v-if="!loading && !data.length" class="chart-empty">{{ $t('admin.noData') }}</div>
+        <VChart v-if="data.length" :option="chartOption" autoresize class="chart" />
       </div>
     </v-card-text>
   </v-card>

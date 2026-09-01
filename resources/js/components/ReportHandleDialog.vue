@@ -102,6 +102,17 @@ const contentPreview = computed(() => {
   }
 })
 
+// 将 reportable_type 的单数短名映射为 admin modules API 路径中的复数模块名
+const modulePathMap = {
+  question: 'questions',
+  article: 'articles',
+  answer: 'answers',
+  comment: 'comments',
+  reply: 'replies',
+  topic: 'topics',
+  user: 'users',
+}
+
 async function loadReportedContent() {
   const type = reportableModule.value
   const id = props.report?.reportable_id
@@ -110,9 +121,10 @@ async function loadReportedContent() {
     return
   }
 
+  const modulePath = modulePathMap[type] || `${type}s`
   contentLoading.value = true
   try {
-    const { data } = await http.get(`/admin/modules/${type}/${id}`)
+    const { data } = await http.get(`/admin/modules/${modulePath}/${id}`)
     reportedContent.value = data
   } catch {
     reportedContent.value = null

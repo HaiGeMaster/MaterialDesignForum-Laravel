@@ -51,9 +51,9 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 
 // 最小化时的标题栏高度
-const BAR_HEIGHT = 36
+const BAR_HEIGHT = 48
 // 最小化时的宽度
-const MIN_WIDTH = 240
+const MIN_WIDTH = 280
 // 尺寸下限
 const MIN_CONTENT_WIDTH = 260
 const MIN_CONTENT_HEIGHT = 160

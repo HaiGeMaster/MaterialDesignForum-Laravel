@@ -39,7 +39,9 @@ function handleAuthUnauthorized() {
 
 onMounted(async () => {
   // 首次加载检查安装状态：未安装则跳转 /install；访问 /install 路由时不跳转避免循环
-  try {
+    try {
+        // setWatermark()
+
     const { data } = await http.get('/install/status')
     if (!data.installed && route.name !== 'install') {
       router.replace('/install')

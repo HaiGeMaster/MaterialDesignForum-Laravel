@@ -28,7 +28,7 @@ async function handleLogout() {
 </script>
 
 <template>
-  <v-app-bar density="comfortable">
+  <v-app-bar >
     <v-app-bar-nav-icon @click="emit('toggle-drawer')" />
 
     <v-app-bar-title>
@@ -40,9 +40,9 @@ async function handleLogout() {
 
     <LanguageSwitcher />
 
-    <NotificationBell />
-
     <ThemeToggle />
+
+    <NotificationBell />
 
     <UserMenu
       v-if="authStore.isLoggedIn"

@@ -189,7 +189,7 @@ const canDelete = computed(() => {
 // ================== 举报权限 ==================
 const canReport = computed(() => {
   if (!props.item || !props.type) return false
-  if (isAdminUser.value) return false // 管理员不举报，直接后台处理
+//   if (isAdminUser.value) return false // 管理员不举报，直接后台处理
   if (isSelf.value) return false // 不能举报自己
   return true
 })

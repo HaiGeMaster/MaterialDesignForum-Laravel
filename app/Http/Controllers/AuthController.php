@@ -72,7 +72,7 @@ class AuthController extends Controller
         $token = $this->createToken($user, $request);
 
         return response()->json([
-            'message' => '注册成功。',
+            'message' => __('messages.http_auth_1'),
             'token' => $token->token,
             'token_expire_at' => $token->expire_time?->toDateTimeString(),
             'user' => $user->load('userGroup'),
@@ -120,7 +120,7 @@ class AuthController extends Controller
         $token = $this->createToken($user, $request);
 
         return response()->json([
-            'message' => '登录成功。',
+            'message' => __('messages.http_auth_2'),
             'token' => $token->token,
             'token_expire_at' => $token->expire_time?->toDateTimeString(),
             'user' => $user->load('userGroup'),
@@ -175,7 +175,7 @@ class AuthController extends Controller
         $token = $this->createToken($user, $request);
 
         return response()->json([
-            'message' => '密码重置成功，已自动登录。',
+            'message' => __('messages.http_auth_3'),
             'token' => $token->token,
             'token_expire_at' => $token->expire_time?->toDateTimeString(),
             'user' => $user->load('userGroup'),
@@ -195,7 +195,7 @@ class AuthController extends Controller
             Token::where('token', trim($matches[1]))->delete();
         }
 
-        return response()->json(['message' => '退出登录成功。']);
+        return response()->json(['message' => __('messages.http_auth_4')]);
     }
 
     /**

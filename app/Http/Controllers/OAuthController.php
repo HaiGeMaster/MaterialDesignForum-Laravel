@@ -279,12 +279,12 @@ class OAuthController extends Controller
     public function unbind(Request $request, OAuth $oauth)
     {
         if ((int) $oauth->user_id !== (int) $request->user()->user_id) {
-            return response()->json(['message' => '无权操作该绑定记录。'], 403);
+            return response()->json(['message' => __('messages.http_oauth_1')], 403);
         }
 
         $oauth->delete();
 
-        return response()->json(['message' => '已解除第三方账号绑定。']);
+        return response()->json(['message' => __('messages.http_oauth_2')]);
     }
 
     // ============================ 内部辅助方法 ============================

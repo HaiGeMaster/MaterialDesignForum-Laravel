@@ -3,7 +3,13 @@ import laravel from 'laravel-vite-plugin';
 import vue from '@vitejs/plugin-vue';
 import tailwindcss from '@tailwindcss/vite';
 
+// 构建时间戳：dev 模式取当前时间，build 模式取打包时间
+const BUILD_TIME = new Date().toISOString();
+
 export default defineConfig({
+    define: {
+        __BUILD_TIME__: JSON.stringify(BUILD_TIME),
+    },
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.js', 'resources/js/admin.js'],

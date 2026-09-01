@@ -303,7 +303,7 @@ class NotificationService
                 (string) config('app.name'),
             ));
         } catch (\Throwable $e) {
-            Log::warning('发送通知邮件失败', [
+            Log::warning(__('messages.service_notificationservice_1'), [
                 'receiver_id' => $receiverId,
                 'type' => $type,
                 'error' => $e->getMessage(),

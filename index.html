@@ -167,8 +167,6 @@
         <h3>配置伪静态（URL 重写）</h3>
         <p>Nginx：</p>
         <pre>location / {
-    try_files $uri $uri/ /index.php$is_args$args;
-    或
     try_files $uri $uri/ /index.php?$query_string;
 }</pre>
         <p style="margin-top:8px">Apache：确保 <code>public/.htaccess</code> 包含：</p>
@@ -189,7 +187,7 @@
 
     <div class="tip">
       <strong>提示：</strong>此页面出现是因为网站运行目录未指向 <code>public/</code>。
-      请参考 <a href="https://github.com/HaiGeMaster/MaterialDesignForum-Laravel/README.md" target="_blank" rel="noopener">README.md</a> 步骤2安装指南完成部署配置。
+      <!-- 请参考 <a href="https://github.com/HaiGeMaster/MaterialDesignForum-Laravel/README.md" target="_blank" rel="noopener">README.md</a> 步骤2安装指南完成部署配置。 -->
     </div>
 
     <hr />

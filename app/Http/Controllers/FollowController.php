@@ -137,7 +137,7 @@ class FollowController extends Controller
 
         if (! $exists) {
             throw ValidationException::withMessages([
-                'id' => '关注的目标不存在。',
+                'id' => __('messages.http_follow_1'),
             ]);
         }
 
