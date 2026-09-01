@@ -33,7 +33,7 @@ const showEmpty = computed(() => !props.loading && props.items.length === 0)
 </script>
 
 <template>
-  <v-card  class="overflow-hidden fill-height">
+  <v-card rounded="lg"  class="overflow-hidden fill-height">
     <!-- 顶部标题栏 -->
     <div class="d-flex align-center px-4 py-3 border-b-thin">
       <v-icon :icon="icon" color="primary" size="small" class="mr-2" />

@@ -23,13 +23,13 @@ return new class extends Migration
             $table->string('name', 20)->charset('utf8mb4')->collate('utf8mb4_unicode_ci')->default('')->comment('话题名称');
             $table->string('cover', 2000)->charset('utf8mb4')->collate('utf8mb4_unicode_ci')->nullable()->comment('封面图片token');
             $table->string('description', 1000)->charset('utf8mb4')->collate('utf8mb4_unicode_ci')->default('')->comment('话题描述');
-            $table->unsignedInteger('article_count')->default(0)->comment('文章数量');
-            $table->unsignedInteger('question_count')->default(0)->comment('问题数量');
-            $table->unsignedInteger('follower_count')->default(0)->comment('关注者数量');
+            $table->unsignedInteger('article_count')->default(0)->comment('文章数量');//用户发布文章后，尺寸的数量应该变更。
+            $table->unsignedInteger('question_count')->default(0)->comment('问题数量');//用户发布问题后，此处的数量应该变更。
+            $table->unsignedInteger('follower_count')->default(0)->comment('关注者数量');//用户关注此话题后，此处的数量应该变更。
             $table->timestamp('create_time')->useCurrent()->comment('创建时间');
             $table->timestamp('update_time')->useCurrent()->comment('更新时间');
             $table->timestamp('delete_time')->nullable()->comment('删除时间');
-            
+
             $table->primary('topic_id');
         });
     }

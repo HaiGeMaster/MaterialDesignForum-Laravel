@@ -170,7 +170,7 @@ onBeforeUnmount(() => {
 <template>
     <!-- 参考旧项目布局：v-list-item 结构（头像 / 用户名 / 内容+回复 / 操作区） -->
     <v-list-item
-        rounded="lg"
+       
         active-class="text-primary"
         class="py-3 comment-item"
         @click="openReply"
@@ -227,7 +227,7 @@ onBeforeUnmount(() => {
             <v-expand-transition>
                 <v-card
                     v-if="expanded"
-                    rounded="lg"
+                   
                     variant="flat"
                     class="mt-1"
                     @click.stop
@@ -267,7 +267,7 @@ onBeforeUnmount(() => {
                 <!-- 查看 / 收起回复 -->
                 <v-btn
                     v-show="replyCount > 0"
-                    rounded="lg"
+                   
                     size="small"
                     variant="plain"
                     class="text-high-emphasis"
@@ -291,7 +291,7 @@ onBeforeUnmount(() => {
                 <v-btn
                     v-if="repliesLoaded"
                     v-show="!repliesFinished && replyCount > 0 && expanded"
-                    rounded="lg"
+                   
                     variant="text"
                     color="primary"
                     size="small"

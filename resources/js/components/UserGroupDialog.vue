@@ -31,6 +31,8 @@ const dialogOpen = computed({
 const DEFAULTS = {
   user_group_name: '',
   user_group_description: '',
+  user_group_icon: 'mdi-account',
+  user_group_color: '',
   user_group_icon_show: false,
   is_admin: false,
   ability_normal_login: true,
@@ -243,6 +245,15 @@ const descriptionRules = [
   (v) => (!v || v.trim().length <= 500 ? true : t('userGroupDialog.descriptionMax')),
 ]
 
+const iconRules = [
+  (v) => (!v || /^mdi-[a-z0-9-]+$/i.test(v.trim()) ? true : t('userGroupDialog.iconFormat')),
+  (v) => (!v || v.trim().length <= 50 ? true : t('userGroupDialog.iconMax')),
+]
+
+const colorRules = [
+  (v) => (!v || /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v.trim()) ? true : t('userGroupDialog.colorFormat')),
+]
+
 async function submit() {
   const { valid } = await formRef.value?.validate()
   if (!valid) return
@@ -278,10 +289,26 @@ async function submit() {
 
 <template>
   <v-dialog v-model="dialogOpen" max-width="800">
-    <v-card
-      :title="isEdit ? $t('userGroupDialog.titleEdit') : $t('userGroupDialog.titleNew')"
-      :prepend-icon="isEdit ? 'mdi-pencil-outline' : 'mdi-account-plus-outline'"
-    >
+    <v-card rounded="lg" >
+      <v-toolbar :title="isEdit ? $t('userGroupDialog.titleEdit') : $t('userGroupDialog.titleNew')">
+        <template #prepend>
+          <v-btn icon variant="text" @click="dialogOpen = false">
+            <v-icon>mdi-close</v-icon>
+            <v-tooltip activator="parent" location="right">
+              {{ $t('common.cancel') }}
+            </v-tooltip>
+          </v-btn>
+        </template>
+        <template #append>
+          <v-btn icon variant="text" :loading="submitting" @click="submit">
+            <v-icon>mdi-check</v-icon>
+            <v-tooltip activator="parent" location="left">
+              {{ isEdit ? $t('common.save') : $t('common.submit') }}
+            </v-tooltip>
+          </v-btn>
+        </template>
+      </v-toolbar>
+
       <v-card-text style="max-height: 65vh; overflow-y: auto;">
         <v-form ref="formRef" @submit.prevent="submit">
           <!-- 基础信息 -->
@@ -308,6 +335,45 @@ async function submit() {
             hide-details="auto"
             class="mb-3"
           />
+          <v-row class="mb-1">
+            <v-col cols="6">
+              <v-text-field
+                v-model="form.user_group_icon"
+                :label="$t('userGroupDialog.icon')"
+                :rules="iconRules"
+                counter="50"
+                variant="outlined"
+                density="compact"
+                hide-details="auto"
+                :hint="$t('userGroupDialog.iconHint')"
+                persistent-hint
+              >
+                <template #prepend-inner>
+                  <v-icon :icon="form.user_group_icon || 'mdi-account'" />
+                </template>
+              </v-text-field>
+            </v-col>
+            <v-col cols="6">
+              <v-text-field
+                v-model="form.user_group_color"
+                :label="$t('userGroupDialog.color')"
+                :rules="colorRules"
+                counter="20"
+                variant="outlined"
+                density="compact"
+                hide-details="auto"
+                :hint="$t('userGroupDialog.colorHint')"
+                persistent-hint
+              >
+                <template #append-inner>
+                  <span
+                    style="display:inline-block;width:20px;height:20px;border-radius:4px;border:1px solid rgba(0,0,0,.12);flex-shrink:0;"
+                    :style="{ backgroundColor: form.user_group_color || 'transparent' }"
+                  />
+                </template>
+              </v-text-field>
+            </v-col>
+          </v-row>
           <v-row class="mb-1">
             <v-col cols="6">
               <v-checkbox
@@ -378,14 +444,6 @@ async function submit() {
         </v-form>
       </v-card-text>
 
-      <v-divider />
-      <v-card-actions>
-        <v-spacer />
-        <v-btn variant="text" @click="dialogOpen = false">{{ $t('common.cancel') }}</v-btn>
-        <v-btn color="primary" variant="tonal" :loading="submitting" @click="submit">
-          {{ isEdit ? $t('common.save') : $t('common.submit') }}
-        </v-btn>
-      </v-card-actions>
     </v-card>
   </v-dialog>
 </template>

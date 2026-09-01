@@ -26,6 +26,9 @@ const { t } = useI18n()
 // 管理员模式：store.apiBase 优先于 prop
 const effectiveApiBase = computed(() => profileEdit.apiBase || props.apiBase)
 
+// 管理员模式：额外可编辑用户组
+const isAdmin = computed(() => Boolean(effectiveApiBase.value))
+
 const form = reactive({
   username: '',
   headline: '',
@@ -33,10 +36,23 @@ const form = reactive({
   blog: '',
   company: '',
   location: '',
+  user_group_id: null,
 })
 
 const formRef = ref(null)
 const saving = ref(false)
+
+// 管理员模式下可选的用户组列表（公开接口 GET /user-groups）
+const userGroups = ref([])
+
+async function loadUserGroups() {
+  try {
+    const { data } = await http.get('/user-groups')
+    userGroups.value = Array.isArray(data) ? data : []
+  } catch {
+    userGroups.value = []
+  }
+}
 
 // 打开对话框时用 store.user 填充表单
 watch(
@@ -50,6 +66,10 @@ watch(
       form.blog = user.blog ?? ''
       form.company = user.company ?? ''
       form.location = user.location ?? ''
+      form.user_group_id = user.user_group_id ?? null
+    }
+    if (visible && isAdmin.value) {
+      loadUserGroups()
     }
   },
 )
@@ -58,6 +78,9 @@ const rules = {
   username: [
     (v) => Boolean(v) || t('profileEdit.usernameRequired'),
     (v) => !v || v.length <= 30 || t('profileEdit.usernameTooLong'),
+  ],
+  userGroup: [
+    (v) => v != null || t('profileEdit.userGroupRequired'),
   ],
 }
 
@@ -79,6 +102,9 @@ async function save() {
       blog: form.blog,
       company: form.company,
       location: form.location,
+    }
+    if (isAdmin.value) {
+      payload.user_group_id = form.user_group_id
     }
 
     if (effectiveApiBase.value) {
@@ -108,10 +134,27 @@ async function save() {
 <template>
   <v-dialog :model-value="profileEdit.model" max-width="560"
     @update:model-value="(v) => { if (!v) profileEdit.close() }" :fullscreen="mobile">
-    <v-card >
-      <v-toolbar  :title="$t('profileEdit.title')">
+    <v-card rounded="lg" >
+      <v-toolbar :title="$t('profileEdit.title')">
+        <template v-slot:prepend>
+          <v-btn icon variant="text" @click="close" >
+            <v-icon>
+              mdi-close
+            </v-icon>
+            <v-tooltip activator="parent" location="right">
+              {{ $t('common.cancel') }}
+            </v-tooltip>
+          </v-btn>
+        </template>
         <template #append>
-          <v-btn icon="mdi-close" variant="text" @click="close" />
+          <v-btn icon variant="text" @click="save":loading="saving" >
+            <v-icon>
+              mdi-check
+            </v-icon>
+            <v-tooltip activator="parent" location="left">
+              {{ $t('common.save') }}
+            </v-tooltip>
+          </v-btn>
         </template>
       </v-toolbar>
 
@@ -125,6 +168,21 @@ async function save() {
                 :rules="rules.username"
                 variant="outlined"
                 density="comfortable"
+              />
+            </v-col>
+
+            <!-- 管理员模式：变更用户所属用户组 -->
+            <v-col v-if="isAdmin" cols="12">
+              <v-select
+                v-model="form.user_group_id"
+                :label="$t('profileEdit.userGroup')"
+                :items="userGroups"
+                item-title="user_group_name"
+                item-value="user_group_id"
+                :rules="rules.userGroup"
+                variant="outlined"
+                density="comfortable"
+                :loading="userGroups.length === 0"
               />
             </v-col>
 
@@ -184,11 +242,11 @@ async function save() {
         </v-form>
       </v-card-text>
 
-      <v-card-actions>
+      <!-- <v-card-actions>
         <v-spacer />
         <v-btn variant="text" @click="close">{{ $t('common.cancel') }}</v-btn>
         <v-btn color="primary" :loading="saving" @click="save">{{ $t('common.save') }}</v-btn>
-      </v-card-actions>
+      </v-card-actions> -->
     </v-card>
   </v-dialog>
 </template>

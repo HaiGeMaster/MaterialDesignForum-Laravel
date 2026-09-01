@@ -355,11 +355,34 @@ abstract class Controller
             ->groupBy('user_id')
             ->pluck('cnt', 'user_id');
 
-        return $users->each(function ($user) use ($followee, $follower, $answer) {
+        // 我关注的话题 / 问题 / 文章数量
+        $followingTopic = Follow::query()
+            ->where('followable_type', 'topic')
+            ->whereIn('user_id', $ids)
+            ->selectRaw('user_id, COUNT(*) as cnt')
+            ->groupBy('user_id')
+            ->pluck('cnt', 'user_id');
+        $followingQuestion = Follow::query()
+            ->where('followable_type', 'question')
+            ->whereIn('user_id', $ids)
+            ->selectRaw('user_id, COUNT(*) as cnt')
+            ->groupBy('user_id')
+            ->pluck('cnt', 'user_id');
+        $followingArticle = Follow::query()
+            ->where('followable_type', 'article')
+            ->whereIn('user_id', $ids)
+            ->selectRaw('user_id, COUNT(*) as cnt')
+            ->groupBy('user_id')
+            ->pluck('cnt', 'user_id');
+
+        return $users->each(function ($user) use ($followee, $follower, $answer, $followingTopic, $followingQuestion, $followingArticle) {
             $id = $user->getKey();
             $user->followee_count = (int) ($followee[$id] ?? 0);
             $user->follower_count = (int) ($follower[$id] ?? 0);
             $user->answer_count = (int) ($answer[$id] ?? 0);
+            $user->following_topic_count = (int) ($followingTopic[$id] ?? 0);
+            $user->following_question_count = (int) ($followingQuestion[$id] ?? 0);
+            $user->following_article_count = (int) ($followingArticle[$id] ?? 0);
         });
     }
 

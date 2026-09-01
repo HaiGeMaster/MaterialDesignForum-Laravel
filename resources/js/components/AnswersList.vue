@@ -115,7 +115,7 @@ onBeforeUnmount(() => window.removeEventListener('content:published', handleCont
 </script>
 
 <template>
-  <v-card id="answers" class="mt-4">
+  <v-card rounded="lg" id="answers" class="mt-4">
     <ListHeader v-if="!answerId" :title="title" :sort="sort" :sort-items="sortItems" @update:sort="(v) => (sort = v)" />
     <ListHeader v-else :title="title" />
 

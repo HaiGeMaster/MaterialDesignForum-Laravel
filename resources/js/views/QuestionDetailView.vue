@@ -141,12 +141,15 @@ onUnmounted(() => {
 
     <template v-if="question">
       <!-- 问题主体 -->
-      <v-card  class="overflow-hidden mb-4">
+      <v-card rounded="lg"  class="overflow-hidden mb-4">
         <!-- 应用栏：返回 / 标题 / 关注 -->
         <v-toolbar :title="question.title">
           <template v-slot:prepend>
-            <v-btn icon variant="text" :title="$t('common.back')" @click="router.back()">
+            <v-btn icon variant="text" @click="router.back()">
               <v-icon>mdi-arrow-left</v-icon>
+              <v-tooltip activator="parent" location="right">
+                {{ $t('common.back') }}
+              </v-tooltip>
             </v-btn>
           </template>
           <template v-slot:append>
@@ -255,7 +258,7 @@ onUnmounted(() => {
 
     <v-empty-state
       v-else-if="!loading"
-      icon="mdi-help-circle-outline"
+      icon="mdi-forum"
       :title="$t('questionDetail.notFound')"
       :text="$t('questionDetail.notFoundText')"
     />

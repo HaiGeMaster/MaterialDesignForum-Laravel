@@ -1,6 +1,6 @@
 <template>
   <v-dialog :model-value="store.model" max-width="420" @update:model-value="store.close">
-    <v-card :title="store.title" :prepend-icon="store.icon">
+    <v-card rounded="lg" :title="store.title" :prepend-icon="store.icon">
       <v-card-text>
         {{ store.text }}
       </v-card-text>

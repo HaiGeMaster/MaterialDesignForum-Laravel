@@ -24,7 +24,7 @@ async function submit() {
   if (!text || submitting.value) return
   if (!authStore.isLoggedIn) {
     show(t('commentSheet.loginFirst'), 'info')
-    router.push('/users/me')
+    router.push('/login')
     return
   }
   submitting.value = true
@@ -74,7 +74,7 @@ async function submit() {
         <v-text-field
           v-model="content"
           color="primary"
-          rounded="lg"
+
           variant="outlined"
           :placeholder="t('replySheet.placeholder')"
           hide-details="auto"
@@ -83,7 +83,7 @@ async function submit() {
         >
           <template v-slot:append-inner>
             <v-btn
-              rounded="lg"
+
               variant="flat"
               color="primary"
               :loading="submitting"

@@ -58,7 +58,27 @@ async function save() {
 
 <template>
   <v-dialog v-model="store.visible" max-width="520">
-    <v-card :title="title" prepend-icon="mdi-pencil">
+    <v-card rounded="lg" >
+      <v-toolbar :title="title">
+        <template #prepend>
+          <v-btn icon variant="text" @click="store.close()">
+            <v-icon>mdi-close</v-icon>
+            <v-tooltip activator="parent" location="right">
+              {{ t('common.cancel') }}
+            </v-tooltip>
+          </v-btn>
+        </template>
+        <template #append>
+          <v-btn icon variant="text" :loading="saving" @click="save">
+            <v-icon>mdi-check</v-icon>
+            <v-tooltip activator="parent" location="left">
+              {{ t('commentReplyEditDialog.save') }}
+            </v-tooltip>
+          </v-btn>
+        </template>
+      </v-toolbar>
+
+      <v-divider />
 
       <v-card-text>
         <v-textarea
@@ -73,16 +93,6 @@ async function save() {
           hide-details="auto"
         />
       </v-card-text>
-
-      <v-card-actions>
-        <v-spacer />
-        <v-btn variant="text" @click="store.close()">
-          {{ t('common.cancel') }}
-        </v-btn>
-        <v-btn color="primary" variant="tonal" :loading="saving" @click="save">
-          {{ t('commentReplyEditDialog.save') }}
-        </v-btn>
-      </v-card-actions>
     </v-card>
   </v-dialog>
 </template>

@@ -39,7 +39,7 @@ function handleMore(item, action) {
 
 // 当前 tab：未登录时不显示「我关注的」
 const tab = computed(() => {
-  const t = route.query.tab
+  const t = route.hash.slice(1)
   if (t === 'latest') return 'latest'
   if (t === 'following' && authStore.isLoggedIn) return 'following'
   return 'hot'
@@ -99,7 +99,7 @@ watch(tab, () => load(true))
   <v-container  :class="xs ? 'pa-0' : 'px-4'" :style="$route.meta.maxWidth ? { maxWidth: `${$route.meta.maxWidth}px`, margin: '0 auto' } : {}">
     <v-progress-linear v-if="loading && !questions.length" indeterminate color="primary" class="mb-3" />
 
-    <v-card v-if="questions.length"  class="overflow-hidden mb-3">
+    <v-card rounded="lg" v-if="questions.length"  class="overflow-hidden mb-3">
       <v-list lines="two" style="padding: 0">
         <ContentListItem
           v-for="q in questions"

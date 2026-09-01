@@ -29,7 +29,7 @@ const error = ref(false)
 // 当前 tab：未登录时强制推荐人脉
 const tab = computed(() => {
   if (!authStore.isLoggedIn) return 'recommend'
-  const t = route.query.tab
+  const t = route.hash.slice(1)
   return t === 'following' || t === 'followers' ? t : 'recommend'
 })
 

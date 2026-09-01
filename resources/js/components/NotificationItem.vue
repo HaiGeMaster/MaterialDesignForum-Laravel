@@ -116,7 +116,7 @@ function notificationIcon(item) {
 
 <template>
   <v-list-item
-    rounded="lg"
+   
     :to="notificationLink(item)"
     class="notification-item px-2"
     lines="two"

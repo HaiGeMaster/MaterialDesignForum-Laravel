@@ -52,7 +52,7 @@ async function toggleVote(type) {
   // 未登录时引导到登录页（个人资料页）
   if (!authStore.isLoggedIn) {
     show(t('vote.loginFirst'), 'info')
-    router.push('/users/me')
+    router.push('/login')
     return
   }
 

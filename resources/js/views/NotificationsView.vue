@@ -96,7 +96,7 @@ function goToSetting() {
 }
 
 function goToLogin() {
-  router.push('/users/me')
+  router.push('/login')
 }
 
 onMounted(() => {
@@ -106,27 +106,35 @@ onMounted(() => {
 
 <template>
   <v-container :class="xs ? 'pa-0' : 'px-4'" class="notifications-view" :style="$route.meta.maxWidth ? { maxWidth: `${$route.meta.maxWidth}px`, margin: '0 auto' } : {}">
-    <v-card class="mx-auto" max-width="720" rounded="lg">
-      <v-toolbar >
-        <v-btn icon="mdi-arrow-left" variant="text" @click="router.back()" />
-        <v-toolbar-title>{{ $t('notifications.title') }}</v-toolbar-title>
-        <v-menu v-if="authStore.isLoggedIn">
-          <template #activator="{ props }">
-            <v-btn icon="mdi-dots-vertical" variant="text" v-bind="props" />
-          </template>
-          <v-list density="compact" nav>
-            <v-list-item
-              :prepend-icon="'mdi-delete-sweep'"
-              :title="$t('notifications.clearAll')"
-              @click="askClearAll"
-            />
-            <v-list-item
-              :prepend-icon="'mdi-cog'"
-              :title="$t('notifications.setting')"
-              @click="goToSetting"
-            />
-          </v-list>
-        </v-menu>
+    <v-card rounded="lg" class="mx-auto">
+      <v-toolbar :title="$t('notifications.title')">
+        <template #prepend>
+          <v-btn icon variant="text" @click="router.back()">
+            <v-icon>mdi-arrow-left</v-icon>
+            <v-tooltip activator="parent" location="right">
+              {{ $t('common.back') }}
+            </v-tooltip>
+          </v-btn>
+        </template>
+        <template #append>
+          <v-menu v-if="authStore.isLoggedIn">
+            <template #activator="{ props }">
+              <v-btn icon="mdi-dots-vertical" variant="text" v-bind="props" />
+            </template>
+            <v-list density="compact" nav>
+              <v-list-item
+                :prepend-icon="'mdi-delete-sweep'"
+                :title="$t('notifications.clearAll')"
+                @click="askClearAll"
+              />
+              <v-list-item
+                :prepend-icon="'mdi-cog'"
+                :title="$t('notifications.setting')"
+                @click="goToSetting"
+              />
+            </v-list>
+          </v-menu>
+        </template>
       </v-toolbar>
 
       <v-divider />

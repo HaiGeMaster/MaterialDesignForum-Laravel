@@ -78,18 +78,22 @@ function insertFromLibrary() {
 
 <template>
   <v-dialog v-model="open" max-width="760" scrollable>
-    <v-card>
-      <v-toolbar density="comfortable">
-        <v-toolbar-title class="text-subtitle-1">{{ $t('editor.libraryDialogTitle') }}</v-toolbar-title>
-        <template #append>
-          <v-btn icon="mdi-close" variant="text" @click="open = false" />
+    <v-card rounded="lg" >
+      <v-toolbar :title="$t('editor.libraryDialogTitle')">
+        <template #prepend>
+          <v-btn icon variant="text" @click="open = false">
+            <v-icon>mdi-close</v-icon>
+            <v-tooltip activator="parent" location="right">
+              {{ $t('common.close') }}
+            </v-tooltip>
+          </v-btn>
         </template>
       </v-toolbar>
 
       <v-card-text class="pa-2">
         <div v-if="libraryItems.length" class="library-grid">
           <v-hover v-for="item in libraryItems" :key="item.media_id" v-slot="{ isHovering, props }">
-            <v-card v-bind="props" class="library-item cursor-pointer"
+            <v-card rounded="lg" v-bind="props" class="library-item cursor-pointer"
               :class="{ 'library-item--selected': librarySelected.has(item.media_id) }"
               :elevation="isHovering ? 4 : 1"
               @click="toggleLibraryItem(item.media_id)">

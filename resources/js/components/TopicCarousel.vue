@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import http from '../api'
 import TopicCard from './TopicCard.vue'
 import { useDisplay } from 'vuetify'
@@ -8,6 +8,24 @@ const topics = ref([])
 const loading = ref(false)
 const scroller = ref(null)
 const { xs } = useDisplay()
+
+// 滚动位置状态：到达最左/最右时隐藏对应的方向按钮
+const canPrev = ref(false)
+const canNext = ref(false)
+
+function updateNavState() {
+  const el = scroller.value
+  if (!el) return
+  // 容差 1px 避免浮点/亚像素误差导致按钮在尽头仍闪现
+  canPrev.value = el.scrollLeft > 1
+  canNext.value = el.scrollLeft + el.clientWidth < el.scrollWidth - 1
+}
+
+// 内容变化（数据到达）后重新计算，此时卡片宽度才确定
+watch(topics, async () => {
+  await nextTick()
+  updateNavState()
+})
 
 async function fetchTopics() {
   loading.value = true
@@ -21,7 +39,25 @@ async function fetchTopics() {
   }
 }
 
-onMounted(fetchTopics)
+onMounted(() => {
+  fetchTopics()
+  const el = scroller.value
+  if (el) {
+    el.addEventListener('scroll', updateNavState, { passive: true })
+    window.addEventListener('resize', onWindowResize)
+    requestAnimationFrame(updateNavState)
+  }
+})
+
+onBeforeUnmount(() => {
+  scroller.value?.removeEventListener('scroll', updateNavState)
+  window.removeEventListener('resize', onWindowResize)
+})
+
+// 窗口尺寸变化会改变一屏卡片数（--per-view 响应式），需要重算是否可滚动
+function onWindowResize() {
+  updateNavState()
+}
 
 // 关注状态由服务器随列表数据返回（topic.is_following），切换后回写最新状态与关注数
 function toggleFollow(topic, { following, followerCount }) {
@@ -44,8 +80,9 @@ function scrollByCard(dir) {
   <div class="topic-carousel " :class="
   xs ? 'pl-3' : 'px-3'
   ">
-    <!-- 上一页按钮（仅在鼠标设备显示） -->
+    <!-- 上一页按钮（仅在鼠标设备显示，滚到最左时隐藏） -->
     <v-btn
+      v-show="canPrev"
       class="carousel-nav carousel-prev"
       icon
       variant="flat"
@@ -62,8 +99,9 @@ function scrollByCard(dir) {
       </div>
     </div>
 
-    <!-- 下一页按钮（仅在鼠标设备显示） -->
+    <!-- 下一页按钮（仅在鼠标设备显示，滚到最右时隐藏） -->
     <v-btn
+      v-show="canNext"
       class="carousel-nav carousel-next"
       icon
       variant="flat"

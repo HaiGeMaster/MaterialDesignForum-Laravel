@@ -25,7 +25,7 @@ function handleContentPublished(payload) {
 
 function handleUnauthorized() {
   authStore.setUser(null)
-  window.location.assign('/users/me?redirect=%2Fadmin%2F')
+  window.location.assign('/login?redirect=%2Fadmin%2F')
 }
 
 onMounted(() => {

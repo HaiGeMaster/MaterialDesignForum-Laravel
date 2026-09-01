@@ -93,7 +93,7 @@ onUnmounted(() => {
 
   <!-- 主题选择对话框 -->
   <v-dialog v-model="dialog" max-width="480" scrollable>
-    <v-card>
+    <v-card rounded="lg" >
       <v-card-title class="d-flex align-center pa-4 pb-2">
         <v-icon icon="mdi-palette-outline" class="me-2" />
         {{ $t('themeDialog.title') }}

@@ -13,16 +13,15 @@ const props = defineProps({
 
 <template>
     <v-dialog v-model="open" max-width="880" scrollable>
-        <v-card style="margin-top: 40px;">
-            <v-toolbar>
+        <v-card rounded="lg" style="margin-top: 40px;">
+            <v-toolbar :title="props.item?.filename">
                 <template #prepend>
-                    <v-btn icon="mdi-image-outline"></v-btn>
-                </template>
-                <v-toolbar-title>
-                    {{ props.item?.filename }}
-                </v-toolbar-title>
-                <template #append>
-                    <v-btn icon="mdi-close" variant="text" @click="open = false" />
+                    <v-btn icon variant="text" @click="open = false">
+                        <v-icon>mdi-close</v-icon>
+                        <v-tooltip activator="parent" location="right">
+                            {{ $t('common.close') }}
+                        </v-tooltip>
+                    </v-btn>
                 </template>
             </v-toolbar>
             <v-card-text class="pa-0 bg-black">

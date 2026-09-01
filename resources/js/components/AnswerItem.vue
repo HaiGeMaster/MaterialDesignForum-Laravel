@@ -54,7 +54,7 @@ function openComments() {
 <template>
   <!-- 参考旧项目布局：v-list-item 结构（头像 / 用户名 / 内容 / 操作区） -->
   <v-list-item
-    rounded="lg"
+   
     active-class="text-primary"
     class="py-3 answer-item"
     @click="openComments"

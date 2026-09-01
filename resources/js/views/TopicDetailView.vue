@@ -121,7 +121,7 @@ onMounted(fetchTopic)
 <template>
   <v-container  :class="xs ? 'px-0' : 'px-4'" :style="$route.meta.maxWidth ? { maxWidth: `${$route.meta.maxWidth}px`, margin: '0 auto' } : {}">
     <div class="d-flex align-center mb-4">
-      <v-btn size="small" variant="tonal" prepend-icon="mdi-arrow-left" to="/topics">
+      <v-btn  variant="tonal" prepend-icon="mdi-arrow-left" to="/topics">
         {{ $t('topicDetail.backToList') }}
       </v-btn>
     </div>
@@ -130,7 +130,7 @@ onMounted(fetchTopic)
 
     <template v-if="topic">
       <!-- 话题信息卡片 -->
-      <v-card  class="overflow-hidden mb-4">
+      <v-card rounded="lg"  class="overflow-hidden mb-4">
         <!-- 左右布局：左侧封面 + 右侧信息 -->
         <div class="topic-header">
           <!-- 封面（左侧较小） -->
@@ -152,7 +152,7 @@ onMounted(fetchTopic)
             <v-avatar
               size="28"
               color="primary"
-              
+
               class="cursor-pointer"
               @click="goCreator"
             >
@@ -198,7 +198,7 @@ onMounted(fetchTopic)
       </v-card>
 
       <!-- 话题下的文章与问题 -->
-      <v-card >
+      <v-card rounded="lg" >
         <v-tabs v-model="activeTab" color="primary" grow>
           <v-tab value="articles">
             <v-icon start icon="mdi-file-document" />
@@ -239,7 +239,7 @@ onMounted(fetchTopic)
 
     <v-empty-state
       v-else-if="!loading"
-      icon="mdi-tag-off"
+      icon="mdi-book-variant"
       :title="$t('topicDetail.notFound')"
       :text="$t('topicDetail.notFoundText')"
     />

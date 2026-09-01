@@ -154,13 +154,27 @@ async function submit() {
 
 <template>
   <v-dialog v-model="dialogOpen" max-width="520">
-    <v-card >
-      <v-toolbar :title="$t('reportDialog.title')" >
+    <v-card rounded="lg" >
+      <v-toolbar :title="$t('reportDialog.title')">
         <template #prepend>
-          <v-btn icon="mdi-flag-checkered" />
+          <v-btn icon variant="text" @click="dialogOpen = false">
+            <v-icon>
+              mdi-close
+            </v-icon>
+            <v-tooltip activator="parent" location="right">
+              {{ $t('common.cancel') }}
+            </v-tooltip>
+          </v-btn>
         </template>
         <template #append>
-          <v-btn icon="mdi-close" variant="text" @click="dialogOpen = false" />
+          <v-btn icon variant="text" :loading="submitting" @click="submit">
+            <v-icon>
+              mdi-check
+            </v-icon>
+            <v-tooltip activator="parent" location="left">
+              {{ $t('common.save') }}
+            </v-tooltip>
+          </v-btn>
         </template>
       </v-toolbar>
       <v-divider />
@@ -182,12 +196,12 @@ async function submit() {
 
           <!-- 举报对象内容预览 -->
           <div class="text-subtitle-2 text-medium-emphasis mb-1">{{ $t('reportDialog.reportedContent') }}</div>
-          <v-card v-if="contentLoading" variant="outlined" class="mb-3" flat>
+          <v-card rounded="lg" v-if="contentLoading" variant="outlined" class="mb-3" flat>
             <v-card-text class="d-flex align-center justify-center py-6">
               <v-progress-circular indeterminate size="small" />
             </v-card-text>
           </v-card>
-          <v-card v-else-if="contentPreview" variant="outlined" class="mb-3" flat>
+          <v-card rounded="lg" v-else-if="contentPreview" variant="outlined" class="mb-3" flat>
             <v-card-text>
               <div v-if="contentPreview.title" class="text-subtitle-1 font-weight-bold mb-2">
                 {{ contentPreview.title }}
@@ -228,14 +242,6 @@ async function submit() {
         </v-radio-group>
       </v-card-text>
 
-      <v-divider />
-      <v-card-actions>
-        <v-spacer />
-        <v-btn variant="text" @click="dialogOpen = false">{{ $t('common.cancel') }}</v-btn>
-        <v-btn color="primary" variant="tonal" :loading="submitting" @click="submit">
-          {{ $t('common.save') }}
-        </v-btn>
-      </v-card-actions>
     </v-card>
   </v-dialog>
 </template>

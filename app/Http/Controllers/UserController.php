@@ -88,6 +88,9 @@ class UserController extends Controller
      */
     public function show(Request $request, User $user)
     {
+        // 加载用户组，供前端展示用户组标识（他人主页同样需要）
+        $user->load('userGroup');
+
         $this->attachUserCounts(collect([$user]));
 
         return response()->json($this->appendFollowStatusToModel($user, $request, 'user'));

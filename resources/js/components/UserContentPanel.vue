@@ -3,10 +3,8 @@ import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import http from '../api'
-import { useAuthStore } from '../stores/auth'
 import { useInfiniteList } from '../composables/useInfiniteList'
 import InfiniteScroll from './InfiniteScroll.vue'
-import UserMediaLibrary from './UserMediaLibrary.vue'
 
 const props = defineProps({
     /** 用户 ID */
@@ -14,7 +12,6 @@ const props = defineProps({
 })
 
 const { t } = useI18n()
-const authStore = useAuthStore()
 const router = useRouter()
 
 // 点击问题 / 文章 / 回答进入对应详情页
@@ -27,12 +24,6 @@ function goDetail(item, type) {
         router.push(`/questions/${item.question_id}`)
     }
 }
-
-// 媒体库仅本人可见：浏览他人主页时隐藏该标签
-const isSelf = computed(() => {
-    const me = authStore.user
-    return Boolean(me) && String(me.user_id) === String(props.userId)
-})
 
 const tab = ref('questions')
 
@@ -130,21 +121,11 @@ function answerTitle(item) {
 </script>
 
 <template>
-    <v-card class="overflow-hidden">
+    <v-card rounded="lg" class="overflow-hidden">
         <v-tabs v-model="tab" color="primary" grow @update:model-value="handleTabChange">
             <v-tab value="questions">{{ $t('userContent.questions') }}</v-tab>
             <v-tab value="articles">{{ $t('userContent.articles') }}</v-tab>
             <v-tab value="answers">{{ $t('userContent.answers') }}</v-tab>
-            <v-tab v-if="isSelf" value="media">
-                <span class="d-inline-flex align-center">
-                    {{ $t('userContent.media') }}
-                    <v-tooltip :text="$t('userContent.mediaPrivate')" location="top">
-                        <template #activator="{ props: tipProps }">
-                            <v-icon v-bind="tipProps" size="small" class="ml-1">mdi-lock-outline</v-icon>
-                        </template>
-                    </v-tooltip>
-                </span>
-            </v-tab>
         </v-tabs>
 
         <v-progress-linear v-if="loading" indeterminate color="primary" />
@@ -171,7 +152,7 @@ function answerTitle(item) {
                     @load="loadQuestionsNext"
                     @retry="retryQuestions"
                 />
-                <v-empty-state v-else-if="!questionsLoading" icon="mdi-comment-question-outline"
+                <v-empty-state v-else-if="!questionsLoading" icon="mdi-forum"
                     :title="$t('userContent.emptyQuestionsTitle')" :text="$t('userContent.emptyQuestionsText')"
                     class="pa-4" />
             </v-window-item>
@@ -197,7 +178,7 @@ function answerTitle(item) {
                     @load="loadArticlesNext"
                     @retry="retryArticles"
                 />
-                <v-empty-state v-else-if="!articlesLoading" icon="mdi-file-document-outline"
+                <v-empty-state v-else-if="!articlesLoading" icon="mdi-file-document"
                     :title="$t('userContent.emptyArticlesTitle')" :text="$t('userContent.emptyArticlesText')"
                     class="pa-4" />
             </v-window-item>
@@ -223,14 +204,9 @@ function answerTitle(item) {
                     @load="loadAnswersNext"
                     @retry="retryAnswers"
                 />
-                <v-empty-state v-else-if="!answersLoading" icon="mdi-message-processing-outline"
+                <v-empty-state v-else-if="!answersLoading" icon="mdi-message-reply"
                     :title="$t('userContent.emptyAnswersTitle')" :text="$t('userContent.emptyAnswersText')"
                     class="pa-4" />
-            </v-window-item>
-
-            <!-- 媒体库（仅本人可见） -->
-            <v-window-item v-if="isSelf" value="media">
-                <UserMediaLibrary :key="props.userId" :userId="props.userId" />
             </v-window-item>
         </v-window>
     </v-card>

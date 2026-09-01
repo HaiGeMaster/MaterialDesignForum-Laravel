@@ -5,7 +5,6 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
 import { useUserStore } from '../stores/user'
 import { useFeedback } from '../composables/useFeedback'
-import AuthForm from '../components/AuthForm.vue'
 import UserContentPanel from '../components/UserContentPanel.vue'
 import UserProfileCard from '../components/UserProfileCard.vue'
 
@@ -64,34 +63,6 @@ function handleToggleFollow({ following, followerCount }) {
   }
 }
 
-// ---------- 登录 / 注册 ----------
-async function handleLogin(payload) {
-  try {
-    const result = await authStore.login(payload)
-    feedback(t('profile.welcomeBack', { username: result.user.username }), 'success')
-  } catch (error) {
-    feedback(error.message, 'error')
-  }
-}
-
-async function handleRegister(payload) {
-  try {
-    const result = await authStore.register(payload)
-    feedback(t('profile.registered', { username: result.user.username }), 'success')
-  } catch (error) {
-    feedback(error.message, 'error')
-  }
-}
-
-async function handleResetPassword(payload) {
-  try {
-    const result = await authStore.resetPassword(payload)
-    feedback(t('profile.passwordReset', { username: result.user.username }), 'success')
-  } catch (error) {
-    feedback(error.message, 'error')
-  }
-}
-
 function handleMore(action) {
   feedback(t('common.developing'), 'info')
 }
@@ -99,16 +70,8 @@ function handleMore(action) {
 
 <template>
   <v-container  :class="xs ? 'pa-0' : 'px-4'" :style="$route.meta.maxWidth ? { maxWidth: `${$route.meta.maxWidth}px`, margin: '0 auto' } : {}">
-    <!-- 未登录且访问"me"或无法确认目标时：登录 / 注册 -->
-    <AuthForm v-if="!isLoggedIn && !viewingOther"
-      :loading="authStore.loading"
-      @login="handleLogin"
-      @register="handleRegister"
-      @reset-password="handleResetPassword"
-    />
-
-    <!-- 他人主页（未登录也可查看基本信息） -->
-    <template v-else-if="viewingOther">
+    <!-- 他人主页（未登录也可查看基本信息；/users/me 未登录由路由守卫重定向到登录页） -->
+    <template v-if="viewingOther">
       <UserProfileCard
         v-if="viewedUser"
         mode="other"

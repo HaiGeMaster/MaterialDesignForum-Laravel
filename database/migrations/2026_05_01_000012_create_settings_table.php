@@ -18,7 +18,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('option', function (Blueprint $table) {
+        Schema::create('settings', function (Blueprint $table) {
             $table->string('name', 40)->charset('utf8mb4')->collate('utf8mb4_unicode_ci')->default('')->comment('字段名');
             $table->text('value')->charset('utf8mb4')->collate('utf8mb4_unicode_ci')->comment('字段值');
             
@@ -26,7 +26,7 @@ return new class extends Migration
         });
 
         // 插入默认设置数据
-        DB::table('option')->insert([
+        DB::table('settings')->insert([
             ['name' => 'default_language',  'value' => 'en_US'],
             ['name' => 'site_description',  'value' => 'Material Design Forum · For design, for standards, for a better interface · 为设计，为规范，为更好的界面'],
             ['name' => 'site_gongan_beian', 'value' => ''],
@@ -42,6 +42,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('option');
+        Schema::dropIfExists('settings');
     }
 };

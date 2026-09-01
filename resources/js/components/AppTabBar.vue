@@ -10,7 +10,8 @@ const { tabs, visible, active } = useTabBar()
 
 function selectTab(value) {
   if (value === active.value) return
-  router.push({ query: { ...route.query, tab: value } })
+  // Vue Router 4 不会自动补 #，需显式带上前缀，否则 URL 会拼成 /topicsrecommend
+  router.push({ hash: `#${value}` })
 }
 </script>
 

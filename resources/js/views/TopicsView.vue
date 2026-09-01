@@ -16,7 +16,7 @@ const authStore = useAuthStore()
 // 当前 tab：未登录时强制推荐话题
 const tab = computed(() => {
   if (!authStore.isLoggedIn) return 'recommend'
-  return route.query.tab === 'following' ? 'following' : 'recommend'
+  return route.hash.slice(1) === 'following' ? 'following' : 'recommend'
 })
 
 // 每个 tab 的空状态文案不同

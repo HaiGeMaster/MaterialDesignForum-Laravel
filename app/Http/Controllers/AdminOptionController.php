@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 class AdminOptionController extends Controller
 {
@@ -52,14 +54,14 @@ class AdminOptionController extends Controller
         $availableThemes = $validated['available_themes'] ?? ['light', 'dark'];
         $customThemes = $validated['custom_themes'] ?? [];
 
-        DB::table('option')->updateOrInsert(['name' => 'theme'], ['value' => $defaultTheme]);
-        DB::table('option')->updateOrInsert(['name' => 'default_theme'], ['value' => $defaultTheme]);
-        DB::table('option')->updateOrInsert(['name' => 'available_themes'], ['value' => implode(',', $availableThemes)]);
-        DB::table('option')->updateOrInsert(['name' => 'custom_themes'], ['value' => json_encode($customThemes, JSON_UNESCAPED_SLASHES)]);
+        DB::table('settings')->updateOrInsert(['name' => 'theme'], ['value' => $defaultTheme]);
+        DB::table('settings')->updateOrInsert(['name' => 'default_theme'], ['value' => $defaultTheme]);
+        DB::table('settings')->updateOrInsert(['name' => 'available_themes'], ['value' => implode(',', $availableThemes)]);
+        DB::table('settings')->updateOrInsert(['name' => 'custom_themes'], ['value' => json_encode($customThemes, JSON_UNESCAPED_SLASHES)]);
 
         // 兼容旧版 theme_color 存储
         if (isset($validated['colors'])) {
-            DB::table('option')->updateOrInsert([
+            DB::table('settings')->updateOrInsert([
                 'name' => 'theme_color',
             ], [
                 'value' => json_encode($validated['colors'], JSON_UNESCAPED_SLASHES),
@@ -194,7 +196,7 @@ class AdminOptionController extends Controller
 
     public function siteInfo()
     {
-        $rows = DB::table('option')
+        $rows = DB::table('settings')
             ->whereIn('name', self::SITE_FIELDS)
             ->pluck('value', 'name');
 
@@ -206,9 +208,92 @@ class AdminOptionController extends Controller
         return response()->json(['data' => $data]);
     }
 
+    public function about()
+    {
+        $siteName = (string) DB::table('settings')->where('name', 'site_name')->value('value');
+
+        return response()->json([
+            'name' => $siteName !== '' ? $siteName : (string) config('app.name', 'MDForum'),
+            'version' => (string) config('app.version', '1.0.0'),
+            'laravel_version' => \Illuminate\Foundation\Application::VERSION,
+            'php_version' => PHP_VERSION,
+            'environment' => App::environment(),
+            'url' => (string) config('app.url'),
+            'year' => (int) date('Y'),
+        ]);
+    }
+
+    public function checkUpdate()
+    {
+        $current = (string) config('app.version', '1.0.0');
+        $source = (string) DB::table('settings')->where('name', 'update_source')->value('value');
+
+        if ($source === '') {
+            return response()->json([
+                'is_update' => false,
+                'source_configured' => false,
+                'check_failed' => false,
+                'current_version' => $current,
+                'latest_version' => null,
+                'download_url' => null,
+            ]);
+        }
+
+        try {
+            $payload = Http::timeout(8)->acceptJson()->get($source)->throw()->json();
+        } catch (\Throwable) {
+            return response()->json([
+                'is_update' => false,
+                'source_configured' => true,
+                'check_failed' => true,
+                'current_version' => $current,
+                'latest_version' => null,
+                'download_url' => null,
+            ]);
+        }
+
+        $latest = (string) ($payload['latest_version'] ?? $payload['version'] ?? '');
+        $downloadUrl = (string) ($payload['download_url'] ?? '');
+        $changelog = (string) ($payload['changelog'] ?? '');
+
+        return response()->json([
+            'is_update' => $latest !== '' && version_compare($latest, $current, '>'),
+            'source_configured' => true,
+            'check_failed' => false,
+            'current_version' => $current,
+            'latest_version' => $latest !== '' ? $latest : null,
+            'download_url' => $downloadUrl !== '' ? $downloadUrl : null,
+            'changelog' => $changelog,
+        ]);
+    }
+
+    public function updateSource()
+    {
+        return response()->json([
+            'update_source' => (string) DB::table('settings')->where('name', 'update_source')->value('value'),
+        ]);
+    }
+
+    public function updateUpdateSource(Request $request)
+    {
+        $validated = $request->validate([
+            'update_source' => ['nullable', 'url', 'max:500'],
+        ]);
+
+        DB::table('settings')->updateOrInsert(
+            ['name' => 'update_source'],
+            ['value' => (string) ($validated['update_source'] ?? '')],
+        );
+
+        return response()->json([
+            'is_set' => true,
+            'update_source' => (string) ($validated['update_source'] ?? ''),
+        ]);
+    }
+
     private function themeData(): array
     {
-        $rows = DB::table('option')->whereIn('name', [
+        $rows = DB::table('settings')->whereIn('name', [
             'theme', 'theme_color', 'default_theme', 'available_themes', 'custom_themes',
             'site_name', 'site_icp_beian', 'site_gongan_beian',
         ])->pluck('value', 'name');
@@ -249,7 +334,7 @@ class AdminOptionController extends Controller
 
         DB::transaction(function () use ($validated) {
             foreach (self::SITE_FIELDS as $field) {
-                DB::table('option')->updateOrInsert(
+                DB::table('settings')->updateOrInsert(
                     ['name' => $field],
                     ['value' => $validated[$field] ?? ''],
                 );

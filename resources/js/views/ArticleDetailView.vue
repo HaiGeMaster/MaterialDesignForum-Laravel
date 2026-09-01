@@ -132,12 +132,15 @@ onUnmounted(() => {
     <v-progress-linear v-if="loading && !article" indeterminate color="primary" class="mb-4" />
 
     <template v-if="article">
-      <v-card class="overflow-hidden">
+      <v-card rounded="lg" class="overflow-hidden">
         <!-- 应用栏：返回 / 标题 / 关注 -->
         <v-toolbar :title="article.title">
           <template v-slot:prepend>
-            <v-btn icon variant="text" :title="$t('common.back')" @click="router.back()">
+            <v-btn icon variant="text" @click="router.back()">
               <v-icon>mdi-arrow-left</v-icon>
+              <v-tooltip activator="parent" location="right">
+                {{ $t('common.back') }}
+              </v-tooltip>
             </v-btn>
           </template>
           <!-- <v-toolbar-title class="font-weight-bold">
@@ -205,7 +208,7 @@ onUnmounted(() => {
         class="mt-4" />
     </template>
 
-    <v-empty-state v-else-if="!loading" icon="mdi-file-document-outline" :title="$t('articleDetail.notFound')"
+    <v-empty-state v-else-if="!loading" icon="mdi-file-document" :title="$t('articleDetail.notFound')"
       :text="$t('articleDetail.notFoundText')" />
   </v-container>
 </template>

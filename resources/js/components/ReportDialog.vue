@@ -77,7 +77,7 @@ async function submit() {
   // 未登录时引导到登录页（个人资料页）
   if (!authStore.isLoggedIn) {
     show(t('report.loginFirst'), 'info')
-    router.push('/users/me')
+    router.push('/login')
     return
   }
   submitting.value = true
@@ -101,7 +101,7 @@ async function submit() {
 
 <template>
   <v-dialog :model-value="modelValue" max-width="480" @update:model-value="emit('update:modelValue', $event)">
-    <v-card :title="$t('report.title')" prepend-icon="mdi-flag-outline" :subtitle="$t('report.subtitle')">
+    <v-card rounded="lg" :title="$t('report.title')" prepend-icon="mdi-flag-outline" :subtitle="$t('report.subtitle')">
       <v-card-subtitle>{{ $t('report.subtitle') }}</v-card-subtitle>
 
       <v-card-text>

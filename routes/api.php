@@ -91,6 +91,10 @@ Route::middleware('auth.token')->group(function () {
         Route::put('/admin/options/oauth', [AdminOptionController::class, 'updateOAuth']);
         Route::get('/admin/options/site-info', [AdminOptionController::class, 'siteInfo']);
         Route::put('/admin/options/site-info', [AdminOptionController::class, 'updateSiteInfo']);
+        Route::get('/admin/options/about', [AdminOptionController::class, 'about']);
+        Route::get('/admin/options/update', [AdminOptionController::class, 'checkUpdate']);
+        Route::get('/admin/options/update-source', [AdminOptionController::class, 'updateSource']);
+        Route::put('/admin/options/update-source', [AdminOptionController::class, 'updateUpdateSource']);
     });
 
     // 后台模块数据预览：每个模块对应自身的管理权限中间件

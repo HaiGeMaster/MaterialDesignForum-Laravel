@@ -38,7 +38,7 @@ const moreItems = [{ title: t('userCard.message'), icon: 'mdi-message-outline' }
 </script>
 
 <template>
-  <v-card width="320"  class="overflow-hidden">
+  <v-card rounded="lg" width="320"  class="overflow-hidden">
     <!-- 封面 -->
     <v-img v-if="user?.cover" :src="user.cover" height="160" cover />
     <div v-else class="bg-secondary" style="height: 160px"></div>

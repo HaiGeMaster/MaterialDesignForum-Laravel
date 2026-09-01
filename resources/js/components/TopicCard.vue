@@ -33,7 +33,7 @@ function openDetail() {
 </script>
 
 <template>
-  <v-card class="topic-card d-flex flex-column"  elevation="1" @click="openDetail">
+  <v-card rounded="lg" class="topic-card d-flex flex-column"  elevation="1" @click="openDetail">
     <!-- 上方话题图片 -->
     <div class="topic-cover">
       <v-img v-if="topic.cover" :src="topic.cover" cover height="140" />

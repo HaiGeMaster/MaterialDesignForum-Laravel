@@ -21,14 +21,14 @@ onMounted(async () => {
   if (errorReason) {
     processing.value = false
     feedback(t(`oauth.errors.${errorReason}`, { defaultValue: t('oauth.errors.default') }), 'error')
-    router.replace('/users/me')
+    router.replace('/login')
     return
   }
 
   if (!token) {
     processing.value = false
     feedback(t('oauth.errors.invalid_callback'), 'error')
-    router.replace('/users/me')
+    router.replace('/login')
     return
   }
 
@@ -39,12 +39,12 @@ onMounted(async () => {
       router.replace('/')
     } else {
       feedback(t('oauth.errors.fetch_me_failed'), 'error')
-      router.replace('/users/me')
+      router.replace('/login')
     }
   } catch (error) {
     processing.value = false
     feedback(error.message || t('oauth.errors.fetch_me_failed'), 'error')
-    router.replace('/users/me')
+    router.replace('/login')
   }
 })
 </script>

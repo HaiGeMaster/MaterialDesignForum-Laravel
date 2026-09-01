@@ -62,7 +62,7 @@ defineExpose({ upHandler, downHandler, enterHandler })
 </script>
 
 <template>
-  <v-card min-width="180" max-height="200" class="overflow-y-auto">
+  <v-card rounded="lg" min-width="180" max-height="200" class="overflow-y-auto">
     <div v-if="filtered.length" class="py-1">
       <div
         v-for="(item, i) in filtered"

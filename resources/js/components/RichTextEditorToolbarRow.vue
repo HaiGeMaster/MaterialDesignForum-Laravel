@@ -174,7 +174,7 @@ function onMenuVisibility(id, open) {
                 <v-icon :icon="btn.icon" size="small" />
               </v-btn>
             </template>
-            <v-card min-width="180" class="pa-2">
+            <v-card rounded="lg" min-width="180" class="pa-2">
               <div class="d-flex flex-wrap ga-1">
                 <v-tooltip v-for="c in btn.colors" :key="c.value" :text="c.label" >
                   <template #activator="{ props: tipProps }">
@@ -214,7 +214,7 @@ function onMenuVisibility(id, open) {
                 <v-icon :icon="btn.icon" size="small" />
               </v-btn>
             </template>
-            <v-card min-width="180" class="pa-2">
+            <v-card rounded="lg" min-width="180" class="pa-2">
               <div class="d-flex flex-wrap ga-1">
                 <v-tooltip v-for="c in btn.colors" :key="c.value" :text="c.label" >
                   <template #activator="{ props: tipProps }">
@@ -279,7 +279,7 @@ function onMenuVisibility(id, open) {
       <!-- 功能分组菜单：合并同类按钮，点击弹出子项选择 -->
       <v-tooltip v-else-if="btn.type === 'menu'" :text="btn.title" >
         <template #activator="{ props: tipProps }">
-          <v-menu 
+          <v-menu
             v-model="openMenus[btn.id]"
 
             offset="6"
@@ -292,7 +292,7 @@ function onMenuVisibility(id, open) {
             </template>
 
             <!-- 插入菜单中点“链接”后切换为链接输入面板 -->
-            <v-card v-if="linkPanelMenu === btn.id" min-width="260" class="pa-2">
+            <v-card rounded="lg" v-if="linkPanelMenu === btn.id" min-width="260" class="pa-2">
               <div class="d-flex align-center ga-1 mb-1">
                 <v-btn size="x-small" variant="text" icon @click="linkPanelMenu = ''">
                   <v-icon icon="mdi-arrow-left" size="small" />

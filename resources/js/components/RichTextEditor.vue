@@ -464,7 +464,7 @@ const tableMenu = computed(() => ({
       :tippy-options="{ duration: 100 }"
       :should-show="({ editor: e }) => !e.isActive('image') && !e.isActive('video') && !e.isEmpty"
     >
-      <v-card class="d-flex align-center pa-1" density="compact" elevation="4">
+      <v-card rounded="lg" class="d-flex align-center pa-1" density="compact" elevation="4">
         <v-btn size="x-small" icon variant="text" :color="editor.isActive('bold') ? 'primary' : undefined" @click="editor.chain().focus().toggleBold().run()"><v-icon icon="mdi-format-bold" size="small" /></v-btn>
         <v-btn size="x-small" icon variant="text" :color="editor.isActive('italic') ? 'primary' : undefined" @click="editor.chain().focus().toggleItalic().run()"><v-icon icon="mdi-format-italic" size="small" /></v-btn>
         <v-btn size="x-small" icon variant="text" :color="editor.isActive('underline') ? 'primary' : undefined" @click="editor.chain().focus().toggleUnderline().run()"><v-icon icon="mdi-format-underline" size="small" /></v-btn>
@@ -584,7 +584,7 @@ const tableMenu = computed(() => ({
 
   /* color: rgb(var(--v-theme-on-surface), 0.7); */
   background: rgb(var(--v-theme-on-surface-variant));
-  
+
   color: rgb(var(--v-theme-surface-variant));
 }
 
@@ -597,7 +597,7 @@ const tableMenu = computed(() => ({
 }
 
 .rich-editor__content :deep(.ProseMirror code:not(.code-block__code)) {
-  
+
   color: rgb(var(--v-theme-on-surface-variant));
   background: rgb(var(--v-theme-surface-variant));
 

@@ -5,6 +5,7 @@ import http from '../api'
 import AdminNewDataStats from '../components/AdminNewDataStats.vue'
 import AdminServerInfoStats from '../components/AdminServerInfoStats.vue'
 import { useAuthStore } from '../stores/auth'
+import adminRouter from '../router/admin'
 
 const authStore = useAuthStore()
 const { locale } = useI18n()
@@ -17,16 +18,17 @@ const server = ref({})
 const chartRanges = ref({})
 const chartLoading = ref({})
 
+// 配色参考旧项目 MaterialDesignForum-Vuetify4-Laravel 的 MD_OBJECT_COLORS（Vuetify Material Design 色板 base 值）
 const dashboardItems = computed(() => [
-    { key: 'topic', label: 'topics', countKey: 'topic_count', permission: 'ability_admin_manage_topic', icon: 'mdi-book-variant', color: 'primary', chartColor: '#1867C0', areaColor: 'rgba(24, 103, 192, 0.22)', to: '/topics' },
-    { key: 'question', label: 'questions', countKey: 'question_count', permission: 'ability_admin_manage_question', icon: 'mdi-forum', color: 'info', chartColor: '#2196F3', areaColor: 'rgba(33, 150, 243, 0.22)', to: '/questions' },
-    { key: 'answer', label: 'answers', countKey: 'answer_count', permission: 'ability_admin_manage_answer', icon: 'mdi-message-reply', color: 'cyan', chartColor: '#00ACC1', areaColor: 'rgba(0, 172, 193, 0.22)', to: '/answers' },
-    { key: 'article', label: 'articles', countKey: 'article_count', permission: 'ability_admin_manage_article', icon: 'mdi-file-document', color: 'success', chartColor: '#4CAF50', areaColor: 'rgba(76, 175, 80, 0.22)', to: '/articles' },
-    { key: 'comment', label: 'comments', countKey: 'comment_count', permission: 'ability_admin_manage_comment', icon: 'mdi-message-reply-text', color: 'orange', chartColor: '#FB8C00', areaColor: 'rgba(251, 140, 0, 0.22)', to: '/comments' },
-    { key: 'reply', label: 'replies', countKey: 'reply_count', permission: 'ability_admin_manage_reply', icon: 'mdi-reply-all', color: 'deep-purple', chartColor: '#673AB7', areaColor: 'rgba(103, 58, 183, 0.22)', to: '/replies' },
-    { key: 'user_group', label: 'userGroups', countKey: 'user_group_count', permission: 'ability_admin_manage_user_group', icon: 'mdi-account-group', color: 'teal', chartColor: '#00897B', areaColor: 'rgba(0, 137, 123, 0.22)', to: '/user-groups' },
-    { key: 'user', label: 'users', countKey: 'user_count', permission: 'ability_admin_manage_user', icon: 'mdi-account-multiple', color: 'blue-grey', chartColor: '#546E7A', areaColor: 'rgba(84, 110, 122, 0.22)', to: '/users' },
-    { key: 'report', label: 'reports', countKey: 'report_count', permission: 'ability_admin_manage_report', icon: 'mdi-flag', color: 'error', chartColor: '#B00020', areaColor: 'rgba(176, 0, 32, 0.22)', to: '/reports' },
+    { key: 'topic', label: 'topics', countKey: 'topic_count', permission: 'ability_admin_manage_topic', icon: 'mdi-book-variant', color: 'orange', chartColor: '#FB8C00', areaColor: 'rgba(251, 140, 0, 0.22)', to: '/topics' },
+    { key: 'question', label: 'questions', countKey: 'question_count', permission: 'ability_admin_manage_question', icon: 'mdi-forum', color: 'deep-purple', chartColor: '#673AB7', areaColor: 'rgba(103, 58, 183, 0.22)', to: '/questions' },
+    { key: 'answer', label: 'answers', countKey: 'answer_count', permission: 'ability_admin_manage_answer', icon: 'mdi-message-reply', color: 'purple', chartColor: '#9C27B0', areaColor: 'rgba(156, 39, 176, 0.22)', to: '/answers' },
+    { key: 'article', label: 'articles', countKey: 'article_count', permission: 'ability_admin_manage_article', icon: 'mdi-file-document', color: 'teal', chartColor: '#009688', areaColor: 'rgba(0, 150, 136, 0.22)', to: '/articles' },
+    { key: 'comment', label: 'comments', countKey: 'comment_count', permission: 'ability_admin_manage_comment', icon: 'mdi-message-reply-text', color: 'green', chartColor: '#4CAF50', areaColor: 'rgba(76, 175, 80, 0.22)', to: '/comments' },
+    { key: 'reply', label: 'replies', countKey: 'reply_count', permission: 'ability_admin_manage_reply', icon: 'mdi-reply-all', color: 'light-green', chartColor: '#8BC34A', areaColor: 'rgba(139, 195, 74, 0.22)', to: '/replies' },
+    { key: 'user_group', label: 'userGroups', countKey: 'user_group_count', permission: 'ability_admin_manage_user_group', icon: 'mdi-account-group', color: 'red', chartColor: '#F44336', areaColor: 'rgba(244, 67, 54, 0.22)', to: '/user-groups' },
+    { key: 'user', label: 'users', countKey: 'user_count', permission: 'ability_admin_manage_user', icon: 'mdi-account-multiple', color: 'blue', chartColor: '#2196F3', areaColor: 'rgba(33, 150, 243, 0.22)', to: '/users' },
+    { key: 'report', label: 'reports', countKey: 'report_count', permission: 'ability_admin_manage_report', icon: 'mdi-flag', color: 'blue-grey', chartColor: '#607D8B', areaColor: 'rgba(96, 125, 139, 0.22)', to: '/reports' },
 ])
 
 const visibleItems = computed(() => dashboardItems.value.filter((item) => {
@@ -61,7 +63,7 @@ async function fetchOverview(range = 'last_7_days') {
 }
 
 function openModule(item) {
-    window.location.assign(item.to)
+    adminRouter.push(item.to)
 }
 
 async function updateChartRange(item, range) {
@@ -107,7 +109,7 @@ onMounted(fetchOverview)
 
         <v-row class="mb-6">
             <v-col v-for="item in visibleItems" :key="item.key" cols="12" sm="6" md="4" lg="3">
-                <v-card class="count-card h-100" variant="tonal" :color="item.color" @click="openModule(item)">
+                <v-card rounded="lg" class="count-card h-100" variant="tonal" :color="item.color" @click="openModule(item)">
                     <v-card-text class="d-flex align-center pa-5">
                         <v-avatar :color="item.chartColor" size="46"><v-icon :icon="item.icon" /></v-avatar>
                         <div class="ml-4">
@@ -154,7 +156,7 @@ onMounted(fetchOverview)
     gap: 24px;
     padding: 28px;
     border: 1px solid rgba(var(--v-theme-primary), 0.16);
-    border-radius: 16px;
+    /* border-radius: 16px; */
     background: linear-gradient(120deg, rgba(var(--v-theme-primary), 0.1), rgba(var(--v-theme-secondary), 0.06));
 }
 
@@ -168,7 +170,7 @@ onMounted(fetchOverview)
 
 .count-card,
 .panel-card {
-    border-radius: 12px;
+    /* border-radius: 12px; */
 }
 
 @media (max-width: 600px) {

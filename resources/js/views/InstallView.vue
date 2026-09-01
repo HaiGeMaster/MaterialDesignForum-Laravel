@@ -159,7 +159,7 @@ async function runInstall() {
 }
 
 function goLogin() {
-  router.replace('/users/me')
+  router.replace('/login')
 }
 
 // 是否允许进入下一步：环境检查必须全部通过
@@ -168,7 +168,7 @@ const canProceedFromRequirements = computed(() => requirements.value.all_pass)
 
 <template>
   <v-container class="d-flex align-center justify-center" style="min-height: 80vh">
-    <v-card width="720" max-width="100%" elevation="8" rounded="lg">
+    <v-card rounded="lg" width="720" max-width="100%" elevation="8">
 
       <v-toolbar>
         <template v-slot:prepend>
@@ -188,7 +188,7 @@ const canProceedFromRequirements = computed(() => requirements.value.all_pass)
       <!-- <v-card-title class="text-h5 font-weight-bold pa-6">
         <v-icon class="mr-2">mdi-tune-vertical</v-icon>
         {{ t('install.title') }}
-        
+
       </v-card-title> -->
 
       <v-divider />
@@ -344,7 +344,7 @@ const canProceedFromRequirements = computed(() => requirements.value.all_pass)
           <p class="text-body-2 text-medium-emphasis mb-4">
             {{ t('install.done.adminCreated') }}
           </p>
-          <v-card variant="outlined" max-width="320" class="mx-auto mb-6">
+          <v-card rounded="lg" variant="outlined" max-width="320" class="mx-auto mb-6">
             <v-list density="compact">
               <v-list-item>
                 <template #prepend><v-icon>mdi-account</v-icon></template>

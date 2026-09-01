@@ -101,6 +101,7 @@ class AdminModuleController extends Controller
             'soft_delete' => true,
             'update_fields' => [
                 'user_group_name', 'user_group_description',
+                'user_group_icon', 'user_group_color',
                 'user_group_icon_show', 'is_admin',
                 'ability_normal_login', 'ability_admin_login',
                 'ability_admin_manage_user_group', 'ability_admin_manage_user',

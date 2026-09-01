@@ -32,7 +32,7 @@ adminRouter.beforeEach(async (to) => {
   const authStore = useAuthStore()
 
   if (!authStore.isLoggedIn) {
-    window.location.assign('/users/me?redirect=%2Fadmin%2F')
+    window.location.assign('/login?redirect=%2Fadmin%2F')
     return false
   }
 

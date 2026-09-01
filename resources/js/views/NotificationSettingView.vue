@@ -139,20 +139,30 @@ onMounted(() => {
 
 <template>
   <v-container :class="xs ? 'px-0' : 'px-4'" class=" notification-setting-view" :style="$route.meta.maxWidth ? { maxWidth: `${$route.meta.maxWidth}px`, margin: '0 auto' } : {}">
-    <v-card class="mx-auto my-4" max-width="720" rounded="lg">
-      <v-toolbar >
-        <v-btn icon="mdi-arrow-left" variant="text" @click="router.back()" />
-        <v-toolbar-title>{{ $t('notificationSetting.title') }}</v-toolbar-title>
-        <v-btn
-          color="primary"
-          variant="tonal"
-          :loading="saving"
-          :disabled="!authStore.isLoggedIn"
-          @click="saveSettings"
-        >
-          <v-icon start>mdi-check</v-icon>
-          {{ $t('notificationSetting.save') }}
-        </v-btn>
+    <v-card rounded="lg" >
+      <v-toolbar :title="$t('notificationSetting.title')">
+        <template #prepend>
+          <v-btn icon variant="text" @click="router.back()">
+            <v-icon>mdi-arrow-left</v-icon>
+            <v-tooltip activator="parent" location="right">
+              {{ $t('common.back') }}
+            </v-tooltip>
+          </v-btn>
+        </template>
+        <template #append>
+          <v-btn
+            icon
+            variant="text"
+            :loading="saving"
+            :disabled="!authStore.isLoggedIn"
+            @click="saveSettings"
+          >
+            <v-icon>mdi-check</v-icon>
+            <v-tooltip activator="parent" location="left">
+              {{ $t('notificationSetting.save') }}
+            </v-tooltip>
+          </v-btn>
+        </template>
       </v-toolbar>
 
       <v-divider />
@@ -165,7 +175,7 @@ onMounted(() => {
           :text="$t('notifications.loginText')"
         >
           <template #actions>
-            <v-btn color="primary" variant="tonal" @click="router.push('/users/me')">
+            <v-btn color="primary" variant="tonal" @click="router.push('/login')">
               {{ $t('common.login') }}
             </v-btn>
           </template>
@@ -217,11 +227,11 @@ onMounted(() => {
               <tr v-for="item in group.items" :key="item.name">
                 <td class="text-body-2">{{ $t(`notificationTypeName.${item.name}`) }}</td>
                 <td class="text-center">
-                  <v-checkbox v-model="item.web_message" 
+                  <v-checkbox v-model="item.web_message"
                     color="primary" density="compact" hide-details class="d-inline-flex" />
                 </td>
                 <td class="text-center">
-                  <v-checkbox v-model="item.email_message" 
+                  <v-checkbox v-model="item.email_message"
                     color="primary" density="compact" hide-details class="d-inline-flex" />
                 </td>
               </tr>

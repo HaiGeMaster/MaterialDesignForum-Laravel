@@ -248,13 +248,23 @@ function toggleBuiltinTheme(name, enabled) {
 
 <template>
   <v-container class="option-detail-page py-6 px-4 px-md-8">
-    <v-card class="option-detail-card" >
-      <v-toolbar :title="page.title" color="transparent">
+    <v-card rounded="lg" class="option-detail-card" >
+      <v-toolbar :title="page.title">
         <template #prepend>
-          <v-btn icon="mdi-arrow-left" variant="text" :title="$t('common.back')" @click="goBack" />
+          <v-btn icon variant="text" @click="goBack">
+            <v-icon>mdi-arrow-left</v-icon>
+            <v-tooltip activator="parent" location="right">
+              {{ $t('common.back') }}
+            </v-tooltip>
+          </v-btn>
         </template>
         <template #append>
-          <v-btn icon="mdi-check" variant="text" :loading="saving" :title="$t('common.save')" @click="save" />
+          <v-btn icon variant="text" :loading="saving" @click="save">
+            <v-icon>mdi-check</v-icon>
+            <v-tooltip activator="parent" location="left">
+              {{ $t('common.save') }}
+            </v-tooltip>
+          </v-btn>
         </template>
       </v-toolbar>
 
@@ -284,7 +294,7 @@ function toggleBuiltinTheme(name, enabled) {
 
       <v-card-text v-else-if="route.params.setting === 'oauth'" class="form-section">
         <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-4" />
-        <v-card v-for="provider in ['github', 'google', 'microsoft']" :key="provider" class="provider-section mb-4" variant="flat">
+        <v-card rounded="lg" v-for="provider in ['github', 'google', 'microsoft']" :key="provider" class="provider-section mb-4" variant="flat">
           <v-card-title class="text-subtitle-1 text-capitalize">{{ provider }}</v-card-title>
           <v-card-text>
             <v-text-field v-model="forms.oauth[`${provider.toUpperCase()}_CLIENT_ID`]" :label="$t('admin.clientId')" />
@@ -373,7 +383,7 @@ function toggleBuiltinTheme(name, enabled) {
 
     <!-- 新建自定义主题对话框 -->
     <v-dialog v-model="newThemeDialog" max-width="480">
-      <v-card>
+      <v-card rounded="lg" >
         <v-card-title>{{ $t('admin.newTheme') }}</v-card-title>
         <v-card-text>
           <v-text-field v-model="newTheme.name" :label="$t('admin.themeName')" :rules="[v => !!v || $t('auth.rules.required')]" />
@@ -401,7 +411,7 @@ function toggleBuiltinTheme(name, enabled) {
 }
 
 .option-detail-card {
-  border-radius: 12px;
+  /* border-radius: 12px; */
 }
 
 .form-section {
@@ -410,7 +420,7 @@ function toggleBuiltinTheme(name, enabled) {
 
 .provider-section {
   border: 1px solid rgba(var(--v-theme-on-surface), 0.1);
-  border-radius: 10px;
+  /* border-radius: 10px; */
 }
 
 @media (max-width: 600px) {

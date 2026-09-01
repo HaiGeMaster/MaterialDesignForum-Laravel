@@ -83,7 +83,7 @@ onBeforeUnmount(() => window.removeEventListener('comment:added', handleCommentA
 </script>
 
 <template>
-  <v-card id="comments" class="mt-4">
+  <v-card rounded="lg" id="comments" class="mt-4">
     <ListHeader :title="title" :sort="sort" :sort-items="sortItems" @update:sort="(v) => (sort = v)" />
 
     <v-divider />

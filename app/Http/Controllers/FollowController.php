@@ -150,24 +150,62 @@ class FollowController extends Controller
             ->where('followable_id', $id)
             ->first();
 
-        if ($follow) {
-            $follow->delete();
-            $following = false;
-        } else {
-            Follow::create([
-                'user_id' => $user->user_id,
-                'followable_type' => $type,
-                'followable_id' => $id,
-            ]);
-            $following = true;
+        // 关注记录与冗余计数字段在同一事务中维护，保证一致性
+        DB::transaction(function () use ($follow, $user, $type, $id, &$following) {
+            if ($follow) {
+                $follow->delete();
+                $following = false;
+            } else {
+                Follow::create([
+                    'user_id' => $user->user_id,
+                    'followable_type' => $type,
+                    'followable_id' => $id,
+                ]);
+                $following = true;
+            }
 
-            // 发送关注通知（user_follow / topic_follow / question_follow / article_follow）
+            // 以 follow 表为准重算写回：被关注对象的关注人数
+            DB::table(self::TYPE_TABLE[$type])
+                ->where(self::TYPE_PRIMARY_KEY[$type], $id)
+                ->update(['follower_count' => $this->followerCount($type, $id)]);
+
+            // 以 follow 表为准重算写回：发起用户的关注计数（followee_count / following_*_count）
+            $this->refreshUserFollowCounts($user->user_id);
+        });
+
+        // 发送关注通知（user_follow / topic_follow / question_follow / article_follow）
+        // 置于事务之外：通知失败不应回滚关注本身
+        if ($following) {
             $this->notifyFollow($type, $id, $user);
         }
 
         return response()->json([
             'following' => $following,
             'follower_count' => $this->followerCount($type, $id),
+        ]);
+    }
+
+    /**
+     * 以 follow 表为准，重算并写回指定用户的关注计数冗余字段。
+     *
+     * - followee_count            关注了多少用户
+     * - following_topic_count     关注了多少话题
+     * - following_question_count  关注了多少问题
+     * - following_article_count   关注了多少文章
+     */
+    private function refreshUserFollowCounts(int $userId): void
+    {
+        $counts = Follow::query()
+            ->where('user_id', $userId)
+            ->selectRaw('followable_type, COUNT(*) as cnt')
+            ->groupBy('followable_type')
+            ->pluck('cnt', 'followable_type');
+
+        DB::table('user')->where('user_id', $userId)->update([
+            'followee_count' => (int) ($counts['user'] ?? 0),
+            'following_topic_count' => (int) ($counts['topic'] ?? 0),
+            'following_question_count' => (int) ($counts['question'] ?? 0),
+            'following_article_count' => (int) ($counts['article'] ?? 0),
         ]);
     }
 

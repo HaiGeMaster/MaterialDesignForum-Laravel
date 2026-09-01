@@ -50,7 +50,7 @@ const visibleAdminNavGroups = computed(() => adminNavGroups.value
     width="260"
     @update:model-value="(value) => emit('update:modelValue', value)"
   >
-    <v-list nav density="comfortable">
+    <v-list nav density="comfortable" color="primary">
       <template v-for="(group, groupIndex) in visibleAdminNavGroups" :key="group[0].id">
         <v-divider v-if="groupIndex" class="my-2" />
         <v-list-item
@@ -59,7 +59,7 @@ const visibleAdminNavGroups = computed(() => adminNavGroups.value
           :prepend-icon="item.icon"
           :title="item.title"
           :to="item.to"
-          rounded="lg"
+
           exact
         />
       </template>

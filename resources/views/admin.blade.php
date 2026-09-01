@@ -3,7 +3,8 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Admin · {{ \Illuminate\Support\Facades\DB::table('option')->where('name', 'site_name')->value('value') ?: config('app.name') }}</title>
+        <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+        <title>Admin · {{ \Illuminate\Support\Facades\DB::table('settings')->where('name', 'site_name')->value('value') ?: config('app.name') }}</title>
         @vite(['resources/css/app.css', 'resources/js/admin.js'])
     </head>
     <body>

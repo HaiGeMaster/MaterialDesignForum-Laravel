@@ -13,13 +13,15 @@ const routes = [
   
   { path: '/articles', name: 'articles', component: () => import('../views/ArticlesView.vue'), meta: { titleKey: 'route.articles', maxWidth: 860 } },
   { path: '/articles/:article_id', name: 'article-detail', component: () => import('../views/ArticleDetailView.vue'), meta: { titleKey: 'route.articleDetail', maxWidth: 860 } },
+  { path: '/login', name: 'login', component: () => import('../views/LoginView.vue'), meta: { titleKey: 'route.login' } },
   { path: '/users/:user_id', name: 'user', component: () => import('../views/ProfileView.vue'), meta: { titleKey: 'route.user', maxWidth: 860 } },
   { path: '/users', name: 'users', component: () => import('../views/PeopleView.vue'), meta: { titleKey: 'route.users', maxWidth: 1080 } },
-  { path: '/notifications', name: 'notifications', component: () => import('../views/NotificationsView.vue'), meta: { titleKey: 'route.notifications', maxWidth: 1080 } },
-  { path: '/notifications/setting', name: 'notification-setting', component: () => import('../views/NotificationSettingView.vue'), meta: { titleKey: 'route.notificationSetting', maxWidth: 1080 } },
+  { path: '/notifications', name: 'notifications', component: () => import('../views/NotificationsView.vue'), meta: { titleKey: 'route.notifications', maxWidth: 860 } },
+  { path: '/notifications/setting', name: 'notification-setting', component: () => import('../views/NotificationSettingView.vue'), meta: { titleKey: 'route.notificationSetting', maxWidth: 860 } },
   { path: '/oauth/callback', name: 'oauth-callback', component: () => import('../views/OAuthCallbackView.vue'), meta: { titleKey: 'route.oauthCallback' } },
   { path: '/install', name: 'install', component: () => import('../views/InstallView.vue'), meta: { titleKey: 'route.install' } },
   { path: '/settings', name: 'settings', component: () => import('../views/SettingsView.vue'), meta: { titleKey: 'route.settings', requiresAuth: true } },
+  { path: '/media', name: 'media-library', component: () => import('../views/MediaLibraryView.vue'), meta: { titleKey: 'route.mediaLibrary', maxWidth: 1080, requiresAuth: true } },
 ]
 
 const router = createRouter({
@@ -27,15 +29,29 @@ const router = createRouter({
   routes,
 })
 
-// 登录守卫：requiresAuth 路由未登录时重定向到登录页
+// 站内路径校验：仅接受以 / 开头且非 // 的路径（避免开放重定向）
+function safePath(value) {
+  return typeof value === 'string' && value.startsWith('/') && !value.startsWith('//') ? value : '/'
+}
+
+// 登录守卫：requiresAuth 路由未登录时重定向到独立登录页
 router.beforeEach(async (to) => {
-  if (to.meta.requiresAuth) {
-    const authStore = useAuthStore()
-    if (!authStore.isLoggedIn) {
-      return { path: '/users/me', query: { redirect: to.fullPath } }
-    }
+  const authStore = useAuthStore()
+
+  // 已登录用户访问登录页：跳回原目标或首页
+  if (to.name === 'login' && authStore.isLoggedIn) {
+    return { path: safePath(to.query.redirect) }
   }
 
+  // 需要登录的路由（如 /settings）
+  if (to.meta.requiresAuth && !authStore.isLoggedIn) {
+    return { path: '/login', query: { redirect: to.fullPath } }
+  }
+
+  // 个人主页 /users/me 需要登录（他人主页 /users/:id 未登录仍可查看）
+  if (to.params.user_id === 'me' && !authStore.isLoggedIn) {
+    return { path: '/login', query: { redirect: to.fullPath } }
+  }
 })
 
 router.afterEach((to) => {

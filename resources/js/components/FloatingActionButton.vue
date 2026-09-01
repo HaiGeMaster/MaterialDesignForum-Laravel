@@ -40,11 +40,11 @@ const editorWindow = useEditorWindowStore()
 const pageConfig = {
   topics: {
     labelKey: 'floatingAction.newTopic',
-    icon: 'mdi-tag-plus-outline',
+    icon: 'mdi-book-plus-outline',
   },
   questions: {
     labelKey: 'floatingAction.newQuestion',
-    icon: 'mdi-comment-question-outline',
+    icon: 'mdi-forum-plus-outline',
   },
   articles: {
     labelKey: 'floatingAction.newArticle',
@@ -53,7 +53,7 @@ const pageConfig = {
   // 问题详情页：悬浮按钮变为「写回答」
   'question-detail': {
     labelKey: 'questionDetail.writeAnswer',
-    icon: 'mdi-message-reply-outline',
+    icon: 'mdi-comment-plus-outline',
   },
   // 文章详情页：悬浮按钮变为「写评论」（底部输入框）
   'article-detail': {
@@ -63,7 +63,7 @@ const pageConfig = {
   // 管理员用户组管理页：悬浮按钮变为「新建用户组」
   'admin-user-groups': {
     labelKey: 'admin.newUserGroup',
-    icon: 'mdi-account-plus-outline',
+    icon: 'mdi-account-multiple-plus',
   },
 }
 
@@ -80,7 +80,7 @@ const visible = computed(() => Boolean(current.value))
 function handleClick() {
   if (!authStore.isLoggedIn) {
     show(t('floatingAction.loginFirst'), 'info')
-    router.push('/users/me')
+    router.push('/login')
     return
   }
   if (route.name === 'topics') {

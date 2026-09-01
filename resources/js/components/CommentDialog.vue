@@ -67,7 +67,7 @@ async function submit() {
   if (!text || submitting.value) return
   if (!authStore.isLoggedIn) {
     show(t('commentSheet.loginFirst'), 'info')
-    router.push('/users/me')
+    router.push('/login')
     return
   }
   submitting.value = true
@@ -113,12 +113,19 @@ watch(
     :fullscreen="mobile"
     scrollable
   >
-    <v-card rounded="lg">
+    <v-card rounded="lg" >
       <!-- 头部：标题 + 排序 + 关闭 -->
-      <v-toolbar >
-        <v-toolbar-title >
-          {{ $t('commentDialog.title') }} ({{ total }})
-        </v-toolbar-title>
+      <v-toolbar :title="`${$t('commentDialog.title')} (${total})`">
+        <template #prepend>
+          <v-btn icon variant="text" @click="store.close()">
+            <v-icon>
+              mdi-close
+            </v-icon>
+            <v-tooltip activator="parent" location="right">
+              {{ $t('common.cancel') }}
+            </v-tooltip>
+          </v-btn>
+        </template>
         <template v-slot:append>
           <v-menu :close-on-content-click="true" >
             <template v-slot:activator="{ props: menuProps }">
@@ -141,9 +148,6 @@ watch(
               </v-list-item>
             </v-list>
           </v-menu>
-          <v-btn icon  variant="text" @click="store.close()">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
         </template>
       </v-toolbar>
 
@@ -179,7 +183,7 @@ watch(
         <v-text-field
           v-model="content"
           color="primary"
-          rounded="lg"
+
           variant="outlined"
           :placeholder="$t('commentSheet.placeholder')"
           hide-details="auto"
@@ -188,7 +192,7 @@ watch(
         >
           <template v-slot:append-inner>
             <v-btn
-              rounded="lg"
+
               variant="flat"
               color="primary"
               :loading="submitting"

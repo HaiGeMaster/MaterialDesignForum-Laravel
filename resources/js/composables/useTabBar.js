@@ -67,11 +67,11 @@ export function useTabBar() {
     return tabs.value.length > 0
   })
 
-  // 当前激活 tab：优先取 URL query，非法/缺失时回退默认
+  // 当前激活 tab：优先取 URL hash 锚点（#recommend），非法/缺失时回退默认
   const active = computed(() => {
     if (!config.value) return ''
-    const q = String(route.query.tab || '')
-    if (tabs.value.some((t) => t.value === q)) return q
+    const h = route.hash.slice(1)
+    if (tabs.value.some((t) => t.value === h)) return h
     return config.value.default
   })
 

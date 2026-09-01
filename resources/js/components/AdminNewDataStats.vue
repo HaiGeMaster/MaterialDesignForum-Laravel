@@ -87,27 +87,20 @@ function changeRange(value) {
 </script>
 
 <template>
-  <v-card class="stats-card h-100"  @click="emit('open', item)">
-    <v-card-title class="d-flex align-center ga-2">
-      <v-avatar :color="item.chartColor" size="32">
-        <v-icon :icon="item.icon" size="18" />
-      </v-avatar>
-      <span class="text-subtitle-1">{{ $t(`admin.${item.label}`) }}</span>
-      <v-spacer />
-      <v-select
-        :model-value="range"
-        :items="rangeItems"
-        item-title="title"
-        item-value="value"
-        density="compact"
-        variant="underlined"
-        hide-details
-        prepend-inner-icon="mdi-calendar-month-outline"
-        class="range-select"
-        @click.stop
-        @update:model-value="changeRange"
-      />
-    </v-card-title>
+  <v-card rounded="lg" class="stats-card h-100" @click="emit('open', item)">
+    <v-toolbar :title="$t(`admin.${item.label}`)">
+      <template #prepend>
+        <v-avatar :color="item.chartColor" size="32" class="mx-2">
+          <v-icon :icon="item.icon" size="18" />
+        </v-avatar>
+         </template>
+      <template #append>
+
+        <v-select :model-value="range" :items="rangeItems" item-title="title" item-value="value" density="compact"
+          variant="underlined" hide-details prepend-inner-icon="mdi-calendar-month-outline" class="range-select"
+          @click.stop @update:model-value="changeRange" />
+      </template>
+    </v-toolbar>
     <v-card-text>
       <div class="chart-wrap">
         <v-progress-linear v-if="loading" indeterminate color="primary" class="chart-loading" />
@@ -120,7 +113,7 @@ function changeRange(value) {
 
 <style scoped>
 .stats-card {
-  border-radius: 12px;
+  /* border-radius: 12px; */
   cursor: pointer;
 }
 

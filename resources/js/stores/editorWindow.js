@@ -38,12 +38,12 @@ export const useEditorWindowStore = defineStore('editorWindow', {
     meta(state) {
       const map = {
         question_create: {
-          icon: 'mdi-comment-question-outline',
+          icon: 'mdi-forum-plus-outline',
           titleKey: 'editorWindow.createQuestion',
           publishKey: 'editorWindow.publish',
         },
         question_edit: {
-          icon: 'mdi-pencil-outline',
+          icon: 'mdi-forum',
           titleKey: 'editorWindow.editQuestion',
           publishKey: 'editorWindow.save',
         },
@@ -53,17 +53,17 @@ export const useEditorWindowStore = defineStore('editorWindow', {
           publishKey: 'editorWindow.publish',
         },
         article_edit: {
-          icon: 'mdi-pencil-outline',
+          icon: 'mdi-file-document',
           titleKey: 'editorWindow.editArticle',
           publishKey: 'editorWindow.save',
         },
         answer_create: {
-          icon: 'mdi-message-reply-outline',
+          icon: 'mdi-comment-plus-outline',
           titleKey: 'editorWindow.createAnswer',
           publishKey: 'editorWindow.publish',
         },
         answer_edit: {
-          icon: 'mdi-pencil-outline',
+          icon: 'mdi-comment-plus-outline',
           titleKey: 'editorWindow.editAnswer',
           publishKey: 'editorWindow.save',
         },

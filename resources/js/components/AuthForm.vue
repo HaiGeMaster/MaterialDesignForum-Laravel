@@ -133,7 +133,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <v-card >
+  <v-card rounded="lg" >
     <v-tabs v-model="activeTab" color="primary" grow>
       <v-tab value="login">{{ $t('auth.login') }}</v-tab>
       <v-tab value="register">{{ $t('auth.register') }}</v-tab>

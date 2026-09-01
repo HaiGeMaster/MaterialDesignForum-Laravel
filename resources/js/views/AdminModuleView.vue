@@ -8,11 +8,13 @@ import { useDeleteDialogStore } from '../stores/deleteDialog'
 import { useCommentReplyEditStore } from '../stores/commentReplyEditDialog'
 import { useEditorWindowStore } from '../stores/editorWindow'
 import { useProfileEditStore } from '../stores/profileEditDialog'
+import { useDisplay } from 'vuetify'
 import http from '../api'
 import TopicDialog from '../components/TopicDialog.vue'
 import UserGroupDialog from '../components/UserGroupDialog.vue'
 import ReportHandleDialog from '../components/ReportHandleDialog.vue'
 
+const { mobile } = useDisplay()
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
@@ -523,11 +525,9 @@ onBeforeUnmount(() => {
 <template>
   <v-container class="admin-module-page py-6 px-4 px-md-8" fluid>
     <!-- 标题区 -->
-    <v-row class="mb-2" align="center" no-gutters>
+    <!-- <v-row class="mb-2" align="center" no-gutters>
       <v-col cols="12" md="6" class="d-flex align-center">
-        <!-- <v-avatar col哈哈 -->
         <div>
-          <!-- <div class="text-overline text-primary font-weight-bold">MDForum / ADMIN</div> -->
           <h1 class="text-h5 font-weight-bold">
             {{ moduleMeta ? $t(moduleMeta.titleKey) : $t('common.developing') }}
           </h1>
@@ -550,28 +550,36 @@ onBeforeUnmount(() => {
           {{ $t('admin.refresh') }}
         </v-btn>
       </v-col>
-    </v-row>
+    </v-row> -->
 
     <v-alert v-if="error" type="error" variant="tonal" class="mb-4" closable @click:close="error = null">
       {{ error }}
     </v-alert>
 
-    <v-card class="data-table-card">
-      <v-data-table-server
-        v-if="moduleMeta"
-        v-model:page="page"
-        v-model:items-per-page="itemsPerPage"
-        v-model:sort-by="sortBy"
-        :headers="headers"
-        :items="items"
-        :items-length="total"
-        :loading="loading"
-        :search="search"
-        hover
-        density="comfortable"
-        @update:options="loadItems"
-        @click:row="onRowClick"
-      >
+    <v-card rounded="lg" class="data-table-card">
+
+      <v-toolbar :title="moduleMeta ? $t(moduleMeta.titleKey) : $t('common.developing')">
+        <!-- <template #prepend>
+          <h1 class="text-h5 font-weight-bold">
+            {{ moduleMeta ? $t(moduleMeta.titleKey) : $t('common.developing') }}
+          </h1>
+        </template> -->
+        <template #append>
+          <div class="d-flex align-center" style="gap: 12px;">
+            <v-text-field v-model="searchInput" density="compact" variant="outlined" prepend-inner-icon="mdi-magnify"
+              :placeholder="$t('admin.searchPlaceholder')" hide-details clearable style="max-width: 320px;"
+              @update:model-value="applySearch"
+              @click:clear="() => { search = ''; searchInput = ''; page = 1; loadItems() }" />
+            <v-btn variant="tonal" color="primary" prepend-icon="mdi-refresh" :loading="loading" @click="refresh">
+              {{ $t('admin.refresh') }}
+            </v-btn>
+          </div>
+        </template>
+      </v-toolbar>
+
+      <v-data-table-server :mobile="mobile" v-if="moduleMeta" v-model:page="page" v-model:items-per-page="itemsPerPage"
+        v-model:sort-by="sortBy" :headers="headers" :items="items" :items-length="total" :loading="loading"
+        :search="search" hover density="comfortable" @update:options="loadItems" @click:row="onRowClick">
         <template #[`item.name`]="{ item }">
           <div class="text-truncate" style="max-width: 280px;">
             {{ item?.name || '—' }}
@@ -624,32 +632,13 @@ onBeforeUnmount(() => {
         </template>
         <template #[`item.actions`]="{ item }">
           <div class="d-flex justify-end" style="gap: 4px;">
-            <v-btn
-              v-if="moduleMeta?.itemTo && moduleMeta.itemTo(item || {})"
-              icon="mdi-open-in-new"
-              size="small"
-              variant="text"
-              :title="$t('admin.actions.viewOnSite')"
-              @click.stop="openInNewTab(moduleMeta.itemTo(item || {}))"
-            />
-            <v-btn
-              v-if="moduleEditable"
-              icon="mdi-pencil"
-              size="small"
-              variant="text"
-              color="primary"
-              :title="$t('common.edit')"
-              @click.stop="openEditDialog(item)"
-            />
-            <v-btn
-              v-if="moduleDeletable"
-              icon="mdi-delete"
-              size="small"
-              variant="text"
-              color="error"
-              :title="$t('common.delete')"
-              @click.stop="openDeleteDialog(item)"
-            />
+            <v-btn v-if="moduleMeta?.itemTo && moduleMeta.itemTo(item || {})" icon="mdi-open-in-new" size="small"
+              variant="text" :title="$t('admin.actions.viewOnSite')"
+              @click.stop="openInNewTab(moduleMeta.itemTo(item || {}))" />
+            <v-btn v-if="moduleEditable" icon="mdi-pencil" size="small" variant="text" color="primary"
+              :title="$t('common.edit')" @click.stop="openEditDialog(item)" />
+            <v-btn v-if="moduleDeletable" icon="mdi-delete" size="small" variant="text" color="error"
+              :title="$t('common.delete')" @click.stop="openDeleteDialog(item)" />
           </div>
         </template>
         <template #loading>
@@ -665,26 +654,14 @@ onBeforeUnmount(() => {
     </v-card>
 
     <!-- 话题编辑对话框（topics 模块专用；其他模块的编辑对话框均为全局组件，已在 App.vue 挂载） -->
-    <TopicDialog
-      v-model="topicDialogVisible"
-      :topic="topicEditItem"
-      api-base="/admin/modules/topics"
-      @submit="onTopicSaved"
-    />
+    <TopicDialog v-model="topicDialogVisible" :topic="topicEditItem" api-base="/admin/modules/topics"
+      @submit="onTopicSaved" />
 
     <!-- 用户组编辑对话框（user-groups 模块专用） -->
-    <UserGroupDialog
-      v-model="userGroupDialogVisible"
-      :user-group="userGroupEditItem"
-      @submit="onUserGroupSaved"
-    />
+    <UserGroupDialog v-model="userGroupDialogVisible" :user-group="userGroupEditItem" @submit="onUserGroupSaved" />
 
     <!-- 举报处理对话框（reports 模块专用） -->
-    <ReportHandleDialog
-      v-model="reportDialogVisible"
-      :report="reportEditItem"
-      @submit="onReportHandled"
-    />
+    <ReportHandleDialog v-model="reportDialogVisible" :report="reportEditItem" @submit="onReportHandled" />
   </v-container>
 </template>
 
@@ -694,7 +671,7 @@ onBeforeUnmount(() => {
 }
 
 .data-table-card {
-  border-radius: 12px;
+  /* border-radius: 12px; */
   overflow: hidden;
 }
 </style>

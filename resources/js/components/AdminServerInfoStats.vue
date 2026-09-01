@@ -24,12 +24,17 @@ const fields = computed(() => [
 </script>
 
 <template>
-  <v-card class="system-info-card h-100" >
-    <v-card-title class="d-flex align-center">
-      <span>{{ $t('admin.systemInfo') }}</span>
-      <v-spacer />
-      <v-icon icon="mdi-information-outline" />
-    </v-card-title>
+  <v-card rounded="lg" class="system-info-card h-100">
+    <v-toolbar :title="$t('admin.systemInfo')">
+      <template #prepend>
+        <v-avatar size="32" class="mx-2">
+          <v-icon icon="mdi-information-outline" />
+        </v-avatar>
+      </template>
+      <!-- <template #append>
+
+      </template> -->
+    </v-toolbar>
 
     <v-card-text class="system-info-content">
       <v-list v-if="!loading && data" density="compact">
@@ -49,7 +54,7 @@ const fields = computed(() => [
 
 <style scoped>
 .system-info-card {
-  border-radius: 12px;
+  /* border-radius: 12px; */
 }
 
 .system-info-content {

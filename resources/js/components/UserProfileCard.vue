@@ -17,7 +17,7 @@ const props = defineProps({
     following: { type: Boolean, default: false },
 });
 
-const emit = defineEmits(["toggle-follow", "more", "saved"]);
+const emit = defineEmits(["toggle-follow", "saved"]);
 
 const { t } = useI18n();
 const { xs } = useDisplay();
@@ -81,15 +81,13 @@ async function onFileChange(event) {
     }
 }
 
-// 自定义更多项（内置的复制链接/分享/举报由 MoreActions 按权限自动生成）
-// const moreItems = [{ title: t("userProfile.message"), icon: "mdi-message-outline" }];
 </script>
 
 <template>
-    <v-card>
+    <v-card rounded="lg" >
         <!-- 封面：头像+名字行整体以封面底边为锚 -->
         <div class="cover-wrap">
-            <v-img v-if="user?.cover" :src="user.cover" height="240" cover />
+            <v-img v-if="user?.cover" :src="user.cover" alt="" height="240" cover />
             <div v-else class="bg-primary" style="height: 240px"></div>
 
             <!--
@@ -104,7 +102,7 @@ async function onFileChange(event) {
                     size="96"
                     class=" avatar-wrap elevation-2"
                 >
-                    <v-img v-if="user?.avatar" :src="user.avatar" cover />
+                    <v-img v-if="user?.avatar" :src="user.avatar" :alt="user?.username" cover />
                     <span v-else class="text-h4">{{ initial }}</span>
                     <!-- 头像上传按钮：悬浮头像时显示，居中对齐头像 -->
                     <v-btn
@@ -115,6 +113,7 @@ async function onFileChange(event) {
                         variant="flat"
                         color="primary"
                         :title="$t('userProfile.uploadAvatar')"
+                        :aria-label="$t('userProfile.uploadAvatar')"
                         :loading="uploadingType === 'avatar'"
                         @click.stop="pick('avatar')"
                     />
@@ -138,6 +137,7 @@ async function onFileChange(event) {
                 variant="flat"
                 color="primary"
                 :title="$t('userProfile.uploadCover')"
+                :aria-label="$t('userProfile.uploadCover')"
                 :loading="uploadingType === 'cover'"
                 @click.stop="pick('cover')"
             />
@@ -213,10 +213,8 @@ async function onFileChange(event) {
                         :following="following"
                         @toggle-follow="emit('toggle-follow', $event)"
                     />
-
                     <v-btn
-                        variant="tonal"
-                        size="small"
+                        variant="text"
                         prepend-icon="mdi-account-arrow-right-outline"
                         @click="
                             usersDialog.open({
@@ -229,8 +227,7 @@ async function onFileChange(event) {
                         {{ $t("userProfile.following", { count: user?.followee_count ?? 0 }) }}
                     </v-btn>
                     <v-btn
-                        variant="tonal"
-                        size="small"
+                        variant="text"
                         prepend-icon="mdi-account-heart-outline"
                         @click="
                             usersDialog.open({
@@ -246,12 +243,7 @@ async function onFileChange(event) {
 
                 <v-spacer />
 
-                <MoreActions
-                    type="user"
-                    :item="user"
-                />
-                    <!-- :items="moreItems"
-                    @select="(item) => emit('more', item.title)" -->
+                <MoreActions type="user" :item="user" />
             </div>
         </v-card-text>
 
@@ -336,5 +328,13 @@ async function onFileChange(event) {
 
 .avatar-wrap:hover .avatar-upload-btn {
     opacity: 1;
+}
+
+/* 触摸设备：没有 hover 状态，上传按钮常驻显示 */
+@media (hover: none) {
+    .cover-upload-btn,
+    .avatar-upload-btn {
+        opacity: 1;
+    }
 }
 </style>

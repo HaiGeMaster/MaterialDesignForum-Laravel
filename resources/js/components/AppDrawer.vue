@@ -13,14 +13,14 @@ const authStore = useAuthStore()
 const { t } = useI18n()
 
 const profilePath = computed(() =>
-  authStore.isLoggedIn ? `/users/${authStore.user?.user_id}` : '/users/me',
+  authStore.isLoggedIn ? `/users/${authStore.user?.user_id}` : '/login',
 )
 
 // 内容导航：始终显示
 const contentNavItems = computed(() => [
   { title: t('nav.home'), icon: 'mdi-home', to: '/' },
-  { title: t('nav.topics'), icon: 'mdi-tag-multiple', to: '/topics' },
-  { title: t('nav.questions'), icon: 'mdi-help-circle', to: '/questions' },
+  { title: t('nav.topics'), icon: 'mdi-book-variant', to: '/topics' },
+  { title: t('nav.questions'), icon: 'mdi-forum', to: '/questions' },
   { title: t('nav.articles'), icon: 'mdi-file-document', to: '/articles' },
 ])
 
@@ -28,9 +28,9 @@ const contentNavItems = computed(() => [
 const accountNavItems = computed(() => {
   const items = []
   if (authStore.isLoggedIn) {
-    items.push({ title: t('nav.profile'), icon: 'mdi-account', to: profilePath.value })
+    items.push({ title: t('nav.profile'), icon: 'mdi-account-circle', to: profilePath.value })
   }
-  items.push({ title: t('nav.people'), icon: 'mdi-account-group', to: '/users' })
+  items.push({ title: t('nav.people'), icon: 'mdi-account-multiple', to: '/users' })
   if (authStore.isLoggedIn) {
     items.push({ title: t('nav.notifications'), icon: 'mdi-bell', to: '/notifications' })
   }
@@ -44,7 +44,7 @@ const accountNavItems = computed(() => {
     :model-value="modelValue"
     @update:model-value="(v) => emit('update:modelValue', v)"
   >
-    <v-list nav>
+    <v-list nav  color="primary">
       <v-list-item
         v-for="item in contentNavItems"
         :key="item.to"

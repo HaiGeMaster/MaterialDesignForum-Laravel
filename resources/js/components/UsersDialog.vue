@@ -114,13 +114,17 @@ function isSelf(user) {
     :fullscreen="mobile"
     max-width="530"
   >
-    <v-card >
-      <v-toolbar >
-        <v-toolbar-title >
-          {{ title }}
-        </v-toolbar-title>
+    <v-card rounded="lg" >
+      <v-toolbar :title="title">
         <template #append>
-          <v-btn icon="mdi-close" variant="text" @click="model = false" />
+          <v-btn icon variant="text" @click="model = false">
+            <v-icon>
+              mdi-close
+            </v-icon>
+            <v-tooltip activator="parent" location="left">
+              {{ $t('common.cancel') }}
+            </v-tooltip>
+          </v-btn>
         </template>
       </v-toolbar>
 
@@ -171,7 +175,7 @@ function isSelf(user) {
 
       <v-empty-state
         v-else-if="!loading && !error"
-        icon="mdi-account-search-outline"
+        icon="mdi-account-multiple"
         :title="$t('usersDialog.empty')"
       />
     </v-card>

@@ -98,7 +98,32 @@ async function submit() {
 
 <template>
   <v-dialog v-model="dialogOpen" max-width="560">
-    <v-card :title="isEdit ? $t('topicDialog.titleEdit') : $t('topicDialog.titleNew')" :prepend-icon="isEdit ? 'mdi-pencil-outline' : 'mdi-tag-plus-outline'">
+    <v-card rounded="lg" >
+      <!-- :title="isEdit ? $t('topicDialog.titleEdit') : $t('topicDialog.titleNew')" :prepend-icon="isEdit ? 'mdi-pencil-outline' : 'mdi-tag-plus-outline'" -->
+
+
+      <v-toolbar :title="isEdit ? $t('topicDialog.titleEdit') : $t('topicDialog.titleNew')">
+        <template v-slot:prepend>
+          <v-btn icon variant="text" @click="dialogOpen = false" >
+            <v-icon>
+              mdi-close
+            </v-icon>
+            <v-tooltip activator="parent" location="right">
+              {{ $t('common.cancel') }}
+            </v-tooltip>
+          </v-btn>
+        </template>
+        <template #append>
+          <v-btn icon variant="text" @click="submit":loading="submitting" >
+            <v-icon>
+              mdi-check
+            </v-icon>
+            <v-tooltip activator="parent" location="left">
+              {{ isEdit ? $t('common.save') : $t('common.submit') }}
+            </v-tooltip>
+          </v-btn>
+        </template>
+      </v-toolbar>
 
       <v-card-text>
         <v-form ref="formRef" @submit.prevent="submit">
@@ -138,13 +163,13 @@ async function submit() {
         </v-form>
       </v-card-text>
 
-      <v-card-actions>
+      <!-- <v-card-actions>
         <v-spacer />
         <v-btn variant="text" @click="dialogOpen = false">{{ $t('common.cancel') }}</v-btn>
         <v-btn color="primary" variant="tonal" :loading="submitting" @click="submit">
           {{ isEdit ? $t('common.save') : $t('common.submit') }}
         </v-btn>
-      </v-card-actions>
+      </v-card-actions> -->
     </v-card>
   </v-dialog>
 </template>

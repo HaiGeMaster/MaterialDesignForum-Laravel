@@ -26,7 +26,7 @@ const section = ref('list')
 watch(
   isLoggedIn,
   (val) => {
-    if (!val) router.replace('/users/me')
+    if (!val) router.replace('/login')
   },
   { immediate: true },
 )
@@ -117,7 +117,7 @@ function bindProvider(provider) {
   const token = authStore.token
   if (!token) {
     feedback(t('oauth.errors.auth_required'), 'error')
-    router.replace('/users/me')
+    router.replace('/login')
     return
   }
   window.location.href = `/oauth/redirect/${provider}?mode=bind&token=${encodeURIComponent(token)}`
@@ -164,7 +164,7 @@ onMounted(() => {
       <v-col cols="12" md="10" lg="8">
         <!-- 设置选项列表 -->
         <template v-if="section === 'list'">
-          <v-card prepend-icon="mdi-cog-outline" :title="$t('settings.title')">
+          <v-card rounded="lg" prepend-icon="mdi-cog-outline" :title="$t('settings.title')">
             <!-- <v-card-title >
               <v-icon icon="mdi-cog-outline" />
               {{ $t('settings.title') }}
@@ -194,7 +194,7 @@ onMounted(() => {
 
         <!-- 第三方账号绑定 -->
         <template v-else-if="section === 'oauth'">
-          <v-card>
+          <v-card rounded="lg" >
             <v-card-title>
               <v-btn
                 icon="mdi-arrow-left"
@@ -260,7 +260,7 @@ onMounted(() => {
 
         <!-- 修改密码 -->
         <template v-else>
-          <v-card >
+          <v-card rounded="lg" >
             <v-card-title>
               <v-btn
                 icon="mdi-arrow-left"

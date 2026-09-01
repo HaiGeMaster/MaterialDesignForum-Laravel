@@ -5,7 +5,7 @@
         <v-text-field
           v-model="content"
           color="primary"
-          rounded="lg"
+
           variant="outlined"
           :label="label || $t('commentSheet.placeholder')"
           hide-details="auto"
@@ -14,7 +14,7 @@
         >
           <template v-slot:append-inner>
             <v-btn
-              rounded="lg"
+
               variant="flat"
               color="primary"
               :loading="submitting"
@@ -68,7 +68,7 @@ async function submit() {
   if (!text || submitting.value) return
   if (!authStore.isLoggedIn) {
     show(t('commentSheet.loginFirst'), 'info')
-    router.push('/users/me')
+    router.push('/login')
     return
   }
   submitting.value = true
