@@ -62,12 +62,12 @@ const showEmpty = computed(() => !props.loading && props.items.length === 0)
     </v-list>
 
     <!-- 空状态 -->
-    <v-empty-state
+    <!-- <v-empty-state
       v-else
       icon="mdi-inbox-outline"
       :title="$t('content.emptyTitle', { title })"
       :text="emptyText || $t('content.emptyText')"
       class="pa-4"
-    />
+    /> -->
   </v-card>
 </template>
