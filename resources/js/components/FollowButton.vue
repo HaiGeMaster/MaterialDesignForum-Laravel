@@ -13,7 +13,8 @@ const props = defineProps({
   targetId: { type: [Number, String], required: true },
   // 是否已关注（父组件传入的初始/外部状态）
   following: { type: Boolean, default: false },
-  size: { type: String, default: 'small' },
+    size: { type: String, default: 'small' },
+  variant: { type: String, default: 'tonal' },
 })
 
 const emit = defineEmits(['toggle-follow'])
@@ -85,7 +86,7 @@ async function handleToggle() {
         v-bind="props"
         icon
         :size="size"
-        variant="tonal"
+        :variant="variant"
         :loading="loading"
         @click.stop="handleToggle"
       >

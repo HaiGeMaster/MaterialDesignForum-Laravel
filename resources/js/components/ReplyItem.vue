@@ -14,8 +14,9 @@ const props = defineProps({
   reply: { type: Object, required: true },
   /** 所属评论 id（用于打开回复框 / 删除后由父组件移除并更新计数） */
   commentId: { type: [Number, String], required: true },
+  disableAction: { type: Boolean, default: false },
 })
-const emit = defineEmits(['deleted'])
+const emit = defineEmits(['deleted', 'open'])
 
 const { t } = useI18n()
 const authStore = useAuthStore()
@@ -57,6 +58,14 @@ function openReply() {
   })
 }
 
+function handlePrimaryClick() {
+  if (props.disableAction) {
+    emit('open', props.reply)
+    return
+  }
+  openReply()
+}
+
 function askDelete() {
   deleteDialog.open({
     title: t('commentSection.deleteReplyTitle'),
@@ -85,10 +94,10 @@ onBeforeUnmount(() => window.removeEventListener('reply:edited', handleReplyEdit
 <template>
   <!-- 参考旧项目布局：v-list-item 结构（头像 / 用户名(+回复对象) / 内容 / 操作区） -->
   <v-list-item
-   
+
     active-class="text-primary"
     class="py-3 reply-item"
-    @click="openReply"
+    @click="handlePrimaryClick"
   >
     <!-- 头像：点击弹出用户小卡片 -->
     <template #prepend>
@@ -100,8 +109,6 @@ onBeforeUnmount(() => window.removeEventListener('reply:edited', handleReplyEdit
         <template #activator="{ props: menuProps }">
           <v-avatar
             size="36"
-            color="primary"
-            
             class="cursor-pointer"
             v-bind="menuProps"
             @click.stop="menuProps.onClick?.($event)"

@@ -127,7 +127,7 @@ async function submit() {
 
       <v-card-text>
         <v-form ref="formRef" @submit.prevent="submit">
-          <v-text-field
+          <v-text-field color="primary" 
             v-model="name"
             :label="$t('topicDialog.name')"
             :rules="nameRules"
@@ -137,7 +137,7 @@ async function submit() {
             class="mb-4"
           />
 
-          <v-textarea
+          <v-textarea color="primary" 
             v-model="description"
             :label="$t('topicDialog.description')"
             :rules="descriptionRules"

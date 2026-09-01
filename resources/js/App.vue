@@ -8,6 +8,7 @@ import http from './api'
 import AppBar from './components/AppBar.vue'
 import AppDrawer from './components/AppDrawer.vue'
 import RichTextEditorWindow from './components/RichTextEditorWindow.vue'
+import SearchWindow from './components/SearchWindow.vue'
 import FloatingActionButton from './components/FloatingActionButton.vue'
 import UsersDialog from './components/UsersDialog.vue'
 import CommentReplySheet from './components/CommentReplySheet.vue'
@@ -116,6 +117,9 @@ body,
 
     <!-- 安装向导页：隐藏所有内容创作 / 互动相关浮窗，保持页面纯净 -->
     <template v-if="!isInstallPage">
+      <!-- 全局搜索悬浮窗口 -->
+      <SearchWindow />
+
       <!-- 悬浮窗口：富文本编辑器（写文章 / 写提问 / 写回答，及编辑） -->
       <RichTextEditorWindow
         :width="420"

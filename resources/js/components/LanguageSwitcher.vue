@@ -27,7 +27,7 @@ function switchLanguage(code) {
         <v-icon icon="mdi-translate" />
       </v-btn>
     </template>
-    <v-list density="compact" nav>
+    <v-list rounded="lg" density="compact" nav>
       <v-list-item
         v-for="lang in languages"
         :key="lang.code"

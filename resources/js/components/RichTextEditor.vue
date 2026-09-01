@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { EditorContent, useEditor, VueRenderer } from '@tiptap/vue-3'
-import { BubbleMenu } from '@tiptap/extension-bubble-menu'
+// import { BubbleMenu } from '@tiptap/extension-bubble-menu'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import Underline from '@tiptap/extension-underline'
@@ -458,7 +458,7 @@ const tableMenu = computed(() => ({
     <EditorContent class="rich-editor__content" :editor="editor" />
 
     <!-- 悬浮格式化工具栏：选中文本时出现 -->
-    <BubbleMenu
+    <!-- <BubbleMenu
       v-if="editor"
       :editor="editor"
       :tippy-options="{ duration: 100 }"
@@ -473,7 +473,7 @@ const tableMenu = computed(() => ({
         <v-divider vertical inset class="mx-1" />
         <v-btn size="x-small" icon variant="text" :color="editor.isActive('blockquote') ? 'primary' : undefined" @click="editor.chain().focus().toggleBlockquote().run()"><v-icon icon="mdi-format-quote-close" size="small" /></v-btn>
       </v-card>
-    </BubbleMenu>
+    </BubbleMenu> -->
 
     <!-- 下栏工具栏：发布按钮（最左侧）+ 段落排版与插入 -->
     <div class="rich-editor__toolbar rich-editor__toolbar--bottom">

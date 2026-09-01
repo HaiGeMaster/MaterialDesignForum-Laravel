@@ -269,9 +269,9 @@ function onChange(value) {
 <style>
 /* v-select 下拉菜单浮层（渲染在 body，需全局样式深色化） */
 .code-block-lang-menu {
-  background: #0d1117;
+  /* background: #0d1117;
   border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 6px;
+  border-radius: 6px; */
   overflow: hidden;
 }
 

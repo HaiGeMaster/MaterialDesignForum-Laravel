@@ -87,8 +87,8 @@ async function onFileChange(event) {
     <v-card rounded="lg" >
         <!-- 封面：头像+名字行整体以封面底边为锚 -->
         <div class="cover-wrap">
-            <v-img v-if="user?.cover" :src="user.cover" alt="" height="240" cover />
-            <div v-else class="bg-primary" style="height: 240px"></div>
+            <v-img v-if="user?.cover" :src="user.cover" alt="" height="440" cover />
+            <div v-else class="bg-primary" style="height: 440px"></div>
 
             <!--
                 头像+名字行：bottom: -48px（行高 96px），行中心点精确落在封面底边；

@@ -10,8 +10,9 @@ import { useCommentDialogStore } from '../stores/commentDialog'
 
 const props = defineProps({
   answer: { type: Object, required: true },
+  disableAction: { type: Boolean, default: false },
 })
-const emit = defineEmits(['edit', 'delete'])
+const emit = defineEmits(['edit', 'delete', 'open'])
 
 const { t } = useI18n()
 const commentDialog = useCommentDialogStore()
@@ -49,15 +50,23 @@ function openComments() {
     onCountChange: (n) => (commentCount.value = n),
   })
 }
+
+function handlePrimaryClick() {
+  if (props.disableAction) {
+    emit('open', props.answer)
+    return
+  }
+  openComments()
+}
 </script>
 
 <template>
   <!-- 参考旧项目布局：v-list-item 结构（头像 / 用户名 / 内容 / 操作区） -->
-  <v-list-item
-   
+  <v-list-item rounded="lg"
+
     active-class="text-primary"
     class="py-3 answer-item"
-    @click="openComments"
+    @click="handlePrimaryClick"
   >
     <!-- 头像：点击弹出用户小卡片 -->
     <template #prepend>
@@ -69,8 +78,6 @@ function openComments() {
         <template #activator="{ props: menuProps }">
           <v-avatar
             size="36"
-            color="primary"
-            
             class="cursor-pointer"
             v-bind="menuProps"
             @click.stop="menuProps.onClick?.($event)"

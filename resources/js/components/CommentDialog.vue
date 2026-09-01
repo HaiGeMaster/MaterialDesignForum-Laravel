@@ -129,15 +129,15 @@ watch(
         <template v-slot:append>
           <v-menu :close-on-content-click="true" >
             <template v-slot:activator="{ props: menuProps }">
-              <v-btn v-bind="menuProps" variant="text"  class="text-none">
-                <v-icon  start>mdi-sort</v-icon>
+              <v-btn v-bind="menuProps" variant="text" class="text-none">
+                <v-icon start>mdi-sort</v-icon>
                 <span class="text-body-2">
                   {{ sortItems.find((i) => i.value === sort)?.label || sortItems[0]?.label }}
                 </span>
-                <v-icon >mdi-chevron-down</v-icon>
+                <v-icon>mdi-chevron-down</v-icon>
               </v-btn>
             </template>
-            <v-list density="compact" min-width="160">
+            <v-list rounded="lg" density="compact" min-width="160">
               <v-list-item
                 v-for="item in sortItems"
                 :key="item.value"
@@ -149,13 +149,12 @@ watch(
             </v-list>
           </v-menu>
 
-
           <v-btn icon variant="text" @click="store.close()">
             <v-icon>
               mdi-close
             </v-icon>
             <v-tooltip activator="parent" location="left">
-              {{ $t('common.cancel') }}
+              {{ $t('common.close') }}
             </v-tooltip>
           </v-btn>
         </template>
@@ -190,10 +189,8 @@ watch(
 
       <!-- 底部：发布评论输入框 -->
       <v-card-actions class="pa-3">
-        <v-text-field
+        <v-text-field color="primary" 
           v-model="content"
-          color="primary"
-
           variant="outlined"
           :placeholder="$t('commentSheet.placeholder')"
           hide-details="auto"

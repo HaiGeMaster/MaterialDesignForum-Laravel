@@ -80,8 +80,8 @@ function clear() {
 <template>
   <div>
     <!-- 预览区，点击即可选择图片 -->
-    <div
-      class="image-upload-preview rounded-xl"
+    <v-card rounded="lg" variant="text"
+      class="image-upload-preview"
       :style="{ aspectRatio: previewRatio }"
       @click="pick"
     >
@@ -107,7 +107,7 @@ function clear() {
       <div v-if="userStore.uploading" class="image-upload-loading rounded-xl">
         <v-progress-circular indeterminate size="24" color="primary" />
       </div>
-    </div>
+    </v-card>
 
     <input
       ref="fileInput"

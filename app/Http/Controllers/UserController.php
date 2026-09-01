@@ -21,6 +21,7 @@ class UserController extends Controller
      * tab 过滤：
      * - following  我关注的用户（需登录）
      * - followers  我的粉丝（需登录）
+     * - new        最近加入的用户（按注册时间倒序）
      * - recommend  推荐人脉（默认，按粉丝数排序）
      */
     public function index(Request $request)
@@ -58,7 +59,12 @@ class UserController extends Controller
             $query->whereIn('user_id', $ids);
         }
 
-        $query->orderByDesc('follower_count')->orderByDesc('user_id');
+        // new：按注册时间倒序；其余：按粉丝数倒序
+        if ($tab === 'new') {
+            $query->orderByDesc('create_time')->orderByDesc('user_id');
+        } else {
+            $query->orderByDesc('follower_count')->orderByDesc('user_id');
+        }
 
         // 带 page 参数时分页返回，否则保持完整数组（旧调用不受影响）
         [$result, $collection] = $this->paginateOrGet($query, $request);
@@ -300,5 +306,91 @@ class UserController extends Controller
         $user->save();
 
         return response()->json(['message' => __('messages.http_user_2')]);
+    }
+
+    /**
+     * 获取当前用户的登录设备凭证列表。
+     */
+    public function tokens(Request $request)
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $currentToken = $this->extractBearerToken($request);
+
+        $items = $user->tokens()
+            ->orderByDesc('update_time')
+            ->get()
+            ->map(function ($token) use ($currentToken) {
+                return [
+                    'token' => $token->token,
+                    'device' => $token->device ?: 'Unknown device',
+                    'create_time' => $token->create_time?->toDateTimeString(),
+                    'update_time' => $token->update_time?->toDateTimeString(),
+                    'expire_time' => $token->expire_time?->toDateTimeString(),
+                    'is_current' => $token->token === $currentToken,
+                ];
+            });
+
+        return response()->json([
+            'data' => $items,
+            'current_token' => $currentToken,
+        ]);
+    }
+
+    /**
+     * 注销某个设备的登录凭证。
+     */
+    public function revokeToken(Request $request, string $token)
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $currentToken = $this->extractBearerToken($request);
+
+        if ($token === $currentToken) {
+            return response()->json([
+                'message' => '当前设备登录凭证不能直接注销，请使用退出登录。',
+            ], 422);
+        }
+
+        $deleted = $user->tokens()->where('token', $token)->delete();
+
+        if (! $deleted) {
+            return response()->json([
+                'message' => '该登录凭证不存在或不属于当前用户。',
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => '已注销该设备登录凭证。',
+        ]);
+    }
+
+    /**
+     * 注销当前用户除当前设备外的所有登录凭证。
+     */
+    public function revokeOtherTokens(Request $request)
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $currentToken = $this->extractBearerToken($request);
+
+        $user->tokens()
+            ->when($currentToken, fn ($query) => $query->where('token', '!=', $currentToken))
+            ->delete();
+
+        return response()->json([
+            'message' => '已注销其他设备的登录凭证。',
+        ]);
+    }
+
+    protected function extractBearerToken(Request $request): ?string
+    {
+        $header = (string) $request->header('Authorization', '');
+
+        if (preg_match('/Bearer\s+(.+)/i', $header, $matches)) {
+            return trim($matches[1]);
+        }
+
+        return null;
     }
 }

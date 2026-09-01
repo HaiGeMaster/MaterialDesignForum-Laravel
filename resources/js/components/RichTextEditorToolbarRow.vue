@@ -261,7 +261,7 @@ function onMenuVisibility(id, open) {
                 <v-icon icon="mdi-menu-down" size="x-small" />
               </v-btn>
             </template>
-            <v-list density="compact" min-width="120" max-height="280" class="overflow-y-auto">
+            <v-list rounded="lg" density="compact" min-width="120" max-height="280" class="overflow-y-auto">
               <v-list-item
                 v-for="opt in btn.options"
                 :key="opt.value"
@@ -299,7 +299,7 @@ function onMenuVisibility(id, open) {
                 </v-btn>
                 <span class="text-body-2 font-weight-medium">{{ btn.title }}</span>
               </div>
-              <v-text-field
+              <v-text-field color="primary" 
                 v-model="linkUrl"
                 density="compact"
                 variant="outlined"
@@ -319,7 +319,7 @@ function onMenuVisibility(id, open) {
             </v-card>
 
             <!-- 子功能列表 -->
-            <v-list v-else density="compact" min-width="170">
+            <v-list rounded="lg" v-else density="compact" min-width="170">
               <v-list-item
                 v-for="item in btn.items"
                 :key="item.title"

@@ -14,8 +14,9 @@ import { useFeedback } from "../composables/useFeedback";
 
 const props = defineProps({
     comment: { type: Object, required: true },
+    disableAction: { type: Boolean, default: false },
 });
-const emit = defineEmits(["deleted"]);
+const emit = defineEmits(["deleted", "open"]);
 
 const { t } = useI18n();
 const authStore = useAuthStore();
@@ -143,6 +144,14 @@ function openReply() {
     });
 }
 
+function handlePrimaryClick() {
+    if (props.disableAction) {
+        emit("open", props.comment);
+        return;
+    }
+    openReply();
+}
+
 function askDelete() {
     deleteDialog.open({
         title: t("commentSection.deleteTitle"),
@@ -170,10 +179,10 @@ onBeforeUnmount(() => {
 <template>
     <!-- 参考旧项目布局：v-list-item 结构（头像 / 用户名 / 内容+回复 / 操作区） -->
     <v-list-item
-       
+
         active-class="text-primary"
         class="py-3 comment-item"
-        @click="openReply"
+        @click="handlePrimaryClick"
     >
         <!-- 头像：点击弹出用户小卡片 -->
         <template #prepend>
@@ -185,8 +194,6 @@ onBeforeUnmount(() => {
                 <template #activator="{ props: menuProps }">
                     <v-avatar
                         size="36"
-                        color="primary"
-                        
                         class="cursor-pointer"
                         v-bind="menuProps"
                         @click.stop="menuProps.onClick?.($event)"
@@ -227,7 +234,7 @@ onBeforeUnmount(() => {
             <v-expand-transition>
                 <v-card
                     v-if="expanded"
-                   
+
                     variant="flat"
                     class="mt-1"
                     @click.stop
@@ -267,7 +274,7 @@ onBeforeUnmount(() => {
                 <!-- 查看 / 收起回复 -->
                 <v-btn
                     v-show="replyCount > 0"
-                   
+
                     size="small"
                     variant="plain"
                     class="text-high-emphasis"
@@ -291,7 +298,7 @@ onBeforeUnmount(() => {
                 <v-btn
                     v-if="repliesLoaded"
                     v-show="!repliesFinished && replyCount > 0 && expanded"
-                   
+
                     variant="text"
                     color="primary"
                     size="small"

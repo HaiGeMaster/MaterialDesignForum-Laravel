@@ -15,10 +15,10 @@ const props = defineProps({
     <v-dialog v-model="open" max-width="880" scrollable>
         <v-card rounded="lg" style="margin-top: 40px;">
             <v-toolbar :title="props.item?.filename">
-                <template #prepend>
+                <template #append>
                     <v-btn icon variant="text" @click="open = false">
                         <v-icon>mdi-close</v-icon>
-                        <v-tooltip activator="parent" location="right">
+                        <v-tooltip activator="parent" location="left">
                             {{ $t('common.close') }}
                         </v-tooltip>
                     </v-btn>

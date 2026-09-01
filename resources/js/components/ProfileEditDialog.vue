@@ -162,7 +162,7 @@ async function save() {
         <v-form ref="formRef">
           <v-row>
             <v-col cols="12">
-              <v-text-field
+              <v-text-field color="primary" 
                 v-model="form.username"
                 :label="$t('profileEdit.username')"
                 :rules="rules.username"
@@ -187,7 +187,7 @@ async function save() {
             </v-col>
 
             <v-col cols="12">
-              <v-text-field
+              <v-text-field color="primary" 
                 v-model="form.headline"
                 :label="$t('profileEdit.headline')"
                 :hint="$t('profileEdit.headlineHint')"
@@ -199,7 +199,7 @@ async function save() {
             </v-col>
 
             <v-col cols="12">
-              <v-textarea
+              <v-textarea color="primary" 
                 v-model="form.bio"
                 :label="$t('profileEdit.bio')"
                 :hint="$t('profileEdit.bioHint')"
@@ -213,7 +213,7 @@ async function save() {
             </v-col>
 
             <v-col cols="12" sm="6">
-              <v-text-field
+              <v-text-field color="primary" 
                 v-model="form.location"
                 :label="$t('profileEdit.location')"
                 variant="outlined"
@@ -222,7 +222,7 @@ async function save() {
             </v-col>
 
             <v-col cols="12" sm="6">
-              <v-text-field
+              <v-text-field color="primary" 
                 v-model="form.company"
                 :label="$t('profileEdit.company')"
                 variant="outlined"
@@ -231,7 +231,7 @@ async function save() {
             </v-col>
 
             <v-col cols="12">
-              <v-text-field
+              <v-text-field color="primary" 
                 v-model="form.blog"
                 :label="$t('profileEdit.blog')"
                 variant="outlined"

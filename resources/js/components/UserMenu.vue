@@ -49,7 +49,7 @@ function handleLogout() {
     <template #activator="{ props }">
       <!-- 只显示头像，点击弹出用户菜单 -->
       <v-btn icon variant="text" v-bind="props">
-        <v-avatar :size="mobile ? 40 : avatarSize" :color="avatarColor || undefined">
+        <v-avatar :size="mobile ? 40 : avatarSize" >
           <v-img
             v-if="authStore.user?.avatar"
             :src="authStore.user.avatar"
@@ -61,7 +61,7 @@ function handleLogout() {
       </v-btn>
     </template>
 
-    <v-list density="compact" nav>
+    <v-list rounded="lg" density="compact" nav>
       <v-list-subheader>{{ authStore.user?.username || '' }}</v-list-subheader>
       <v-divider class="my-1" />
       <v-list-item v-bind="navAttrs(profilePath)" prepend-icon="mdi-account" :title="t('nav.profile')" />

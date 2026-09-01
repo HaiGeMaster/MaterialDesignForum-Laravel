@@ -21,6 +21,9 @@ const isLoggedIn = computed(() => authStore.isLoggedIn)
 
 // 当前展示的区块：list=选项列表 / profile=编辑个人资料 / password=修改密码 / oauth=第三方绑定
 const section = ref('list')
+const sessionTokens = ref([])
+const sessionLoading = ref(false)
+const sessionDeleting = ref(false)
 
 // 未登录直接回登录页
 watch(
@@ -90,6 +93,46 @@ const oauthRows = computed(() => {
   })
 })
 
+async function loadSessionTokens() {
+  sessionLoading.value = true
+  try {
+    const { data } = await http.get('/user/tokens')
+    sessionTokens.value = Array.isArray(data?.data) ? data.data : []
+  } catch (error) {
+    sessionTokens.value = []
+    feedback(error.message || t('settings.deviceSessionsLoadFailed'), 'error')
+  } finally {
+    sessionLoading.value = false
+  }
+}
+
+async function revokeSessionToken(token) {
+  if (!token) return
+  try {
+    sessionDeleting.value = token
+    await http.delete(`/user/tokens/${encodeURIComponent(token)}`)
+    await loadSessionTokens()
+    feedback(t('settings.deviceSessionRevoked'), 'success')
+  } catch (error) {
+    feedback(error.message || t('settings.deviceSessionRevokeFailed'), 'error')
+  } finally {
+    sessionDeleting.value = ''
+  }
+}
+
+async function revokeOtherSessions() {
+  try {
+    sessionDeleting.value = 'all'
+    await http.delete('/user/tokens')
+    await loadSessionTokens()
+    feedback(t('settings.deviceSessionsRevoked'), 'success')
+  } catch (error) {
+    feedback(error.message || t('settings.deviceSessionsRevokeFailed'), 'error')
+  } finally {
+    sessionDeleting.value = ''
+  }
+}
+
 async function loadEnabledProviders() {
   try {
     const { data } = await http.get('/oauth/providers')
@@ -156,6 +199,16 @@ onMounted(() => {
   loadOauthBindings()
   consumeCallbackQuery()
 })
+
+watch(
+  () => section.value,
+  (value) => {
+    if (value === 'sessions') {
+      loadSessionTokens()
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
@@ -185,7 +238,7 @@ onMounted(() => {
               {{ $t('settings.title') }}
             </v-card-title> -->
             <!-- <v-divider /> -->
-            <v-list>
+            <v-list rounded="lg" >
               <v-list-item
                 prepend-icon="mdi-shield-lock"
                 :title="$t('settings.changePassword')"
@@ -193,6 +246,15 @@ onMounted(() => {
                 append-icon="mdi-chevron-right"
                 class="pa-4"
                 @click="section = 'password'"
+              />
+              <v-divider />
+              <v-list-item
+                prepend-icon="mdi-monitor-lock"
+                :title="$t('settings.deviceSessions')"
+                :subtitle="$t('settings.deviceSessionsSub')"
+                append-icon="mdi-chevron-right"
+                class="pa-4"
+                @click="section = 'sessions'"
               />
               <v-divider />
               <v-list-item
@@ -204,6 +266,67 @@ onMounted(() => {
                 @click="section = 'oauth'"
               />
             </v-list>
+          </v-card>
+        </template>
+
+        <!-- 登录设备凭证 -->
+        <template v-else-if="section === 'sessions'">
+          <v-card rounded="lg">
+            <v-toolbar :title="$t('settings.deviceSessions')">
+              <template #prepend>
+                <v-btn icon variant="text" @click="section = 'list'">
+                  <v-icon>mdi-arrow-left</v-icon>
+                  <v-tooltip activator="parent" location="right">
+                    {{ $t('common.back') }}
+                  </v-tooltip>
+                </v-btn>
+              </template>
+              <template #append>
+                <v-btn
+                  v-if="sessionTokens.length > 1"
+                  variant="text"
+                  :loading="sessionDeleting === 'all'"
+                  @click="revokeOtherSessions"
+                >
+                  {{ $t('settings.revokeOtherSessions') }}
+                </v-btn>
+              </template>
+            </v-toolbar>
+
+            <v-card-text>
+              <v-progress-linear v-if="sessionLoading" indeterminate color="primary" class="mb-4" />
+
+              <v-list v-else rounded="lg" lines="two" class="px-0">
+                <template v-for="(session, idx) in sessionTokens" :key="session.token">
+                  <v-divider v-if="idx" />
+                  <v-list-item class="px-0">
+                    <template #prepend>
+                      <v-avatar color="primary" variant="tonal">
+                        <v-icon :icon="session.is_current ? 'mdi-laptop' : 'mdi-cellphone'" />
+                      </v-avatar>
+                    </template>
+                    <v-list-item-title>
+                      {{ session.device || $t('settings.unknownDevice') }}
+                      <span v-if="session.is_current" class="text-caption text-primary ml-2">{{ $t('settings.currentDevice') }}</span>
+                    </v-list-item-title>
+                    <v-list-item-subtitle>
+                      {{ session.create_time }}
+                    </v-list-item-subtitle>
+                    <template #append>
+                      <v-btn
+                        v-if="!session.is_current"
+                        variant="text"
+                        color="error"
+                        :loading="sessionDeleting === session.token"
+                        @click="revokeSessionToken(session.token)"
+                      >
+                        {{ $t('settings.revokeSession') }}
+                      </v-btn>
+                    </template>
+                  </v-list-item>
+                </template>
+              </v-list>
+            </v-card-text>
           </v-card>
         </template>
 
@@ -243,7 +366,7 @@ onMounted(() => {
                 {{ $t('oauth.noProvidersConfigured') }}
               </div>
 
-              <v-list lines="two" class="px-0">
+              <v-list rounded="lg" lines="two" class="px-0">
                 <template v-for="(row, idx) in oauthRows" :key="row.provider">
                   <v-divider v-if="idx" />
                   <v-list-item class="px-0">
@@ -318,7 +441,7 @@ onMounted(() => {
             <v-divider /> -->
             <v-card-text>
               <v-form ref="passwordFormRef" @submit.prevent="handleUpdatePassword">
-                <v-text-field
+                <v-text-field color="primary" 
                   v-model="passwordForm.old_password"
                   :label="$t('settings.oldPassword')"
                   type="password"
@@ -326,7 +449,7 @@ onMounted(() => {
                   :rules="[passwordRules.old_password]"
                   autocomplete="current-password"
                 />
-                <v-text-field
+                <v-text-field color="primary" 
                   v-model="passwordForm.password"
                   :label="$t('settings.newPassword')"
                   type="password"
@@ -334,7 +457,7 @@ onMounted(() => {
                   :rules="[passwordRules.password]"
                   autocomplete="new-password"
                 />
-                <v-text-field
+                <v-text-field color="primary" 
                   v-model="passwordForm.password_confirmation"
                   :label="$t('settings.confirmNewPassword')"
                   type="password"

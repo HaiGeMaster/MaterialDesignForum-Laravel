@@ -11,7 +11,7 @@ const props = defineProps({
   to: { type: String, default: '' },
   /** 列表数据 */
   items: { type: Array, default: () => [] },
-  /** 条目类型：question 问题 / article 文章 */
+  /** 条目类型：question 问题 / article 文章 / user 用户 */
   itemType: { type: String, default: 'question' },
   /** 是否加载中 */
   loading: { type: Boolean, default: false },
@@ -24,9 +24,9 @@ const emit = defineEmits(['toggle-follow', 'more', 'open'])
 // 当前打开头像卡片菜单的列表项 id（同时只开一个）
 const activeAvatar = ref(null)
 
-// 问题/文章主键字段不同，统一取 id
+// 问题/文章/用户主键字段不同，统一取 id
 function itemId(item) {
-  return item.question_id ?? item.article_id
+  return item.question_id ?? item.article_id ?? item.user_id
 }
 
 const showEmpty = computed(() => !props.loading && props.items.length === 0)
@@ -47,7 +47,7 @@ const showEmpty = computed(() => !props.loading && props.items.length === 0)
     <v-progress-linear v-if="loading" indeterminate color="primary" />
 
     <!-- 列表 -->
-    <v-list v-else-if="items.length" lines="two" style="padding: 0;">
+    <v-list rounded="lg" v-else-if="items.length" lines="two" style="padding: 0;">
       <ContentListItem
         v-for="item in items"
         :key="itemId(item)"

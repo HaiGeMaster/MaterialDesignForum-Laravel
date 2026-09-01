@@ -133,7 +133,7 @@ function answerTitle(item) {
         <v-window v-model="tab">
             <!-- 提问 -->
             <v-window-item value="questions">
-                <v-list style="padding:0;" v-if="questions.length" lines="two">
+                <v-list rounded="lg" style="padding:0;" v-if="questions.length" lines="two">
                     <v-list-item v-for="item in questions" :key="item.question_id" :title="item.title"
                         class="border-b-thin" @click="goDetail(item, 'question')">
                         <template #subtitle>
@@ -159,7 +159,7 @@ function answerTitle(item) {
 
             <!-- 文章 -->
             <v-window-item value="articles">
-                <v-list style="padding:0;" v-if="articles.length" lines="two">
+                <v-list rounded="lg" style="padding:0;" v-if="articles.length" lines="two">
                     <v-list-item v-for="item in articles" :key="item.article_id" :title="item.title"
                         class="border-b-thin" @click="goDetail(item, 'article')">
                         <template #subtitle>
@@ -185,7 +185,7 @@ function answerTitle(item) {
 
             <!-- 回答 -->
             <v-window-item value="answers">
-                <v-list style="padding:0;" v-if="answers.length" lines="two">
+                <v-list rounded="lg" style="padding:0;" v-if="answers.length" lines="two">
                     <v-list-item v-for="item in answers" :key="item.answer_id" :title="answerTitle(item)"
                         class="border-b-thin" @click="goDetail(item, 'answer')">
                         <template #subtitle>

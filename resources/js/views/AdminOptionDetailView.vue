@@ -272,24 +272,24 @@ function toggleBuiltinTheme(name, enabled) {
 
       <v-card-text v-if="route.params.setting === 'info'" class="form-section">
         <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-4" />
-        <v-text-field v-model="forms.info.site_name" :label="$t('admin.siteName')" />
-        <v-textarea v-model="forms.info.site_description" :label="$t('admin.siteDescription')" rows="3" />
-        <v-text-field v-model="forms.info.site_keywords" :label="$t('admin.siteKeywords')" :hint="$t('admin.siteKeywordsHint')" persistent-hint />
-        <v-text-field v-model="forms.info.site_icp_beian" :label="$t('admin.siteIcp')" />
-        <v-text-field v-model="forms.info.site_gongan_beian" :label="$t('admin.sitePolice')" />
+        <v-text-field color="primary"  v-model="forms.info.site_name" :label="$t('admin.siteName')" />
+        <v-textarea color="primary"  v-model="forms.info.site_description" :label="$t('admin.siteDescription')" rows="3" />
+        <v-text-field color="primary"  v-model="forms.info.site_keywords" :label="$t('admin.siteKeywords')" :hint="$t('admin.siteKeywordsHint')" persistent-hint />
+        <v-text-field color="primary"  v-model="forms.info.site_icp_beian" :label="$t('admin.siteIcp')" />
+        <v-text-field color="primary"  v-model="forms.info.site_gongan_beian" :label="$t('admin.sitePolice')" />
         <v-select v-model="forms.info.default_language" :items="infoLanguages" item-title="title" item-value="value" :label="$t('admin.defaultLanguage')" />
       </v-card-text>
 
       <v-card-text v-else-if="route.params.setting === 'mail'" class="form-section">
         <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-4" />
-        <v-text-field v-model="forms.mail.MAIL_MAILER" :label="$t('admin.mailer')" />
-        <v-text-field v-model="forms.mail.MAIL_HOST" :label="$t('admin.smtpHost')" />
-        <v-text-field v-model="forms.mail.MAIL_PORT" :label="$t('admin.smtpPort')" />
+        <v-text-field color="primary"  v-model="forms.mail.MAIL_MAILER" :label="$t('admin.mailer')" />
+        <v-text-field color="primary"  v-model="forms.mail.MAIL_HOST" :label="$t('admin.smtpHost')" />
+        <v-text-field color="primary"  v-model="forms.mail.MAIL_PORT" :label="$t('admin.smtpPort')" />
         <v-select v-model="forms.mail.MAIL_SCHEME" :items="[{ title: 'NULL', value: '' }, { title: 'SSL', value: 'smtps' }, { title: 'TLS', value: 'smtp' }]" :label="$t('admin.smtpEncryption')" />
-        <v-text-field v-model="forms.mail.MAIL_USERNAME" :label="$t('admin.smtpUsername')" />
-        <v-text-field v-model="forms.mail.MAIL_PASSWORD" type="password" :label="$t('admin.smtpPassword')" :hint="forms.mail.password_set ? $t('admin.passwordKeepHint') : ''" persistent-hint />
-        <v-text-field v-model="forms.mail.MAIL_FROM_ADDRESS" :label="$t('admin.mailFromAddress')" />
-        <v-text-field v-model="forms.mail.MAIL_FROM_NAME" :label="$t('admin.mailFromName')" />
+        <v-text-field color="primary"  v-model="forms.mail.MAIL_USERNAME" :label="$t('admin.smtpUsername')" />
+        <v-text-field color="primary"  v-model="forms.mail.MAIL_PASSWORD" type="password" :label="$t('admin.smtpPassword')" :hint="forms.mail.password_set ? $t('admin.passwordKeepHint') : ''" persistent-hint />
+        <v-text-field color="primary"  v-model="forms.mail.MAIL_FROM_ADDRESS" :label="$t('admin.mailFromAddress')" />
+        <v-text-field color="primary"  v-model="forms.mail.MAIL_FROM_NAME" :label="$t('admin.mailFromName')" />
       </v-card-text>
 
       <v-card-text v-else-if="route.params.setting === 'oauth'" class="form-section">
@@ -297,8 +297,8 @@ function toggleBuiltinTheme(name, enabled) {
         <v-card rounded="lg" v-for="provider in ['github', 'google', 'microsoft']" :key="provider" class="provider-section mb-4" variant="flat">
           <v-card-title class="text-subtitle-1 text-capitalize">{{ provider }}</v-card-title>
           <v-card-text>
-            <v-text-field v-model="forms.oauth[`${provider.toUpperCase()}_CLIENT_ID`]" :label="$t('admin.clientId')" />
-            <v-text-field v-model="forms.oauth[`${provider.toUpperCase()}_CLIENT_SECRET`]" type="password" :label="$t('admin.clientSecret')" :hint="forms.oauth[`${provider.toUpperCase()}_SECRET_SET`] ? $t('admin.secretKeepHint') : ''" persistent-hint />
+            <v-text-field color="primary"  v-model="forms.oauth[`${provider.toUpperCase()}_CLIENT_ID`]" :label="$t('admin.clientId')" />
+            <v-text-field color="primary"  v-model="forms.oauth[`${provider.toUpperCase()}_CLIENT_SECRET`]" type="password" :label="$t('admin.clientSecret')" :hint="forms.oauth[`${provider.toUpperCase()}_SECRET_SET`] ? $t('admin.secretKeepHint') : ''" persistent-hint />
           </v-card-text>
         </v-card>
       </v-card-text>
@@ -317,7 +317,7 @@ function toggleBuiltinTheme(name, enabled) {
 
         <!-- 内置主题启用/禁用 -->
         <div class="text-subtitle-1 font-weight-bold mb-3">{{ $t('admin.builtinThemes') }}</div>
-        <v-list density="compact">
+        <v-list rounded="lg" density="compact">
           <v-list-item
             v-for="th in BUILTIN_THEMES"
             :key="th.name"
@@ -348,7 +348,7 @@ function toggleBuiltinTheme(name, enabled) {
           </v-btn>
         </div>
 
-        <v-list v-if="forms.theme.custom_themes.length" density="compact">
+        <v-list rounded="lg" v-if="forms.theme.custom_themes.length" density="compact">
           <v-list-item
             v-for="ct in forms.theme.custom_themes"
             :key="ct.name"
@@ -368,37 +368,50 @@ function toggleBuiltinTheme(name, enabled) {
         <!-- Light / Dark 主色配置 -->
         <div class="text-subtitle-1 font-weight-bold mb-3">{{ $t('admin.lightTheme') }}</div>
         <v-row>
-          <v-col cols="12" sm="4"><v-text-field v-model="forms.theme.lightPrimary" :color="forms.theme.lightPrimary" :label="$t('admin.primaryColor')" /></v-col>
-          <v-col cols="12" sm="4"><v-text-field v-model="forms.theme.lightSecondary" :color="forms.theme.lightSecondary" :label="$t('admin.secondaryColor')" /></v-col>
-          <v-col cols="12" sm="4"><v-text-field v-model="forms.theme.lightAccent" :color="forms.theme.lightAccent" :label="$t('admin.accentColor')" /></v-col>
+          <v-col cols="12" sm="4"><v-text-field color="primary"  v-model="forms.theme.lightPrimary" :color="forms.theme.lightPrimary" :label="$t('admin.primaryColor')" /></v-col>
+          <v-col cols="12" sm="4"><v-text-field color="primary"  v-model="forms.theme.lightSecondary" :color="forms.theme.lightSecondary" :label="$t('admin.secondaryColor')" /></v-col>
+          <v-col cols="12" sm="4"><v-text-field color="primary"  v-model="forms.theme.lightAccent" :color="forms.theme.lightAccent" :label="$t('admin.accentColor')" /></v-col>
         </v-row>
         <div class="text-subtitle-1 font-weight-bold mb-3 mt-2">{{ $t('admin.darkTheme') }}</div>
         <v-row>
-          <v-col cols="12" sm="4"><v-text-field v-model="forms.theme.darkPrimary" :color="forms.theme.darkPrimary" :label="$t('admin.primaryColor')" /></v-col>
-          <v-col cols="12" sm="4"><v-text-field v-model="forms.theme.darkSecondary" :color="forms.theme.darkSecondary" :label="$t('admin.secondaryColor')" /></v-col>
-          <v-col cols="12" sm="4"><v-text-field v-model="forms.theme.darkAccent" :color="forms.theme.darkAccent" :label="$t('admin.accentColor')" /></v-col>
+          <v-col cols="12" sm="4"><v-text-field color="primary"  v-model="forms.theme.darkPrimary" :color="forms.theme.darkPrimary" :label="$t('admin.primaryColor')" /></v-col>
+          <v-col cols="12" sm="4"><v-text-field color="primary"  v-model="forms.theme.darkSecondary" :color="forms.theme.darkSecondary" :label="$t('admin.secondaryColor')" /></v-col>
+          <v-col cols="12" sm="4"><v-text-field color="primary"  v-model="forms.theme.darkAccent" :color="forms.theme.darkAccent" :label="$t('admin.accentColor')" /></v-col>
         </v-row>
       </v-card-text>
     </v-card>
 
     <!-- 新建自定义主题对话框 -->
     <v-dialog v-model="newThemeDialog" max-width="480">
-      <v-card rounded="lg" >
-        <v-card-title>{{ $t('admin.newTheme') }}</v-card-title>
+      <v-card rounded="lg">
+        <v-toolbar :title="$t('admin.newTheme')">
+          <template #prepend>
+            <v-btn icon variant="text" @click="newThemeDialog = false">
+              <v-icon>mdi-close</v-icon>
+              <v-tooltip activator="parent" location="right">
+                {{ $t('common.cancel') }}
+              </v-tooltip>
+            </v-btn>
+          </template>
+          <template #append>
+            <v-btn icon variant="text" @click="addCustomTheme">
+              <v-icon>mdi-check</v-icon>
+              <v-tooltip activator="parent" location="left">
+                {{ $t('common.confirm') }}
+              </v-tooltip>
+            </v-btn>
+          </template>
+        </v-toolbar>
+
         <v-card-text>
-          <v-text-field v-model="newTheme.name" :label="$t('admin.themeName')" :rules="[v => !!v || $t('auth.rules.required')]" />
+          <v-text-field color="primary"  v-model="newTheme.name" :label="$t('admin.themeName')" :rules="[v => !!v || $t('auth.rules.required')]" />
           <v-switch v-model="newTheme.dark" :label="$t('admin.darkMode')" color="primary" hide-details class="mb-3" />
           <v-row>
-            <v-col cols="12" sm="4"><v-text-field v-model="newTheme.primary" :label="$t('admin.primaryColor')" type="color" /></v-col>
-            <v-col cols="12" sm="4"><v-text-field v-model="newTheme.secondary" :label="$t('admin.secondaryColor')" type="color" /></v-col>
-            <v-col cols="12" sm="4"><v-text-field v-model="newTheme.accent" :label="$t('admin.accentColor')" type="color" /></v-col>
+            <v-col cols="12" sm="4"><v-text-field color="primary"  v-model="newTheme.primary" :label="$t('admin.primaryColor')" type="color" /></v-col>
+            <v-col cols="12" sm="4"><v-text-field color="primary"  v-model="newTheme.secondary" :label="$t('admin.secondaryColor')" type="color" /></v-col>
+            <v-col cols="12" sm="4"><v-text-field color="primary"  v-model="newTheme.accent" :label="$t('admin.accentColor')" type="color" /></v-col>
           </v-row>
         </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn variant="text" @click="newThemeDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="primary" variant="tonal" @click="addCustomTheme">{{ $t('common.confirm') }}</v-btn>
-        </v-card-actions>
       </v-card>
     </v-dialog>
   </v-container>

@@ -59,7 +59,7 @@ async function submit() {
       <v-card-text class="pt-4 pb-1">
         <!-- 被回复目标信息：头像 / 用户名 / 内容预览 -->
         <div class="d-flex align-start ga-3">
-          <v-avatar size="36" color="primary" >
+          <v-avatar size="36">
             <v-img v-if="target.avatar" :src="target.avatar" cover />
             <span v-else class="text-body-2 font-weight-bold text-primary">{{ targetInitial }}</span>
           </v-avatar>
@@ -71,10 +71,8 @@ async function submit() {
       </v-card-text>
 
       <v-card-actions class="pt-1">
-        <v-text-field
+        <v-text-field color="primary" 
           v-model="content"
-          color="primary"
-
           variant="outlined"
           :placeholder="t('replySheet.placeholder')"
           hide-details="auto"

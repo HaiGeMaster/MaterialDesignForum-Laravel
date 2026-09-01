@@ -116,7 +116,7 @@ function notificationIcon(item) {
 
 <template>
   <v-list-item
-   
+
     :to="notificationLink(item)"
     class="notification-item px-2"
     lines="two"
@@ -124,8 +124,6 @@ function notificationIcon(item) {
     <template #prepend>
       <v-avatar
         size="40"
-        color="primary"
-        
         :to="sender.user_id ? `/users/${sender.user_id}` : undefined"
         @click.stop
       >

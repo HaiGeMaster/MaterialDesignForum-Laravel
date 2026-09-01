@@ -81,7 +81,7 @@ const gonganBeianImg = '/assets/fixed_content/gwbeian.png'
     width="260"
     @update:model-value="(value) => emit('update:modelValue', value)"
   >
-    <v-list nav density="comfortable" color="primary">
+    <v-list rounded="lg" nav density="comfortable" color="primary">
       <template v-for="(group, groupIndex) in visibleAdminNavGroups" :key="group[0].id">
         <v-divider v-if="groupIndex" class="my-2" />
         <v-list-item

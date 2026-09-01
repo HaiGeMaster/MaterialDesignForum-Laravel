@@ -69,8 +69,11 @@ const pageConfig = {
 
 // 话题 / 问题 / 文章列表页、问题详情页、管理员用户组页显示
 const current = computed(() => {
-  if (route.name === 'admin-module' && route.params.module === 'user-groups') {
-    return pageConfig['admin-user-groups']
+  if (route.name === 'admin-module') {
+    if (route.params.module === 'user-groups') return pageConfig['admin-user-groups']
+    if (['topics', 'questions', 'articles'].includes(route.params.module)) {
+      return pageConfig[route.params.module]
+    }
   }
   return pageConfig[route.name]
 })
@@ -83,11 +86,11 @@ function handleClick() {
     router.push('/login')
     return
   }
-  if (route.name === 'topics') {
+  if (route.name === 'topics' || (route.name === 'admin-module' && route.params.module === 'topics')) {
     topicDialog.value = true
-  } else if (route.name === 'questions') {
+  } else if (route.name === 'questions' || (route.name === 'admin-module' && route.params.module === 'questions')) {
     editorWindow.openEditor({ mode: 'question', action: 'create' })
-  } else if (route.name === 'articles') {
+  } else if (route.name === 'articles' || (route.name === 'admin-module' && route.params.module === 'articles')) {
     editorWindow.openEditor({ mode: 'article', action: 'create' })
   } else if (route.name === 'question-detail') {
     // 问题详情页：打开编辑器写回答

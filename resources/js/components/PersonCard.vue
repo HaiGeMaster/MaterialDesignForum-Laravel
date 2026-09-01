@@ -27,7 +27,7 @@ const isSelf = computed(
 </script>
 
 <template>
-  <v-card
+  <v-card rounded="lg" 
     class="person-card d-flex flex-column"
 
     elevation="1"
@@ -35,7 +35,7 @@ const isSelf = computed(
   >
     <!-- 上方居中头像 -->
     <div class="person-avatar d-flex align-center justify-center">
-      <v-avatar size="72" color="primary" >
+      <v-avatar size="72">
         <v-img v-if="person.avatar" :src="person.avatar" cover />
         <span v-else class="text-h4 font-weight-bold text-primary">{{ initial }}</span>
       </v-avatar>

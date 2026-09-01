@@ -13,6 +13,8 @@ const router = useRouter()
 
 const questions = ref([])
 const articles = ref([])
+const popularUsers = ref([])
+const newUsers = ref([])
 const loading = ref(true)
 
 // 各面板数据：切片前 5 条
@@ -40,11 +42,25 @@ const newArticles = computed(() =>
     .slice(0, 5)
 )
 
+const popularUsersTop = computed(() =>
+  [...popularUsers.value]
+    .sort((a, b) => (b.follower_count ?? 0) - (a.follower_count ?? 0))
+    .slice(0, 5)
+)
+
+const newUsersTop = computed(() =>
+  [...newUsers.value]
+    .sort((a, b) => new Date(b.create_time) - new Date(a.create_time))
+    .slice(0, 5)
+)
+
 const panels = computed(() => [
   { title: t('home.hotQuestions'), icon: 'mdi-fire', to: '/questions', itemType: 'question', items: hotQuestions.value },
   { title: t('home.newQuestions'), icon: 'mdi-clock-fast', to: '/questions', itemType: 'question', items: newQuestions.value },
   { title: t('home.hotArticles'), icon: 'mdi-fire', to: '/articles', itemType: 'article', items: hotArticles.value },
   { title: t('home.newArticles'), icon: 'mdi-clock-fast', to: '/articles', itemType: 'article', items: newArticles.value },
+  { title: t('home.popularUsers'), icon: 'mdi-fire', to: '/users', itemType: 'user', items: popularUsersTop.value },
+  { title: t('home.newUsers'), icon: 'mdi-clock-fast', to: '/users', itemType: 'user', items: newUsersTop.value },
 ])
 
 // 关注状态回写到作者数据（与其它视图的回写模式一致）
@@ -68,15 +84,25 @@ function handleOpen(item) {
     router.push(`/questions/${item.question_id}`)
   } else if (item.article_id) {
     router.push(`/articles/${item.article_id}`)
+  } else if (item.user_id) {
+    router.push(`/users/${item.user_id}`)
   }
 }
 
 async function fetchData() {
   loading.value = true
   try {
-    const [q, a] = await Promise.all([http.get('/questions'), http.get('/articles')])
+    // 用户列表后端已按 tab 排序：recommend 按粉丝数倒序、new 按注册时间倒序
+    const [q, a, pu, nu] = await Promise.all([
+      http.get('/questions'),
+      http.get('/articles'),
+      http.get('/users', { params: { tab: 'recommend' } }),
+      http.get('/users', { params: { tab: 'new' } }),
+    ])
     questions.value = q.data
     articles.value = a.data
+    popularUsers.value = pu.data
+    newUsers.value = nu.data
   } catch (error) {
     // 首页加载失败不打断页面
   } finally {

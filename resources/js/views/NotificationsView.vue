@@ -121,7 +121,7 @@ onMounted(() => {
             <template #activator="{ props }">
               <v-btn icon="mdi-dots-vertical" variant="text" v-bind="props" />
             </template>
-            <v-list density="compact" nav>
+            <v-list rounded="lg" density="compact" nav>
               <v-list-item
                 :prepend-icon="'mdi-delete-sweep'"
                 :title="$t('notifications.clearAll')"
@@ -164,7 +164,7 @@ onMounted(() => {
       </v-card-text>
 
       <v-card-text v-else class="pa-0">
-        <v-list lines="two" class="pa-0">
+        <v-list rounded="lg" lines="two" class="pa-0">
           <template v-for="(notification, i) in notifications" :key="notification.notification_id">
             <NotificationItem :item="notification" />
             <v-divider v-if="i < notifications.length - 1" />

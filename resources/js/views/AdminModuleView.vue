@@ -361,6 +361,9 @@ const items = ref([])
 const total = ref(0)
 const loading = ref(true)
 const error = ref(null)
+const selected = ref([])
+const selectedUserGroupId = ref(null)
+const bulkUserGroupDialog = ref(false)
 
 const page = ref(1)
 const itemsPerPage = ref(15)
@@ -397,6 +400,12 @@ function truncate(text, len = 80) {
   if (!text) return '—'
   const str = String(text).replace(/<[^>]+>/g, '').trim()
   return str.length > len ? str.slice(0, len) + '…' : str
+}
+
+function itemValue(item) {
+  if (!item) return null
+  const key = moduleMeta.value?.idKey || 'id'
+  return item[key] ?? item.id ?? null
 }
 
 const TARGET_TYPE_LABELS = {
@@ -457,12 +466,16 @@ watch(
   () => moduleName.value,
   () => {
     if (!moduleMeta.value) return
+    clearSelection()
     page.value = 1
     itemsPerPage.value = 15
     sortBy.value = []
     search.value = ''
     searchInput.value = ''
     loadItems()
+    if (moduleName.value === 'users') {
+      loadUserGroups()
+    }
   },
   { immediate: true },
 )
@@ -486,6 +499,122 @@ function openInNewTab(url) {
 
 function refresh() {
   loadItems()
+}
+
+const selectedIds = computed(() => {
+  if (!moduleName.value || !moduleMeta.value) return []
+  const key = moduleMeta.value.idKey
+  return selected.value.map((row) => row?.[key]).filter((id) => id !== undefined && id !== null)
+})
+
+const selectedUsers = computed(() => selected.value.filter((item) => moduleName.value === 'users'))
+const selectedReports = computed(() => selected.value.filter((item) => moduleName.value === 'reports'))
+const hasSelection = computed(() => selected.value.length > 0)
+
+async function loadUserGroups() {
+  try {
+    const { data } = await http.get('/user-groups')
+    userGroupOptions.value = Array.isArray(data) ? data : []
+  } catch {
+    userGroupOptions.value = []
+  }
+}
+
+const userGroupOptions = ref([])
+
+function clearSelection() {
+  selected.value = []
+}
+
+async function bulkDeleteSelected() {
+  if (!hasSelection.value) return
+  if (moduleName.value === 'reports') return
+
+  const count = selected.value.length
+  const label = moduleName.value === 'users' ? '用户' : '选中的条目'
+
+  deleteDialog.open({
+    title: t('admin.bulkDeleteTitle'),
+    text: t('admin.bulkDeleteText', { count, label }),
+    confirmText: t('common.delete'),
+    onConfirm: async () => {
+      const module = moduleName.value
+      await Promise.all(
+        selected.value.map((item) => {
+          const idKey = MODULE_META[module]?.idKey || `${module.replace(/s$/, '')}_id`
+          const id = item?.[idKey]
+          if (!id) return Promise.resolve()
+          return http.delete(`/admin/modules/${module}/${id}`)
+        }),
+      )
+      clearSelection()
+      await loadItems()
+      feedback(t('admin.bulkDeleteSuccess', { count }), 'success')
+    },
+  })
+}
+
+async function bulkDisableSelectedUsers() {
+  if (moduleName.value !== 'users' || !selectedUsers.value.length) return
+
+  deleteDialog.open({
+    title: t('admin.bulkDisableTitle'),
+    text: t('admin.bulkDisableText', { count: selectedUsers.value.length }),
+    confirmText: t('admin.bulkDisableAction'),
+    icon: 'mdi-account-cancel',
+    color: 'warning',
+    onConfirm: async () => {
+      const now = new Date().toISOString()
+      await Promise.all(
+        selectedUsers.value.map((item) => {
+          const id = item?.user_id
+          if (!id) return Promise.resolve()
+          return http.put(`/admin/modules/users/${id}`, { disable_time: now })
+        }),
+      )
+      clearSelection()
+      await loadItems()
+      feedback(t('admin.bulkDisableSuccess', { count: selectedUsers.value.length }), 'success')
+    },
+  })
+}
+
+function openBulkUserGroupDialog() {
+  if (moduleName.value !== 'users' || !selectedUsers.value.length) return
+  selectedUserGroupId.value = null
+  bulkUserGroupDialog.value = true
+}
+
+async function applyBulkUserGroup() {
+  if (!selectedUserGroupId.value || moduleName.value !== 'users' || !selectedUsers.value.length) return
+
+  const targetGroupId = Number(selectedUserGroupId.value)
+  await Promise.all(
+    selectedUsers.value.map((item) => {
+      const id = item?.user_id
+      if (!id) return Promise.resolve()
+      return http.put(`/admin/modules/users/${id}`, { user_group_id: targetGroupId })
+    }),
+  )
+  bulkUserGroupDialog.value = false
+  clearSelection()
+  await loadItems()
+  feedback(t('admin.bulkUserGroupSuccess', { count: selectedUsers.value.length }), 'success')
+}
+
+async function bulkSetReportState(state) {
+  if (moduleName.value !== 'reports' || !selectedReports.value.length) return
+
+  await Promise.all(
+    selectedReports.value.map((item) => {
+      const id = item?.report_id
+      if (!id) return Promise.resolve()
+      return http.put(`/admin/modules/reports/${id}`, { report_handle_state: state })
+    }),
+  )
+  clearSelection()
+  await loadItems()
+  feedback(t('admin.bulkReportStateSuccess', { count: selectedReports.value.length, state: t(`reportDialog.state${state === 0 ? 'Pending' : state === 1 ? 'Handled' : 'Dismissed'}`) }), 'success')
 }
 
 // ================== 编辑 / 删除（复用已有全局组件） ==================
@@ -670,7 +799,7 @@ onBeforeUnmount(() => {
         </div>
       </v-col>
       <v-col cols="12" md="6" class="d-flex align-center justify-end mt-4 mt-md-0" style="gap:12px;">
-        <v-text-field
+        <v-text-field color="primary" 
           v-model="searchInput"
           density="compact"
           variant="outlined"
@@ -695,20 +824,79 @@ onBeforeUnmount(() => {
     <v-card rounded="lg" class="data-table-card">
 
       <v-toolbar :title="moduleMeta ? $t(moduleMeta.titleKey) : $t('common.developing')">
-        <!-- <template #prepend>
-          <h1 class="text-h5 font-weight-bold">
-            {{ moduleMeta ? $t(moduleMeta.titleKey) : $t('common.developing') }}
-          </h1>
-        </template> -->
+        <template #prepend>
+          <div v-if="hasSelection" class="d-flex align-center ga-2">
+            <v-btn
+              v-if="moduleName !== 'reports' && moduleName !== 'users'"
+              color="error"
+              variant="flat"
+              size="small"
+              prepend-icon="mdi-delete-outline"
+              @click="bulkDeleteSelected"
+            >
+              {{ $t('admin.bulkDelete') }} ({{ selected.length }})
+            </v-btn>
+
+            <v-btn
+              v-if="moduleName === 'users'"
+              color="warning"
+              variant="flat"
+              size="small"
+              prepend-icon="mdi-account-cancel"
+              @click="bulkDisableSelectedUsers"
+            >
+              {{ $t('admin.bulkDisable') }} ({{ selected.length }})
+            </v-btn>
+
+            <v-btn
+              v-if="moduleName === 'users'"
+              color="primary"
+              variant="flat"
+              size="small"
+              prepend-icon="mdi-account-switch"
+              @click="openBulkUserGroupDialog"
+            >
+              {{ $t('admin.bulkChangeUserGroup') }}
+            </v-btn>
+
+            <v-btn
+              v-if="moduleName === 'reports'"
+              color="error"
+              variant="flat"
+              size="small"
+              prepend-icon="mdi-clock-outline"
+              @click="bulkSetReportState(0)"
+            >
+              {{ $t('reportDialog.statePending') }}
+            </v-btn>
+            <v-btn
+              v-if="moduleName === 'reports'"
+              color="grey"
+              variant="flat"
+              size="small"
+              prepend-icon="mdi-check-circle-outline"
+              @click="bulkSetReportState(1)"
+            >
+              {{ $t('reportDialog.stateHandled') }}
+            </v-btn>
+            <v-btn
+              v-if="moduleName === 'reports'"
+              color="success"
+              variant="flat"
+              size="small"
+              prepend-icon="mdi-close-circle-outline"
+              @click="bulkSetReportState(2)"
+            >
+              {{ $t('reportDialog.stateDismissed') }}
+            </v-btn>
+          </div>
+        </template>
         <template #append>
           <div class="d-flex align-center" style="gap: 12px;max-width: 600px;width: 100%;">
-            <v-text-field v-model="searchInput" density="compact" variant="outlined" prepend-inner-icon="mdi-magnify"
+            <v-text-field color="primary"  v-model="searchInput" density="compact" variant="outlined" prepend-inner-icon="mdi-magnify"
               :placeholder="$t('admin.searchPlaceholder')" hide-details clearable style="max-width: 320px;"
               @update:model-value="applySearch"
               @click:clear="() => { search = ''; searchInput = ''; page = 1; loadItems() }" />
-            <!-- <v-btn variant="tonal" color="primary" prepend-icon="mdi-refresh" :loading="loading" @click="refresh">
-              {{ $t('admin.refresh') }}
-            </v-btn> -->
 
             <v-btn icon variant="text" :loading="loading" @click="refresh">
               <v-icon>mdi-refresh</v-icon>
@@ -720,9 +908,10 @@ onBeforeUnmount(() => {
         </template>
       </v-toolbar>
 
-      <v-data-table-server :mobile="mobile" v-if="moduleMeta" v-model:page="page" v-model:items-per-page="itemsPerPage"
+      <v-data-table-server :mobile="mobile" v-if="moduleMeta" v-model="selected" v-model:page="page" v-model:items-per-page="itemsPerPage"
         v-model:sort-by="sortBy" :headers="headers" :items="items" :items-length="total" :loading="loading"
-        :search="search" hover density="comfortable" @update:options="loadItems" @click:row="onRowClick">
+        :search="search" :item-value="itemValue" :return-object="true" show-select hover density="comfortable"
+        @update:options="loadItems" @click:row="onRowClick">
         <template #[`item.name`]="{ item }">
           <div class="text-truncate" style="max-width: 280px;">
             {{ item?.name || '—' }}
@@ -842,6 +1031,34 @@ onBeforeUnmount(() => {
 
     <!-- 举报处理对话框（reports 模块专用） -->
     <ReportHandleDialog v-model="reportDialogVisible" :report="reportEditItem" @submit="onReportHandled" />
+
+    <v-dialog v-model="bulkUserGroupDialog" max-width="420">
+      <v-card rounded="lg">
+        <v-card-title class="d-flex align-center justify-space-between">
+          <span>{{ $t('admin.bulkChangeUserGroup') }}</span>
+          <v-btn icon variant="text" @click="bulkUserGroupDialog = false">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
+        <v-card-text>
+          <v-select
+            v-model="selectedUserGroupId"
+            :items="userGroupOptions"
+            item-title="user_group_name"
+            item-value="user_group_id"
+            :label="$t('admin.userGroup')"
+            variant="outlined"
+            density="comfortable"
+          />
+        </v-card-text>
+        <v-card-actions class="justify-end">
+          <v-btn variant="text" @click="bulkUserGroupDialog = false">{{ $t('common.cancel') }}</v-btn>
+          <v-btn color="primary" :disabled="!selectedUserGroupId" @click="applyBulkUserGroup">
+            {{ $t('common.confirm') }}
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 

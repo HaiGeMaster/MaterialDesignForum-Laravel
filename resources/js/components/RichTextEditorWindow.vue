@@ -151,7 +151,7 @@ function handleClose() {
     <div class="editor-window">
       <!-- 标题输入：提问 / 文章；回答无标题 -->
       <div v-if="store.hasTitle" class="editor-window__title">
-        <v-text-field
+        <v-text-field color="primary" 
           v-model="titleModel"
           :label="$t('editorWindow.titleLabel')"
           :placeholder="$t('editorWindow.titlePlaceholder')"

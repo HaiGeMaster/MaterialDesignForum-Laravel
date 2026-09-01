@@ -92,7 +92,7 @@ onUnmounted(() => {
         <v-icon :icon="currentIcon" />
       </v-btn>
     </template>
-    <v-list density="compact" nav>
+    <v-list rounded="lg" density="compact" nav>
       <!-- System 选项 -->
       <v-list-item
         :active="storedTheme === 'system'"

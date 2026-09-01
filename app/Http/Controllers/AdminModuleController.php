@@ -143,7 +143,7 @@ class AdminModuleController extends Controller
             'sortable'     => ['user_id', 'username', 'follower_count', 'followee_count', 'following_topic_count', 'following_article_count', 'following_question_count', 'article_count', 'question_count', 'answer_count', 'comment_count', 'reply_count', 'notification_unread', 'create_time', 'last_login_time', 'update_time', 'disable_time'],
             'relations'    => ['userGroup'],
             'soft_delete' => false,
-            'update_fields' => ['username', 'email', 'user_group_id', 'headline', 'bio', 'blog', 'company', 'location', 'language'],
+            'update_fields' => ['username', 'email', 'user_group_id', 'headline', 'bio', 'blog', 'company', 'location', 'language', 'disable_time'],
             'delete_field'  => 'disable_time',
         ],
         'reports' => [

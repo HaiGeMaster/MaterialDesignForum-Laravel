@@ -158,6 +158,8 @@ onUnmounted(() => {
               :target-id="question.question_id"
               :following="isFollowing"
               @toggle-follow="toggleFollow"
+               size="default"
+               variant="text"
             />
           </template>
         </v-toolbar>
@@ -169,7 +171,7 @@ onUnmounted(() => {
             :to="creator?.user_id ? `/users/${creator.user_id}` : undefined"
           >
             <template v-slot:prepend>
-              <v-avatar size="40" color="primary" >
+              <v-avatar size="40" >
                 <v-img v-if="creator?.avatar" :src="creator.avatar" cover />
                 <span v-else class="text-body-2 font-weight-bold text-primary">{{ creatorInitial }}</span>
               </v-avatar>

@@ -337,7 +337,7 @@ function share() {
       />
     </template>
 
-    <v-list density="compact" min-width="160">
+    <v-list rounded="lg" density="compact" >
       <template v-for="(item, index) in menuItems" :key="index">
         <v-divider v-if="item.divider" />
         <v-list-item

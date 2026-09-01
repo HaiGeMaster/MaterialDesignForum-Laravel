@@ -101,15 +101,40 @@ async function submit() {
 
 <template>
   <v-dialog :model-value="modelValue" max-width="480" @update:model-value="emit('update:modelValue', $event)">
-    <v-card rounded="lg" :title="$t('report.title')" prepend-icon="mdi-flag-outline" :subtitle="$t('report.subtitle')">
-      <v-card-subtitle>{{ $t('report.subtitle') }}</v-card-subtitle>
+    <v-card rounded="xl">
+      <v-toolbar :title="$t('report.title')">
+        <template v-slot:prepend>
+          <v-btn icon variant="text" @click="emit('update:modelValue', false)">
+            <v-icon>
+              mdi-close
+            </v-icon>
+            <v-tooltip activator="parent" location="right">
+              {{ $t('report.cancel') }}
+            </v-tooltip>
+          </v-btn>
+        </template>
+        <template #append>
+          <v-btn icon variant="text" color="error" :disabled="!canSubmit" :loading="submitting" @click="submit">
+            <v-icon>
+              mdi-check
+            </v-icon>
+            <v-tooltip activator="parent" location="left">
+              {{ $t('report.submit') }}
+            </v-tooltip>
+          </v-btn>
+        </template>
+      </v-toolbar>
 
       <v-card-text>
+        <div class="text-body-2 text-medium-emphasis mb-4">
+          {{ $t('report.subtitle') }}
+        </div>
+
         <v-radio-group v-model="reason" color="error">
           <v-radio v-for="r in reasons" :key="r" :label="r" :value="r" />
         </v-radio-group>
 
-        <v-textarea
+        <v-textarea color="primary" 
           v-if="showOther"
           v-model="otherText"
           :label="$t('report.describe')"
@@ -120,22 +145,6 @@ async function submit() {
           :disabled="submitting"
         />
       </v-card-text>
-
-      <v-card-actions>
-        <v-spacer />
-        <v-btn variant="text" :disabled="submitting" @click="emit('update:modelValue', false)">
-          {{ $t('report.cancel') }}
-        </v-btn>
-        <v-btn
-          color="error"
-          variant="tonal"
-          :disabled="!canSubmit"
-          :loading="submitting"
-          @click="submit"
-        >
-          {{ $t('report.submit') }}
-        </v-btn>
-      </v-card-actions>
     </v-card>
   </v-dialog>
 </template>

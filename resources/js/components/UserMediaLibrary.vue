@@ -368,11 +368,11 @@ function mediaDate(item) {
                             {{ itemTypeLabel(item) }}
                         </template>
                     </v-select>
-                    <v-text-field v-model="filterDateFrom" :label="$t('mediaFilter.dateFrom')" type="date"
+                    <v-text-field color="primary"  v-model="filterDateFrom" :label="$t('mediaFilter.dateFrom')" type="date"
                         density="compact" variant="outlined" hide-details clearable class="media-filter-date" />
-                    <v-text-field v-model="filterDateTo" :label="$t('mediaFilter.dateTo')" type="date" density="compact"
+                    <v-text-field color="primary"  v-model="filterDateTo" :label="$t('mediaFilter.dateTo')" type="date" density="compact"
                         variant="outlined" hide-details clearable class="media-filter-date" />
-                    <v-text-field v-model="searchQuery" :label="$t('mediaFilter.searchFilename')"
+                    <v-text-field color="primary"  v-model="searchQuery" :label="$t('mediaFilter.searchFilename')"
                         prepend-inner-icon="mdi-magnify" density="compact" variant="outlined" hide-details clearable
                         @keyup.enter="applyFilters" class="media-filter-search" />
                     <div class="d-flex ga-1">
@@ -421,7 +421,7 @@ function mediaDate(item) {
         </div>
 
         <!-- 列表视图 -->
-        <v-list v-else-if="media.length && viewMode === 'list'" class="media-list pa-0">
+        <v-list rounded="lg" v-else-if="media.length && viewMode === 'list'" class="media-list pa-0">
             <v-list-item v-for="item in media" :key="item.media_id" class="cursor-pointer"
                 :class="{ 'media-selected-list': isSelected(item) }" @click="handleItemClick(item)">
                 <template #prepend>

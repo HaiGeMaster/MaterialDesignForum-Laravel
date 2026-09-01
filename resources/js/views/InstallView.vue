@@ -220,7 +220,7 @@ const canProceedFromRequirements = computed(() => requirements.value.all_pass)
             {{ t('install.requirements.success') }}
           </v-alert>
 
-          <v-list density="compact">
+          <v-list rounded="lg" density="compact">
             <v-list-item v-for="(check, key) in requirements.checks" :key="key">
               <template #prepend>
                 <v-icon :color="check.pass ? 'success' : 'error'">
@@ -248,19 +248,19 @@ const canProceedFromRequirements = computed(() => requirements.value.all_pass)
           <v-form @submit.prevent="saveDatabase">
             <v-row>
               <v-col cols="12" sm="8">
-                <v-text-field v-model="dbForm.host" :label="t('install.database.host')"
+                <v-text-field color="primary"  v-model="dbForm.host" :label="t('install.database.host')"
                   prepend-inner-icon="mdi-server" />
               </v-col>
               <v-col cols="12" sm="4">
-                <v-text-field v-model.number="dbForm.port" type="number" :label="t('install.database.port')"
+                <v-text-field color="primary"  v-model.number="dbForm.port" type="number" :label="t('install.database.port')"
                   prepend-inner-icon="mdi-door" />
               </v-col>
             </v-row>
-            <v-text-field v-model="dbForm.database" :label="t('install.database.name')"
+            <v-text-field color="primary"  v-model="dbForm.database" :label="t('install.database.name')"
               prepend-inner-icon="mdi-database" class="mb-3" />
-            <v-text-field v-model="dbForm.username" :label="t('install.database.username')"
+            <v-text-field color="primary"  v-model="dbForm.username" :label="t('install.database.username')"
               prepend-inner-icon="mdi-account" class="mb-3" />
-            <v-text-field v-model="dbForm.password" type="password" :label="t('install.database.password')"
+            <v-text-field color="primary"  v-model="dbForm.password" type="password" :label="t('install.database.password')"
               prepend-inner-icon="mdi-lock" />
           </v-form>
         </div>
@@ -271,10 +271,10 @@ const canProceedFromRequirements = computed(() => requirements.value.all_pass)
             {{ t('install.app.hint') }}
           </p>
 
-          <v-text-field v-model="appForm.app_name" :label="t('install.app.appName')" prepend-inner-icon="mdi-tag"
+          <v-text-field color="primary"  v-model="appForm.app_name" :label="t('install.app.appName')" prepend-inner-icon="mdi-tag"
             class="mb-3" />
 
-          <v-text-field v-model="appForm.app_url" :label="t('install.app.appUrl')" prepend-inner-icon="mdi-web"
+          <v-text-field color="primary"  v-model="appForm.app_url" :label="t('install.app.appUrl')" prepend-inner-icon="mdi-web"
             :hint="t('install.app.appUrlHint')" persistent-hint class="mb-3" />
 
           <v-select v-model="appForm.timezone" :items="timezoneOptions" :label="t('install.app.timezone')"
@@ -290,26 +290,26 @@ const canProceedFromRequirements = computed(() => requirements.value.all_pass)
           <template v-if="appForm.mail_mailer === 'smtp'">
             <v-row>
               <v-col cols="12" sm="8">
-                <v-text-field v-model="appForm.mail_host" :label="t('install.app.mailHost')" />
+                <v-text-field color="primary"  v-model="appForm.mail_host" :label="t('install.app.mailHost')" />
               </v-col>
               <v-col cols="12" sm="4">
-                <v-text-field v-model.number="appForm.mail_port" type="number" :label="t('install.app.mailPort')" />
+                <v-text-field color="primary"  v-model.number="appForm.mail_port" type="number" :label="t('install.app.mailPort')" />
               </v-col>
             </v-row>
             <v-row>
               <v-col cols="12" sm="6">
-                <v-text-field v-model="appForm.mail_username" :label="t('install.app.mailUsername')" />
+                <v-text-field color="primary"  v-model="appForm.mail_username" :label="t('install.app.mailUsername')" />
               </v-col>
               <v-col cols="12" sm="6">
-                <v-text-field v-model="appForm.mail_password" type="password" :label="t('install.app.mailPassword')" />
+                <v-text-field color="primary"  v-model="appForm.mail_password" type="password" :label="t('install.app.mailPassword')" />
               </v-col>
             </v-row>
             <v-row>
               <v-col cols="12" sm="6">
-                <v-text-field v-model="appForm.mail_from_address" :label="t('install.app.mailFromAddress')" />
+                <v-text-field color="primary"  v-model="appForm.mail_from_address" :label="t('install.app.mailFromAddress')" />
               </v-col>
               <v-col cols="12" sm="6">
-                <v-text-field v-model="appForm.mail_from_name" :label="t('install.app.mailFromName')" />
+                <v-text-field color="primary"  v-model="appForm.mail_from_name" :label="t('install.app.mailFromName')" />
               </v-col>
             </v-row>
             <v-select v-model="appForm.mail_scheme" :items="mailSchemeOptions" item-value="value" item-title="title"
@@ -323,17 +323,17 @@ const canProceedFromRequirements = computed(() => requirements.value.all_pass)
             {{ t('install.admin.hint') }}
           </v-alert>
 
-          <v-text-field v-model="adminForm.username" :label="t('install.admin.username')"
+          <v-text-field color="primary"  v-model="adminForm.username" :label="t('install.admin.username')"
             prepend-inner-icon="mdi-account-circle" :hint="t('install.admin.usernameHint')" persistent-hint
             class="mb-3" />
 
-          <v-text-field v-model="adminForm.email" :label="t('install.admin.email')" prepend-inner-icon="mdi-email"
+          <v-text-field color="primary"  v-model="adminForm.email" :label="t('install.admin.email')" prepend-inner-icon="mdi-email"
             class="mb-3" />
 
-          <v-text-field v-model="adminForm.password" type="password" :label="t('install.admin.password')"
+          <v-text-field color="primary"  v-model="adminForm.password" type="password" :label="t('install.admin.password')"
             prepend-inner-icon="mdi-lock" :hint="t('install.admin.passwordHint')" persistent-hint class="mb-3" />
 
-          <v-text-field v-model="adminForm.password_confirmation" type="password"
+          <v-text-field color="primary"  v-model="adminForm.password_confirmation" type="password"
             :label="t('install.admin.passwordConfirm')" prepend-inner-icon="mdi-lock-check" />
         </div>
 
@@ -345,7 +345,7 @@ const canProceedFromRequirements = computed(() => requirements.value.all_pass)
             {{ t('install.done.adminCreated') }}
           </p>
           <v-card rounded="lg" variant="outlined" max-width="320" class="mx-auto mb-6">
-            <v-list density="compact">
+            <v-list rounded="lg" density="compact">
               <v-list-item>
                 <template #prepend><v-icon>mdi-account</v-icon></template>
                 <v-list-item-title>{{ installResult?.admin?.username || adminForm.username }}</v-list-item-title>

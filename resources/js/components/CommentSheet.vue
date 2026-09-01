@@ -2,10 +2,8 @@
   <v-bottom-sheet v-model="sheet" inset max-width="750">
     <v-card rounded="t-lg">
       <v-card-text class="pt-4 pb-2">
-        <v-text-field
+        <v-text-field color="primary" 
           v-model="content"
-          color="primary"
-
           variant="outlined"
           :label="label || $t('commentSheet.placeholder')"
           hide-details="auto"

@@ -37,7 +37,7 @@ const fields = computed(() => [
     </v-toolbar>
 
     <v-card-text class="system-info-content">
-      <v-list v-if="!loading && data" density="compact">
+      <v-list rounded="lg" v-if="!loading && data" density="compact">
         <v-list-item v-for="field in fields" :key="field.key" :prepend-icon="field.icon">
           <v-list-item-title>{{ $t(`admin.serverFields.${field.key}`) }}</v-list-item-title>
           <template #append>
@@ -45,7 +45,7 @@ const fields = computed(() => [
           </template>
         </v-list-item>
       </v-list>
-      <v-list v-else density="compact">
+      <v-list rounded="lg" v-else density="compact">
         <v-skeleton-loader v-for="field in fields" :key="field.key" type="list-item-two-line" />
       </v-list>
     </v-card-text>

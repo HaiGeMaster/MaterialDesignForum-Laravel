@@ -100,7 +100,7 @@ watch(tab, () => load(true))
     <v-progress-linear v-if="loading && !articles.length" indeterminate color="primary" class="mb-3" />
 
     <v-card rounded="lg" v-if="articles.length"  class="overflow-hidden mb-3">
-      <v-list lines="two" style="padding: 0">
+      <v-list rounded="lg" lines="two" style="padding: 0">
         <ContentListItem
           v-for="a in articles"
           :key="a.article_id"

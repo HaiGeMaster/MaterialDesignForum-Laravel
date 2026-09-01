@@ -130,7 +130,7 @@ function isSelf(user) {
 
       <v-divider />
 
-      <v-list v-if="users.length" lines="two" class="pa-0" max-height="60vh">
+      <v-list rounded="lg" v-if="users.length" lines="two" class="pa-0" max-height="60vh">
         <v-list-item
           v-for="user in users"
           :key="user.user_id"
@@ -138,7 +138,7 @@ function isSelf(user) {
           @click="goProfile(user)"
         >
           <template #prepend>
-            <v-avatar size="44" color="primary"  class="mr-2">
+            <v-avatar size="44"  class="mr-2">
               <v-img v-if="user.avatar" :src="user.avatar" cover />
               <span v-else >
                 {{ user.username?.slice(0, 1).toUpperCase() || '?' }}

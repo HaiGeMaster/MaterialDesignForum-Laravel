@@ -17,6 +17,7 @@ use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\UserOptionController;
 use App\Http\Controllers\ReplyController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserGroupController;
@@ -59,6 +60,9 @@ Route::middleware('auth.token')->group(function () {
         Route::post('/user/upload', [UserController::class, 'uploadImage']);
     });
     Route::put('/user/password', [UserController::class, 'updatePassword']);
+    Route::get('/user/tokens', [UserController::class, 'tokens']);
+    Route::delete('/user/tokens/{token}', [UserController::class, 'revokeToken']);
+    Route::delete('/user/tokens', [UserController::class, 'revokeOtherTokens']);
 
     // 切换关注状态（用户 / 话题 / 提问 / 文章），需登录
     Route::post('/follows/toggle', [FollowController::class, 'toggle']);
@@ -125,6 +129,7 @@ Route::get('/follows/status', [FollowController::class, 'status']);
 // 获取关注关系下的用户列表（用户浏览对话框，未登录亦可浏览）
 Route::post('/follows/get', [FollowController::class, 'get']);
 Route::get('/theme', [AdminOptionController::class, 'theme']);
+Route::get('/search', [SearchController::class, 'index']);
 
 Route::apiResource('users', UserController::class);
 

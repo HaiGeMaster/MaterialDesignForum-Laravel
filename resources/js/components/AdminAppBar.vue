@@ -1,4 +1,5 @@
 <script setup>
+import { useDisplay } from 'vuetify'
 import { useAuthStore } from '../stores/auth'
 import LanguageSwitcher from './LanguageSwitcher.vue'
 import ThemeToggle from './ThemeToggle.vue'
@@ -8,6 +9,7 @@ import { siteName } from '../themeConfig'
 const emit = defineEmits(['toggle-drawer'])
 
 const authStore = useAuthStore()
+const { smAndDown } = useDisplay()
 
 async function handleLogout() {
   await authStore.logout()
@@ -19,8 +21,9 @@ async function handleLogout() {
 <template>
   <v-app-bar color="surface" elevation="1">
     <v-app-bar-nav-icon @click="emit('toggle-drawer')" />
-    <v-app-bar-title>
-      <!-- <v-icon icon="mdi-shield-crown-outline" class="mr-2" /> -->
+
+    <v-img v-if="smAndDown" src="/favicon.png" alt="site logo" width="24" height="24" style="width: 24px;max-width: 24px;" />
+    <v-app-bar-title v-else>
       {{ siteName }} Admin
     </v-app-bar-title>
     <v-spacer />
@@ -31,12 +34,6 @@ async function handleLogout() {
     <!-- 深色模式切换 -->
     <ThemeToggle />
 
-    <UserMenu
-      avatar-color="primary"
-      :avatar-size="30"
-      link-mode="href"
-      show-return-home
-      @logout="handleLogout"
-    />
+    <UserMenu avatar-color="primary" :avatar-size="30" link-mode="href" show-return-home @logout="handleLogout" />
   </v-app-bar>
 </template>

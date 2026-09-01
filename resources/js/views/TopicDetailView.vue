@@ -151,8 +151,6 @@ onMounted(fetchTopic)
           <div v-if="creator" class="d-flex align-center ga-2 mt-3">
             <v-avatar
               size="28"
-              color="primary"
-
               class="cursor-pointer"
               @click="goCreator"
             >

@@ -81,7 +81,7 @@ async function save() {
       <v-divider />
 
       <v-card-text>
-        <v-textarea
+        <v-textarea color="primary" 
           ref="textareaRef"
           v-model="content"
           :placeholder="t('commentReplyEditDialog.placeholder')"

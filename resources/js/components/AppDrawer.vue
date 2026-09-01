@@ -75,7 +75,7 @@ const accountNavItems = computed(() => {
     :model-value="modelValue"
     @update:model-value="(v) => emit('update:modelValue', v)"
   >
-    <v-list nav  color="primary">
+    <v-list rounded="lg" nav  color="primary">
       <v-list-item
         v-for="item in contentNavItems"
         :key="item.to"

@@ -134,6 +134,7 @@ onBeforeUnmount(() => window.removeEventListener('content:published', handleCont
     <!-- 回答列表 -->
     <template v-else>
       <div class="pa-3">
+        <!-- <v-list rounded="lg" density="compact"> -->
         <AnswerItem
           v-for="answer in items"
           :key="answer.answer_id"
@@ -141,6 +142,7 @@ onBeforeUnmount(() => window.removeEventListener('content:published', handleCont
           @edit="editAnswer"
           @delete="askDelete"
         />
+        <!-- </v-list> -->
       </div>
       <InfiniteScroll :loading="loading" :error="error" :finished="finished" @load="loadNext" @retry="retry" />
     </template>

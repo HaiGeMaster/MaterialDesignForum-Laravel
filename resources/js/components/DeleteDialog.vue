@@ -1,18 +1,28 @@
 <template>
   <v-dialog :model-value="store.model" max-width="420" @update:model-value="store.close">
-    <v-card rounded="lg" :title="store.title" :prepend-icon="store.icon">
+    <v-card rounded="lg">
+      <v-toolbar :title="store.title">
+        <template #prepend>
+          <v-btn icon variant="text" @click="store.close">
+            <v-icon>mdi-close</v-icon>
+            <v-tooltip activator="parent" location="right">
+              {{ store.cancelText || t('common.cancel') }}
+            </v-tooltip>
+          </v-btn>
+        </template>
+        <template #append>
+          <v-btn icon variant="text" :loading="store.loading" @click="store.confirm">
+            <v-icon>mdi-check</v-icon>
+            <v-tooltip activator="parent" location="left">
+              {{ store.confirmText || t('common.delete') }}
+            </v-tooltip>
+          </v-btn>
+        </template>
+      </v-toolbar>
+
       <v-card-text>
         {{ store.text }}
       </v-card-text>
-      <v-card-actions>
-        <v-spacer />
-        <v-btn variant="text" @click="store.close">
-          {{ store.cancelText || t('common.cancel') }}
-        </v-btn>
-        <v-btn :color="store.color" variant="tonal" :loading="store.loading" @click="store.confirm">
-          {{ store.confirmText || t('common.delete') }}
-        </v-btn>
-      </v-card-actions>
     </v-card>
   </v-dialog>
 </template>

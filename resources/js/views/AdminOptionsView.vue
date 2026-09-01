@@ -87,7 +87,7 @@ async function openAbout() {
     <div v-for="group in settingGroups" :key="group.title" class="mb-5">
       <h2 class="text-subtitle-1 font-weight-bold px-1 mb-2">{{ group.title }}</h2>
       <v-card rounded="lg" class="options-card">
-        <v-list lines="two" nav>
+        <v-list rounded="lg" lines="two" nav>
           <template v-for="(item, index) in group.items" :key="item.key">
             <v-divider v-if="index" />
             <v-list-item @click="openSetting(item.key)">
@@ -108,15 +108,21 @@ async function openAbout() {
     </div>
 
     <v-dialog v-model="aboutDialog" max-width="520">
-      <v-card rounded="lg" >
-        <v-card-title class="d-flex align-center">
-          <v-icon icon="mdi-information-outline" class="mr-2" color="primary" />
-          {{ $t('admin.aboutTitle') }}
-        </v-card-title>
-        <v-divider />
+      <v-card rounded="lg">
+        <v-toolbar :title="$t('admin.aboutTitle')">
+          <template #prepend>
+            <v-btn icon variant="text" @click="aboutDialog = false">
+              <v-icon>mdi-close</v-icon>
+              <v-tooltip activator="parent" location="right">
+                {{ $t('common.close') }}
+              </v-tooltip>
+            </v-btn>
+          </template>
+        </v-toolbar>
+
         <v-card-text>
           <v-skeleton-loader v-if="aboutLoading" type="list-item-three-line" />
-          <v-list v-else-if="aboutData" lines="two">
+          <v-list rounded="lg" v-else-if="aboutData" lines="two">
             <v-list-item v-for="row in aboutRows" :key="row.key">
               <v-list-item-title class="text-body-2 text-medium-emphasis">{{ $t(`admin.${row.key}`) }}</v-list-item-title>
               <v-list-item-subtitle class="text-body-1 font-weight-medium">{{ row.value }}</v-list-item-subtitle>
@@ -124,13 +130,14 @@ async function openAbout() {
           </v-list>
           <v-alert v-else type="error" variant="tonal">{{ $t('admin.aboutLoadFailed') }}</v-alert>
         </v-card-text>
+
         <v-card-actions>
           <span class="text-caption text-medium-emphasis px-4">
             {{ $t('admin.appCopyright', { year: aboutData?.year || new Date().getFullYear() }) }}
             <a href="https://github.com/HaiGeMaster">HaiGeMaster</a>
           </span>
-          <v-spacer />
-          <v-btn variant="tonal" @click="aboutDialog = false">{{ $t('admin.close') }}</v-btn>
+          <!-- <v-spacer />
+          <v-btn variant="tonal" @click="aboutDialog = false">{{ $t('admin.close') }}</v-btn> -->
         </v-card-actions>
       </v-card>
     </v-dialog>
