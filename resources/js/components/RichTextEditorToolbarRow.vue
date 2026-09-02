@@ -142,6 +142,10 @@ function onMenuClick(id, item) {
     props.editor?.chain().focus().insertTable({ rows: 3, cols: 3 }).run()
     return
   }
+  if (item.type === 'details') {
+    props.editor?.chain().focus().setDetails().run()
+    return
+  }
   if (item.type === 'library') {
     if (!auth.user?.user_id) {
       show(t('editor.libraryNoSelection'), 'error')
@@ -281,7 +285,7 @@ function onMenuVisibility(id, open) {
         <template #activator="{ props: tipProps }">
           <v-menu
             v-model="openMenus[btn.id]"
-
+            :close-on-content-click="false"
             offset="6"
             @update:model-value="onMenuVisibility(btn.id, $event)"
           >
@@ -325,6 +329,7 @@ function onMenuVisibility(id, open) {
                 :key="item.title"
                 density="compact"
                 :active="item.active?.()"
+                :disabled="item.disabled?.()"
                 @click="onMenuClick(btn.id, item)"
               >
                 <v-list-item-title class="text-body-2">

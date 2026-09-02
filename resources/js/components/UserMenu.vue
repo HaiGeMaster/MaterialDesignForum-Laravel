@@ -65,6 +65,7 @@ function handleLogout() {
       <v-list-subheader>{{ authStore.user?.username || '' }}</v-list-subheader>
       <v-divider class="my-1" />
       <v-list-item v-bind="navAttrs(profilePath)" prepend-icon="mdi-account" :title="t('nav.profile')" />
+      <!-- <v-list-item v-bind="navAttrs('/sign-in')" prepend-icon="mdi-calendar-check" :title="t('nav.signIn')" /> -->
       <v-list-item
         v-if="showMediaLibrary"
         v-bind="navAttrs('/media')"

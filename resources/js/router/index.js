@@ -20,8 +20,10 @@ const routes = [
   { path: '/notifications/setting', name: 'notification-setting', component: () => import('../views/NotificationSettingView.vue'), meta: { titleKey: 'route.notificationSetting', maxWidth: 860 } },
   { path: '/oauth/callback', name: 'oauth-callback', component: () => import('../views/OAuthCallbackView.vue'), meta: { titleKey: 'route.oauthCallback' } },
   { path: '/install', name: 'install', component: () => import('../views/InstallView.vue'), meta: { titleKey: 'route.install' } },
-  { path: '/settings', name: 'settings', component: () => import('../views/SettingsView.vue'), meta: { titleKey: 'route.settings', requiresAuth: true } },
+  { path: '/settings', name: 'settings', component: () => import('../views/SettingsView.vue'), meta: { titleKey: 'route.settings', requiresAuth: true, maxWidth: 860 } },
   { path: '/media', name: 'media-library', component: () => import('../views/MediaLibraryView.vue'), meta: { titleKey: 'route.mediaLibrary', maxWidth: 1080, requiresAuth: true } },
+  { path: '/:pathMatch(.*)*', name: 'not-found', component: () => import('../views/NotFoundView.vue'), meta: { titleKey: 'route.notFound', maxWidth: 860 } },
+  // { path: '/sign-in', name: 'sign-in', component: () => import('../views/SignInView.vue'), meta: { titleKey: 'route.signIn', requiresAuth: true, maxWidth: 860 } },
 ]
 
 const router = createRouter({

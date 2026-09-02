@@ -55,7 +55,7 @@ function toggleFollow(topic, { following, followerCount }) {
 <template>
   <v-container  class="pa-4" :style="$route.meta.maxWidth ? { maxWidth: `${$route.meta.maxWidth}px`, margin: '0 auto' } : {}">
     <v-row v-if="topics.length">
-      <v-col v-for="t in topics" :key="t.topic_id" cols="6" sm="6" md="4" lg="3">
+      <v-col v-for="t in topics" :key="t.topic_id" cols="12" sm="6" md="4" lg="3">
         <TopicCard :topic="t" :following="t.is_following" @toggle-follow="toggleFollow" />
       </v-col>
     </v-row>

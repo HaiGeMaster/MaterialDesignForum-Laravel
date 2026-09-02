@@ -37,6 +37,7 @@
     "mediaLibrary": "媒体库",
     "people": "人脉",
     "notifications": "通知",
+    "signIn": "签到",
     "admin": "管理后台"
   },
   "footer": {
@@ -492,6 +493,8 @@
       "deleteRow": "删除行",
       "deleteCol": "删除列",
       "deleteTable": "删除表格",
+      "mergeCells": "合并单元格",
+      "splitCell": "拆分单元格",
       "toggleHeaderRow": "切换表头行",
       "toggleHeaderCol": "切换表头列"
     },
@@ -1001,8 +1004,39 @@
     "oauthCallback": "登录中",
     "install": "安装向导",
     "settings": "个人设置",
+    "signIn": "签到",
     "admin": "管理后台",
-    "mediaLibrary": "媒体库"
+    "mediaLibrary": "媒体库",
+    "notFound": "页面不存在"
+  },
+  "notFound": {
+    "title": "404",
+    "message": "你访问的页面不存在，或者它已经被移动到了其他位置。",
+    "backHome": "返回首页"
+  },
+  "signIn": {
+    "title": "每日签到",
+    "checkIn": "签到领积分",
+    "checkedIn": "已签到",
+    "checkedBadge": "已签",
+    "streakBadge": "连签",
+    "checkedInToday": "今日已签到",
+    "notCheckedInToday": "今日未签到",
+    "total": "累计签到",
+    "continuous": "连续签到",
+    "reward": "今日奖励",
+    "totalReward": "累计积分",
+    "days": "天",
+    "points": "积分",
+    "rulesTitle": "签到规则",
+    "ruleBase": "基础奖励：每日签到固定 10 积分",
+    "ruleChain": "连续 3 天：奖励 25 积分，连续 7 天：80 积分，连续 30 天：200 积分",
+    "ruleLimit": "同一账号每天只可签到一次，跨日会断签并重新计算连续奖励",
+    "success": "签到成功，获得 {points} 积分",
+    "already": "今日已签到，明天再来吧。",
+    "failed": "签到失败",
+    "fetchFailed": "签到状态获取失败",
+    "streakCurrent": "当前连续签到 {days} 天"
   },
   "oauth": {
     "processing": "正在处理第三方登录，请稍候...",

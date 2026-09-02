@@ -2,6 +2,7 @@
 import { computed, watch, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { EditorContent, useEditor } from '@tiptap/vue-3'
+import { mergeAttributes } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
 import { TextStyle, FontSize, LineHeight } from '@tiptap/extension-text-style'
@@ -9,6 +10,11 @@ import { Color } from '@tiptap/extension-color'
 import Highlight from '@tiptap/extension-highlight'
 import Link from '@tiptap/extension-link'
 import TextAlign from '@tiptap/extension-text-align'
+import Mention from '@tiptap/extension-mention'
+import TaskList from '@tiptap/extension-task-list'
+import TaskItem from '@tiptap/extension-task-item'
+import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table'
+import { Details, DetailsSummary, DetailsContent } from '@tiptap/extension-details'
 import { Fancybox } from '@fancyapps/ui'
 import '@fancyapps/ui/dist/fancybox/fancybox.css'
 import { zh_CN } from '@fancyapps/ui/dist/fancybox/l10n/zh_CN.js'
@@ -51,6 +57,43 @@ const editor = useEditor({
     ResizableImage,
     Video,
     CodeBlock,
+    Mention.extend({
+      priority: 1001,
+      parseHTML() {
+        return [{
+          tag: 'a.mention',
+          getAttrs: (element) => ({
+            id: element.getAttribute('href')?.match(/^\/users\/(\d+)/)?.[1] || null,
+            label: element.textContent?.replace(/^@/, '') || null,
+          }),
+        }]
+      },
+    }).configure({
+      HTMLAttributes: { class: 'mention' },
+      renderHTML({ node, options }) {
+        return [
+          'a',
+          mergeAttributes(options.HTMLAttributes, {
+            href: `/users/${node.attrs.id}`,
+          }),
+          `@${node.attrs.label ?? node.attrs.id}`,
+        ]
+      },
+    }),
+    TaskList,
+    TaskItem.configure({ nested: true }),
+    Table.configure({ resizable: false }),
+    TableRow,
+    TableCell,
+    TableHeader,
+    Details.configure({
+      HTMLAttributes: { class: 'details' },
+      renderToggleButton: ({ element, isOpen }) => {
+        element.setAttribute('aria-expanded', String(isOpen))
+      },
+    }),
+    DetailsSummary,
+    DetailsContent,
     Link.configure({
       openOnClick: true,
       autolink: true,
@@ -159,13 +202,14 @@ onBeforeUnmount(() => {
 <style scoped>
 /* 富文本排版（与编辑器渲染效果一致） */
 .prose {
-  font-size: 15px;
-  line-height: 1.8;
+  font-size: 14px;
+  line-height: 1.7;
   color: rgb(var(--v-theme-on-surface));
   word-break: break-word;
 }
 
 .prose :deep(.ProseMirror) {
+  padding: 12px 14px;
   outline: none;
 }
 
@@ -189,22 +233,53 @@ onBeforeUnmount(() => {
   font-size: 1.15em;
 }
 
-.prose :deep(p) {
+/* .prose :deep(p) {
   margin: 0.5em 0;
-}
+} */
 
-.prose :deep(ul),
+.prose :deep(ul:not([data-type="taskList"])),
 .prose :deep(ol) {
   padding-left: 1.5em;
   margin: 0.5em 0;
 }
 
-.prose :deep(ul) {
+.prose :deep(ul:not([data-type="taskList"])) {
   list-style: disc;
 }
 
 .prose :deep(ol) {
   list-style: decimal;
+}
+
+.prose :deep(li) {
+  padding-left: 0.15em;
+}
+
+/* 任务列表 */
+.prose :deep(ul[data-type="taskList"]) {
+  list-style: none;
+  padding-left: 0;
+  /* margin: 0.5em 0; */
+}
+
+.prose :deep(ul[data-type="taskList"] > li) {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  /* padding-left: 0; */
+}
+
+.prose :deep(ul[data-type="taskList"] > li > label) {
+  margin-top: 3px;
+}
+
+.prose :deep(ul[data-type="taskList"] > li > div) {
+  flex: 1;
+}
+
+.prose :deep(ul[data-type="taskList"] li[data-checked="true"] > div > p) {
+  text-decoration: line-through;
+  opacity: 0.6;
 }
 
 .prose :deep(blockquote) {
@@ -225,7 +300,7 @@ onBeforeUnmount(() => {
 .prose :deep(img) {
   max-width: 100%;
   height: auto;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 /* 富文本内的图片可点击预览（视频保留原生播放/全屏，不接入灯箱） */
@@ -330,18 +405,93 @@ onBeforeUnmount(() => {
 .prose :deep(table) {
   border-collapse: collapse;
   width: 100%;
-  margin: 0.75em 0;
+  margin: 8px 0;
+  overflow: visible;
 }
 
 .prose :deep(th),
 .prose :deep(td) {
-  border: 1px solid rgb(var(--v-theme-outline));
+  border: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
   padding: 6px 10px;
+  min-width: 60px;
+  vertical-align: top;
+}
+
+.prose :deep(th) {
+  background: rgb(var(--v-theme-surface-variant), 0.3);
+}
+
+.prose :deep([data-type="details"]) {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  border: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+}
+
+.prose :deep([data-type="details"] > button) {
+  align-items: center;
+  align-self: flex-start;
+  display: flex;
+  flex: none;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.1rem;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.625rem;
+  line-height: 1;
+  padding: 0;
+}
+
+.prose :deep([data-type="details"] > button:hover) {
+  background: rgb(var(--v-theme-primary), 0.08);
+}
+
+.prose :deep([data-type="details"] > button::before) {
+  content: '\25B6';
+  transition: transform 0.15s ease;
+}
+
+.prose :deep([data-type="details"].is-open > button::before) {
+  transform: rotate(90deg);
+}
+
+.prose :deep([data-type="details"] > div) {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.prose :deep([data-type="details"] > div > summary) {
+  font-weight: 700;
+}
+
+.prose :deep([data-type="details"] > div > [data-type="detailsContent"]) {
+  padding: 0;
+}
+
+.prose :deep([data-type="details"] summary::marker) {
+  content: '';
+}
+
+.prose :deep([data-type="details"] summary::-webkit-details-marker) {
+  display: none;
+}
+
+.prose :deep([data-type="details"] > div > [data-type="detailsContent"] > :last-child) {
+  margin-bottom: 0.5rem;
 }
 
 .prose :deep(hr) {
   border: none;
-  border-top: 1px solid rgb(var(--v-theme-outline));
+  border-top: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
   margin: 1em 0;
 }
 </style>

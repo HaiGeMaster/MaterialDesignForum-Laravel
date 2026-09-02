@@ -44,8 +44,8 @@ const isSelf = computed(
     <!-- 用户名 + 个性签名 -->
     <div class="text-center px-3 pb-2">
       <div class="text-subtitle-1 font-weight-bold text-truncate">{{ person.username }}</div>
-      <div class="text-body-2 text-medium-emphasis text-truncate">
-        {{ person.bio || $t('personCard.noBio') }}
+      <div v-if="person.headline" class="text-body-2 text-medium-emphasis text-truncate">
+        {{ person.headline }}
       </div>
     </div>
 

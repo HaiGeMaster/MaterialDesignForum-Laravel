@@ -93,7 +93,7 @@ function openPlaceholder(action) {
   <v-container  class="pa-4" :style="$route.meta.maxWidth ? { maxWidth: `${$route.meta.maxWidth}px`, margin: '0 auto' } : {}">
 
     <v-row v-if="users.length">
-      <v-col v-for="u in users" :key="u.user_id" cols="6" sm="6" md="4" lg="3">
+      <v-col v-for="u in users" :key="u.user_id" cols="12" sm="6" md="4" lg="3">
         <PersonCard
           :person="u"
           :following="u.is_following"

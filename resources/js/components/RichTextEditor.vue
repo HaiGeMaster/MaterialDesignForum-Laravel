@@ -1,7 +1,11 @@
 <script setup>
+
+// 编辑此组件后，注意同步渲染组件的一些扩展：resources\js\components\ProseRenderer.vue
+
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { EditorContent, useEditor, VueRenderer } from '@tiptap/vue-3'
+import { mergeAttributes } from '@tiptap/core'
 // import { BubbleMenu } from '@tiptap/extension-bubble-menu'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
@@ -24,6 +28,7 @@ import Superscript from '@tiptap/extension-superscript'
 import Mention from '@tiptap/extension-mention'
 import CharacterCount from '@tiptap/extension-character-count'
 import MentionSuggestion from './MentionSuggestion.vue'
+import http from '../api'
 
 const props = defineProps({
   /** 编辑器 HTML 内容（v-model 双向绑定） */
@@ -70,25 +75,69 @@ const editor = useEditor({
     TableHeader,
     TaskList,
     TaskItem.configure({ nested: true }),
-    Details,
+    Details.configure({
+      HTMLAttributes: { class: 'details' },
+      renderToggleButton: ({ element, isOpen }) => {
+        element.setAttribute('aria-expanded', String(isOpen))
+      },
+    }),
     DetailsSummary,
     DetailsContent,
     Subscript,
     Superscript,
     Mention.configure({
+      HTMLAttributes: {
+        class: 'mention',
+      },
+      renderHTML({ node, options }) {
+        return [
+          'a',
+          mergeAttributes(options.HTMLAttributes, {
+            href: `/users/${node.attrs.id}`,
+          }),
+          `@${node.attrs.label ?? node.attrs.id}`,
+        ]
+      },
       suggestion: {
+        items: async ({ query }) => {
+          try {
+            const { data } = await http.get('/users', { params: { q: query, per_page: 10 } })
+            const users = Array.isArray(data) ? data : data?.data || []
+            return users.map((user) => ({
+              id: user.user_id,
+              label: user.username,
+              avatar: user.avatar,
+            }))
+          } catch {
+            return []
+          }
+        },
         render: () => {
           let component
+
+          const updateMentionPosition = (props) => {
+            const rect = props.clientRect?.()
+            if (!rect || !component?.element) return
+
+            component.element.style.position = 'fixed'
+            component.element.style.left = `${rect.left}px`
+            component.element.style.top = `${rect.bottom}px`
+          }
+
           return {
             onStart: (props) => {
               component = new VueRenderer(MentionSuggestion, { props, editor: props.editor })
-              if (!props.clientRect) return
-              props.decorationNode?.appendChild(component.element)
+              component.element.style.zIndex = '2001'
+              document.body.appendChild(component.element)
+              updateMentionPosition(props)
             },
-            onUpdate(props) { component.updateProps(props) },
+            onUpdate(props) {
+              component.updateProps(props)
+              updateMentionPosition(props)
+            },
             onKeyDown(props) {
               if (props.event.key === 'Escape') { component.destroy(); return true }
-              return component.ref?.[props.event.key]?.()
+              return component.ref?.onKeyDown(props) ?? false
             },
             onExit() { component.destroy() },
           }
@@ -380,6 +429,7 @@ const toolbarBottom = computed(() => [
       { type: 'image', icon: 'mdi-image-outline', title: t('editor.image') },
       { type: 'video', icon: 'mdi-video-outline', title: t('editor.video') },
       { type: 'table', icon: 'mdi-table-plus', title: t('editor.table.insert') },
+      { type: 'details', icon: 'mdi-details', title: t('editor.details') },
       { type: 'library', icon: 'mdi-image-multiple-outline', title: t('editor.fromLibrary') },
     ],
   },
@@ -422,6 +472,18 @@ const tableMenu = computed(() => ({
       icon: 'mdi-table-column-remove',
       title: t('editor.table.deleteCol'),
       action: () => editor.value?.chain().focus().deleteColumn().run(),
+    },
+    {
+      icon: 'mdi-table-merge-cells',
+      title: t('editor.table.mergeCells'),
+      disabled: () => !editor.value?.can().mergeCells(),
+      action: () => editor.value?.chain().focus().mergeCells().run(),
+    },
+    {
+      icon: 'mdi-table-split-cell',
+      title: t('editor.table.splitCell'),
+      disabled: () => !editor.value?.can().splitCell(),
+      action: () => editor.value?.chain().focus().splitCell().run(),
     },
     {
       icon: 'mdi-format-header-1',
@@ -625,6 +687,19 @@ const tableMenu = computed(() => ({
   margin: 12px 0;
 }
 
+/* 普通列表：Tailwind preflight 会清除默认的序号和圆点 */
+.rich-editor__content :deep(.ProseMirror ul:not([data-type="taskList"])) {
+  list-style: disc;
+  padding-left: 1.5em;
+  margin: 8px 0;
+}
+
+.rich-editor__content :deep(.ProseMirror ol) {
+  list-style: decimal;
+  padding-left: 1.5em;
+  margin: 8px 0;
+}
+
 /* 表格 */
 .rich-editor__content :deep(.ProseMirror table) {
   border-collapse: collapse;
@@ -670,24 +745,72 @@ const tableMenu = computed(() => ({
 }
 
 /* 折叠面板 */
-.rich-editor__content :deep(.ProseMirror details) {
+.rich-editor__content :deep(.ProseMirror [data-type="details"]) {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.5rem;
   border: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
-  border-radius: 6px;
-  margin: 8px 0;
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
 }
 
-.rich-editor__content :deep(.ProseMirror details summary) {
-  padding: 6px 10px;
+.rich-editor__content :deep(.ProseMirror [data-type="details"] > button) {
+  align-items: center;
+  align-self: flex-start;
+  display: flex;
+  flex: none;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.1rem;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
   cursor: pointer;
-  font-weight: 500;
+  font-size: 0.625rem;
+  line-height: 1;
+  padding: 0;
 }
 
-.rich-editor__content :deep(.ProseMirror details[open] summary) {
-  border-bottom: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
+.rich-editor__content :deep(.ProseMirror [data-type="details"] > button:hover) {
+  background: rgb(var(--v-theme-primary), 0.08);
 }
 
-.rich-editor__content :deep(.ProseMirror details > :not(summary)) {
-  padding: 6px 10px;
+.rich-editor__content :deep(.ProseMirror [data-type="details"] > button::before) {
+  content: '\25B6';
+  transition: transform 0.15s ease;
+}
+
+.rich-editor__content :deep(.ProseMirror [data-type="details"].is-open > button::before) {
+  transform: rotate(90deg);
+}
+
+.rich-editor__content :deep(.ProseMirror [data-type="details"] > div) {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.rich-editor__content :deep(.ProseMirror [data-type="details"] > div > summary) {
+  font-weight: 700;
+}
+
+.rich-editor__content :deep(.ProseMirror [data-type="details"] > div > [data-type="detailsContent"]) {
+  padding: 0;
+}
+
+.rich-editor__content :deep(.ProseMirror [data-type="details"] summary::marker) {
+  content: '';
+}
+
+.rich-editor__content :deep(.ProseMirror [data-type="details"] summary::-webkit-details-marker) {
+  display: none;
+}
+
+.rich-editor__content :deep(.ProseMirror [data-type="details"] > div > [data-type="detailsContent"] > :last-child) {
+  margin-bottom: 0.5rem;
 }
 
 /* @提及 */

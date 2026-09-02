@@ -18,6 +18,7 @@ use App\Http\Controllers\UserOptionController;
 use App\Http\Controllers\ReplyController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\SignInController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserGroupController;
@@ -82,6 +83,9 @@ Route::middleware('auth.token')->group(function () {
 
     // 批量删除媒体（仅本人），需登录
     Route::delete('/media', [MediaController::class, 'destroy']);
+
+    Route::get('/sign-in/status', [SignInController::class, 'status']);
+    Route::post('/sign-in/check-in', [SignInController::class, 'checkIn']);
 
     // 管理后台首页概览：统计数据只允许具备后台登录权限的用户读取
     Route::get('/admin/overview', [AdminDashboardController::class, 'overview'])

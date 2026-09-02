@@ -98,8 +98,8 @@ return new class extends Migration
         DB::table('user_group')->insert([
             [
                 'user_group_id'                           => 1,
-                'user_group_name'                         => 'Message.Admin.UserGroups.Admin',
-                'user_group_description'                  => 'Message.Admin.UserGroups.Admin',
+                'user_group_name'                         => 'Admin',
+                'user_group_description'                  => 'Admin',
                 'user_group_icon'                         => 'mdi-security',
                 'user_group_icon_show'                    => 1,
                 'user_group_color'                        => '#2196f3',
@@ -169,8 +169,8 @@ return new class extends Migration
             ],
             [
                 'user_group_id'                           => 2,
-                'user_group_name'                         => 'Message.Admin.UserGroups.User',
-                'user_group_description'                  => 'Message.Admin.UserGroups.User',
+                'user_group_name'                         => 'User',
+                'user_group_description'                  => 'User',
                 'user_group_icon'                         => 'mdi-account',
                 'user_group_icon_show'                    => 0,
                 'user_group_color'                        => '#4CAF50',

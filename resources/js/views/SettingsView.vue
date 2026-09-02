@@ -213,8 +213,8 @@ watch(
 
 <template>
   <v-container  :class="xs ? 'px-0' : 'px-4'" :style="$route.meta.maxWidth ? { maxWidth: `${$route.meta.maxWidth}px`, margin: '0 auto' } : {}">
-    <v-row justify="center">
-      <v-col cols="12" md="10" lg="8">
+    <!-- <v-row justify="center">
+      <v-col cols="12" md="10" lg="8"> -->
         <!-- 设置选项列表 -->
         <template v-if="section === 'list'">
           <v-card rounded="lg" >
@@ -472,7 +472,8 @@ watch(
             </v-card-text>
           </v-card>
         </template>
-      </v-col>
-    </v-row>
+
+      <!-- </v-col>
+    </v-row> -->
   </v-container>
 </template>

@@ -37,6 +37,7 @@
     "mediaLibrary": "Media library",
     "people": "People",
     "notifications": "Notifications",
+    "signIn": "Check-in",
     "admin": "Admin"
   },
   "footer": {
@@ -492,6 +493,8 @@
       "deleteRow": "Delete row",
       "deleteCol": "Delete column",
       "deleteTable": "Delete table",
+      "mergeCells": "Merge cells",
+      "splitCell": "Split cell",
       "toggleHeaderRow": "Toggle header row",
       "toggleHeaderCol": "Toggle header column"
     },
@@ -999,8 +1002,39 @@
     "oauthCallback": "Signing in",
     "install": "Installer",
     "settings": "Account settings",
+    "signIn": "Check-in",
     "admin": "Admin dashboard",
-    "mediaLibrary": "Media library"
+    "mediaLibrary": "Media library",
+    "notFound": "Page not found"
+  },
+  "notFound": {
+    "title": "404",
+    "message": "The page you're looking for does not exist or has been moved.",
+    "backHome": "Back to home"
+  },
+  "signIn": {
+    "title": "Daily Check-in",
+    "checkIn": "Check in for points",
+    "checkedIn": "Checked in",
+    "checkedBadge": "Checked",
+    "streakBadge": "Streak",
+    "checkedInToday": "Checked in today",
+    "notCheckedInToday": "Not checked in today",
+    "total": "Total check-ins",
+    "continuous": "Continuous check-ins",
+    "reward": "Today's reward",
+    "totalReward": "Total points",
+    "days": "days",
+    "points": "points",
+    "rulesTitle": "Check-in rules",
+    "ruleBase": "Base reward: 10 points for each daily check-in",
+    "ruleChain": "3-day streak: 25 points; 7-day streak: 80 points; 30-day streak: 200 points",
+    "ruleLimit": "One check-in per account per day; a missed day resets the streak",
+    "success": "Check-in successful, earned {points} points",
+    "already": "Already checked in today. Come back tomorrow.",
+    "failed": "Check-in failed",
+    "fetchFailed": "Failed to fetch check-in status",
+    "streakCurrent": "Current streak: {days} days"
   },
   "oauth": {
     "processing": "Processing third-party sign-in, please wait...",
