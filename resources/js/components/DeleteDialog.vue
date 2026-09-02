@@ -11,8 +11,9 @@
           </v-btn>
         </template>
         <template #append>
-          <v-btn icon variant="text" :loading="store.loading" @click="store.confirm">
-            <v-icon>mdi-check</v-icon>
+          <!-- variant="text"  -->
+          <v-btn icon color="error" variant="tonal" :loading="store.loading" @click="store.confirm">
+            <v-icon >mdi-check</v-icon>
             <v-tooltip activator="parent" location="left">
               {{ store.confirmText || t('common.delete') }}
             </v-tooltip>

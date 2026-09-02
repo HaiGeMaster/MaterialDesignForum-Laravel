@@ -37,6 +37,46 @@ class User extends Authenticatable
         'disable_time' => 'datetime',
     ];
 
+    protected static function booted(): void
+    {
+        static::created(function (self $user): void {
+            self::syncUserGroupCount($user->user_group_id);
+        });
+
+        static::updated(function (self $user): void {
+            if (! $user->wasChanged('user_group_id')) {
+                return;
+            }
+
+            $oldGroupId = (int) $user->getOriginal('user_group_id');
+            $newGroupId = (int) $user->user_group_id;
+
+            if ($oldGroupId > 0) {
+                self::syncUserGroupCount($oldGroupId);
+            }
+
+            if ($newGroupId > 0) {
+                self::syncUserGroupCount($newGroupId);
+            }
+        });
+    }
+
+    public static function syncUserGroupCount(?int $userGroupId): void
+    {
+        if ($userGroupId === null || $userGroupId <= 0) {
+            return;
+        }
+
+        $count = self::query()
+            ->where('user_group_id', $userGroupId)
+            ->whereNull('disable_time')
+            ->count();
+
+        UserGroup::query()
+            ->where('user_group_id', $userGroupId)
+            ->update(['user_group_user_count' => $count, 'update_time' => now()]);
+    }
+
     /**
      * 用户所属的用户组
      */

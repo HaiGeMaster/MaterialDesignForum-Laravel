@@ -551,6 +551,10 @@ async function bulkDeleteSelected() {
       await loadItems()
       feedback(t('admin.bulkDeleteSuccess', { count }), 'success')
     },
+    onError: (error) => {
+      const message = error?.response?.data?.message || error?.message || t('admin.deleteFailed') || '删除失败'
+      feedback(message, 'error')
+    },
   })
 }
 
@@ -588,6 +592,9 @@ function openBulkUserGroupDialog() {
 async function applyBulkUserGroup() {
   if (!selectedUserGroupId.value || moduleName.value !== 'users' || !selectedUsers.value.length) return
 
+  // console.log('selectedUsers.value.length', selectedUsers.value.length)
+  const selectedUsersCount = selectedUsers.value.length
+
   const targetGroupId = Number(selectedUserGroupId.value)
   await Promise.all(
     selectedUsers.value.map((item) => {
@@ -599,12 +606,13 @@ async function applyBulkUserGroup() {
   bulkUserGroupDialog.value = false
   clearSelection()
   await loadItems()
-  feedback(t('admin.bulkUserGroupSuccess', { count: selectedUsers.value.length }), 'success')
+  feedback(t('admin.bulkUserGroupSuccess', { count: selectedUsersCount }), 'success')
 }
 
 async function bulkSetReportState(state) {
   if (moduleName.value !== 'reports' || !selectedReports.value.length) return
 
+  const selectedReportsCount = selectedReports.value.length
   await Promise.all(
     selectedReports.value.map((item) => {
       const id = item?.report_id
@@ -614,7 +622,7 @@ async function bulkSetReportState(state) {
   )
   clearSelection()
   await loadItems()
-  feedback(t('admin.bulkReportStateSuccess', { count: selectedReports.value.length, state: t(`reportDialog.state${state === 0 ? 'Pending' : state === 1 ? 'Handled' : 'Dismissed'}`) }), 'success')
+  feedback(t('admin.bulkReportStateSuccess', { count: selectedReportsCount, state: t(`reportDialog.state${state === 0 ? 'Pending' : state === 1 ? 'Handled' : 'Dismissed'}`) }), 'success')
 }
 
 // ================== 编辑 / 删除（复用已有全局组件） ==================
@@ -756,6 +764,12 @@ function openDeleteDialog(item) {
 
   const label = item?.name || item?.title || item?.username || item?.user_group_name || `#${id}`
 
+  console.log('openDeleteDialog', (m === 'user-groups' && Number(item?.user_group_user_count ?? 0) > 0))
+  if (m === 'user-groups' && Number(item?.user_group_user_count ?? 0) > 0) {
+    feedback(t('admin.userGroupDeleteBlocked'), 'error')
+    return
+  }
+
   deleteDialog.open({
     title: t('admin.deleteTitle'),
     text: t('admin.deleteConfirmPrefix') + label + t('admin.deleteConfirmSuffix'),
@@ -764,6 +778,10 @@ function openDeleteDialog(item) {
       items.value = items.value.filter((row) => row[idKey] !== id)
       total.value = Math.max(0, total.value - 1)
       feedback(t('admin.deleteSuccess'), 'success')
+    },
+    onError: (error) => {
+      const message = error?.response?.data?.message || error?.message || t('admin.deleteFailed') || '删除失败'
+      feedback(message, 'error')
     },
   })
 }
@@ -831,10 +849,13 @@ onBeforeUnmount(() => {
               color="error"
               variant="flat"
               size="small"
-              prepend-icon="mdi-delete-outline"
+              icon
               @click="bulkDeleteSelected"
             >
-              {{ $t('admin.bulkDelete') }} ({{ selected.length }})
+              <v-icon>mdi-delete-outline</v-icon>
+              <v-tooltip activator="parent" >
+                {{ $t('admin.bulkDelete') }} ({{ selected.length }})
+              </v-tooltip>
             </v-btn>
 
             <v-btn
@@ -842,10 +863,13 @@ onBeforeUnmount(() => {
               color="warning"
               variant="flat"
               size="small"
-              prepend-icon="mdi-account-cancel"
+              icon
               @click="bulkDisableSelectedUsers"
             >
-              {{ $t('admin.bulkDisable') }} ({{ selected.length }})
+              <v-icon>mdi-account-cancel</v-icon>
+              <v-tooltip activator="parent" >
+                {{ $t('admin.bulkDisable') }} ({{ selected.length }})
+              </v-tooltip>
             </v-btn>
 
             <v-btn
@@ -853,10 +877,13 @@ onBeforeUnmount(() => {
               color="primary"
               variant="flat"
               size="small"
-              prepend-icon="mdi-account-switch"
+              icon
               @click="openBulkUserGroupDialog"
             >
-              {{ $t('admin.bulkChangeUserGroup') }}
+              <v-icon>mdi-account-switch</v-icon>
+              <v-tooltip activator="parent" >
+                {{ $t('admin.bulkChangeUserGroup') }}
+              </v-tooltip>
             </v-btn>
 
             <v-btn
@@ -864,30 +891,39 @@ onBeforeUnmount(() => {
               color="error"
               variant="flat"
               size="small"
-              prepend-icon="mdi-clock-outline"
+              icon
               @click="bulkSetReportState(0)"
             >
-              {{ $t('reportDialog.statePending') }}
+              <v-icon>mdi-clock-outline</v-icon>
+              <v-tooltip activator="parent" >
+                {{ $t('reportDialog.statePending') }}
+              </v-tooltip>
             </v-btn>
             <v-btn
               v-if="moduleName === 'reports'"
               color="grey"
               variant="flat"
               size="small"
-              prepend-icon="mdi-check-circle-outline"
+              icon
               @click="bulkSetReportState(1)"
             >
-              {{ $t('reportDialog.stateHandled') }}
+              <v-icon>mdi-check-circle-outline</v-icon>
+              <v-tooltip activator="parent" >
+                {{ $t('reportDialog.stateHandled') }}
+              </v-tooltip>
             </v-btn>
             <v-btn
               v-if="moduleName === 'reports'"
               color="success"
               variant="flat"
               size="small"
-              prepend-icon="mdi-close-circle-outline"
+              icon
               @click="bulkSetReportState(2)"
             >
-              {{ $t('reportDialog.stateDismissed') }}
+              <v-icon>mdi-close-circle-outline</v-icon>
+              <v-tooltip activator="parent" >
+                {{ $t('reportDialog.stateDismissed') }}
+              </v-tooltip>
             </v-btn>
           </div>
         </template>
@@ -900,7 +936,7 @@ onBeforeUnmount(() => {
 
             <v-btn icon variant="text" :loading="loading" @click="refresh">
               <v-icon>mdi-refresh</v-icon>
-              <v-tooltip activator="parent" location="left">
+              <v-tooltip activator="parent" >
                 {{ $t('admin.refresh') }}
               </v-tooltip>
             </v-btn>
@@ -908,7 +944,7 @@ onBeforeUnmount(() => {
         </template>
       </v-toolbar>
 
-      <v-data-table-server :mobile="mobile" v-if="moduleMeta" v-model="selected" v-model:page="page" v-model:items-per-page="itemsPerPage"
+      <v-data-table-server color="primary" :mobile="mobile" v-if="moduleMeta" v-model="selected" v-model:page="page" v-model:items-per-page="itemsPerPage"
         v-model:sort-by="sortBy" :headers="headers" :items="items" :items-length="total" :loading="loading"
         :search="search" :item-value="itemValue" :return-object="true" show-select hover density="comfortable"
         @update:options="loadItems" @click:row="onRowClick">
@@ -1034,12 +1070,36 @@ onBeforeUnmount(() => {
 
     <v-dialog v-model="bulkUserGroupDialog" max-width="420">
       <v-card rounded="lg">
-        <v-card-title class="d-flex align-center justify-space-between">
+        <!-- <v-card-title class="d-flex align-center justify-space-between">
           <span>{{ $t('admin.bulkChangeUserGroup') }}</span>
           <v-btn icon variant="text" @click="bulkUserGroupDialog = false">
             <v-icon>mdi-close</v-icon>
           </v-btn>
-        </v-card-title>
+        </v-card-title> -->
+
+        <v-toolbar :title="$t('admin.bulkChangeUserGroup')">
+          <template v-slot:prepend>
+            <v-btn icon variant="text" @click="bulkUserGroupDialog = false" >
+              <v-icon>
+                mdi-close
+              </v-icon>
+              <v-tooltip activator="parent" location="right">
+                {{ $t('common.cancel') }}
+              </v-tooltip>
+            </v-btn>
+          </template>
+          <template #append>
+            <v-btn icon variant="text" @click="applyBulkUserGroup" :disabled="!selectedUserGroupId" >
+              <v-icon>
+                mdi-check
+              </v-icon>
+              <v-tooltip activator="parent" location="left">
+                {{ $t('common.submit') }}
+              </v-tooltip>
+            </v-btn>
+          </template>
+        </v-toolbar>
+
         <v-card-text>
           <v-select
             v-model="selectedUserGroupId"
@@ -1051,12 +1111,12 @@ onBeforeUnmount(() => {
             density="comfortable"
           />
         </v-card-text>
-        <v-card-actions class="justify-end">
+        <!-- <v-card-actions class="justify-end">
           <v-btn variant="text" @click="bulkUserGroupDialog = false">{{ $t('common.cancel') }}</v-btn>
           <v-btn color="primary" :disabled="!selectedUserGroupId" @click="applyBulkUserGroup">
             {{ $t('common.confirm') }}
           </v-btn>
-        </v-card-actions>
+        </v-card-actions> -->
       </v-card>
     </v-dialog>
   </v-container>

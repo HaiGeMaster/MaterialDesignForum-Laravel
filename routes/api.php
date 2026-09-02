@@ -119,7 +119,8 @@ Route::middleware('auth.token')->group(function () {
         ->where('id', '[0-9]+')->middleware('ability:module:destroy');
 
     // 创建接口：仅用户组模块开放（其他模块创建走前台）
-    Route::post('/admin/modules/user-groups', [AdminModuleController::class, 'store'])
+    Route::post('/admin/modules/{module}', [AdminModuleController::class, 'store'])
+        ->where('module', 'user-groups')
         ->middleware('ability:ability_admin_manage_user_group');
 });
 

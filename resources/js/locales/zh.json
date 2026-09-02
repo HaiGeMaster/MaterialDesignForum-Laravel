@@ -707,6 +707,7 @@
     "bulkChangeUserGroup": "变更选中项用户用户组",
     "bulkUserGroupSuccess": "已更新 {count} 个用户的用户组。",
     "bulkReportStateSuccess": "已更新 {count} 个举报项的状态。",
+    "userGroupDeleteBlocked": "该用户组仍有成员，不能直接删除。请先将用户组中的成员移动到其它用户组，再删除该用户组。请在“用户管理”页面进行用户多选批量变更用户组。",
     "userGroup": "用户组",
     "fields": {
       "id": "ID",

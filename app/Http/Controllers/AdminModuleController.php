@@ -475,6 +475,16 @@ class AdminModuleController extends Controller
             return response()->json(['message' => 'Item not found'], 404);
         }
 
+        if ($module === 'user-groups') {
+            $memberCount = User::query()->where('user_group_id', $item->user_group_id)->whereNull('disable_time')->count();
+            if ($memberCount > 0) {
+                return response()->json([
+                    'message' => '该用户组仍有成员，不能直接删除。请先将用户组中的成员移动到其它用户组，再删除该用户组。请在“用户管理”页面进行用户多选批量变更用户组。',
+                    'member_count' => $memberCount,
+                ], 422);
+            }
+        }
+
         $deleteField = $config['delete_field'] ?? null;
         if (in_array($deleteField, ['delete_time', 'disable_time'], true)) {
             // 软删除：仅设置时间戳，行数据保留以便事后审计

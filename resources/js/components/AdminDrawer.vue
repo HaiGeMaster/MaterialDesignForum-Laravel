@@ -115,8 +115,6 @@ const gonganBeianImg = '/assets/fixed_content/gwbeian.png'
           </a>
         </p>
 
-        <!-- 构建时间 -->
-        <p v-if="buildTime">{{ buildTime }}</p>
 
         <!-- 版权信息 -->
         <p>
@@ -135,6 +133,8 @@ const gonganBeianImg = '/assets/fixed_content/gwbeian.png'
             <br>
           </template>
         </p>
+        <!-- 构建时间 -->
+        <p v-if="buildTime">BUILD TIME: {{ buildTime }}</p>
       </div>
     </template>
   </v-navigation-drawer>

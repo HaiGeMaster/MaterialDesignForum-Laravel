@@ -39,6 +39,7 @@ export const useDeleteDialogStore = defineStore('deleteDialog', {
       confirmText = '',
       cancelText = '',
       onConfirm = null,
+      onError = null,
     }) {
       this.title = title
       this.text = text
@@ -47,6 +48,7 @@ export const useDeleteDialogStore = defineStore('deleteDialog', {
       this.confirmText = confirmText
       this.cancelText = cancelText
       this.onConfirm = onConfirm
+      this.onError = onError
       this.loading = false
       this.model = true
     },
@@ -55,6 +57,7 @@ export const useDeleteDialogStore = defineStore('deleteDialog', {
       this.model = false
       this.loading = false
       this.onConfirm = null
+      this.onError = null
     },
 
     async confirm() {
@@ -66,8 +69,11 @@ export const useDeleteDialogStore = defineStore('deleteDialog', {
       try {
         await this.onConfirm()
         this.close()
-      } catch {
-        // 失败时保持对话框打开，错误提示由调用方负责
+      } catch (error) {
+        if (typeof this.onError === 'function') {
+          this.onError(error)
+        }
+        // 失败时保持对话框打开，允许用户重试；错误消息也会由调用方展示。
       } finally {
         this.loading = false
       }

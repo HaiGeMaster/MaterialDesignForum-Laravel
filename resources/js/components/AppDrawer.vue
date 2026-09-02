@@ -117,8 +117,6 @@ const accountNavItems = computed(() => {
           </a>
         </p>
 
-        <!-- 构建时间 -->
-        <p v-if="buildTime">{{ buildTime }}</p>
 
         <!-- 版权信息 -->
         <p>
@@ -138,6 +136,8 @@ const accountNavItems = computed(() => {
           </template>
         </p>
 
+        <!-- 构建时间 -->
+        <p v-if="buildTime">BUILD TIME: {{ buildTime }}</p>
       </div>
     </template>
   </v-navigation-drawer>

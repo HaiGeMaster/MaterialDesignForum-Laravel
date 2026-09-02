@@ -705,6 +705,7 @@
     "bulkChangeUserGroup": "Change selected users' group",
     "bulkUserGroupSuccess": "Updated the user groups for {count} users.",
     "bulkReportStateSuccess": "Updated the status for {count} reports.",
+    "userGroupDeleteBlocked": "This user group still has members and cannot be deleted directly. Please move the members to another user group first, then delete this group. Use multi-select on the Users page to change user groups in bulk.",
     "userGroup": "User group",
     "fields": {
       "id": "ID",
