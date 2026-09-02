@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import http from '../api'
+import { identifyClarityUser } from '../clarity'
 import { useFollowStore } from './follow'
 
 const TOKEN_KEY = 'forum_token'
@@ -36,6 +37,7 @@ export const useAuthStore = defineStore('auth', {
           localStorage.setItem(TOKEN_KEY, this.token)
         }
 
+        identifyClarityUser(this.user)
         return data
       } catch (error) {
         this.error = error.message
@@ -71,6 +73,7 @@ export const useAuthStore = defineStore('auth', {
           localStorage.setItem(TOKEN_KEY, this.token)
         }
 
+        identifyClarityUser(this.user)
         return data
       } catch (error) {
         this.error = error.message
@@ -93,6 +96,7 @@ export const useAuthStore = defineStore('auth', {
           localStorage.setItem(TOKEN_KEY, this.token)
         }
 
+        identifyClarityUser(this.user)
         return data
       } catch (error) {
         this.error = error.message
@@ -122,6 +126,7 @@ export const useAuthStore = defineStore('auth', {
       try {
         const { data } = await http.get('/auth/me')
         this.user = data.user
+        identifyClarityUser(this.user)
         return this.user
       } catch (error) {
         this.user = null
@@ -154,6 +159,7 @@ export const useAuthStore = defineStore('auth', {
 
     setUser(user) {
       this.user = user
+      identifyClarityUser(user)
     },
   },
 })

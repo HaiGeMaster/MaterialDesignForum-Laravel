@@ -18,7 +18,7 @@ powershell -NoProfile -Command ^
   "[System.IO.File]::WriteAllText($path, $json, [System.Text.UTF8Encoding]::new(`$false))"
 echo [Info] composer.json version updated to %BUILD_VERSION%
 
-set "OUTPUT=%ROOT%MDF-APP-Laravel_%TIMESTAMP%.7z"
+set "OUTPUT=%ROOT%MDForum-Laravel_%TIMESTAMP%.7z"
 set "SEVENZIP=D:\App\7-Zip\7z.exe"
 
 :: Check if 7z exists
@@ -51,7 +51,7 @@ echo routes\>>"%LIST%"
 echo storage\app\>>"%LIST%"
 echo storage\certs\>>"%LIST%"
 echo storage\framework\>>"%LIST%"
-@REM echo vendor\>>"%LIST%"
+echo vendor\>>"%LIST%"
 echo artisan>>"%LIST%"
 echo composer.json>>"%LIST%"
 echo composer.lock>>"%LIST%"
