@@ -21,7 +21,7 @@ return new class extends Migration
         Schema::create('settings', function (Blueprint $table) {
             $table->string('name', 40)->charset('utf8mb4')->collate('utf8mb4_unicode_ci')->default('')->comment('字段名');
             $table->text('value')->charset('utf8mb4')->collate('utf8mb4_unicode_ci')->comment('字段值');
-            
+
             $table->primary('name');
         });
 
@@ -34,7 +34,8 @@ return new class extends Migration
             ['name' => 'site_keywords',     'value' => 'Material Design Forum,Vuetify,MDUI,MDForum,Forum,论坛,轻量论坛,简洁论坛,材质设计论坛,轻论坛'],
             ['name' => 'site_name',         'value' => 'Material Design Forum'],
             ['name' => 'site_static_url',   'value' => ''],
-            ['name' => 'theme',             'value' => 'MaterialDesignForum-Vuetify4'],
+            ['name' => 'theme',             'value' => 'system'],
+            ['name' => 'default_theme',             'value' => 'system'],
             ['name' => 'theme_carousel_param', 'value' => ''],
             ['name' => 'theme_typed_param', 'value' => '{"header":"Message.Components.TextPlay.With","body":["Message.Components.TextPlay.MaterialDesign","Message.Components.TextPlay.VueAsTheCore","Message.Components.TextPlay.MoreElegant","Message.Components.TextPlay.UnlimitedDistance","Message.Components.TextPlay.CrossPlatform","Message.Components.TextPlay.DynamicResponsive"],"footer_header":"Message.Components.TextPlay.TheWay","footer_tail":"Message.Components.TextPlay.EnjoyCommunication"}'],
         ]);
