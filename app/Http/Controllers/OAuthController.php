@@ -316,10 +316,10 @@ class OAuthController extends Controller
             'password' => Hash::make(Str::random(40)), // OAuth 用户无需密码登录；随机串防止猜测
             'user_group_id' => 2,
             'create_ip' => $request->ip() ?: '127.0.0.1',
-            'create_location' => GeoLocation::location($request->ip()),
+            'create_location' => GeoLocation::location(GeoLocation::getClientIP()),
             'last_login_time' => now(),
             'last_login_ip' => $request->ip() ?: '127.0.0.1',
-            'last_login_location' => GeoLocation::location($request->ip()),
+            'last_login_location' => GeoLocation::location(GeoLocation::getClientIP()),
             'follower_count' => 0,
             'followee_count' => 0,
             'following_topic_count' => 0,
@@ -401,7 +401,7 @@ class OAuthController extends Controller
     {
         $user->last_login_time = now();
         $user->last_login_ip = $request->ip() ?: '127.0.0.1';
-        $user->last_login_location = GeoLocation::location($request->ip());
+        $user->last_login_location = GeoLocation::location(GeoLocation::getClientIP());
         $user->save();
     }
 

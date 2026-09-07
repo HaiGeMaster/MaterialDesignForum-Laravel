@@ -39,10 +39,10 @@ class AuthController extends Controller
             'password' => Hash::make($data['password']),
             'user_group_id' => 2, // 普通用户组
             'create_ip' => $request->ip() ?: '127.0.0.1',
-            'create_location' => GeoLocation::location($request->ip()),
+            'create_location' => GeoLocation::location(GeoLocation::getClientIP()),
             'last_login_time' => now(),
             'last_login_ip' => $request->ip() ?: '127.0.0.1',
-            'last_login_location' => GeoLocation::location($request->ip()),
+            'last_login_location' => GeoLocation::location(GeoLocation::getClientIP()),
             'follower_count' => 0,
             'followee_count' => 0,
             'following_topic_count' => 0,
@@ -114,7 +114,8 @@ class AuthController extends Controller
 
         $user->last_login_time = now();
         $user->last_login_ip = $request->ip() ?: '127.0.0.1';
-        $user->last_login_location = GeoLocation::location($request->ip());
+        // $user->last_login_location = GeoLocation::location($request->ip());
+        $user->last_login_location = GeoLocation::location(GeoLocation::getClientIP());
         $user->save();
 
         $token = $this->createToken($user, $request);
@@ -168,7 +169,7 @@ class AuthController extends Controller
         $user->update_time = now();
         $user->last_login_time = now();
         $user->last_login_ip = $request->ip() ?: '127.0.0.1';
-        $user->last_login_location = GeoLocation::location($request->ip());
+        $user->last_login_location = GeoLocation::location(GeoLocation::getClientIP());
         $user->save();
 
         // 重置成功后直接颁发令牌，自动登录

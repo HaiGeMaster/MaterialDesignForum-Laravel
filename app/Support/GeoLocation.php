@@ -42,10 +42,52 @@ class GeoLocation
             $result['country'] ?? '',
             $result['province'] ?? '',
             $result['city'] ?? '',
-        ], fn ($v) => $v !== null && $v !== '');
+        ], fn($v) => $v !== null && $v !== '');
 
         $location = implode('', $parts);
 
         return $location !== '' ? $location : null;
     }
+    /**
+     * 获取客户端IP地址
+     */
+    public static function getClientIP(): string
+    {
+        $candidates = [];
+
+        // XFF 是逗号分隔链，最左边是原始客户端
+        if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            foreach (explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']) as $ip) {
+                $ip = trim($ip);
+                if (filter_var($ip, FILTER_VALIDATE_IP)) {
+                    $candidates[] = $ip;
+                    break; // 只取第一个合法 IP
+                }
+            }
+        }
+
+        if (!$candidates && !empty($_SERVER['HTTP_CLIENT_IP'])) {
+            $ip = trim($_SERVER['HTTP_CLIENT_IP']);
+            if (filter_var($ip, FILTER_VALIDATE_IP)) {
+                $candidates[] = $ip;
+            }
+        }
+
+        // 兜底：REMOTE_ADDR 是 TCP 连接的对端地址，无法伪造，永远可信
+        $ip = $candidates[0] ?? ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
+
+        return filter_var($ip, FILTER_VALIDATE_IP) ? $ip : '0.0.0.0';
+    }
+    // public static function getClientIP()
+    // {
+    //     $client_ip = '0.0.0.0';
+    //     if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+    //         $client_ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    //     } elseif (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+    //         $client_ip = $_SERVER['HTTP_CLIENT_IP'];
+    //     } else {
+    //         $client_ip = $_SERVER['REMOTE_ADDR'];
+    //     }
+    //     return $client_ip;
+    // }
 }
