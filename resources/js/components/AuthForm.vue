@@ -143,7 +143,7 @@ onUnmounted(() => {
     <v-card-text class="pa-6">
       <!-- 登录 -->
       <v-form v-if="activeTab === 'login'" ref="loginFormRef" @submit.prevent="handleLogin">
-        <v-text-field color="primary" 
+        <v-text-field color="primary"
           v-model="loginForm.email"
           :label="$t('auth.email')"
           type="email"
@@ -151,7 +151,7 @@ onUnmounted(() => {
           :rules="[rules.required, rules.email]"
           autocomplete="email"
         />
-        <v-text-field color="primary" 
+        <v-text-field color="primary"
           v-model="loginForm.password"
           :label="$t('auth.password')"
           type="password"
@@ -159,7 +159,7 @@ onUnmounted(() => {
           :rules="[rules.required]"
           autocomplete="current-password"
         />
-        <v-btn type="submit" color="primary" block class="mt-2" :loading="loading">
+        <v-btn size="large" type="submit" color="primary" block class="mt-2" :loading="loading">
           {{ $t('auth.login') }}
         </v-btn>
         <OAuthSocialButtons v-if="oauthProviders.length" :providers="oauthProviders" @select="loginWithOAuth" />
@@ -167,14 +167,14 @@ onUnmounted(() => {
 
       <!-- 注册 -->
       <v-form v-else-if="activeTab === 'register'" ref="registerFormRef" @submit.prevent="handleRegister">
-        <v-text-field color="primary" 
+        <v-text-field color="primary"
           v-model="registerForm.username"
           :label="$t('auth.username')"
           prepend-inner-icon="mdi-account"
           :rules="[rules.required, rules.username]"
           autocomplete="username"
         />
-        <v-text-field color="primary" 
+        <v-text-field color="primary"
           v-model="registerForm.email"
           :label="$t('auth.email')"
           type="email"
@@ -182,7 +182,7 @@ onUnmounted(() => {
           :rules="[rules.required, rules.email]"
           autocomplete="email"
         />
-        <v-text-field color="primary" 
+        <v-text-field color="primary"
           v-model="registerForm.email_code"
           :label="$t('auth.emailCode')"
           prepend-inner-icon="mdi-shield-key-outline"
@@ -202,7 +202,7 @@ onUnmounted(() => {
             </v-btn>
           </template>
         </v-text-field>
-        <v-text-field color="primary" 
+        <v-text-field color="primary"
           v-model="registerForm.password"
           :label="$t('auth.password')"
           type="password"
@@ -210,7 +210,7 @@ onUnmounted(() => {
           :rules="[rules.required, rules.password]"
           autocomplete="new-password"
         />
-        <v-text-field color="primary" 
+        <v-text-field color="primary"
           v-model="registerForm.password_confirmation"
           :label="$t('auth.confirmPassword')"
           type="password"
@@ -218,7 +218,7 @@ onUnmounted(() => {
           :rules="[rules.confirmRegister]"
           autocomplete="new-password"
         />
-        <v-btn type="submit" color="primary" block class="mt-2" :loading="loading">
+        <v-btn size="large" type="submit" color="primary" block class="mt-2" :loading="loading">
           {{ $t('auth.register') }}
         </v-btn>
         <OAuthSocialButtons v-if="oauthProviders.length" :providers="oauthProviders" @select="loginWithOAuth" />
@@ -226,7 +226,7 @@ onUnmounted(() => {
 
       <!-- 找回密码 -->
       <v-form v-else ref="resetFormRef" @submit.prevent="handleResetPassword">
-        <v-text-field color="primary" 
+        <v-text-field color="primary"
           v-model="resetForm.email"
           :label="$t('auth.email')"
           type="email"
@@ -234,7 +234,7 @@ onUnmounted(() => {
           :rules="[rules.required, rules.email]"
           autocomplete="email"
         />
-        <v-text-field color="primary" 
+        <v-text-field color="primary"
           v-model="resetForm.email_code"
           :label="$t('auth.emailCode')"
           prepend-inner-icon="mdi-shield-key-outline"
@@ -254,7 +254,7 @@ onUnmounted(() => {
             </v-btn>
           </template>
         </v-text-field>
-        <v-text-field color="primary" 
+        <v-text-field color="primary"
           v-model="resetForm.password"
           :label="$t('auth.newPassword')"
           type="password"
@@ -262,7 +262,7 @@ onUnmounted(() => {
           :rules="[rules.required, rules.password]"
           autocomplete="new-password"
         />
-        <v-text-field color="primary" 
+        <v-text-field color="primary"
           v-model="resetForm.password_confirmation"
           :label="$t('auth.confirmNewPassword')"
           type="password"
@@ -270,7 +270,7 @@ onUnmounted(() => {
           :rules="[rules.confirmReset]"
           autocomplete="new-password"
         />
-        <v-btn type="submit" color="primary" block class="mt-2" :loading="loading">
+        <v-btn size="large" type="submit" color="primary" block class="mt-2" :loading="loading">
           {{ $t('auth.resetPassword') }}
         </v-btn>
       </v-form>

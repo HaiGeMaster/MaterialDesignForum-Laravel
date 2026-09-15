@@ -1,26 +1,58 @@
 <script setup>
 import { computed, watch, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { EditorContent, useEditor } from '@tiptap/vue-3'
+
 import { mergeAttributes } from '@tiptap/core'
-import StarterKit from '@tiptap/starter-kit'
-import Underline from '@tiptap/extension-underline'
-import { TextStyle, FontSize, LineHeight } from '@tiptap/extension-text-style'
+import { EditorContent, useEditor, VueRenderer } from '@tiptap/vue-3'
 import { Color } from '@tiptap/extension-color'
-import Highlight from '@tiptap/extension-highlight'
-import Link from '@tiptap/extension-link'
-import TextAlign from '@tiptap/extension-text-align'
-import Mention from '@tiptap/extension-mention'
-import TaskList from '@tiptap/extension-task-list'
-import TaskItem from '@tiptap/extension-task-item'
+import { TextStyle, FontSize, LineHeight } from '@tiptap/extension-text-style'
 import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table'
 import { Details, DetailsSummary, DetailsContent } from '@tiptap/extension-details'
-import { Fancybox } from '@fancyapps/ui'
-import '@fancyapps/ui/dist/fancybox/fancybox.css'
-import { zh_CN } from '@fancyapps/ui/dist/fancybox/l10n/zh_CN.js'
+
 import { Video } from '../tiptap/Video'
 import { ResizableImage } from '../tiptap/ResizableImage'
 import { CodeBlock } from '../tiptap/CodeBlock'
+
+import StarterKit from '@tiptap/starter-kit'
+import Underline from '@tiptap/extension-underline'
+import Highlight from '@tiptap/extension-highlight'
+import Link from '@tiptap/extension-link'
+import TextAlign from '@tiptap/extension-text-align'
+import TaskList from '@tiptap/extension-task-list'
+import TaskItem from '@tiptap/extension-task-item'
+import Subscript from '@tiptap/extension-subscript'
+import Superscript from '@tiptap/extension-superscript'
+import Mention from '@tiptap/extension-mention'
+// import CharacterCount from '@tiptap/extension-character-count'
+// import Placeholder from '@tiptap/extension-placeholder'
+
+///
+// import { EditorContent, useEditor } from '@tiptap/vue-3'
+// import { mergeAttributes } from '@tiptap/core'
+
+// import StarterKit from '@tiptap/starter-kit'
+// import Underline from '@tiptap/extension-underline'
+// import { TextStyle, FontSize, LineHeight } from '@tiptap/extension-text-style'
+// import { Color } from '@tiptap/extension-color'
+// import Highlight from '@tiptap/extension-highlight'
+// import Link from '@tiptap/extension-link'
+// import TextAlign from '@tiptap/extension-text-align'
+
+// import Mention from '@tiptap/extension-mention'
+// import TaskList from '@tiptap/extension-task-list'
+// import TaskItem from '@tiptap/extension-task-item'
+// import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table'
+// import { Details, DetailsSummary, DetailsContent } from '@tiptap/extension-details'
+// import Subscript from '@tiptap/extension-subscript'
+// import Superscript from '@tiptap/extension-superscript'
+// import { Video } from '../tiptap/Video'
+// import { ResizableImage } from '../tiptap/ResizableImage'
+// import { CodeBlock } from '../tiptap/CodeBlock'
+///
+
+import { Fancybox } from '@fancyapps/ui'
+import '@fancyapps/ui/dist/fancybox/fancybox.css'
+import { zh_CN } from '@fancyapps/ui/dist/fancybox/l10n/zh_CN.js'
 
 defineOptions({ name: 'ProseRenderer' })
 
@@ -47,6 +79,8 @@ const editor = useEditor({
     StarterKit.configure({
       heading: { levels: [1, 2, 3] },
       codeBlock: false,
+      link: false,       // 关掉内置 link，避免和下面冲突
+      underline: false,  // 如果你有自己的 underline 才写这行
     }),
     Underline,
     TextStyle,
@@ -94,6 +128,8 @@ const editor = useEditor({
     }),
     DetailsSummary,
     DetailsContent,
+    Subscript,
+    Superscript,
     Link.configure({
       openOnClick: true,
       autolink: true,
@@ -200,6 +236,378 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+/* ============================================================
+ * Prose 富文本展示（预览/渲染）组件样式
+ * 作用域：.prose
+ * 与编辑器保持一致的排版视觉效果
+ * ============================================================ */
+
+
+/* ------------------------------------------------------------
+ * 1. 基础排版
+ * ------------------------------------------------------------ */
+
+.prose {
+  font-size: 14px;
+  line-height: 1.7;
+  color: rgb(var(--v-theme-on-surface));
+  word-break: break-word;
+}
+
+.prose :deep(.ProseMirror) {
+  padding: 12px 14px;
+  outline: none;
+}
+
+
+/* ------------------------------------------------------------
+ * 2. 标题
+ * ------------------------------------------------------------ */
+
+.prose :deep(h1),
+.prose :deep(h2),
+.prose :deep(h3) {
+  font-weight: 600;
+  margin: 1em 0 0.5em;
+  line-height: 1.4;
+}
+
+.prose :deep(h1) {
+  font-size: 1.5em;
+}
+
+.prose :deep(h2) {
+  font-size: 1.3em;
+}
+
+.prose :deep(h3) {
+  font-size: 1.15em;
+}
+
+
+/* ------------------------------------------------------------
+ * 3. 段落
+ * ------------------------------------------------------------ */
+
+/* .prose :deep(p) {
+  margin: 0.5em 0;
+} */
+
+
+/* ------------------------------------------------------------
+ * 4. 列表（普通列表 + 任务列表）
+ * ------------------------------------------------------------ */
+
+.prose :deep(ul:not([data-type="taskList"])),
+.prose :deep(ol) {
+  padding-left: 1.5em;
+  margin: 0.5em 0;
+}
+
+.prose :deep(ul:not([data-type="taskList"])) {
+  list-style: disc;
+}
+
+.prose :deep(ol) {
+  list-style: decimal;
+}
+
+.prose :deep(li) {
+  padding-left: 0.15em;
+}
+
+/* 任务列表 */
+.prose :deep(ul[data-type="taskList"]) {
+  list-style: none;
+  padding-left: 0;
+  /* margin: 0.5em 0; */
+}
+
+.prose :deep(ul[data-type="taskList"] > li) {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  /* padding-left: 0; */
+}
+
+.prose :deep(ul[data-type="taskList"] > li > label) {
+  margin-top: 3px;
+}
+
+.prose :deep(ul[data-type="taskList"] > li > div) {
+  flex: 1;
+}
+
+.prose :deep(ul[data-type="taskList"] li[data-checked="true"] > div > p) {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+
+/* ------------------------------------------------------------
+ * 5. 引用
+ * ------------------------------------------------------------ */
+
+.prose :deep(blockquote) {
+  border-left: 3px solid rgb(var(--v-theme-primary));
+  margin: 0.75em 0;
+  padding: 0.25em 1em;
+  /* color: rgb(var(--v-theme-on-surface-variant));
+  background: rgb(var(--v-theme-surface-variant)); */
+  background: rgb(var(--v-theme-on-surface-variant));
+  color: rgb(var(--v-theme-surface-variant));
+}
+
+
+/* ------------------------------------------------------------
+ * 6. 链接
+ * ------------------------------------------------------------ */
+
+.prose :deep(a) {
+  color: rgb(var(--v-theme-primary));
+  text-decoration: underline;
+}
+
+
+/* ------------------------------------------------------------
+ * 7. 媒体（图片）
+ * ------------------------------------------------------------ */
+
+.prose :deep(img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+/* 富文本内的图片可点击预览（视频保留原生播放/全屏，不接入灯箱） */
+.prose :deep(.media-resizer img) {
+  cursor: zoom-in;
+}
+
+
+/* ------------------------------------------------------------
+ * 8. 代码（行内代码 + 代码块）
+ * ------------------------------------------------------------ */
+
+.prose :deep(code) {
+  color: rgb(var(--v-theme-on-surface-variant));
+
+  background: rgb(var(--v-theme-surface-variant));
+  border-radius: 4px;
+  padding: 0.1em 0.4em;
+  font-size: 0.92em;
+}
+
+/* 代码块：与编辑器端一致的深色风格 */
+.prose :deep(pre) {
+  background: #0d1117;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 12px 14px;
+  overflow-x: auto;
+}
+
+.prose :deep(pre code) {
+  display: block;
+  background: transparent;
+  padding: 0;
+  color: #e6edf3;
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  tab-size: 4;
+}
+
+
+/* ------------------------------------------------------------
+ * 9. 语法高亮 token（GitHub Dark 风格，与编辑器一致）
+ * ------------------------------------------------------------ */
+
+.prose :deep(.hljs-comment),
+.prose :deep(.hljs-quote) {
+  color: #8b949e;
+  font-style: italic;
+}
+
+.prose :deep(.hljs-keyword),
+.prose :deep(.hljs-selector-tag),
+.prose :deep(.hljs-literal),
+.prose :deep(.hljs-section),
+.prose :deep(.hljs-link) {
+  color: #ff7b72;
+}
+
+.prose :deep(.hljs-title),
+.prose :deep(.hljs-title.function_),
+.prose :deep(.hljs-title.class_),
+.prose :deep(.hljs-selector-class) {
+  color: #d2a8ff;
+}
+
+.prose :deep(.hljs-string),
+.prose :deep(.hljs-attr),
+.prose :deep(.hljs-attribute),
+.prose :deep(.hljs-symbol),
+.prose :deep(.hljs-bullet),
+.prose :deep(.hljs-addition) {
+  color: #a5d6ff;
+}
+
+.prose :deep(.hljs-number),
+.prose :deep(.hljs-variable),
+.prose :deep(.hljs-template-variable),
+.prose :deep(.hljs-meta),
+.prose :deep(.hljs-type),
+.prose :deep(.hljs-selector-id) {
+  color: #79c0ff;
+}
+
+.prose :deep(.hljs-built_in) {
+  color: #ffa657;
+}
+
+.prose :deep(.hljs-name),
+.prose :deep(.hljs-tag) {
+  color: #7ee787;
+}
+
+.prose :deep(.hljs-deletion) {
+  color: #ffa198;
+}
+
+.prose :deep(.hljs-emphasis) {
+  font-style: italic;
+}
+
+.prose :deep(.hljs-strong) {
+  font-weight: 600;
+}
+
+.prose :deep(.hljs-params) {
+  color: #e6edf3;
+}
+
+
+/* ------------------------------------------------------------
+ * 10. 分割线
+ * ------------------------------------------------------------ */
+
+.prose :deep(hr) {
+  border: none;
+  border-top: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
+  margin: 1em 0;
+}
+
+
+/* ------------------------------------------------------------
+ * 11. 表格
+ * ------------------------------------------------------------ */
+
+.prose :deep(.tableWrapper) {
+  border: 1px solid #e5e7eb;   /* 边框放容器上，别放 table 上 */
+  border-radius: 8px;
+  overflow: hidden;            /* 关键：裁掉超出的直角 */
+  margin: 8px 0;
+}
+
+.prose :deep(table) {
+  border-collapse: collapse;
+  width: 100%;
+  /* margin: 8px 0; */
+  overflow: visible;
+  /* border-radius: 6px; */
+}
+
+.prose :deep(th),
+.prose :deep(td) {
+  border: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
+  padding: 6px 10px;
+  min-width: 60px;
+  vertical-align: top;
+}
+
+.prose :deep(th) {
+  background: rgb(var(--v-theme-surface-variant), 0.1);
+  /* background: rgb(var(--v-theme-surface-light)); */
+}
+
+
+/* ------------------------------------------------------------
+ * 12. 折叠面板
+ * ------------------------------------------------------------ */
+
+.prose :deep([data-type="details"]) {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  border: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
+  /* border-radius: 0.5rem; */
+  border-radius: 8px;
+  margin: 1.5rem 0;
+}
+
+.prose :deep([data-type="details"] > button) {
+  align-items: center;
+  align-self: flex-start;
+  display: flex;
+  flex: none;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.1rem;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.625rem;
+  line-height: 1;
+  padding: 0;
+}
+
+.prose :deep([data-type="details"] > button:hover) {
+  background: rgb(var(--v-theme-primary), 0.08);
+}
+
+.prose :deep([data-type="details"] > button::before) {
+  content: '\25B6';
+  transition: transform 0.15s ease;
+}
+
+.prose :deep([data-type="details"].is-open > button::before) {
+  transform: rotate(90deg);
+}
+
+.prose :deep([data-type="details"] > div) {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.prose :deep([data-type="details"] > div > summary) {
+  font-weight: 700;
+}
+
+.prose :deep([data-type="details"] > div > [data-type="detailsContent"]) {
+  padding: 0;
+}
+
+.prose :deep([data-type="details"] summary::marker) {
+  content: '';
+}
+
+.prose :deep([data-type="details"] summary::-webkit-details-marker) {
+  display: none;
+}
+
+.prose :deep([data-type="details"] > div > [data-type="detailsContent"] > :last-child) {
+  margin-bottom: 0.5rem;
+}
+
+</style>
+
+<!-- <style scoped>
 /* 富文本排版（与编辑器渲染效果一致） */
 .prose {
   font-size: 14px;
@@ -310,7 +718,7 @@ onBeforeUnmount(() => {
 
 .prose :deep(code) {
   color: rgb(var(--v-theme-on-surface-variant));
-  
+
   background: rgb(var(--v-theme-surface-variant));
   border-radius: 4px;
   padding: 0.1em 0.4em;
@@ -402,11 +810,20 @@ onBeforeUnmount(() => {
   color: #e6edf3;
 }
 
+
+.prose :deep(.tableWrapper) {
+  border: 1px solid #e5e7eb;   /* 边框放容器上，别放 table 上 */
+  border-radius: 8px;
+  overflow: hidden;            /* 关键：裁掉超出的直角 */
+  margin: 8px 0;
+}
+
 .prose :deep(table) {
   border-collapse: collapse;
   width: 100%;
-  margin: 8px 0;
+  /* margin: 8px 0; */
   overflow: visible;
+  /* border-radius: 6px; */
 }
 
 .prose :deep(th),
@@ -418,7 +835,8 @@ onBeforeUnmount(() => {
 }
 
 .prose :deep(th) {
-  background: rgb(var(--v-theme-surface-variant), 0.3);
+  background: rgb(var(--v-theme-surface-variant), 0.1);
+  /* background: rgb(var(--v-theme-surface-light)); */
 }
 
 .prose :deep([data-type="details"]) {
@@ -426,7 +844,8 @@ onBeforeUnmount(() => {
   gap: 0.25rem;
   padding: 0.5rem;
   border: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
-  border-radius: 0.5rem;
+  /* border-radius: 0.5rem; */
+  border-radius: 8px;
   margin: 1.5rem 0;
 }
 
@@ -494,4 +913,4 @@ onBeforeUnmount(() => {
   border-top: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
   margin: 1em 0;
 }
-</style>
+</style> -->

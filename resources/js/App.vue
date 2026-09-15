@@ -25,6 +25,9 @@ const { t } = useI18n()
 
 const drawer = ref(true)
 
+// 路由加载进度条控制
+const isLoading = ref(false)
+
 // 安装向导页：隐藏左侧抽屉、顶部应用栏等非必要外壳，让向导占满整屏
 const isInstallPage = computed(() => route.name === 'install')
 
@@ -39,9 +42,14 @@ function handleAuthUnauthorized() {
 }
 
 onMounted(async () => {
+  // 注册路由加载回调
+  router.setLoadingCallback((status) => {
+    isLoading.value = status
+  })
+
   // 首次加载检查安装状态：未安装则跳转 /install；访问 /install 路由时不跳转避免循环
-    try {
-        // setWatermark()
+  try {
+    // setWatermark()
 
     const { data } = await http.get('/install/status')
     if (!data.installed && route.name !== 'install') {
@@ -53,6 +61,7 @@ onMounted(async () => {
       router.replace('/')
       return
     }
+
   } catch {
     // status 接口失败时不阻塞，继续走下面的 fetchMe（让用户看到正常界面或后续报错）
   }
@@ -63,45 +72,22 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('auth:unauthorized', handleAuthUnauthorized)
+  // 清理回调
+  router.setLoadingCallback(null)
 })
 </script>
-
-<style scoped>
-/* 应用锁定为视口高度，内容超高时由 v-main 内部滚动，避免整页被撑高 */
-.app-shell {
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
-}
-</style>
-
-<style>
-/* Poppins 字体：全局引入并作为默认字体。
-   通过覆盖 Vuetify 的 --font-family 变量全局生效，
-   避免用 * !important 误伤 MDI 图标字体和代码块等专用字体。 */
-@font-face {
-  font-family: 'Poppins';
-  src: url('../css/Poppins-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-:root {
-  --font-family: 'Poppins', 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', Arial,
-    sans-serif;
-}
-
-body,
-.v-application {
-  font-family: var(--font-family);
-}
-</style>
 
 <template>
   <v-app class="app-shell">
     <!-- 锁定视口高度，滚动只发生在 v-main 内容区 -->
     <v-layout class="v-layout--full-height">
+      <!-- 路由加载进度条：放在最顶部，路由开始加载瞬间显示 -->
+      <v-progress-linear
+        :active="isLoading"
+        indeterminate
+        color="primary"
+      ></v-progress-linear>
+
       <AppBar v-if="!isInstallPage" @toggle-drawer="drawer = !drawer" />
 
       <AppDrawer v-if="!isInstallPage" v-model="drawer" />
@@ -111,7 +97,7 @@ body,
       </v-main>
     </v-layout>
 
-    <v-snackbar v-model="visible" :color="color"  timeout="3000">
+    <v-snackbar v-model="visible" :color="color" timeout="3000">
       {{ text }}
     </v-snackbar>
 
@@ -150,3 +136,45 @@ body,
     </template>
   </v-app>
 </template>
+
+
+<style scoped>
+/* 应用锁定为视口高度，内容超高时由 v-main 内部滚动，避免整页被撑高 */
+.app-shell {
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* 进度条固定在顶部 */
+.v-progress-linear {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2100;
+}
+</style>
+
+<style>
+/* Poppins 字体：全局引入并作为默认字体。
+   通过覆盖 Vuetify 的 --font-family 变量全局生效，
+   避免用 * !important 误伤 MDI 图标字体和代码块等专用字体。 */
+@font-face {
+  font-family: 'Poppins';
+  src: url('../css/Poppins-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font-family: 'Poppins', 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', Arial,
+    sans-serif;
+}
+
+body,
+.v-application {
+  font-family: var(--font-family);
+}
+</style>

@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { i18n } from '../i18n'
 
+import { siteName } from '../themeConfig'
+
 const routes = [
   { path: '/', name: 'home', component: () => import('../views/HomeView.vue'), meta: { titleKey: 'route.home', maxWidth: 1080 } },
   { path: '/topics', name: 'topics', component: () => import('../views/TopicsView.vue'), meta: { titleKey: 'route.topics', maxWidth: 1080 } },
@@ -36,8 +38,18 @@ function safePath(value) {
   return typeof value === 'string' && value.startsWith('/') && !value.startsWith('//') ? value : '/'
 }
 
+// 存储 loading 回调函数
+let loadingCallback = null
+
+// 暴露注册回调的方法
+router.setLoadingCallback = (callback) => {
+  loadingCallback = callback
+}
+
 // 登录守卫：requiresAuth 路由未登录时重定向到独立登录页
 router.beforeEach(async (to) => {
+  if (loadingCallback) loadingCallback(true)
+
   const authStore = useAuthStore()
 
   // 已登录用户访问登录页：跳回原目标或首页
@@ -58,7 +70,11 @@ router.beforeEach(async (to) => {
 
 router.afterEach((to) => {
   const title = to.meta.titleKey ? i18n.global.t(to.meta.titleKey) : ''
-  document.title = title ? `${title} · MDForum` : 'MDForum'
+  document.title = title ? `${title} · ${siteName.value}` : 'MDForum'
+
+  
+  if (loadingCallback) loadingCallback(false)
 })
+
 
 export default router

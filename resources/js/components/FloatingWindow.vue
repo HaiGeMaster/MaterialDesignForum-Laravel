@@ -251,7 +251,8 @@ function close() {
             </v-btn>
 
             <v-btn v-show="!isMobile" icon @click="toggleMaximize">
-              <v-icon>{{ maximized ? 'mdi-window-restore' : 'mdi-window-maximize' }}</v-icon>
+              <!-- <v-icon>{{ maximized ? 'mdi-window-restore' : 'mdi-window-maximize' }}</v-icon> -->
+              <v-icon>{{ maximized ? 'mdi-square-rounded-outline' : 'mdi-border-radius' }}</v-icon>
               <v-tooltip activator="parent" location="left">{{
                 maximized ? $t('floatingWindow.restore') : $t('floatingWindow.maximize')
               }}</v-tooltip>

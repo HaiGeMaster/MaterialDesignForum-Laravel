@@ -2,7 +2,7 @@ import { ref } from 'vue'
 import http from './api'
 
 /** 站点名称（由 /theme 接口同步，默认值兜底） */
-export const siteName = ref('MDForum')
+export const siteName = ref('')
 /** ICP 备案号（未设置时为空字符串） */
 export const siteIcpBeian = ref('')
 /** 公网备案号（未设置时为空字符串） */

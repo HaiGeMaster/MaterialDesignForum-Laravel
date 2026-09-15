@@ -28,7 +28,15 @@ const modulePermissions = {
   options: 'ability_admin_manage_option',
 }
 
+// 存储 loading 回调函数
+let loadingCallback = null
+
+// 暴露注册回调的方法
+adminRouter.setLoadingCallback = (callback) => {
+  loadingCallback = callback
+}
 adminRouter.beforeEach(async (to) => {
+  if (loadingCallback) loadingCallback(true)
   const authStore = useAuthStore()
 
   if (!authStore.isLoggedIn) {
@@ -58,6 +66,7 @@ adminRouter.beforeEach(async (to) => {
 
 adminRouter.afterEach(() => {
   document.title = 'Admin · MDForum'
+  if (loadingCallback) loadingCallback(false)
 })
 
 export default adminRouter

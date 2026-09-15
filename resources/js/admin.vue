@@ -1,5 +1,6 @@
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from './stores/auth'
 import { useFeedback } from './composables/useFeedback'
 import AdminAppBar from './components/AdminAppBar.vue'
@@ -10,9 +11,13 @@ import DeleteDialog from './components/DeleteDialog.vue'
 import ProfileEditDialog from './components/ProfileEditDialog.vue'
 import FloatingActionButton from './components/FloatingActionButton.vue'
 
+const router = useRouter()
 const authStore = useAuthStore()
 const { visible, text, color } = useFeedback()
 const drawer = ref(true)
+
+// 路由加载进度条控制
+const isLoading = ref(false)
 
 function toggleDrawer() {
   drawer.value = !drawer.value
@@ -29,17 +34,31 @@ function handleUnauthorized() {
 }
 
 onMounted(() => {
+  // 注册路由加载回调
+  router.setLoadingCallback((status) => {
+    isLoading.value = status
+  })
+
   window.addEventListener('auth:unauthorized', handleUnauthorized)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('auth:unauthorized', handleUnauthorized)
+  // 清理回调
+  router.setLoadingCallback(null)
 })
 </script>
 
 <template>
   <v-app>
     <v-layout class="admin-shell">
+      <!-- 路由加载进度条：放在最顶部，路由开始加载瞬间显示 -->
+      <v-progress-linear
+        :active="isLoading"
+        indeterminate
+        color="primary"
+      ></v-progress-linear>
+
       <AdminAppBar @toggle-drawer="drawer = !drawer" />
       <AdminDrawer v-model="drawer" />
 

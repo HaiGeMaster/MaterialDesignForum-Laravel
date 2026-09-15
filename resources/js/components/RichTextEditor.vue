@@ -4,29 +4,33 @@
 
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { EditorContent, useEditor, VueRenderer } from '@tiptap/vue-3'
+
 import { mergeAttributes } from '@tiptap/core'
-// import { BubbleMenu } from '@tiptap/extension-bubble-menu'
-import StarterKit from '@tiptap/starter-kit'
-import Placeholder from '@tiptap/extension-placeholder'
-import Underline from '@tiptap/extension-underline'
-import { TextStyle, FontSize, LineHeight } from '@tiptap/extension-text-style'
+import { EditorContent, useEditor, VueRenderer } from '@tiptap/vue-3'
 import { Color } from '@tiptap/extension-color'
-import Highlight from '@tiptap/extension-highlight'
-import Link from '@tiptap/extension-link'
-import TextAlign from '@tiptap/extension-text-align'
-import RichTextEditorToolbarRow from './RichTextEditorToolbarRow.vue'
+import { TextStyle, FontSize, LineHeight } from '@tiptap/extension-text-style'
+import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table'
+import { Details, DetailsSummary, DetailsContent } from '@tiptap/extension-details'
+
 import { Video } from '../tiptap/Video'
 import { ResizableImage } from '../tiptap/ResizableImage'
 import { CodeBlock } from '../tiptap/CodeBlock'
-import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table'
+
+import StarterKit from '@tiptap/starter-kit'
+import Underline from '@tiptap/extension-underline'
+import Highlight from '@tiptap/extension-highlight'
+import Link from '@tiptap/extension-link'
+import TextAlign from '@tiptap/extension-text-align'
 import TaskList from '@tiptap/extension-task-list'
 import TaskItem from '@tiptap/extension-task-item'
-import { Details, DetailsSummary, DetailsContent } from '@tiptap/extension-details'
 import Subscript from '@tiptap/extension-subscript'
 import Superscript from '@tiptap/extension-superscript'
 import Mention from '@tiptap/extension-mention'
 import CharacterCount from '@tiptap/extension-character-count'
+import Placeholder from '@tiptap/extension-placeholder'
+// import { BubbleMenu } from '@tiptap/extension-bubble-menu'
+
+import RichTextEditorToolbarRow from './RichTextEditorToolbarRow.vue'
 import MentionSuggestion from './MentionSuggestion.vue'
 import http from '../api'
 
@@ -52,6 +56,8 @@ const editor = useEditor({
     StarterKit.configure({
       heading: { levels: [1, 2, 3] },
       codeBlock: false,
+      link: false,       // 关掉内置 link，避免和下面冲突
+      underline: false,  // 如果你有自己的 underline 才写这行
     }),
     Underline,
     TextStyle,
@@ -554,6 +560,394 @@ const tableMenu = computed(() => ({
 </template>
 
 <style scoped>
+/* ============================================================
+ * RichEditor 富文本编辑器组件样式
+ * 作用域：.rich-editor / .rich-editor__content（ProseMirror）
+ * ============================================================ */
+
+
+/* ------------------------------------------------------------
+ * 1. 容器布局（编辑器整体框架）
+ * ------------------------------------------------------------ */
+
+.rich-editor {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: rgb(var(--v-theme-surface));
+  border: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.rich-editor__content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+
+/* ------------------------------------------------------------
+ * 2. 工具栏（上栏 + 下栏 + 发布按钮插槽）
+ * ------------------------------------------------------------ */
+
+.rich-editor__toolbar {
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  /* background: rgb(var(--v-theme-surface-variant), 0.3); */
+}
+
+.rich-editor__toolbar--top {
+  border-bottom: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
+}
+
+.rich-editor__toolbar--bottom {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 2px 4px;
+  border-top: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
+}
+
+/* 下栏采用横向布局：发布按钮在最左侧，工具栏按钮紧随其后（取消行容器的盒模型） */
+.rich-editor__toolbar--bottom :deep(.rich-editor__toolbar-row) {
+  display: contents;
+}
+
+.rich-editor__publish-slot {
+  display: flex;
+  align-items: center;
+  flex: none;
+  padding-right: 2px;
+}
+
+
+/* ------------------------------------------------------------
+ * 3. 编辑区基础排版（ProseMirror 核心）
+ * ------------------------------------------------------------ */
+
+.rich-editor__content :deep(.ProseMirror) {
+  height: 100%;
+  min-height: 100%;
+  outline: none;
+  padding: 12px 14px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+
+/* ------------------------------------------------------------
+ * 4. 占位符（编辑器为空时显示）
+ * ------------------------------------------------------------ */
+
+.rich-editor__content :deep(.ProseMirror p.is-editor-empty:first-child::before) {
+  content: attr(data-placeholder);
+  color: rgb(var(--v-theme-on-surface), 0.4);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+
+/* ------------------------------------------------------------
+ * 5. 标题
+ * ------------------------------------------------------------ */
+
+.rich-editor__content :deep(.ProseMirror h1) {
+  font-size: 1.6em;
+}
+
+.rich-editor__content :deep(.ProseMirror h2) {
+  font-size: 1.35em;
+}
+
+.rich-editor__content :deep(.ProseMirror h3) {
+  font-size: 1.15em;
+}
+
+
+/* ------------------------------------------------------------
+ * 6. 列表（普通列表 + 任务列表）
+ * ------------------------------------------------------------ */
+
+/* 普通列表：Tailwind preflight 会清除默认的序号和圆点 */
+.rich-editor__content :deep(.ProseMirror ul:not([data-type="taskList"])) {
+  list-style: disc;
+  padding-left: 1.5em;
+  margin: 8px 0;
+}
+
+.rich-editor__content :deep(.ProseMirror ol) {
+  list-style: decimal;
+  padding-left: 1.5em;
+  margin: 8px 0;
+}
+
+/* 任务列表 */
+.rich-editor__content :deep(.ProseMirror ul[data-type="taskList"]) {
+  list-style: none;
+  padding-left: 0;
+}
+
+.rich-editor__content :deep(.ProseMirror ul[data-type="taskList"] li) {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.rich-editor__content :deep(.ProseMirror ul[data-type="taskList"] li label) {
+  margin-top: 3px;
+}
+
+.rich-editor__content :deep(.ProseMirror ul[data-type="taskList"] li div) {
+  flex: 1;
+}
+
+.rich-editor__content :deep(.ProseMirror ul[data-type="taskList"] li[data-checked="true"] div > p) {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+
+/* ------------------------------------------------------------
+ * 7. 引用
+ * ------------------------------------------------------------ */
+
+.rich-editor__content :deep(.ProseMirror blockquote) {
+  margin: 8px 0;
+  padding-left: 12px;
+  border-left: 3px solid rgb(var(--v-theme-primary));
+
+  /* color: rgb(var(--v-theme-on-surface), 0.7); */
+  background: rgb(var(--v-theme-on-surface-variant));
+
+  color: rgb(var(--v-theme-surface-variant));
+}
+
+
+/* ------------------------------------------------------------
+ * 8. 链接
+ * ------------------------------------------------------------ */
+
+.rich-editor__content :deep(.ProseMirror a) {
+  color: rgb(var(--v-theme-primary));
+  text-decoration: underline;
+}
+
+
+/* ------------------------------------------------------------
+ * 9. 媒体（图片 / 视频）
+ * ------------------------------------------------------------ */
+
+.rich-editor__content :deep(.ProseMirror img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+.rich-editor__content :deep(.ProseMirror video) {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  background: #000;
+}
+
+
+/* ------------------------------------------------------------
+ * 10. 代码（行内代码 + 代码块）
+ * ------------------------------------------------------------ */
+
+/* 代码块的 pre/code 由 CodeBlockView 负责样式，这里排除避免冲突（仅行内 code 生效） */
+.rich-editor__content :deep(.ProseMirror pre:not(.code-block__pre)) {
+  padding: 10px 12px;
+  border-radius: 6px;
+  overflow: auto;
+  background: rgb(var(--v-theme-surface-variant), 0.5);
+}
+
+.rich-editor__content :deep(.ProseMirror code:not(.code-block__code)) {
+  color: rgb(var(--v-theme-on-surface-variant));
+  background: rgb(var(--v-theme-surface-variant));
+
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  /* background: rgb(var(--v-theme-surface-variant), 0.5); */
+}
+
+
+/* ------------------------------------------------------------
+ * 11. 分割线
+ * ------------------------------------------------------------ */
+
+.rich-editor__content :deep(.ProseMirror hr) {
+  border: none;
+  border-top: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
+  margin: 12px 0;
+}
+
+
+/* ------------------------------------------------------------
+ * 12. @提及
+ * ------------------------------------------------------------ */
+
+.rich-editor__content :deep(.ProseMirror .mention) {
+  color: rgb(var(--v-theme-primary));
+  font-weight: 500;
+}
+
+
+/* ------------------------------------------------------------
+ * 13. 表格（含选中单元格高亮 + 列宽调整手柄，仅编辑器）
+ * ------------------------------------------------------------ */
+
+.rich-editor__content :deep(.ProseMirror .tableWrapper) {
+  border: 1px solid #e5e7eb;   /* 边框放容器上，别放 table 上 */
+  border-radius: 8px;
+  overflow: hidden;            /* 关键：裁掉超出的直角 */
+  margin: 8px 0;
+}
+
+.rich-editor__content :deep(.ProseMirror table) {
+  border-collapse: collapse;
+  width: 100%;
+  /* margin: 8px 0; */
+  overflow: visible;
+  /* border-radius: 6px; */
+}
+
+.rich-editor__content :deep(.ProseMirror table td),
+.rich-editor__content :deep(.ProseMirror table th) {
+  border: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
+  padding: 6px 10px;
+  min-width: 60px;
+  vertical-align: top;
+  position: relative;
+}
+
+.rich-editor__content :deep(.ProseMirror table th) {
+  /* background: rgb(var(--v-theme-surface-variant), 0.3); */
+  background: rgb(var(--v-theme-surface-variant), 0.1);
+  /* background: rgb(var(--v-theme-surface-light)); */
+  font-weight: 600;
+}
+
+.rich-editor__content :deep(.ProseMirror table .selectedCell:after) {
+  background: rgb(var(--v-theme-primary), 0.08);
+  content: '';
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 2;
+}
+
+.rich-editor__content :deep(.ProseMirror table .column-resize-handle) {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: -2px;
+  width: 4px;
+  background-color: rgb(var(--v-theme-primary));
+  pointer-events: none;
+}
+
+
+/* ------------------------------------------------------------
+ * 14. 折叠面板
+ * ------------------------------------------------------------ */
+
+.rich-editor__content :deep(.ProseMirror [data-type="details"]) {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  border: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
+  /* border-radius: 0.5rem; */
+  border-radius: 8px;
+  margin: 1.5rem 0;
+}
+
+.rich-editor__content :deep(.ProseMirror [data-type="details"] > button) {
+  align-items: center;
+  align-self: flex-start;
+  display: flex;
+  flex: none;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.1rem;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.625rem;
+  line-height: 1;
+  padding: 0;
+}
+
+.rich-editor__content :deep(.ProseMirror [data-type="details"] > button:hover) {
+  background: rgb(var(--v-theme-primary), 0.08);
+}
+
+.rich-editor__content :deep(.ProseMirror [data-type="details"] > button::before) {
+  content: '\25B6';
+  transition: transform 0.15s ease;
+}
+
+.rich-editor__content :deep(.ProseMirror [data-type="details"].is-open > button::before) {
+  transform: rotate(90deg);
+}
+
+.rich-editor__content :deep(.ProseMirror [data-type="details"] > div) {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.rich-editor__content :deep(.ProseMirror [data-type="details"] > div > summary) {
+  font-weight: 700;
+}
+
+.rich-editor__content :deep(.ProseMirror [data-type="details"] > div > [data-type="detailsContent"]) {
+  padding: 0;
+}
+
+.rich-editor__content :deep(.ProseMirror [data-type="details"] summary::marker) {
+  content: '';
+}
+
+.rich-editor__content :deep(.ProseMirror [data-type="details"] summary::-webkit-details-marker) {
+  display: none;
+}
+
+.rich-editor__content :deep(.ProseMirror [data-type="details"] > div > [data-type="detailsContent"] > :last-child) {
+  margin-bottom: 0.5rem;
+}
+
+
+/* ------------------------------------------------------------
+ * 15. 状态栏（字数统计）
+ * ------------------------------------------------------------ */
+
+.rich-editor__status {
+  display: flex;
+  justify-content: flex-end;
+  padding: 2px 8px;
+  font-size: 11px;
+  color: rgb(var(--v-theme-on-surface), 0.4);
+  border-top: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
+}
+
+</style>
+
+<!-- <style scoped>
 .rich-editor {
   display: flex;
   flex-direction: column;
@@ -701,11 +1095,19 @@ const tableMenu = computed(() => ({
 }
 
 /* 表格 */
+.rich-editor__content :deep(.ProseMirror .tableWrapper) {
+  border: 1px solid #e5e7eb;   /* 边框放容器上，别放 table 上 */
+  border-radius: 8px;
+  overflow: hidden;            /* 关键：裁掉超出的直角 */
+  margin: 8px 0;
+}
+
 .rich-editor__content :deep(.ProseMirror table) {
   border-collapse: collapse;
   width: 100%;
-  margin: 8px 0;
+  /* margin: 8px 0; */
   overflow: visible;
+  /* border-radius: 6px; */
 }
 
 .rich-editor__content :deep(.ProseMirror table td),
@@ -718,7 +1120,9 @@ const tableMenu = computed(() => ({
 }
 
 .rich-editor__content :deep(.ProseMirror table th) {
-  background: rgb(var(--v-theme-surface-variant), 0.3);
+  /* background: rgb(var(--v-theme-surface-variant), 0.3); */
+  background: rgb(var(--v-theme-surface-variant), 0.1);
+  /* background: rgb(var(--v-theme-surface-light)); */
   font-weight: 600;
 }
 
@@ -750,7 +1154,8 @@ const tableMenu = computed(() => ({
   gap: 0.25rem;
   padding: 0.5rem;
   border: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
-  border-radius: 0.5rem;
+  /* border-radius: 0.5rem; */
+  border-radius: 8px;
   margin: 1.5rem 0;
 }
 
@@ -853,4 +1258,4 @@ const tableMenu = computed(() => ({
   color: rgb(var(--v-theme-on-surface), 0.4);
   border-top: 1px solid rgb(var(--v-border-color), var(--v-border-opacity));
 }
-</style>
+</style> -->
