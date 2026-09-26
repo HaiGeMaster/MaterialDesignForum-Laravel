@@ -49,7 +49,8 @@ function handleLogout() {
     <template #activator="{ props }">
       <!-- 只显示头像，点击弹出用户菜单 -->
       <v-btn icon variant="text" v-bind="props">
-        <v-avatar :size="mobile ? 40 : avatarSize" >
+        <v-avatar :size="mobile ? 40 : avatarSize" 
+            :variant="authStore.user?.avatar?'text': 'tonal'">
           <v-img
             v-if="authStore.user?.avatar"
             :src="authStore.user.avatar"
@@ -69,14 +70,14 @@ function handleLogout() {
       <v-list-item
         v-if="showMediaLibrary"
         v-bind="navAttrs('/media')"
-        prepend-icon="mdi-image-multiple-outline"
+        prepend-icon="mdi-image-multiple"
         :title="t('nav.mediaLibrary')"
       />
-      <v-list-item v-bind="navAttrs('/settings')" prepend-icon="mdi-cog" :title="t('appBar.settings')" />
+      <v-list-item v-show="showAdmin" v-bind="navAttrs('/settings')" prepend-icon="mdi-cog" :title="t('appBar.settings')" />
       <v-list-item
         v-if="showAdmin && authStore.canAccessAdmin"
         href="/admin/"
-        prepend-icon="mdi-shield-crown-outline"
+        prepend-icon="mdi-shield-crown"
         :title="t('nav.admin')"
       />
       <v-list-item

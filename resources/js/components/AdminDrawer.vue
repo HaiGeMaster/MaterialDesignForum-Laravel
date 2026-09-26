@@ -78,10 +78,9 @@ const gonganBeianImg = '/assets/fixed_content/gwbeian.png'
 <template>
   <v-navigation-drawer
     :model-value="props.modelValue"
-    width="260"
     @update:model-value="(value) => emit('update:modelValue', value)"
   >
-    <v-list rounded="lg" nav density="comfortable" color="primary">
+    <v-list rounded="lg" nav color="primary">
       <template v-for="(group, groupIndex) in visibleAdminNavGroups" :key="group[0].id">
         <v-divider v-if="groupIndex" class="my-2" />
         <v-list-item

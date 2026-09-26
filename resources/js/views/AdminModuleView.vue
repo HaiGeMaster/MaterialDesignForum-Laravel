@@ -969,10 +969,25 @@ onBeforeUnmount(() => {
           </div>
         </template>
         <template #[`item.username`]="{ item }">
-          <span v-if="item?.username" class="text-primary font-weight-medium">
+          <!-- <span v-if="item?.username" class="text-primary font-weight-medium">
             {{ item.username }}
           </span>
-          <span v-else>—</span>
+          <span v-else>—</span> -->
+
+          <v-chip
+            variant="tonal"
+          >
+            <!-- <v-avatar start>
+              <v-img :src="item.avatar"></v-img>
+            </v-avatar> -->
+            <v-avatar start :variant="item?.avatar?'': 'tonal'">
+                <v-img v-if="item.avatar" :src="item.avatar" cover />
+                <span v-else class="text-body-2 font-weight-bold text-primary">{{ item.username.charAt(0).toUpperCase() }}</span>
+            </v-avatar>
+
+            {{ item.username }}
+          </v-chip>
+
         </template>
         <template #[`item.commentable_type`]="{ item }">
           {{ targetTypeLabel(item?.commentable_type) }}
@@ -1001,6 +1016,18 @@ onBeforeUnmount(() => {
             {{ $t(reportState(item?.report_handle_state).label) }}
           </v-chip>
         </template>
+
+
+        <template #[`item.create_location`]="{ item }">
+          <span class="text-no-wrap">{{ item?.create_location }}</span>
+        </template>
+        <template #[`item.last_login_location`]="{ item }">
+          <span class="text-no-wrap">{{ item?.last_login_location }}</span>
+        </template>
+        <template #[`item.location`]="{ item }">
+          <span class="text-no-wrap">{{ item?.location }}</span>
+        </template>
+
         <template #[`item.create_time`]="{ item }">
           <span class="text-no-wrap">{{ formatDate(item?.create_time) }}</span>
         </template>

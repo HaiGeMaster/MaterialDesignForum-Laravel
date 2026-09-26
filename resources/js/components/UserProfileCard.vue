@@ -45,6 +45,12 @@ const fileInput = ref(null);
 const pendingType = ref("cover");
 const uploadingType = ref("");
 
+const fmtCount = (n) =>
+  new Intl.NumberFormat(undefined, {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(Number(n ?? 0));
+
 function pick(type) {
     pendingType.value = type;
     fileInput.value?.click();

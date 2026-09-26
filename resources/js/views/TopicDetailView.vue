@@ -153,6 +153,7 @@ onMounted(fetchTopic)
               size="28"
               class="cursor-pointer"
               @click="goCreator"
+              :variant="creator?.avatar?'': 'tonal'"
             >
               <v-img v-if="creator.avatar" :src="creator.avatar" cover />
               <span v-else class="text-body-2 font-weight-bold text-primary">{{ creatorInitial }}</span>

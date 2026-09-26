@@ -195,6 +195,7 @@ onBeforeUnmount(() => {
                     <v-avatar
                         size="36"
                         class="cursor-pointer"
+                        :variant="author?.avatar?'': 'tonal'"
                         v-bind="menuProps"
                         @click.stop="menuProps.onClick?.($event)"
                     >
@@ -235,6 +236,7 @@ onBeforeUnmount(() => {
                 <v-card
                     v-if="expanded"
 
+                    rounded="lg"
                     variant="flat"
                     class="mt-1"
                     @click.stop

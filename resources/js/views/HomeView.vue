@@ -6,6 +6,8 @@ import http from '../api'
 import ContentListPanel from '../components/ContentListPanel.vue'
 import TopicCarousel from '../components/TopicCarousel.vue'
 import { useFeedback } from '../composables/useFeedback'
+import { useDisplay } from 'vuetify'
+const { xs } = useDisplay()
 
 const { show } = useFeedback()
 const { t } = useI18n()
@@ -114,7 +116,8 @@ onMounted(fetchData)
 </script>
 
 <template>
-  <v-container   :style="$route.meta.maxWidth ? { maxWidth: `${$route.meta.maxWidth}px`,padding:'0'} : {}">
+  <v-container   :style="$route.meta.maxWidth ? { maxWidth: `${$route.meta.maxWidth}px`,padding: `${xs?'0': '10px'}` } : {}" >
+    <!-- style="overflow-x: hidden;" -->
     <!-- 话题转轴 -->
     <div class="d-flex align-center mb-3 pa-4">
       <v-icon icon="mdi-tag-multiple" class="mr-2" />
@@ -124,6 +127,7 @@ onMounted(fetchData)
         {{ $t('content.viewAll') }}
       </v-btn>
     </div>
+
     <TopicCarousel />
 
     <!-- 内容四栏：最多两列排布 -->

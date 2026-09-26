@@ -59,7 +59,8 @@ async function submit() {
       <v-card-text class="pt-4 pb-1">
         <!-- 被回复目标信息：头像 / 用户名 / 内容预览 -->
         <div class="d-flex align-start ga-3">
-          <v-avatar size="36">
+          <v-avatar size="36" 
+            :variant="target?.avatar?'': 'tonal'">
             <v-img v-if="target.avatar" :src="target.avatar" cover />
             <span v-else class="text-body-2 font-weight-bold text-primary">{{ targetInitial }}</span>
           </v-avatar>

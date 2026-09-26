@@ -147,21 +147,21 @@ onMounted(fetchStatus)
 
         <v-row class="mb-4">
           <v-col cols="12" md="4">
-            <v-sheet color="primary" rounded="xl" class="pa-4 text-white" elevation="0">
+            <v-sheet color="primary" rounded="lg" class="pa-4 text-white" elevation="0">
               <div class="text-caption opacity-80">{{ t('signIn.total') }}</div>
               <div class="text-h4 font-weight-bold mt-2">{{ status.total_sign_days }}</div>
               <div class="text-caption opacity-80">{{ t('signIn.days') }}</div>
             </v-sheet>
           </v-col>
           <v-col cols="12" md="4">
-            <v-sheet color="amber-lighten-2" rounded="xl" class="pa-4" elevation="0">
+            <v-sheet color="amber-lighten-2" rounded="lg" class="pa-4" elevation="0">
               <div class="text-caption">{{ t('signIn.continuous') }}</div>
               <div class="text-h4 font-weight-bold mt-2">{{ status.continuous_sign_days }}</div>
               <div class="text-caption">{{ t('signIn.days') }}</div>
             </v-sheet>
           </v-col>
           <v-col cols="12" md="4">
-            <v-sheet color="green-lighten-2" rounded="xl" class="pa-4" elevation="0">
+            <v-sheet color="green-lighten-2" rounded="lg" class="pa-4" elevation="0">
               <div class="text-caption">{{ t('signIn.reward') }}</div>
               <div class="text-h4 font-weight-bold mt-2">{{ status.last_reward_points || 10 }}</div>
               <div class="text-caption">{{ t('signIn.points') }}</div>

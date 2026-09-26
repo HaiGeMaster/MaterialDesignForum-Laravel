@@ -4,10 +4,55 @@ import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
-// 模块级共享：全局 z-index 计数器，支持多个窗口叠加并点击置顶
-let globalZ = 1900
-function nextZ() {
-  return ++globalZ
+/* ============================================================
+ * 全局窗口栈（挂在 window 上，而不是模块作用域）
+ *
+ * 为什么不用模块级变量：Vite HMR、动态 import 重复求值、组件被打包进
+ * 多个 chunk 时，模块作用域会各建各的数组 —— 表现为"点了没反应"。
+ * 挂到 window 上可保证所有实例共享同一个栈。
+ *
+ * 数组末尾 = 最顶层。点击任意窗口 → 移到栈顶 → 统一重排 z-index。
+ * ============================================================ */
+const Z_BASE = 1900
+
+function getStack() {
+  if (typeof window === 'undefined') return []
+  if (!window.__floatingWindowStack) {
+    window.__floatingWindowStack = []
+  }
+  return window.__floatingWindowStack
+}
+
+function restack() {
+  const stack = getStack()
+  stack.forEach((win, i) => {
+    win.z.value = Z_BASE + i + 1
+    win.isTop.value = i === stack.length - 1
+  })
+}
+
+/** 新窗口入栈即置顶，天然叠在已有窗口之上 */
+function register(win) {
+  const stack = getStack()
+  stack.push(win)
+  restack()
+}
+
+function unregister(win) {
+  const stack = getStack()
+  const i = stack.indexOf(win)
+  if (i > -1) stack.splice(i, 1)
+  restack()
+}
+
+/** 移到栈顶；已在栈顶则跳过，避免无意义重排 */
+function raise(win) {
+  const stack = getStack()
+  if (stack[stack.length - 1] === win) return
+  const i = stack.indexOf(win)
+  if (i > -1) stack.splice(i, 1)
+  stack.push(win)
+  restack()
 }
 
 // 移动端断点与 Vuetify 一致（<600px）：手机上窗口默认全屏
@@ -46,6 +91,8 @@ const props = defineProps({
   appbarDensity: { type: String, default: 'default' },
   /** 是否显示应用栏扩展区域 */
   appbarExtended: { type: Boolean, default: false },
+  /** 开启后在控制台打印层级变化，用于排查 */
+  debug: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['close'])
@@ -68,8 +115,44 @@ const x = ref(props.x)
 const y = ref(props.y)
 const w = ref(props.width)
 const h = ref(props.height)
-// 初始层级取当前全局值，新窗口自然叠在已有窗口之上
-const zIndex = ref(globalZ)
+
+// 窗口根元素，用于判断点击事件是否落在本窗口内
+const rootEl = ref(null)
+
+// 层级：初始占位，实际值由全局栈在 register() 时统一分配
+const zIndex = ref(Z_BASE)
+const isTop = ref(false)
+// 放进全局栈的句柄（持有响应式引用，供 restack 跨实例写入）
+const winHandle = { z: zIndex, isTop, debug: () => props.debug }
+
+function log(...args) {
+  if (props.debug) {
+    console.log('[FloatingWindow]', props.title || '(untitled)', ...args)
+  }
+}
+
+/* ------------------------------------------------------------
+ * 置顶：document 级捕获监听
+ *
+ * 捕获阶段挂在 document 上是整个文档树里最早能拿到事件的点，
+ * 窗口内容里的 stopPropagation / stopImmediatePropagation 都拦不住它。
+ * 组件根节点上的监听会被内容里的第三方组件（编辑器、canvas、菜单）
+ * 打断，document 上不会。
+ * ------------------------------------------------------------ */
+function onDocPointerDown(e) {
+  const el = rootEl.value
+  if (!el || !e.target) return
+  // contains 对 Text 节点也有效；iframe 内部点击父文档收不到事件（见文末说明）
+  if (el.contains(e.target)) {
+    raise(winHandle)
+    log('raise →', zIndex.value)
+  }
+}
+
+// 拖动的那一刻也置顶一次，双保险
+function focusWindow() {
+  raise(winHandle)
+}
 
 // 监听屏幕尺寸变化：手机上默认全屏，且取消最小化状态
 let mql = null
@@ -81,9 +164,26 @@ function updateMobile(e) {
 }
 
 onMounted(() => {
+  // 挂载即入栈：新开的窗口一定在最上层
+  register(winHandle)
+  log('register →', zIndex.value, 'stack:', getStack().length)
+
+  // 捕获阶段：pointerdown 覆盖鼠标/触摸/触控笔；mousedown 兜底老环境
+  document.addEventListener('pointerdown', onDocPointerDown, true)
+  document.addEventListener('mousedown', onDocPointerDown, true)
+
   mql = window.matchMedia(MOBILE_QUERY)
   isMobile.value = mql.matches
   mql.addEventListener('change', updateMobile)
+})
+
+onBeforeUnmount(() => {
+  // 出栈，防止 z-index 泄漏（HMR / 路由切换尤其重要）
+  unregister(winHandle)
+  document.removeEventListener('pointerdown', onDocPointerDown, true)
+  document.removeEventListener('mousedown', onDocPointerDown, true)
+  mql?.removeEventListener('change', updateMobile)
+  detachPointer()
 })
 
 // 记录最大化前的位置尺寸，恢复时还原
@@ -106,13 +206,21 @@ const windowStyle = computed(() => {
   }
 })
 
-// 点击窗口任意处，将其层级提到全局最高，覆盖其他窗口
-function focusWindow() {
-  zIndex.value = nextZ()
-}
-
 function clamp(v, min, max) {
   return Math.min(Math.max(v, min), max)
+}
+
+// —— 指针事件统管：鼠标 / 触摸 / 触控笔共用一套逻辑 ——
+function attachPointer() {
+  document.addEventListener('pointermove', onPointerMove, { passive: false })
+  document.addEventListener('pointerup', onPointerUp)
+  document.addEventListener('pointercancel', onPointerUp)
+}
+
+function detachPointer() {
+  document.removeEventListener('pointermove', onPointerMove)
+  document.removeEventListener('pointerup', onPointerUp)
+  document.removeEventListener('pointercancel', onPointerUp)
 }
 
 // —— 拖动 ——
@@ -120,16 +228,9 @@ function startDrag(e) {
   // 最大化/移动端全屏状态下不可拖动；最小化时仅剩标题栏，仍可拖动；点击按钮不触发
   if (maximized.value || isMobile.value) return
   if (e.target.closest('button')) return
-  // 兼容触摸事件与鼠标事件
-  const clientX = e.touches ? e.touches[0].clientX : e.clientX
-  const clientY = e.touches ? e.touches[0].clientY : e.clientY
-  drag = { type: 'move', startX: clientX, startY: clientY, ox: x.value, oy: y.value }
+  drag = { type: 'move', startX: e.clientX, startY: e.clientY, ox: x.value, oy: y.value }
   interacting.value = true
-  // 鼠标事件通过 document 监听器跟踪；触摸事件由模板 @touchmove / @touchend 处理
-  if (!e.touches) {
-    document.addEventListener('mousemove', onMouseMove)
-    document.addEventListener('mouseup', onMouseUp)
-  }
+  attachPointer()
 }
 
 // —— 缩放（右下角手柄）——
@@ -138,12 +239,14 @@ function startResize(e) {
   e.preventDefault()
   drag = { type: 'resize', startX: e.clientX, startY: e.clientY, ow: w.value, oh: h.value }
   interacting.value = true
-  document.addEventListener('mousemove', onMouseMove)
-  document.addEventListener('mouseup', onMouseUp)
+  attachPointer()
 }
 
-function onMouseMove(e) {
+function onPointerMove(e) {
   if (!drag) return
+  // 触摸拖动时阻止页面跟着滚
+  if (e.pointerType !== 'mouse') e.preventDefault()
+
   if (drag.type === 'move') {
     // 最小化时按标题栏实际宽度计算右边界，保证能拖到最右侧；各方向保留 16px 边距
     const dragW = minimized.value ? MIN_WIDTH : w.value
@@ -155,32 +258,11 @@ function onMouseMove(e) {
   }
 }
 
-function onMouseUp() {
+function onPointerUp() {
+  if (!drag) return
   drag = null
   interacting.value = false
-  document.removeEventListener('mousemove', onMouseMove)
-  document.removeEventListener('mouseup', onMouseUp)
-}
-
-onBeforeUnmount(() => {
-  mql?.removeEventListener('change', updateMobile)
-  document.removeEventListener('mousemove', onMouseMove)
-  document.removeEventListener('mouseup', onMouseUp)
-})
-
-// —— 触摸拖动 ——
-function onTouchMove(e) {
-  if (!drag || drag.type !== 'move') return
-  const touch = e.touches[0]
-  x.value = clamp(drag.ox + (touch.clientX - drag.startX), MARGIN, window.innerWidth - (minimized.value ? MIN_WIDTH : w.value) - MARGIN)
-  y.value = clamp(drag.oy + (touch.clientY - drag.startY), MARGIN, window.innerHeight - BAR_HEIGHT - MARGIN)
-}
-
-function onTouchEnd() {
-  drag = null
-  interacting.value = false
-  document.removeEventListener('touchmove', onTouchMove)
-  document.removeEventListener('touchend', onTouchEnd)
+  detachPointer()
 }
 
 // —— 窗口控制 ——
@@ -211,87 +293,85 @@ function close() {
 <template>
   <Teleport to="body">
     <Transition name="window-pop" appear>
-    <div
-      v-if="visible"
-      class="floating-window"
-      :class="{
-        'floating-window--maximized': maximized || isMobile,
-        'floating-window--no-anim': interacting,
-      }"
-      :style="windowStyle"
-      @mousedown="focusWindow"
-    >
-      <v-card rounded="lg" width="100%" height="100%" style="overflow: hidden;">
-        <v-layout style="height: inherit">
-          <v-app-bar
-            class="bg-surface-light"
-            elevation="0"
-            :density="appbarDensity"
-            @mousedown="startDrag"
-            @touchstart="startDrag"
-            @touchmove.prevent="onTouchMove"
-            @touchend="onTouchEnd"
-            @dblclick="toggleMaximize"
-          >
-            <v-app-bar-nav-icon v-if="showDrawer" variant="text" @click.stop="drawer = !drawer" />
-
-            <v-icon v-if="icon" style="margin-left: 16px;">{{ icon }}</v-icon>
-
-            <v-app-bar-title :style="{ marginLeft: icon ? '16px' : '' }">
-              {{ title || $t('floatingWindow.defaultTitle') }}
-            </v-app-bar-title>
-
-            <slot name="appbar_append" />
-
-            <v-btn icon @click="toggleMinimize">
-              <v-icon>{{ minimized ? 'mdi-window-restore' : 'mdi-minus' }}</v-icon>
-              <v-tooltip activator="parent" location="left">{{
-                minimized ? $t('floatingWindow.restore') : $t('floatingWindow.minimize')
-              }}</v-tooltip>
-            </v-btn>
-
-            <v-btn v-show="!isMobile" icon @click="toggleMaximize">
-              <!-- <v-icon>{{ maximized ? 'mdi-window-restore' : 'mdi-window-maximize' }}</v-icon> -->
-              <v-icon>{{ maximized ? 'mdi-square-rounded-outline' : 'mdi-border-radius' }}</v-icon>
-              <v-tooltip activator="parent" location="left">{{
-                maximized ? $t('floatingWindow.restore') : $t('floatingWindow.maximize')
-              }}</v-tooltip>
-            </v-btn>
-
-            <v-btn icon @click="close">
-              <v-icon>mdi-close</v-icon>
-              <v-tooltip activator="parent" location="left">{{ $t('floatingWindow.close') }}</v-tooltip>
-            </v-btn>
-
-            <template v-if="appbarExtended" v-slot:extension>
-              <slot name="appbar_extension" />
-            </template>
-          </v-app-bar>
-
-          <v-navigation-drawer
-            v-if="showDrawer"
-            v-model="drawer"
-            :location="isMobile ? 'bottom' : undefined"
-            temporary
-          >
-            <slot name="drawer_list" />
-          </v-navigation-drawer>
-
-          <v-main style="height: 100%;" v-show="!minimized">
-            <slot name="content">
-              <slot />
-            </slot>
-          </v-main>
-        </v-layout>
-      </v-card>
-
-      <!-- 右下角缩放手柄（最小化/全屏/移动端时隐藏） -->
       <div
-        v-show="!minimized && !maximized && !isMobile"
-        class="floating-window__resize"
-        @mousedown="startResize"
-      />
-    </div>
+        v-if="visible"
+        ref="rootEl"
+        class="floating-window"
+        :class="{
+          'floating-window--maximized': maximized || isMobile,
+          'floating-window--no-anim': interacting,
+          'floating-window--active': isTop,
+        }"
+        :style="windowStyle"
+        @pointerdown.capture="focusWindow"
+      >
+        <v-card rounded="lg" width="100%" height="100%" style="overflow: hidden;">
+          <v-layout style="height: inherit">
+            <v-app-bar
+              class="bg-surface-light floating-window__drag"
+              elevation="0"
+              :density="appbarDensity"
+              @pointerdown="startDrag"
+              @dblclick="toggleMaximize"
+            >
+              <v-app-bar-nav-icon v-if="showDrawer" variant="text" @click.stop="drawer = !drawer" />
+
+              <v-icon v-if="icon" style="margin-left: 16px;">{{ icon }}</v-icon>
+
+              <v-app-bar-title :style="{ marginLeft: icon ? '16px' : '' }">
+                {{ title || $t('floatingWindow.defaultTitle') }}
+              </v-app-bar-title>
+
+              <slot name="appbar_append" />
+
+              <v-btn icon @click="toggleMinimize">
+                <v-icon>{{ minimized ? 'mdi-window-restore' : 'mdi-minus' }}</v-icon>
+                <v-tooltip activator="parent" location="left">{{
+                  minimized ? $t('floatingWindow.restore') : $t('floatingWindow.minimize')
+                }}</v-tooltip>
+              </v-btn>
+
+              <v-btn v-show="!isMobile" icon @click="toggleMaximize">
+                <v-icon>{{ maximized ? 'mdi-square-rounded-outline' : 'mdi-border-radius' }}</v-icon>
+                <v-tooltip activator="parent" location="left">{{
+                  maximized ? $t('floatingWindow.restore') : $t('floatingWindow.maximize')
+                }}</v-tooltip>
+              </v-btn>
+
+              <v-btn icon @click="close">
+                <v-icon>mdi-close</v-icon>
+                <v-tooltip activator="parent" location="left">{{ $t('floatingWindow.close') }}</v-tooltip>
+              </v-btn>
+
+              <template v-if="appbarExtended" #extension>
+                <slot name="appbar_extension" />
+              </template>
+            </v-app-bar>
+
+            <v-navigation-drawer
+              v-if="showDrawer"
+              v-model="drawer"
+              :location="isMobile ? 'bottom' : undefined"
+              temporary
+            >
+              <slot name="drawer_list" />
+            </v-navigation-drawer>
+
+            <v-main style="height: 100%;" v-show="!minimized">
+              <slot name="content">
+                <slot />
+              </slot>
+            </v-main>
+          </v-layout>
+        </v-card>
+
+        <!-- 右下角缩放手柄（最小化/全屏/移动端时隐藏） -->
+        <div
+          v-show="!minimized && !maximized && !isMobile"
+          class="floating-window__resize"
+          @pointerdown="startResize"
+        />
+      </div>
     </Transition>
   </Teleport>
 </template>
@@ -299,7 +379,7 @@ function close() {
 <style scoped>
 .floating-window {
   position: fixed;
-  z-index: 1900;
+  /* 不写死 z-index：层级完全由行内 style（全局栈）决定 */
   display: flex;
   flex-direction: column;
   min-width: 240px;
@@ -310,7 +390,14 @@ function close() {
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
   overflow: hidden;
   /* 最小化 / 最大化 / 还原时平滑过渡 */
-  transition: left 0.22s ease, top 0.22s ease, width 0.22s ease, height 0.22s ease;
+  transition: left 0.22s ease, top 0.22s ease, width 0.22s ease, height 0.22s ease,
+    box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+/* 当前最顶层窗口：加深阴影 + 主色描边，焦点一眼可辨（同时方便确认置顶是否生效） */
+.floating-window--active {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
+  border-color: rgb(var(--v-theme-primary), 0.5);
 }
 
 /* 拖拽 / 缩放进行中禁用过渡，避免跟手延迟 */
@@ -323,6 +410,11 @@ function close() {
   border: none;
 }
 
+/* 标题栏即拖拽把手：禁用浏览器默认手势，保证触摸拖动不误触页面滚动 */
+.floating-window__drag {
+  touch-action: none;
+}
+
 /* 右下角缩放手柄 */
 .floating-window__resize {
   position: absolute;
@@ -332,6 +424,7 @@ function close() {
   height: 18px;
   cursor: nwse-resize;
   z-index: 1;
+  touch-action: none;
   background:
     linear-gradient(135deg, transparent 50%, rgb(var(--v-theme-on-surface), 0.35) 50%);
   border-radius: 0 0 10px 0;

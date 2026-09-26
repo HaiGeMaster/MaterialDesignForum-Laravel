@@ -89,10 +89,31 @@ onBeforeUnmount(() => {
   </v-app>
 </template>
 
-<style scoped>
+<style >
 .admin-shell {
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
+}
+
+/* Poppins 字体：全局引入并作为默认字体。
+   通过覆盖 Vuetify 的 --font-family 变量全局生效，
+   避免用 * !important 误伤 MDI 图标字体和代码块等专用字体。 */
+@font-face {
+  font-family: 'Poppins';
+  src: url('../css/Poppins-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font-family: 'Poppins', 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', Arial,
+    sans-serif;
+}
+
+body,
+.v-application {
+  font-family: var(--font-family);
 }
 </style>

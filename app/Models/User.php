@@ -23,6 +23,7 @@ class User extends Authenticatable
     protected $guarded = [];
 
     protected $hidden = [
+        // 'email',后期需要修改为用户验证或管理员才能访问用户的邮件
         'password',
     ];
 

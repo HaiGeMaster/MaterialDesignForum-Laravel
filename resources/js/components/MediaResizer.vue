@@ -205,13 +205,16 @@ function startResize(ev, dir) {
 .media-resizer--selected {
   outline: 2px solid rgb(var(--v-theme-primary));
   outline-offset: 2px;
+
+  /* 图片预览选择边框圆角 */
+  border-radius: 8px;
 }
 
 .media-resizer img,
 .media-resizer video {
   display: block;
   max-width: 100%;
-  border-radius: 6px;
+  border-radius: 8px;
   background: #000;
 }
 

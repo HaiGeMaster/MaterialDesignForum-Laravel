@@ -101,7 +101,7 @@ async function submit() {
 
 <template>
   <v-dialog :model-value="modelValue" max-width="480" @update:model-value="emit('update:modelValue', $event)">
-    <v-card rounded="xl">
+    <v-card rounded="lg">
       <v-toolbar :title="$t('report.title')">
         <template v-slot:prepend>
           <v-btn icon variant="text" @click="emit('update:modelValue', false)">

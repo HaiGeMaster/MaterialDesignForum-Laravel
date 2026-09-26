@@ -79,6 +79,7 @@ function handlePrimaryClick() {
           <v-avatar
             size="36"
             class="cursor-pointer"
+            :variant="author?.avatar?'': 'tonal'"
             v-bind="menuProps"
             @click.stop="menuProps.onClick?.($event)"
           >

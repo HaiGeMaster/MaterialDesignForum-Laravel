@@ -7,6 +7,7 @@ import { useFeedback } from '../composables/useFeedback'
 import LanguageSwitcher from './LanguageSwitcher.vue'
 import ThemeToggle from './ThemeToggle.vue'
 import NotificationBell from './NotificationBell.vue'
+import GuestMenu from './GuestMenu.vue'
 import AppTabBar from './AppTabBar.vue'
 import UserMenu from './UserMenu.vue'
 import { useTabBar } from '../composables/useTabBar'
@@ -91,9 +92,11 @@ async function handleLogout() {
       @logout="handleLogout"
     />
 
-    <v-btn v-else variant="tonal" to="/login" prepend-icon="mdi-account">
+    <!-- <v-btn v-else variant="tonal" to="/login" prepend-icon="mdi-account">
       {{ $t('appBar.loginRegister') }}
-    </v-btn>
+    </v-btn> -->
+
+    <GuestMenu v-if="!authStore.isLoggedIn"/>
 
     <!-- 路由页标签栏：渲染在应用栏扩展区，随应用栏固定；无 tab 时不渲染扩展区 -->
     <template v-if="showTabBar" #extension>

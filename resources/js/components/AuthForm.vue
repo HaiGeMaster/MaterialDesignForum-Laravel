@@ -1,10 +1,12 @@
 <script setup>
-import { onMounted, onUnmounted, reactive, ref } from 'vue'
+import { onMounted, onUnmounted, reactive, ref,watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
 import { useFeedback } from '../composables/useFeedback'
 import http from '../api'
 import OAuthSocialButtons from './OAuthSocialButtons.vue'
+import { useRoute, useRouter } from 'vue-router'
+const router = useRouter()
 
 defineProps({
   loading: { type: Boolean, default: false },
@@ -20,6 +22,36 @@ const activeTab = ref('login')
 const loginFormRef = ref()
 const registerFormRef = ref()
 const resetFormRef = ref()
+
+//监听路由哈希值，如果是 register 则切换到注册表单，如果是 reset 则切换到重置密码表单
+watch(
+  () => router.currentRoute.value.hash,
+  (hash) => {
+    if (hash === '#register') {
+      activeTab.value = 'register'
+    } else if (hash === '#reset') {
+      activeTab.value = 'reset'
+    } else {
+      activeTab.value = 'login'
+    }
+  },
+  { immediate: true },
+)
+
+//监听activeTab的变化，如果是 register 则切换路由哈希
+watch(
+  () => activeTab.value,
+  (tab) => {
+    if (tab === 'register') {
+      router.replace({ hash: '#register' })
+    } else if (tab === 'reset') {
+      router.replace({ hash: '#reset' })
+    } else {
+      router.replace({ hash: '' })
+    }
+  },
+  { immediate: true },
+)
 
 const loginForm = reactive({ email: '', password: '' })
 const registerForm = reactive({

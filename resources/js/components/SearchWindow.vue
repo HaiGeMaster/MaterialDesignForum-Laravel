@@ -14,7 +14,7 @@ import { useSearchWindowStore } from '../stores/searchWindow'
 
 const props = defineProps({
   /** 窗口初始宽度（px） */
-  width: { type: Number, default: 400 },
+  width: { type: Number, default: 420 },
   /** 窗口初始高度（px） */
   height: { type: Number, default: 520 },
   /** 窗口初始横坐标（px，不传则贴右下角、距边缘 16px） */

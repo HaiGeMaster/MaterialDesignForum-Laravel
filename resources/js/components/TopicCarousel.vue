@@ -9,19 +9,28 @@ const loading = ref(false)
 const scroller = ref(null)
 const { xs } = useDisplay()
 
-// 滚动位置状态：到达最左/最右时隐藏对应的方向按钮
 const canPrev = ref(false)
 const canNext = ref(false)
+
+let rafId = 0
+let ro = null
 
 function updateNavState() {
   const el = scroller.value
   if (!el) return
-  // 容差 1px 避免浮点/亚像素误差导致按钮在尽头仍闪现
   canPrev.value = el.scrollLeft > 1
   canNext.value = el.scrollLeft + el.clientWidth < el.scrollWidth - 1
 }
 
-// 内容变化（数据到达）后重新计算，此时卡片宽度才确定
+// scroll 高频触发，用 rAF 合并成每帧一次
+function onScroll() {
+  if (rafId) return
+  rafId = requestAnimationFrame(() => {
+    rafId = 0
+    updateNavState()
+  })
+}
+
 watch(topics, async () => {
   await nextTick()
   updateNavState()
@@ -32,7 +41,7 @@ async function fetchTopics() {
   try {
     const { data } = await http.get('/topics')
     topics.value = data
-  } catch (error) {
+  } catch {
     // 首页加载失败不打断页面
   } finally {
     loading.value = false
@@ -42,29 +51,22 @@ async function fetchTopics() {
 onMounted(() => {
   fetchTopics()
   const el = scroller.value
-  if (el) {
-    el.addEventListener('scroll', updateNavState, { passive: true })
-    window.addEventListener('resize', onWindowResize)
-    requestAnimationFrame(updateNavState)
-  }
+  if (!el) return
+  el.addEventListener('scroll', onScroll, { passive: true })
+  // 比 window.resize 更准：侧栏折叠、父容器宽度变化都能捕获
+  ro = new ResizeObserver(updateNavState)
+  ro.observe(el)
 })
 
 onBeforeUnmount(() => {
-  scroller.value?.removeEventListener('scroll', updateNavState)
-  window.removeEventListener('resize', onWindowResize)
+  if (rafId) cancelAnimationFrame(rafId)
+  scroller.value?.removeEventListener('scroll', onScroll)
+  ro?.disconnect()
 })
 
-// 窗口尺寸变化会改变一屏卡片数（--per-view 响应式），需要重算是否可滚动
-function onWindowResize() {
-  updateNavState()
-}
-
-// 关注状态由服务器随列表数据返回（topic.is_following），切换后回写最新状态与关注数
 function toggleFollow(topic, { following, followerCount }) {
   topic.is_following = following
-  if (followerCount !== undefined) {
-    topic.follower_count = followerCount
-  }
+  if (followerCount !== undefined) topic.follower_count = followerCount
 }
 
 function scrollByCard(dir) {
@@ -77,10 +79,7 @@ function scrollByCard(dir) {
 </script>
 
 <template>
-  <div class="topic-carousel " :class="
-  xs ? 'pl-3' : 'px-3'
-  ">
-    <!-- 上一页按钮（仅在鼠标设备显示，滚到最左时隐藏） -->
+  <div class="topic-carousel" :class="xs ? 'pl-3' : 'px-3'">
     <v-btn
       v-show="canPrev"
       class="carousel-nav carousel-prev"
@@ -92,14 +91,13 @@ function scrollByCard(dir) {
       <v-icon icon="mdi-chevron-left" />
     </v-btn>
 
-    <!-- 横向滚动轨道：触摸屏上可直接手指滑动 -->
-    <div ref="scroller" class="carousel-track">
+    <!-- :aria-label="$t('carousel.label')" -->
+    <div ref="scroller" class="carousel-track" role="region" >
       <div v-for="t in topics" :key="t.topic_id" class="topic-slide">
         <TopicCard :topic="t" :following="t.is_following" @toggle-follow="toggleFollow" />
       </div>
     </div>
 
-    <!-- 下一页按钮（仅在鼠标设备显示，滚到最右时隐藏） -->
     <v-btn
       v-show="canNext"
       class="carousel-nav carousel-next"
@@ -122,57 +120,58 @@ function scrollByCard(dir) {
 <style scoped>
 .topic-carousel {
   position: relative;
-
+  width: 100%;
+  /* 关键：作为 flex/grid item 时允许被压缩到小于内容宽度 */
+  min-width: 0;
+  max-width: 100%;
 }
 
 .carousel-track {
   --per-view: 4;
+  --gap: 18px;
+
   display: flex;
-  gap: 18px;
+  gap: var(--gap);
+  width: 100%;
+  min-width: 0;
   overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  padding: 4px 4px 8px;
-  /* 隐藏滚动条，保持干净外观 */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
+  overscroll-behavior-x: contain; /* 滑到尽头不把页面一起带走 */
+  scroll-snap-type: x proximity;  /* proximity 比 mandatory 更不容易卡住/漂移 */
+  /* 只留纵向 padding：横向 padding 在滚动容器里会被浏览器吞掉，是宽度算错的元凶 */
+  padding-block: 4px 8px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .carousel-track::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
+  display: none;
 }
 
 .topic-slide {
-    padding: 3px;
-  /* min-width: 0 防止卡片内文字/按钮把固定宽度撑开，保证所有卡片宽度统一 */
-  flex: 0 0 calc((100% - (var(--per-view) - 1) * 16px) / var(--per-view));
-  min-width: 0;
+  /* 左右各 3px 给卡片阴影留出空间，卡片整体仍在 basis 内（border-box） */
+  padding: 3px;
+  /* 唯一宽度来源：和 gap 共用 --gap，不会再出现 16/18 不一致 */
+  flex: 0 0 calc((100% - (var(--per-view) - 1) * var(--gap)) / var(--per-view));
+  min-width: 0; /* 防止卡片内长文本把固定宽度撑开 */
   scroll-snap-align: start;
 }
 
-/* 触摸屏设备：隐藏上一页/下一页按钮，改为手指滑动 */
 @media (hover: none) and (pointer: coarse) and (max-width: 600px) {
   .carousel-nav {
     display: none;
   }
 }
 
-/* 响应式：一屏显示的卡片数 */
 @media (max-width: 1280px) {
-  .carousel-track {
-    --per-view: 3;
-  }
+  .carousel-track { --per-view: 3; }
 }
 
 @media (max-width: 960px) {
-  .carousel-track {
-    --per-view: 2;
-  }
+  .carousel-track { --per-view: 2; }
 }
 
 @media (max-width: 600px) {
-  .carousel-track {
-    --per-view: 1.2; /* 露出下一张的边缘，提示可滑动 */
-  }
+  .carousel-track { --per-view: 1.2; } /* 露出下一张边缘，提示可滑动 */
 }
 
 .carousel-nav {
@@ -184,11 +183,9 @@ function scrollByCard(dir) {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
 }
 
-.carousel-prev {
-  left: -8px;
-}
-
-.carousel-next {
-  right: -8px;
-}
+/* 不再用负值：负值会顶出父容器边界 */
+/* .carousel-prev { left: 0; }
+.carousel-next { right: 0; } */
+.carousel-prev { left: -8px; }
+.carousel-next { right: -8px; }
 </style>

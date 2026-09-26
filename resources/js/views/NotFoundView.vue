@@ -8,7 +8,7 @@ const { t } = useI18n()
 
 <template>
   <v-container class="d-flex align-center justify-center py-12" style="min-height: 60vh;">
-    <v-card class="mx-auto" max-width="560" rounded="xl" variant="text">
+    <v-card class="mx-auto" max-width="560" rounded="lg" variant="text">
       <v-empty-state
         icon="mdi-map-search"
         :title="t('notFound.title')"

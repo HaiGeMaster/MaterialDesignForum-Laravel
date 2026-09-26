@@ -137,7 +137,7 @@ watch(
                 <v-icon>mdi-chevron-down</v-icon>
               </v-btn>
             </template>
-            <v-list rounded="lg" density="compact" min-width="160">
+            <v-list rounded="lg" density="compact" min-width="160" nav>
               <v-list-item
                 v-for="item in sortItems"
                 :key="item.value"

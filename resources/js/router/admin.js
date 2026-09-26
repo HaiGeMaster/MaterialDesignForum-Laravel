@@ -4,6 +4,7 @@ import AdminView from '../views/AdminView.vue'
 import AdminModuleView from '../views/AdminModuleView.vue'
 import AdminOptionsView from '../views/AdminOptionsView.vue'
 import AdminOptionDetailView from '../views/AdminOptionDetailView.vue'
+import { siteName } from '../themeConfig'
 
 const adminRouter = createRouter({
   history: createWebHistory('/admin/'),
@@ -65,7 +66,12 @@ adminRouter.beforeEach(async (to) => {
 })
 
 adminRouter.afterEach(() => {
-  document.title = 'Admin · MDForum'
+  // document.title = 'Admin · MDForum'
+
+    const title = to.meta.titleKey ? i18n.global.t(to.meta.titleKey) : ''
+    document.title = title ? `${title} · ${siteName.value}` : 'Admin'
+  
+  
   if (loadingCallback) loadingCallback(false)
 })
 

@@ -156,7 +156,7 @@ function notificationIcon(item) {
 
     <v-list-item :to="notificationLink(item)" class="notification-item px-2" lines="two">
         <template #prepend>
-            <v-avatar size="40" :to="sender.user_id ? `/users/${sender.user_id}` : undefined" @click.stop>
+            <v-avatar size="40" :variant="sender?.avatar?'': 'tonal'" :to="sender.user_id ? `/users/${sender.user_id}` : undefined" @click.stop>
                 <v-img v-if="sender.avatar" :src="sender.avatar" cover />
                 <span v-else class="text-body-2 font-weight-bold text-primary">{{ senderInitial }}</span>
             </v-avatar>

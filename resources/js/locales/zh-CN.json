@@ -1,4 +1,15 @@
 {
+  "baseLanguagePackInfo":{
+    "langname": "简体中文(中国)",
+    "flagicon": "cn",
+    "langcode": "zh_CN",
+    "bcp47": "zh-CN",
+    "hello": "您好世界！",
+    "LanguageMaker": "语言制作者:HaiGeMaster",
+    "show": true,
+    "usability": true,
+    "vuetifyLangcode": "zhHans"
+  },
   "common": {
     "cancel": "取消",
     "confirm": "确定",

@@ -35,7 +35,7 @@ const isSelf = computed(
   >
     <!-- 上方居中头像 -->
     <div class="person-avatar d-flex align-center justify-center">
-      <v-avatar size="72">
+      <v-avatar size="72" :variant="person?.avatar?'': 'tonal'">
         <v-img v-if="person.avatar" :src="person.avatar" cover />
         <span v-else class="text-h4 font-weight-bold text-primary">{{ initial }}</span>
       </v-avatar>

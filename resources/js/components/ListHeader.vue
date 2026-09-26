@@ -26,7 +26,7 @@ const emit = defineEmits(["update:sort"]);
                         <v-icon>mdi-chevron-down</v-icon>
                     </v-btn>
                 </template>
-                <v-list rounded="lg" min-width="160">
+                <v-list rounded="lg" min-width="160" density="compact" nav>
                     <v-list-item
                         v-for="item in sortItems"
                         :key="item.value"

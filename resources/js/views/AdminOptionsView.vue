@@ -85,9 +85,13 @@ async function openAbout() {
     </div> -->
 
     <div v-for="group in settingGroups" :key="group.title" class="mb-5">
-      <h2 class="text-subtitle-1 font-weight-bold px-1 mb-2">{{ group.title }}</h2>
+      <!-- <h2 class="text-subtitle-1 font-weight-bold px-1 mb-2">{{ group.title }}</h2> -->
       <v-card rounded="lg" class="options-card">
-        <v-list rounded="lg" lines="two" nav>
+        <v-list rounded="lg" lines="two" >
+          <v-list-subheader>
+            {{group.title}}
+          </v-list-subheader>
+          <v-divider/>
           <template v-for="(item, index) in group.items" :key="item.key">
             <v-divider v-if="index" />
             <v-list-item @click="openSetting(item.key)">

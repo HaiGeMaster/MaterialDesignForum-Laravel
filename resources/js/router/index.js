@@ -70,7 +70,7 @@ router.beforeEach(async (to) => {
 
 router.afterEach((to) => {
   const title = to.meta.titleKey ? i18n.global.t(to.meta.titleKey) : ''
-  document.title = title ? `${title} · ${siteName.value}` : 'MDForum'
+  document.title = title ? `${title} · ${siteName.value}` : ''
 
   
   if (loadingCallback) loadingCallback(false)

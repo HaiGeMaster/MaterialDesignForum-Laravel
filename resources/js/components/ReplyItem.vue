@@ -94,7 +94,7 @@ onBeforeUnmount(() => window.removeEventListener('reply:edited', handleReplyEdit
 <template>
   <!-- 参考旧项目布局：v-list-item 结构（头像 / 用户名(+回复对象) / 内容 / 操作区） -->
   <v-list-item
-
+    rounded="lg"
     active-class="text-primary"
     class="py-3 reply-item"
     @click="handlePrimaryClick"
@@ -110,6 +110,7 @@ onBeforeUnmount(() => window.removeEventListener('reply:edited', handleReplyEdit
           <v-avatar
             size="36"
             class="cursor-pointer"
+            :variant="author?.avatar?'': 'tonal'"
             v-bind="menuProps"
             @click.stop="menuProps.onClick?.($event)"
           >

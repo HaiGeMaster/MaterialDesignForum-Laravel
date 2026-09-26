@@ -62,6 +62,7 @@ function userInitial(item) {
       <v-avatar
         v-if="isUser"
         size="36"
+         :variant="item.avatar?'': 'tonal'"
       >
         <v-img v-if="item.avatar" :src="item.avatar" cover />
         <span v-else class="text-body-2 font-weight-bold text-primary">
@@ -81,6 +82,7 @@ function userInitial(item) {
           <v-avatar
             size="36"
             class="cursor-pointer"
+            :variant="item?.creator?.avatar?'': 'tonal'"
             v-bind="menuProps"
             @click.stop="menuProps.onClick?.($event)"
           >
