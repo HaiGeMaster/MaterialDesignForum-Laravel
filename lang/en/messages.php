@@ -1,104 +1,192 @@
 <?php
 
-// TODO: 以下条目为中文原文占位，请人工翻译为 EN。
-
 return [
-    'http_adminmodule_1' => '您的举报已处理：未发现违规，不予处理',
+    'http_adminmodule_1' => 'Your report has been handled: no violation found, no action taken.',
 
-    'http_answer_1' => '该用户组无发表回答权限。',
+    'http_adminmodule_2' => 'This email is already taken',
 
-    'http_article_1' => '该用户组无发表文章权限。',
+    'http_adminmodule_3' => 'Your report has been handled: the violating content has been dealt with',
 
-    'http_auth_1' => '注册成功。',
+    'http_adminmodule_4' => 'This user group still has members and cannot be deleted directly. Please move the members to another user group first, then delete it. You can batch-change user groups on the "User Management" page.',
 
-    'http_auth_2' => '登录成功。',
+    'http_answer_1' => 'Your user group is not allowed to post answers.',
 
-    'http_auth_3' => '密码重置成功，已自动登录。',
+    'http_article_1' => 'Your user group is not allowed to post articles.',
 
-    'http_auth_4' => '退出登录成功。',
+    'http_auth_1' => 'Registration successful.',
 
-    'http_comment_1' => '该用户组无发表评论权限。',
+    'http_auth_2' => 'Login successful.',
 
-    'http_emailverification_1' => '验证码已发送，请查收邮箱。',
+    'http_auth_3' => 'Password reset successful. You have been logged in automatically.',
 
-    'http_emailverification_2' => '注册验证码',
+    'http_auth_4' => 'Logged out successfully.',
 
-    'http_emailverification_3' => '找回密码验证码',
+    'http_auth_5' => 'Incorrect email or password.',
 
-    'http_emailverification_4' => '论坛',
+    'http_auth_6' => 'This account has been disabled.',
 
-    'http_follow_1' => '关注的目标不存在。',
+    'http_auth_7' => 'This user group is not allowed to log in.',
 
-    'http_installer_1' => '系统已安装，禁止再次执行安装程序。',
+    'http_auth_8' => 'This email is not registered.',
 
-    'http_installer_2' => 'PHP 版本 ≥ 8.2',
+    'http_comment_1' => 'Your user group is not allowed to post comments.',
 
-    'http_installer_3' => 'PDO MySQL 扩展',
+    'http_emailverification_1' => 'Verification code sent. Please check your inbox.',
 
-    'http_installer_4' => 'OpenSSL 扩展',
+    'http_emailverification_2' => 'Registration verification code',
 
-    'http_installer_5' => 'Mbstring 扩展',
+    'http_emailverification_3' => 'Password reset verification code',
 
-    'http_installer_6' => 'Fileinfo 扩展',
+    'http_emailverification_4' => 'Forum',
 
-    'http_installer_7' => '.env 文件可写',
+    'http_emailverification_5' => 'This email is already registered.',
 
-    'http_installer_8' => 'storage 目录可写',
+    'http_emailverification_6' => 'This email is not registered.',
 
-    'http_installer_9' => 'bootstrap/cache 目录可写',
+    'http_emailverification_7' => 'Sending too frequently. Please try again in :seconds seconds.',
 
-    'http_installer_10' => '数据库连接失败：',
+    'http_emailverification_8' => 'The :label does not exist. Please request a verification code first.',
 
-    'http_installer_11' => '数据库连接成功，配置已保存。',
+    'http_emailverification_9' => 'The verification code has expired. Please request a new one.',
 
-    'http_installer_12' => '应用配置已保存。',
+    'http_emailverification_10' => 'The verification code is incorrect.',
 
-    'http_installer_13' => '管理员账号或邮箱已存在，请更换后重试。',
+    'http_follow_1' => 'The follow target does not exist.',
 
-    'http_installer_14' => '安装成功！请使用刚才的管理员账号登录。',
+    'http_installer_1' => 'The system is already installed. Running the installer again is not allowed.',
 
-    'http_installer_15' => '安装失败：',
+    'http_installer_2' => 'PHP version ≥ 8.2',
 
-    'http_installer_16' => '不允许写入的 .env 键：:key',
+    'http_installer_3' => 'PDO MySQL extension',
 
-    'http_installer_17' => '无法写入 .env 文件：:path',
+    'http_installer_4' => 'OpenSSL extension',
 
-    'http_media_1' => '上传成功。',
+    'http_installer_5' => 'Mbstring extension',
 
-    'http_media_2' => '无权查看该用户的媒体库。',
+    'http_installer_6' => 'Fileinfo extension',
 
-    'http_media_3' => '已删除 :deleted 个文件。',
+    'http_installer_7' => '.env file is writable',
 
-    'http_oauth_1' => '无权操作该绑定记录。',
+    'http_installer_8' => 'storage directory is writable',
 
-    'http_oauth_2' => '已解除第三方账号绑定。',
+    'http_installer_9' => 'bootstrap/cache directory is writable',
 
-    'http_question_1' => '该用户组无发表问题权限。',
+    'http_installer_10' => 'Database connection failed: ',
 
-    'http_reply_1' => '该用户组无发表回复权限。',
+    'http_installer_11' => 'Database connected successfully. Configuration saved.',
 
-    'http_topic_1' => '该用户组无创建话题权限。',
+    'http_installer_12' => 'Application configuration saved.',
 
-    'http_user_1' => '个人资料已更新。',
+    'http_installer_13' => 'The admin account or email already exists. Please choose another one and try again.',
 
-    'http_user_2' => '密码修改成功。',
+    'http_installer_14' => 'Installation succeeded! Please log in with the admin account you just created.',
 
-    'http_checkability_1' => '未认证：请先登录。',
+    'http_installer_15' => 'Installation failed: ',
 
-    'http_checkability_2' => '无权限：当前用户组不具备该操作权限。',
+    'http_installer_16' => 'Disallowed .env key: :key',
 
-    'http_ensuretokenisvalid_1' => '未认证：缺少访问令牌。',
+    'http_installer_17' => 'Unable to write the .env file: :path',
 
-    'http_ensuretokenisvalid_2' => '未认证：无效的访问令牌。',
+    'http_media_1' => 'Upload successful.',
 
-    'http_ensuretokenisvalid_3' => '未认证：访问令牌已过期。',
+    'http_media_2' => "You are not allowed to view this user's media library.",
 
-    'http_ensuretokenisvalid_4' => '未认证：用户不存在。',
+    'http_media_3' => ':deleted file(s) deleted.',
 
-    'http_ensuretokenisvalid_5' => '未认证：该账号已被禁用。',
+    'http_oauth_1' => 'You are not allowed to operate this binding record.',
 
-    'http_ensuretokenisvalid_6' => '未认证：该用户组已被禁止登录。',
+    'http_oauth_2' => 'Third-party account binding removed.',
 
-    'service_notificationservice_1' => '发送通知邮件失败',
+    'http_question_1' => 'Your user group is not allowed to post questions.',
+
+    'http_reply_1' => 'Your user group is not allowed to post replies.',
+
+    'http_signin_1' => 'You have already checked in today.',
+
+    'http_signin_2' => 'Check-in successful.',
+
+    'http_topic_1' => 'Your user group is not allowed to create topics.',
+
+    'http_user_1' => 'Profile updated.',
+
+    'http_user_2' => 'Password changed successfully.',
+
+    'http_user_3' => 'The old password is incorrect.',
+
+    'http_user_4' => "The current device's login token cannot be revoked directly. Please use logout instead.",
+
+    'http_user_5' => 'The login token does not exist or does not belong to the current user.',
+
+    'http_user_6' => "The device's login token has been revoked.",
+
+    'http_user_7' => "Login tokens on other devices have been revoked.",
+
+    'http_checkability_1' => 'Unauthenticated: please log in first.',
+
+    'http_checkability_2' => 'Forbidden: your user group does not have permission for this action.',
+
+    'http_ensuretokenisvalid_1' => 'Unauthenticated: missing access token.',
+
+    'http_ensuretokenisvalid_2' => 'Unauthenticated: invalid access token.',
+
+    'http_ensuretokenisvalid_3' => 'Unauthenticated: access token has expired.',
+
+    'http_ensuretokenisvalid_4' => 'Unauthenticated: user not found.',
+
+    'http_ensuretokenisvalid_5' => 'Unauthenticated: this account has been disabled.',
+
+    'http_ensuretokenisvalid_6' => 'Unauthenticated: this user group is not allowed to log in.',
+
+    'service_notificationservice_1' => 'Failed to send notification email',
+
+    'service_notificationservice_2' => '{value} followed you',
+
+    'service_notificationservice_3' => '{value} followed your topic',
+
+    'service_notificationservice_4' => '{value} deleted your topic',
+
+    'service_notificationservice_5' => '{value} followed your question',
+
+    'service_notificationservice_6' => '{value} commented on your question',
+
+    'service_notificationservice_7' => '{value} answered your question',
+
+    'service_notificationservice_8' => '{value} deleted your question',
+
+    'service_notificationservice_9' => '{value} followed your article',
+
+    'service_notificationservice_10' => '{value} commented on your article',
+
+    'service_notificationservice_11' => '{value} liked your article',
+
+    'service_notificationservice_12' => '{value} deleted your article',
+
+    'service_notificationservice_13' => '{value} commented on your answer',
+
+    'service_notificationservice_14' => '{value} liked your answer',
+
+    'service_notificationservice_15' => '{value} deleted your answer',
+
+    'service_notificationservice_16' => '{value} liked your comment',
+
+    'service_notificationservice_17' => '{value} replied to your comment',
+
+    'service_notificationservice_18' => '{value} deleted your comment',
+
+    'service_notificationservice_19' => '{value} liked your reply',
+
+    'service_notificationservice_20' => '{value} replied to your reply',
+
+    'service_notificationservice_21' => '{value} deleted your reply',
+
+    'service_notificationservice_22' => 'A user you follow has an update: {value}',
+
+    'service_notificationservice_23' => 'A topic you follow has an update: {value}',
+
+    'service_notificationservice_24' => 'A question you follow has an update: {value}',
+
+    'service_notificationservice_25' => 'An article you follow has an update: {value}',
+
+    'service_notificationservice_26' => '{value} Your report has been handled',
 
 ];

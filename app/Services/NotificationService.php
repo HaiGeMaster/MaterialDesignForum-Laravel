@@ -83,33 +83,33 @@ class NotificationService
         self::TYPE_REPORT_HANDLED,
     ];
 
-    /** 类型 → 中文文案模板（{value} 为用户名字符串，用于邮件正文 / 兜底展示） */
+    /** 类型 → 翻译键（渲染时经 __() 本地化，{value} 为用户名字符串，用于邮件正文 / 兜底展示） */
     public const TEMPLATES = [
-        self::TYPE_USER_FOLLOW => '{value} 关注了您',
-        self::TYPE_TOPIC_FOLLOW => '{value} 关注了您的话题',
-        self::TYPE_TOPIC_DELETE => '{value} 删除了您的话题',
-        self::TYPE_QUESTION_FOLLOW => '{value} 关注了您的提问',
-        self::TYPE_QUESTION_COMMENT => '{value} 评论了您的提问',
-        self::TYPE_QUESTION_ANSWER => '{value} 回答了您的提问',
-        self::TYPE_QUESTION_DELETE => '{value} 删除了您的提问',
-        self::TYPE_ARTICLE_FOLLOW => '{value} 关注了您的文章',
-        self::TYPE_ARTICLE_COMMENT => '{value} 评论了您的文章',
-        self::TYPE_ARTICLE_LIKE => '{value} 点赞了您的文章',
-        self::TYPE_ARTICLE_DELETE => '{value} 删除了您的文章',
-        self::TYPE_ANSWER_COMMENT => '{value} 评论了您的回答',
-        self::TYPE_ANSWER_LIKE => '{value} 点赞了您的回答',
-        self::TYPE_ANSWER_DELETE => '{value} 删除了您的回答',
-        self::TYPE_COMMENT_LIKE => '{value} 点赞了您的评论',
-        self::TYPE_COMMENT_REPLY => '{value} 回复了您的评论',
-        self::TYPE_COMMENT_DELETE => '{value} 删除了您的评论',
-        self::TYPE_REPLY_LIKE => '{value} 点赞了您的回复',
-        self::TYPE_REPLY_REPLY => '{value} 回复了您的回复',
-        self::TYPE_REPLY_DELETE => '{value} 删除了您的回复',
-        self::TYPE_FOLLOW_USER_UPDATE => '您关注的用户有更新 {value}',
-        self::TYPE_FOLLOW_TOPIC_UPDATE => '您关注的话题有更新 {value}',
-        self::TYPE_FOLLOW_QUESTION_UPDATE => '您关注的提问有更新 {value}',
-        self::TYPE_FOLLOW_ARTICLE_UPDATE => '您关注的文章有更新 {value}',
-        self::TYPE_REPORT_HANDLED => '{value} 您的举报已处理',
+        self::TYPE_USER_FOLLOW => 'messages.service_notificationservice_2',
+        self::TYPE_TOPIC_FOLLOW => 'messages.service_notificationservice_3',
+        self::TYPE_TOPIC_DELETE => 'messages.service_notificationservice_4',
+        self::TYPE_QUESTION_FOLLOW => 'messages.service_notificationservice_5',
+        self::TYPE_QUESTION_COMMENT => 'messages.service_notificationservice_6',
+        self::TYPE_QUESTION_ANSWER => 'messages.service_notificationservice_7',
+        self::TYPE_QUESTION_DELETE => 'messages.service_notificationservice_8',
+        self::TYPE_ARTICLE_FOLLOW => 'messages.service_notificationservice_9',
+        self::TYPE_ARTICLE_COMMENT => 'messages.service_notificationservice_10',
+        self::TYPE_ARTICLE_LIKE => 'messages.service_notificationservice_11',
+        self::TYPE_ARTICLE_DELETE => 'messages.service_notificationservice_12',
+        self::TYPE_ANSWER_COMMENT => 'messages.service_notificationservice_13',
+        self::TYPE_ANSWER_LIKE => 'messages.service_notificationservice_14',
+        self::TYPE_ANSWER_DELETE => 'messages.service_notificationservice_15',
+        self::TYPE_COMMENT_LIKE => 'messages.service_notificationservice_16',
+        self::TYPE_COMMENT_REPLY => 'messages.service_notificationservice_17',
+        self::TYPE_COMMENT_DELETE => 'messages.service_notificationservice_18',
+        self::TYPE_REPLY_LIKE => 'messages.service_notificationservice_19',
+        self::TYPE_REPLY_REPLY => 'messages.service_notificationservice_20',
+        self::TYPE_REPLY_DELETE => 'messages.service_notificationservice_21',
+        self::TYPE_FOLLOW_USER_UPDATE => 'messages.service_notificationservice_22',
+        self::TYPE_FOLLOW_TOPIC_UPDATE => 'messages.service_notificationservice_23',
+        self::TYPE_FOLLOW_QUESTION_UPDATE => 'messages.service_notificationservice_24',
+        self::TYPE_FOLLOW_ARTICLE_UPDATE => 'messages.service_notificationservice_25',
+        self::TYPE_REPORT_HANDLED => 'messages.service_notificationservice_26',
     ];
 
     /** 用户通知设置在 user_option 表中的 name */
@@ -287,7 +287,8 @@ class NotificationService
                 return;
             }
 
-            $template = self::TEMPLATES[$type] ?? $type;
+            $templateKey = self::TEMPLATES[$type] ?? null;
+            $template = $templateKey !== null ? __($templateKey) : $type;
             $message = str_replace('{value}', $sender->username, $template);
 
             // 关联内容链接（可选）

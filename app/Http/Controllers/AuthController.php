@@ -95,20 +95,20 @@ class AuthController extends Controller
 
         if (! $user || ! Hash::check($data['password'], $user->password)) {
             throw ValidationException::withMessages([
-                'email' => ['邮箱或密码不正确。'],
+                'email' => [__('messages.http_auth_5')],
             ]);
         }
 
         if ($user->disable_time) {
             throw ValidationException::withMessages([
-                'email' => ['该账号已被禁用。'],
+                'email' => [__('messages.http_auth_6')],
             ]);
         }
 
         // 用户组 ability_normal_login=false 时禁止登录
         if (! $user->canLoginNormally()) {
             throw ValidationException::withMessages([
-                'email' => ['该用户组已被禁止登录。'],
+                'email' => [__('messages.http_auth_7')],
             ]);
         }
 
@@ -145,20 +145,20 @@ class AuthController extends Controller
 
         if (! $user) {
             throw ValidationException::withMessages([
-                'email' => ['该邮箱尚未注册。'],
+                'email' => [__('messages.http_auth_8')],
             ]);
         }
 
         if ($user->disable_time) {
             throw ValidationException::withMessages([
-                'email' => ['该账号已被禁用。'],
+                'email' => [__('messages.http_auth_6')],
             ]);
         }
 
         // 用户组 ability_normal_login=false 时禁止登录（即使找回密码也不自动登录）
         if (! $user->canLoginNormally()) {
             throw ValidationException::withMessages([
-                'email' => ['该用户组已被禁止登录。'],
+                'email' => [__('messages.http_auth_7')],
             ]);
         }
 

@@ -297,7 +297,7 @@ class UserController extends Controller
 
         if (! Hash::check($data['old_password'], $user->password)) {
             throw ValidationException::withMessages([
-                'old_password' => ['旧密码不正确。'],
+                'old_password' => [__('messages.http_user_3')],
             ]);
         }
 
@@ -348,7 +348,7 @@ class UserController extends Controller
 
         if ($token === $currentToken) {
             return response()->json([
-                'message' => '当前设备登录凭证不能直接注销，请使用退出登录。',
+                'message' => __('messages.http_user_4'),
             ], 422);
         }
 
@@ -356,12 +356,12 @@ class UserController extends Controller
 
         if (! $deleted) {
             return response()->json([
-                'message' => '该登录凭证不存在或不属于当前用户。',
+                'message' => __('messages.http_user_5'),
             ], 404);
         }
 
         return response()->json([
-            'message' => '已注销该设备登录凭证。',
+            'message' => __('messages.http_user_6'),
         ]);
     }
 
@@ -379,7 +379,7 @@ class UserController extends Controller
             ->delete();
 
         return response()->json([
-            'message' => '已注销其他设备的登录凭证。',
+            'message' => __('messages.http_user_7'),
         ]);
     }
 

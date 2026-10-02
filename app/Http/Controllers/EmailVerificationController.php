@@ -50,7 +50,7 @@ class EmailVerificationController extends Controller
         // 邮箱已被注册则无需发送
         if (User::where('email', $email)->exists()) {
             throw ValidationException::withMessages([
-                'email' => ['该邮箱已被注册。'],
+                'email' => [__('messages.http_emailverification_5')],
             ]);
         }
 
@@ -77,7 +77,7 @@ class EmailVerificationController extends Controller
         // 邮箱未注册则无法找回
         if (! User::where('email', $email)->exists()) {
             throw ValidationException::withMessages([
-                'email' => ['该邮箱尚未注册。'],
+                'email' => [__('messages.http_emailverification_6')],
             ]);
         }
 
@@ -125,7 +125,7 @@ class EmailVerificationController extends Controller
                 if (now()->diffInSeconds($createdAt) < self::SEND_COOLDOWN_SECONDS) {
                     $remain = self::SEND_COOLDOWN_SECONDS - (int) now()->diffInSeconds($createdAt);
                     throw ValidationException::withMessages([
-                        'email' => ["发送过于频繁，请 {$remain} 秒后再试。"],
+                        'email' => [__('messages.http_emailverification_7', ['seconds' => $remain])],
                     ]);
                 }
             }
@@ -157,7 +157,7 @@ class EmailVerificationController extends Controller
 
         if (! $row || ! $row->life_time) {
             throw ValidationException::withMessages([
-                'email_code' => ["{$label}不存在，请先获取验证码。"],
+                'email_code' => [__('messages.http_emailverification_8', ['label' => $label])],
             ]);
         }
 
@@ -168,13 +168,13 @@ class EmailVerificationController extends Controller
         if ($expireAt->isPast()) {
             DB::table('cache')->where('name', $key)->delete();
             throw ValidationException::withMessages([
-                'email_code' => ['验证码已过期，请重新获取。'],
+                'email_code' => [__('messages.http_emailverification_9')],
             ]);
         }
 
         if (! hash_equals((string) $row->value, (string) $code)) {
             throw ValidationException::withMessages([
-                'email_code' => ['验证码不正确。'],
+                'email_code' => [__('messages.http_emailverification_10')],
             ]);
         }
 

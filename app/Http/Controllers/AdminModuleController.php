@@ -362,7 +362,10 @@ class AdminModuleController extends Controller
                 ->where('user_id', '!=', $id)
                 ->exists();
             if ($exists) {
-                return response()->json(['message' => 'Email already taken', 'errors' => ['email' => ['该邮箱已被使用']]], 422);
+                return response()->json([
+                    'message' => __('messages.http_adminmodule_2'),
+                    'errors' => ['email' => [__('messages.http_adminmodule_2')]],
+                ], 422);
             }
         }
 
@@ -411,7 +414,7 @@ class AdminModuleController extends Controller
         }
 
         $resultText = $newState === 1
-            ? '您的举报已处理：违规内容已处理'
+            ? __('messages.http_adminmodule_3')
             : __('messages.http_adminmodule_1');
 
         // 根据举报对象类型补齐通知上下文（用于前端跳转）
@@ -479,7 +482,7 @@ class AdminModuleController extends Controller
             $memberCount = User::query()->where('user_group_id', $item->user_group_id)->whereNull('disable_time')->count();
             if ($memberCount > 0) {
                 return response()->json([
-                    'message' => '该用户组仍有成员，不能直接删除。请先将用户组中的成员移动到其它用户组，再删除该用户组。请在“用户管理”页面进行用户多选批量变更用户组。',
+                    'message' => __('messages.http_adminmodule_4'),
                     'member_count' => $memberCount,
                 ], 422);
             }

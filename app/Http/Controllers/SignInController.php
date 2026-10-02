@@ -70,7 +70,7 @@ class SignInController extends Controller
 
         if (SignLog::query()->where('user_id', $user->user_id)->whereDate('sign_date', $today)->exists()) {
             return response()->json([
-                'message' => '今天已经签到过了。',
+                'message' => __('messages.http_signin_1'),
             ], 422);
         }
 
@@ -119,7 +119,7 @@ class SignInController extends Controller
             $totalRewardPoints = (int) SignLog::query()->where('user_id', $user->user_id)->sum('reward_points');
 
             return response()->json([
-                'message' => '签到成功。',
+                'message' => __('messages.http_signin_2'),
                 'signed_today' => true,
                 'reward_points' => $rewardPoints,
                 'total_reward_points' => $totalRewardPoints,
