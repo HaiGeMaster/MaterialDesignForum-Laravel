@@ -23,30 +23,15 @@ const forms = reactive({
   theme: {
     default_theme: 'system',
     available_themes: ['light', 'dark'],
-    custom_themes: [],
-    lightPrimary: '#1867C0', lightSecondary: '#48A9A6', lightAccent: '#FB8C00',
-    darkPrimary: '#2196F3', darkSecondary: '#54B6B2', darkAccent: '#FB8C00',
   },
 })
 
-// ---- 主题管理辅助 ----
-const newThemeDialog = ref(false)
-const newTheme = reactive({ name: '', dark: true, primary: '#2196F3', secondary: '#54B6B2', accent: '#FB8C00' })
-
-// 所有内置主题名称列表
-const builtinThemeNames = computed(() => BUILTIN_THEMES.map(th => th.name))
-
-// 默认主题下拉选项（内置主题 + 自定义主题 + system）
+// 默认主题下拉选项（内置主题 + system）
 const defaultThemeItems = computed(() => {
   const items = [{ title: `${t('themeDialog.system')} (Light/Dark)`, value: 'system' }]
   for (const th of BUILTIN_THEMES) {
     if (forms.theme.available_themes.includes(th.name)) {
       items.push({ title: th.label, value: th.name })
-    }
-  }
-  for (const ct of forms.theme.custom_themes) {
-    if (forms.theme.available_themes.includes(ct.name)) {
-      items.push({ title: ct.name, value: ct.name })
     }
   }
   return items
@@ -84,19 +69,6 @@ async function save() {
       const { data } = await http.put('/admin/options/theme', {
         default_theme: forms.theme.default_theme,
         available_themes: forms.theme.available_themes,
-        custom_themes: forms.theme.custom_themes,
-        colors: {
-          light: {
-            primary: forms.theme.lightPrimary,
-            secondary: forms.theme.lightSecondary,
-            accent: forms.theme.lightAccent,
-          },
-          dark: {
-            primary: forms.theme.darkPrimary,
-            secondary: forms.theme.darkSecondary,
-            accent: forms.theme.darkAccent,
-          },
-        },
       })
       applyThemeForm(data)
       applyThemeConfig(theme, data)
@@ -132,13 +104,6 @@ async function loadSiteInfo() {
 function applyThemeForm(data) {
   forms.theme.default_theme = data.default_theme || data.theme || forms.theme.default_theme
   forms.theme.available_themes = Array.isArray(data.available_themes) ? data.available_themes : forms.theme.available_themes
-  forms.theme.custom_themes = Array.isArray(data.custom_themes) ? data.custom_themes : []
-  forms.theme.lightPrimary = data.colors?.light?.primary || forms.theme.lightPrimary
-  forms.theme.lightSecondary = data.colors?.light?.secondary || forms.theme.lightSecondary
-  forms.theme.lightAccent = data.colors?.light?.accent || forms.theme.lightAccent
-  forms.theme.darkPrimary = data.colors?.dark?.primary || forms.theme.darkPrimary
-  forms.theme.darkSecondary = data.colors?.dark?.secondary || forms.theme.darkSecondary
-  forms.theme.darkAccent = data.colors?.dark?.accent || forms.theme.darkAccent
 }
 
 async function loadTheme() {
@@ -193,45 +158,6 @@ onMounted(() => {
   if (route.params.setting === 'mail') loadMail()
   if (route.params.setting === 'oauth') loadOauth()
 })
-
-// ---- 新建自定义主题 ----
-function resetNewTheme() {
-  newTheme.name = ''
-  newTheme.dark = true
-  newTheme.primary = '#2196F3'
-  newTheme.secondary = '#54B6B2'
-  newTheme.accent = '#FB8C00'
-}
-
-function addCustomTheme() {
-  if (!newTheme.name.trim()) return
-  // 检查名称是否已存在
-  const exists = forms.theme.custom_themes.some(ct => ct.name === newTheme.name)
-    || builtinThemeNames.value.includes(newTheme.name)
-  if (exists) {
-    show(t('admin.themeNameExists'), 'error')
-    return
-  }
-  forms.theme.custom_themes.push({
-    name: newTheme.name.trim(),
-    dark: newTheme.dark,
-    colors: { primary: newTheme.primary, secondary: newTheme.secondary, accent: newTheme.accent },
-  })
-  // 自动启用新主题
-  if (!forms.theme.available_themes.includes(newTheme.name.trim())) {
-    forms.theme.available_themes.push(newTheme.name.trim())
-  }
-  resetNewTheme()
-  newThemeDialog.value = false
-}
-
-function removeCustomTheme(name) {
-  forms.theme.custom_themes = forms.theme.custom_themes.filter(ct => ct.name !== name)
-  forms.theme.available_themes = forms.theme.available_themes.filter(t => t !== name)
-  if (forms.theme.default_theme === name) {
-    forms.theme.default_theme = 'system'
-  }
-}
 
 function toggleBuiltinTheme(name, enabled) {
   if (enabled && !forms.theme.available_themes.includes(name)) {
@@ -337,83 +263,8 @@ function toggleBuiltinTheme(name, enabled) {
           </v-list-item>
         </v-list>
 
-        <v-divider class="my-5" />
-
-        <!-- 自定义主题 -->
-        <div class="d-flex align-center mb-3">
-          <div class="text-subtitle-1 font-weight-bold">{{ $t('admin.customThemes') }}</div>
-          <v-spacer />
-          <v-btn size="small" color="primary" variant="tonal" prepend-icon="mdi-plus" @click="newThemeDialog = true">
-            {{ $t('admin.newTheme') }}
-          </v-btn>
-        </div>
-
-        <v-list rounded="lg" v-if="forms.theme.custom_themes.length" density="compact">
-          <v-list-item
-            v-for="ct in forms.theme.custom_themes"
-            :key="ct.name"
-            :title="ct.name"
-            :subtitle="ct.dark ? $t('admin.darkMode') : $t('admin.lightMode')"
-            prepend-icon="mdi-palette"
-          >
-            <template v-slot:append>
-              <v-btn icon="mdi-delete-outline" variant="text" size="small" color="error" @click="removeCustomTheme(ct.name)" />
-            </template>
-          </v-list-item>
-        </v-list>
-        <div v-else class="text-body-2 text-medium-emphasis mb-4">{{ $t('admin.noCustomThemes') }}</div>
-
-        <v-divider class="my-5" />
-
-        <!-- Light / Dark 主色配置 -->
-        <div class="text-subtitle-1 font-weight-bold mb-3">{{ $t('admin.lightTheme') }}</div>
-        <v-row>
-          <v-col cols="12" sm="4"><v-text-field color="primary"  v-model="forms.theme.lightPrimary" :color="forms.theme.lightPrimary" :label="$t('admin.primaryColor')" /></v-col>
-          <v-col cols="12" sm="4"><v-text-field color="primary"  v-model="forms.theme.lightSecondary" :color="forms.theme.lightSecondary" :label="$t('admin.secondaryColor')" /></v-col>
-          <v-col cols="12" sm="4"><v-text-field color="primary"  v-model="forms.theme.lightAccent" :color="forms.theme.lightAccent" :label="$t('admin.accentColor')" /></v-col>
-        </v-row>
-        <div class="text-subtitle-1 font-weight-bold mb-3 mt-2">{{ $t('admin.darkTheme') }}</div>
-        <v-row>
-          <v-col cols="12" sm="4"><v-text-field color="primary"  v-model="forms.theme.darkPrimary" :color="forms.theme.darkPrimary" :label="$t('admin.primaryColor')" /></v-col>
-          <v-col cols="12" sm="4"><v-text-field color="primary"  v-model="forms.theme.darkSecondary" :color="forms.theme.darkSecondary" :label="$t('admin.secondaryColor')" /></v-col>
-          <v-col cols="12" sm="4"><v-text-field color="primary"  v-model="forms.theme.darkAccent" :color="forms.theme.darkAccent" :label="$t('admin.accentColor')" /></v-col>
-        </v-row>
       </v-card-text>
     </v-card>
-
-    <!-- 新建自定义主题对话框 -->
-    <v-dialog v-model="newThemeDialog" max-width="480">
-      <v-card rounded="lg">
-        <v-toolbar :title="$t('admin.newTheme')">
-          <template #prepend>
-            <v-btn icon variant="text" @click="newThemeDialog = false">
-              <v-icon>mdi-close</v-icon>
-              <v-tooltip activator="parent" location="right">
-                {{ $t('common.cancel') }}
-              </v-tooltip>
-            </v-btn>
-          </template>
-          <template #append>
-            <v-btn icon variant="text" @click="addCustomTheme">
-              <v-icon>mdi-check</v-icon>
-              <v-tooltip activator="parent" location="left">
-                {{ $t('common.confirm') }}
-              </v-tooltip>
-            </v-btn>
-          </template>
-        </v-toolbar>
-
-        <v-card-text>
-          <v-text-field color="primary"  v-model="newTheme.name" :label="$t('admin.themeName')" :rules="[v => !!v || $t('auth.rules.required')]" />
-          <v-switch v-model="newTheme.dark" :label="$t('admin.darkMode')" color="primary" hide-details class="mb-3" />
-          <v-row>
-            <v-col cols="12" sm="4"><v-text-field color="primary"  v-model="newTheme.primary" :label="$t('admin.primaryColor')" type="color" /></v-col>
-            <v-col cols="12" sm="4"><v-text-field color="primary"  v-model="newTheme.secondary" :label="$t('admin.secondaryColor')" type="color" /></v-col>
-            <v-col cols="12" sm="4"><v-text-field color="primary"  v-model="newTheme.accent" :label="$t('admin.accentColor')" type="color" /></v-col>
-          </v-row>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
   </v-container>
 </template>
 

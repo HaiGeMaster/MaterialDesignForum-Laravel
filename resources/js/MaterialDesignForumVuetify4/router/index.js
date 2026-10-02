@@ -5,15 +5,35 @@ import { i18n } from '../i18n'
 
 import { siteName } from '../themeConfig'
 
+//   '/'
+//   '/topics'
+//   '/topics/:topic_id'
+//   '/questions'
+//   '/questions/:question_id'
+//   '/questions/:question_id/answers/:answer_id'
+//   '/articles'
+//   '/articles/:article_id'
+//   '/login'
+//   '/users/:user_id'
+//   '/users'
+//   '/notifications'
+//   '/notifications/setting'
+//   '/oauth/callback'
+//   '/install'
+//   '/settings'
+//   '/media'
+//   '/:pathMatch(.*)*'
+
+
 const routes = [
   { path: '/', name: 'home', component: () => import('../views/HomeView.vue'), meta: { titleKey: 'route.home', maxWidth: 1080 } },
   { path: '/topics', name: 'topics', component: () => import('../views/TopicsView.vue'), meta: { titleKey: 'route.topics', maxWidth: 1080 } },
   { path: '/topics/:topic_id', name: 'topic-detail', component: () => import('../views/TopicDetailView.vue'), meta: { titleKey: 'route.topicDetail', maxWidth: 860 } },
   { path: '/questions', name: 'questions', component: () => import('../views/QuestionsView.vue'), meta: { titleKey: 'route.questions', maxWidth: 860 } },
   { path: '/questions/:question_id', name: 'question-detail', component: () => import('../views/QuestionDetailView.vue'), meta: { titleKey: 'route.questionDetail', maxWidth: 860 } },
-  
+
   { path: '/questions/:question_id/answers/:answer_id', name: 'question-answer-detail', component: () => import('../views/QuestionDetailView.vue'), meta: { titleKey: 'route.questionDetail', maxWidth: 860 } },
-  
+
   { path: '/articles', name: 'articles', component: () => import('../views/ArticlesView.vue'), meta: { titleKey: 'route.articles', maxWidth: 860 } },
   { path: '/articles/:article_id', name: 'article-detail', component: () => import('../views/ArticleDetailView.vue'), meta: { titleKey: 'route.articleDetail', maxWidth: 860 } },
   { path: '/login', name: 'login', component: () => import('../views/LoginView.vue'), meta: { titleKey: 'route.login' } },
@@ -81,7 +101,7 @@ router.afterEach((to) => {
   currentTitleKey = to.meta.titleKey || null
   applyDocumentTitle()
 
-  
+
   if (loadingCallback) loadingCallback(false)
 })
 

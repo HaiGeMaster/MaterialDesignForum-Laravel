@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import http from '../api'
+import ColorTextField from './ColorTextField.vue'
 import { useFeedback } from '../composables/useFeedback'
 
 const props = defineProps({
@@ -354,7 +355,7 @@ async function submit() {
               </v-text-field>
             </v-col>
             <v-col cols="6">
-              <v-text-field color="primary" 
+              <ColorTextField color="primary"
                 v-model="form.user_group_color"
                 :label="$t('userGroupDialog.color')"
                 :rules="colorRules"
@@ -364,14 +365,7 @@ async function submit() {
                 hide-details="auto"
                 :hint="$t('userGroupDialog.colorHint')"
                 persistent-hint
-              >
-                <template #append-inner>
-                  <span
-                    style="display:inline-block;width:20px;height:20px;border-radius:4px;border:1px solid rgba(0,0,0,.12);flex-shrink:0;"
-                    :style="{ backgroundColor: form.user_group_color || 'transparent' }"
-                  />
-                </template>
-              </v-text-field>
+              />
             </v-col>
           </v-row>
           <v-row class="mb-1">

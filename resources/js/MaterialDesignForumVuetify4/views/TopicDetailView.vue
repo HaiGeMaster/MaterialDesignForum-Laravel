@@ -33,8 +33,30 @@ function handleOpen(item) {
 }
 const questions = ref([])
 const loading = ref(false)
-const activeTab = ref('articles')
 const editDialog = ref(false)
+
+const TOPIC_TABS = ['articles', 'questions']
+
+// 从路由哈希解析 tab（如 #questions），无效值回退到 articles
+function hashToTab(hash) {
+  const value = String(hash || '').replace(/^#/, '')
+  return TOPIC_TABS.includes(value) ? value : 'articles'
+}
+
+// tab 与路由哈希双向绑定（刷新 / 前进后退 / 分享链接可恢复）
+const activeTab = ref(hashToTab(route.hash))
+
+// 路由哈希变化 → 同步 tab（浏览器前进/后退、手动改地址）
+watch(() => route.hash, (hash) => {
+  activeTab.value = hashToTab(hash)
+})
+
+// tab 切换 → 写回哈希（replace 避免产生多余历史记录）
+watch(activeTab, (value) => {
+  if (route.hash !== `#${value}`) {
+    router.replace({ hash: `#${value}` })
+  }
+})
 
 const gradientPalette = [
   'linear-gradient(135deg, #424242 0%, #212121 100%)',

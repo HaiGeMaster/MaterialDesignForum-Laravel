@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import http from '../api'
 import { useInfiniteList } from '../composables/useInfiniteList'
@@ -12,6 +12,7 @@ const props = defineProps({
 })
 
 const { t } = useI18n()
+const route = useRoute()
 const router = useRouter()
 
 // 点击问题 / 文章 / 回答进入对应详情页
@@ -25,7 +26,32 @@ function goDetail(item, type) {
     }
 }
 
-const tab = ref('questions')
+const TABS = ['questions', 'articles', 'answers']
+
+// 从路由哈希解析 tab（如 #articles），无效值回退到 questions
+function hashToTab(hash) {
+    const value = String(hash || '').replace(/^#/, '')
+    return TABS.includes(value) ? value : 'questions'
+}
+
+// tab 与路由哈希双向绑定（刷新 / 前进后退 / 分享链接可恢复）
+const tab = ref(hashToTab(route.hash))
+
+// 路由哈希变化 → 同步 tab 并懒加载（浏览器前进/后退、手动改地址）
+watch(() => route.hash, (hash) => {
+    const next = hashToTab(hash)
+    if (next !== tab.value) {
+        tab.value = next
+        handleTabChange(next)
+    }
+})
+
+// tab 切换 → 写回哈希（replace 避免产生多余历史记录）
+watch(tab, (value) => {
+    if (route.hash !== `#${value}`) {
+        router.replace({ hash: `#${value}` })
+    }
+})
 
 // 提问 / 文章 / 回答：无限滚动分页加载
 const {
@@ -90,14 +116,14 @@ async function loadTab(name) {
     if (name === 'answers') return loadAnswers(true)
 }
 
-// 用户切换时重置并重新加载
+// 用户切换时重置并重新加载（tab 依据当前哈希恢复）
 watch(
     () => props.userId,
     async (userId) => {
         if (!userId) return
         loaded.value = { questions: false, articles: false, answers: false }
-        tab.value = 'questions'
-        await loadTab('questions')
+        tab.value = hashToTab(route.hash)
+        await loadTab(tab.value)
     },
     { immediate: true },
 )
