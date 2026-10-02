@@ -1,3 +1,4 @@
+import { watch } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { i18n } from '../i18n'
@@ -68,13 +69,27 @@ router.beforeEach(async (to) => {
   }
 })
 
+// 当前路由的标题键（供 siteName / 语言切换后重刷标题使用）
+let currentTitleKey = null
+
+function applyDocumentTitle() {
+  const title = currentTitleKey ? i18n.global.t(currentTitleKey) : ''
+  document.title = title ? `${title} · ${siteName.value}` : siteName.value
+}
+
 router.afterEach((to) => {
-  const title = to.meta.titleKey ? i18n.global.t(to.meta.titleKey) : ''
-  document.title = title ? `${title} · ${siteName.value}` : ''
+  currentTitleKey = to.meta.titleKey || null
+  applyDocumentTitle()
 
   
   if (loadingCallback) loadingCallback(false)
 })
+
+// siteName 由 /theme 接口异步加载，首次导航可能早于其就绪；到位后重刷当前页标题
+watch(siteName, applyDocumentTitle)
+
+// 切换语言时同步刷新标题
+watch(i18n.global.locale, applyDocumentTitle)
 
 
 export default router

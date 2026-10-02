@@ -4,7 +4,7 @@ import Admin from './admin.vue'
 import adminRouter from './router/admin.js'
 import vuetify from './plugins/vuetify'
 import { i18n } from './i18n'
-import '../css/app.css'
+import '../../css/app.css'
 import { loadThemeConfig } from './themeConfig'
 import { initClarity } from './clarity'
 

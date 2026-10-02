@@ -101,7 +101,7 @@ onBeforeUnmount(() => {
    避免用 * !important 误伤 MDI 图标字体和代码块等专用字体。 */
 @font-face {
   font-family: 'Poppins';
-  src: url('../css/Poppins-Regular.ttf') format('truetype');
+  src: url('../../css/Poppins-Regular.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;

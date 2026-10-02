@@ -1,3 +1,4 @@
+import { watch } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import AdminView from '../views/AdminView.vue'
@@ -5,14 +6,15 @@ import AdminModuleView from '../views/AdminModuleView.vue'
 import AdminOptionsView from '../views/AdminOptionsView.vue'
 import AdminOptionDetailView from '../views/AdminOptionDetailView.vue'
 import { siteName } from '../themeConfig'
+import { i18n } from '../i18n'
 
 const adminRouter = createRouter({
   history: createWebHistory('/admin/'),
   routes: [
-    { path: '/', name: 'admin-dashboard', component: AdminView },
-    { path: '/options', name: 'admin-options', component: AdminOptionsView },
-    { path: '/options/:setting(info|theme|mail|oauth)', name: 'admin-option-detail', component: AdminOptionDetailView },
-    { path: '/:module(topics|questions|answers|articles|comments|replies|user-groups|users|reports|options)', name: 'admin-module', component: AdminModuleView },
+    { path: '/', name: 'admin-dashboard', component: AdminView, meta: { titleKey: 'route.admin' } },
+    { path: '/options', name: 'admin-options', component: AdminOptionsView, meta: { titleKey: 'route.admin' } },
+    { path: '/options/:setting(info|theme|mail|oauth)', name: 'admin-option-detail', component: AdminOptionDetailView, meta: { titleKey: 'route.admin' } },
+    { path: '/:module(topics|questions|answers|articles|comments|replies|user-groups|users|reports|options)', name: 'admin-module', component: AdminModuleView, meta: { titleKey: 'route.admin' } },
   ],
 })
 
@@ -65,14 +67,26 @@ adminRouter.beforeEach(async (to) => {
   return true
 })
 
-adminRouter.afterEach(() => {
-  // document.title = 'Admin · MDForum'
+// 当前路由的标题键（供 siteName / 语言切换后重刷标题使用）
+let currentTitleKey = null
 
-    const title = to.meta.titleKey ? i18n.global.t(to.meta.titleKey) : ''
-    document.title = title ? `${title} · ${siteName.value}` : 'Admin'
-  
-  
+function applyDocumentTitle() {
+  const title = currentTitleKey ? i18n.global.t(currentTitleKey) : ''
+  document.title = title ? `${title} · ${siteName.value}` : (siteName.value || 'Admin')
+}
+
+adminRouter.afterEach((to) => {
+  currentTitleKey = to.meta.titleKey || null
+  applyDocumentTitle()
+
+
   if (loadingCallback) loadingCallback(false)
 })
+
+// siteName 由 /theme 接口异步加载，首次导航可能早于其就绪；到位后重刷当前页标题
+watch(siteName, applyDocumentTitle)
+
+// 切换语言时同步刷新标题
+watch(i18n.global.locale, applyDocumentTitle)
 
 export default adminRouter

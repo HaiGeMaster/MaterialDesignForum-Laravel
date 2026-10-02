@@ -12,7 +12,7 @@ export default defineConfig({
     },
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js', 'resources/js/admin.js'],
+            input: ['resources/css/app.css', 'resources/js/MaterialDesignForumVuetify4/app.js', 'resources/js/MaterialDesignForumVuetify4/admin.js'],
             refresh: true,
         }),
         vue(),

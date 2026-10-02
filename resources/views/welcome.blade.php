@@ -12,7 +12,7 @@
             }
             echo e($siteName ?: config('app.name'));
         @endphp</title>
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @vite(['resources/css/app.css', 'resources/js/MaterialDesignForumVuetify4/app.js'])
     </head>
     <body>
         <div id="app"></div>

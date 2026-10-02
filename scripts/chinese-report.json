@@ -1,46 +1,82 @@
 {
-  "resources/js/views/NotificationsView.vue": [
+  "resources/js/MaterialDesignForumVuetify4/admin.vue": [
     {
-      "line": 8,
-      "text": "小明',"
-    },
-    {
-      "line": 9,
-      "text": "赞了你的文章《初识 Laravel 11》',"
-    },
-    {
-      "line": 16,
-      "text": "小红',"
-    },
-    {
-      "line": 17,
-      "text": "回复了你的问题"
-    },
-    {
-      "line": 17,
-      "text": "如何优雅地处理文件上传？"
-    },
-    {
-      "line": 24,
-      "text": "老王',"
-    },
-    {
-      "line": 25,
-      "text": "关注了你',"
+      "line": 100,
+      "text": "通过覆盖 Vuetify 的 --font-family 变量全局生效，"
     }
   ],
-  "resources/js/views/SettingsView.vue": [
+  "resources/js/MaterialDesignForumVuetify4/App.vue": [
     {
-      "line": 46,
-      "text": "简体中文' },"
+      "line": 161,
+      "text": "通过覆盖 Vuetify 的 --font-family 变量全局生效，"
+    }
+  ],
+  "resources/js/MaterialDesignForumVuetify4/components/AdminDrawer.vue": [
+    {
+      "line": 104,
+      "text": "备案\">"
     },
     {
-      "line": 47,
-      "text": "繁體中文' },"
+      "line": 112,
+      "text": "公安备案\">"
+    }
+  ],
+  "resources/js/MaterialDesignForumVuetify4/components/AppDrawer.vue": [
+    {
+      "line": 107,
+      "text": "备案\">"
     },
     {
-      "line": 49,
-      "text": "日本語' },"
+      "line": 115,
+      "text": "公安备案\">"
+    }
+  ],
+  "resources/js/MaterialDesignForumVuetify4/components/LanguageSwitcher.vue": [
+    {
+      "line": 28,
+      "text": "日本語 (日本)\" },"
+    },
+    {
+      "line": 31,
+      "text": "简体中文(中国)\" },"
+    },
+    {
+      "line": 32,
+      "text": "繁體中文(中国台灣)\" },"
+    }
+  ],
+  "resources/js/MaterialDesignForumVuetify4/components/UserProfileCard.vue": [
+    {
+      "line": 100,
+      "text": "头像+名字行：bottom: -48px（行高 96px），行中心点精确落在封面底边；"
+    },
+    {
+      "line": 101,
+      "text": "居中 / 非 xs 靠左，名字垂直居中对齐头像中心"
+    },
+    {
+      "line": 273,
+      "text": "且行高由 96px 头像决定，"
+    }
+  ],
+  "resources/js/MaterialDesignForumVuetify4/views/AdminModuleView.vue": [
+    {
+      "line": 534,
+      "text": "用户' : '选中的条目'"
+    },
+    {
+      "line": 555,
+      "text": "删除失败'"
+    },
+    {
+      "line": 783,
+      "text": "删除失败'"
+    }
+  ],
+  "resources/js/MaterialDesignForumVuetify4/views/SignInView copy.vue": [
+    {
+      "line": 181,
+      "text": "一', '二', '三', '四', '五', '六', '日']\" :key=\"label\" cols=\"1\" class=\"py-1 text-medium-emphasis\">"
     }
   ]
 }

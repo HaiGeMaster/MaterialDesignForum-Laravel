@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
         <title>Admin · {{ \Illuminate\Support\Facades\DB::table('settings')->where('name', 'site_name')->value('value') ?: config('app.name') }}</title>
-        @vite(['resources/css/app.css', 'resources/js/admin.js'])
+        @vite(['resources/css/app.css', 'resources/js/MaterialDesignForumVuetify4/admin.js'])
     </head>
     <body>
         <div id="admin-app"></div>

@@ -1,7 +1,7 @@
 /**
  * 中文文案扫描脚本
  *
- * 递归扫描 resources/js 下的 .vue / .js / .ts 文件，
+ * 递归扫描 resources/js/MaterialDesignForumVuetify4 下的 .vue / .js / .ts 文件，
  * 提取包含中文的文本片段，输出两种结果：
  *   1. scripts/chinese-report.md —— 按文件分组的可读清单（文件:行号:原文）
  *   2. scripts/chinese-report.json —— 结构化数据（供后续转语言包）
@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(__dirname, '..')
-const TARGET = process.argv[2] ? join(process.cwd(), process.argv[2]) : join(ROOT, 'resources', 'js')
+const TARGET = process.argv[2] ? join(process.cwd(), process.argv[2]) : join(ROOT, 'resources', 'js', 'MaterialDesignForumVuetify4')
 const OUT_DIR = join(__dirname)
 const OUT_MD = join(OUT_DIR, 'chinese-report.md')
 const OUT_JSON = join(OUT_DIR, 'chinese-report.json')
