@@ -1,9 +1,9 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useTheme } from 'vuetify'
 import { useI18n } from 'vue-i18n'
 import { BUILTIN_THEMES } from '../plugins/vuetify'
-import { availableThemes, defaultTheme, resolveTheme } from '../themeConfig'
+import { availableThemes, defaultTheme, resolveTheme, syncThemeColor } from '../themeConfig'
 
 const theme = useTheme()
 const { t } = useI18n()
@@ -15,6 +15,12 @@ const storedTheme = ref(localStorage.getItem('mdforum-theme') || defaultTheme.va
 
 // 当前实际生效是否为深色（system 模式下跟随系统）
 const isDark = computed(() => theme.current.value?.dark ?? false)
+
+// 监听 Vuetify 当前主题变化，自动同步 PWA 顶部窗口栏颜色
+// 无论通过何种方式切换主题（手动 / system / 初始加载）都能生效
+watch(theme.current, () => {
+  requestAnimationFrame(syncThemeColor)
+}, { immediate: true })
 
 // 当前主题图标
 const currentIcon = computed(() => {

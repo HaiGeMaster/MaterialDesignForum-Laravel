@@ -337,10 +337,10 @@ async function onFileChange(event) {
 }
 
 /* 触摸设备：没有 hover 状态，上传按钮常驻显示 */
-@media (hover: none) {
+/* @media (hover: none) {
     .cover-upload-btn,
     .avatar-upload-btn {
         opacity: 1;
     }
-}
+} */
 </style>

@@ -14,6 +14,48 @@ export const availableThemes = ref([])
 export const defaultTheme = ref('system')
 
 /**
+ * 将 Vuetify 当前主题的 surface 色同步到 PWA 顶部窗口栏（theme-color meta）。
+ * Vuetify 3 的 --v-theme-surface 存储的是 RGB 三元组（如 "33, 33, 33"），
+ * 需包装为 rgb(r, g, b) 后写入 meta 标签。
+ */
+export function syncThemeColor() {
+  try {
+    // Vuetify 主题变量默认挂在 :root（documentElement），
+    // 部分配置下可能在 .v-application 上，依次尝试
+    const sources = [
+      document.documentElement,
+      document.body,
+      document.querySelector('.v-application'),
+    ]
+    let raw = ''
+    for (const el of sources) {
+      if (!el) continue
+      raw = getComputedStyle(el).getPropertyValue('--v-theme-surface').trim()
+      if (raw) break
+    }
+
+    if (!raw) {
+    //   console.warn('[PWA] --v-theme-surface not found')
+      return
+    }
+
+    // raw 可能是 "33, 33, 33"，包装为 rgb(...)
+    const color = raw.startsWith('rgb') ? raw : `rgb(${raw})`
+
+    let meta = document.querySelector('meta[name="theme-color"]')
+    if (!meta) {
+      meta = document.createElement('meta')
+      meta.setAttribute('name', 'theme-color')
+      document.head.appendChild(meta)
+    }
+    meta.setAttribute('content', color)
+    // console.log('[PWA] theme-color synced:', color)
+  } catch (e) {
+    // console.error('[PWA] syncThemeColor failed:', e)
+  }
+}
+
+/**
  * 将用户选择的主题名解析为实际 Vuetify 主题名。
  * 'system' 时根据操作系统偏好返回 'light' 或 'dark'。
  */
@@ -54,6 +96,9 @@ export function applyThemeConfig(vuetify, config) {
     const fallback = availableThemes.value.find(n => allThemes[n]) || 'light'
     themeApi.change(fallback)
   }
+
+  // 主题应用后同步 PWA 顶部窗口栏颜色
+  requestAnimationFrame(syncThemeColor)
 }
 
 export async function loadThemeConfig(vuetify) {

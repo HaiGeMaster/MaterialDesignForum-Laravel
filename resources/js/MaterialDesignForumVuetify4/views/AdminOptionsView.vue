@@ -21,7 +21,7 @@ const settingGroups = computed(() => [
     title: t('admin.aboutApplication'),
     items: [
       { key: 'about', title: t('admin.about'), description: t('admin.aboutDescription'), icon: 'mdi-information-outline' },
-      { key: 'qqGroup', title: t('admin.joinQQGroup'), description: t('admin.joinQQGroupDescription'), icon: 'mdi-qqchat' },
+    //   { key: 'qqGroup', title: t('admin.joinQQGroup'), description: t('admin.joinQQGroupDescription'), icon: 'mdi-qqchat' },
     ],
   },
 ])
