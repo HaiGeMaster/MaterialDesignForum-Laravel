@@ -46,7 +46,7 @@ class AdminModuleController extends Controller
             'sortable'     => ['topic_id', 'user_id', 'follower_count', 'article_count', 'question_count', 'create_time', 'update_time'],
             'relations'    => [],
             'soft_delete'  => true,
-            'update_fields' => ['name', 'description'],
+            'update_fields' => ['name', 'description', 'cover'],
             'delete_field'  => 'delete_time',
         ],
         'questions' => [

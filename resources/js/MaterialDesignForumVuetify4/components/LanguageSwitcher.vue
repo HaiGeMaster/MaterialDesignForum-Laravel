@@ -4,8 +4,13 @@ import {
   setLocale,
   // getBaseLanguagePackList
  } from '../i18n'
+import { useAuthStore } from '../stores/auth'
+import { useUserStore } from '../stores/user'
 
 const { locale,t } = useI18n()
+
+const authStore = useAuthStore()
+const userStore = useUserStore()
 
 // 语言列表：用各语言的原生名称展示，需要使用 baseLanguagePackInfo.langname 作为label
 
@@ -32,8 +37,18 @@ const languages = [
   { code: 'zh-TW', label: "繁體中文(中国台灣)" },
 ]
 
-function switchLanguage(code) {
+async function switchLanguage(code) {
   setLocale(code)
+
+  // 已登录用户：把语言标识符（如 zh-CN / en-US）记录到 user 表 language 字段
+  if (authStore.isLoggedIn) {
+    try {
+      await userStore.updateProfile({ language: code })
+      if (authStore.user) authStore.user.language = code
+    } catch {
+      // 保存失败不影响本地语言切换
+    }
+  }
 }
 </script>
 
