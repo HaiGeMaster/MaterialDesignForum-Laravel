@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#FFFFFF">
+  <title>网络连接已断开</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #f5f5f5;
+      --surface: #ffffff;
+      --text: #1c1b1f;
+      --text-secondary: #5c5c5c;
+      --primary: #6750a4;
+      --primary-on: #ffffff;
+      --border: #e0e0e0;
+      --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #141218;
+        --surface: #1d1b20;
+        --text: #e6e0e9;
+        --text-secondary: #cac4d0;
+        --primary: #d0bcff;
+        --primary-on: #381e72;
+        --border: #48454c;
+        --shadow: 0 2px 8px rgba(0,0,0,0.4);
+      }
+    }
+    html, body { height: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      -webkit-font-smoothing: antialiased;
+    }
+    .card {
+      background: var(--surface);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 40px 32px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    .icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 18px;
+      margin: 0 auto 20px;
+      display: block;
+    }
+    h1 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    p {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      margin-bottom: 28px;
+    }
+    .btn {
+      display: inline-block;
+      background: var(--primary);
+      color: var(--primary-on);
+      border: none;
+      border-radius: 999px;
+      padding: 12px 28px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.88; }
+    .btn:active { opacity: 0.76; }
+    .tip {
+      margin-top: 20px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <div class="card" role="alert">
+    <img src="/icon-512.png" alt="" class="icon" onerror="this.style.display='none'">
+    <h1>网络连接已断开</h1>
+    <p>当前设备处于离线状态，无法加载内容。<br>请检查网络连接后重试。</p>
+    <button class="btn" onclick="retry()">重新连接</button>
+    <div class="tip">已缓存的页面仍可正常访问</div>
+  </div>
+  <script>
+    function retry() {
+      if (navigator.onLine) {
+        location.reload();
+      } else {
+        window.addEventListener('online', function once() {
+          window.removeEventListener('online', once);
+          location.reload();
+        });
+        document.querySelector('.tip').textContent = '等待网络连接...';
+      }
+    }
+  </script>
+</body>
+</html>

@@ -43,7 +43,7 @@ async function handleLogout() {
 </script>
 
 <template>
-  <v-app-bar>
+  <v-app-bar scroll-behavior="elevate">
     <v-app-bar-nav-icon @click="emit('toggle-drawer')" />
 
     <v-img v-if="smAndDown" src="/favicon.png" alt="site logo" width="24" height="24" style="width: 24px;max-width: 24px;" />
