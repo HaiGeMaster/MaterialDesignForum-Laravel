@@ -83,7 +83,7 @@ export function applyThemeConfig(vuetify, config) {
   }
 
   // 2. 应用主题
-  const saved = localStorage.getItem('mdforum-theme')
+  const saved = localStorage.getItem('vuetify-theme')
   const target = saved || config.default_theme || 'system'
   const allThemes = themeApi.themes.value
 

@@ -34,7 +34,9 @@ const languages = [
   { code: 'ko-KR', label: "한국어 (대한민국)" },
   { code: 'ru-RU', label: "Русский (Россия)" },
   { code: 'zh-CN', label: "简体中文(中国)" },
-  { code: 'zh-TW', label: "繁體中文(中国台灣)" },
+    { code: 'zh-TW', label: "繁體中文(中国台灣)" },
+
+    //de-DE/en-GB/fr-FR/ja-JP/ko-KR/ru-RU/zh-CN/zh-TW
 ]
 
 async function switchLanguage(code) {

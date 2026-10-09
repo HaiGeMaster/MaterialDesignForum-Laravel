@@ -17,7 +17,7 @@ const saving = ref(false)
 const loading = ref(false)
 
 const forms = reactive({
-  info: { site_name: '', site_description: '', site_keywords: '', site_icp_beian: '', site_gongan_beian: '', default_language: 'zh' },
+  info: { site_name: '', site_description: '', site_keywords: '', site_icp_beian: '', site_gongan_beian: '', default_language: '' },
   mail: { MAIL_MAILER: 'smtp', MAIL_HOST: '', MAIL_PORT: '465', MAIL_SCHEME: 'smtps', MAIL_USERNAME: '', MAIL_PASSWORD: '', password_set: false, MAIL_FROM_ADDRESS: '', MAIL_FROM_NAME: '' },
   oauth: { GITHUB_CLIENT_ID: '', GITHUB_CLIENT_SECRET: '', GITHUB_SECRET_SET: false, GOOGLE_CLIENT_ID: '', GOOGLE_CLIENT_SECRET: '', GOOGLE_SECRET_SET: false, MICROSOFT_CLIENT_ID: '', MICROSOFT_CLIENT_SECRET: '', MICROSOFT_SECRET_SET: false },
   theme: {
@@ -45,8 +45,17 @@ const page = computed(() => ({
 }[route.params.setting] || { title: t('admin.manageSettings'), icon: 'mdi-cog' }))
 
 const infoLanguages = computed(() => [
-  { title: t('admin.chinese'), value: 'zh' },
-  { title: t('admin.english'), value: 'en' },
+//   { title: t('admin.chinese'), value: 'zh' },
+//   { title: t('admin.english'), value: 'en' },
+  { code: 'de-DE', label: "Deutsch (Deutschland)" },
+  { code: 'en-GB', label: "English (United Kingdom)" },
+  { code: 'en-US', label: "English (United States)" },
+  { code: 'fr-FR', label: "Français (France)" },
+  { code: 'ja-JP', label: "日本語 (日本)" },
+  { code: 'ko-KR', label: "한국어 (대한민국)" },
+  { code: 'ru-RU', label: "Русский (Россия)" },
+  { code: 'zh-CN', label: "简体中文(中国)" },
+  { code: 'zh-TW', label: "繁體中文(中国台灣)" },
 ])
 
 function goBack() {
@@ -203,7 +212,7 @@ function toggleBuiltinTheme(name, enabled) {
         <v-text-field color="primary"  v-model="forms.info.site_keywords" :label="$t('admin.siteKeywords')" :hint="$t('admin.siteKeywordsHint')" persistent-hint />
         <v-text-field color="primary"  v-model="forms.info.site_icp_beian" :label="$t('admin.siteIcp')" />
         <v-text-field color="primary"  v-model="forms.info.site_gongan_beian" :label="$t('admin.sitePolice')" />
-        <v-select v-model="forms.info.default_language" :items="infoLanguages" item-title="title" item-value="value" :label="$t('admin.defaultLanguage')" />
+        <v-select v-model="forms.info.default_language" :items="infoLanguages" item-title="label" item-value="code" :label="$t('admin.defaultLanguage')" />
       </v-card-text>
 
       <v-card-text v-else-if="route.params.setting === 'mail'" class="form-section">

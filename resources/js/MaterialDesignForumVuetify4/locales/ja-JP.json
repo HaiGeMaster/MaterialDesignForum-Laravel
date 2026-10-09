@@ -664,7 +664,7 @@
     "appPhp": "PHP バージョン",
     "appEnvironment": "実行環境",
     "appUrl": "サイト URL",
-    "appCopyright": "Copyright © {year} MDForum",
+    "appCopyright": "Copyright © {year} MaterialDesignForum",
     "aboutLoadFailed": "アプリケーション情報の読み込みに失敗しました。しばらくしてからもう一度お試しください",
     "close": "閉じる",
     "siteName": "サイト名",

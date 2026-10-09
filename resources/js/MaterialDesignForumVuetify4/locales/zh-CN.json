@@ -664,7 +664,7 @@
     "appPhp": "PHP 版本",
     "appEnvironment": "运行环境",
     "appUrl": "站点地址",
-    "appCopyright": "Copyright © {year} MDForum",
+    "appCopyright": "Copyright © {year} MaterialDesignForum",
     "aboutLoadFailed": "应用信息加载失败，请稍后重试",
     "close": "关闭",
     "siteName": "站点名称",

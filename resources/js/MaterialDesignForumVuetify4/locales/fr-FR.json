@@ -664,7 +664,7 @@
     "appPhp": "Version de PHP",
     "appEnvironment": "Environnement",
     "appUrl": "Adresse du site",
-    "appCopyright": "Copyright © {year} MDForum",
+    "appCopyright": "Copyright © {year} MaterialDesignForum",
     "aboutLoadFailed": "Échec du chargement des informations de l'application, veuillez réessayer plus tard",
     "close": "Fermer",
     "siteName": "Nom du site",

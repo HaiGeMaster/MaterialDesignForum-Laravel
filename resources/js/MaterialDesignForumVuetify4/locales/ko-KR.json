@@ -664,7 +664,7 @@
     "appPhp": "PHP 버전",
     "appEnvironment": "실행 환경",
     "appUrl": "사이트 주소",
-    "appCopyright": "Copyright © {year} MDForum",
+    "appCopyright": "Copyright © {year} MaterialDesignForum",
     "aboutLoadFailed": "앱 정보를 불러오지 못했습니다. 나중에 다시 시도해 주세요",
     "close": "닫기",
     "siteName": "사이트 이름",

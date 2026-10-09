@@ -23,7 +23,7 @@ class User extends Authenticatable
     protected $guarded = [];
 
     protected $hidden = [
-        // 'email',后期需要修改为用户验证或管理员才能访问用户的邮件
+        'email',
         'password',
     ];
 
@@ -76,6 +76,49 @@ class User extends Authenticatable
         UserGroup::query()
             ->where('user_group_id', $userGroupId)
             ->update(['user_group_user_count' => $count, 'update_time' => now()]);
+    }
+
+    /**
+     * 序列化时条件性地暴露 email 字段。
+     *
+     * email 默认在 $hidden 中对所有人隐藏，仅当当前认证用户
+     * 为用户本人或属于管理员用户组时才在 toArray() 中返回。
+     */
+    public function toArray()
+    {
+        $array = parent::toArray();
+
+        if ($this->shouldRevealEmail()) {
+            $array['email'] = $this->email;
+        }
+
+        return $array;
+    }
+
+    /**
+     * 判断当前认证用户是否可以查看本用户的邮箱。
+     *
+     * 仅当访问者为用户本人或管理员用户组时返回 true。
+     */
+    protected function shouldRevealEmail(): bool
+    {
+        $currentUser = auth()->user();
+
+        if (! $currentUser) {
+            return false;
+        }
+
+        // 用户本人
+        if ($currentUser->user_id === $this->user_id) {
+            return true;
+        }
+
+        // 管理员用户组
+        if (! $currentUser->relationLoaded('userGroup')) {
+            $currentUser->load('userGroup');
+        }
+
+        return (bool) ($currentUser->userGroup->is_admin ?? false);
     }
 
     /**

@@ -664,7 +664,7 @@
     "appPhp": "PHP version",
     "appEnvironment": "Environment",
     "appUrl": "Site URL",
-    "appCopyright": "Copyright © {year} MDForum",
+    "appCopyright": "Copyright © {year} MaterialDesignForum",
     "aboutLoadFailed": "Failed to load application information, please try again later",
     "close": "Close",
     "siteName": "Site name",

@@ -21,8 +21,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'ability' => \App\Http\Middleware\CheckAbility::class,
         ]);
 
-        // 全局（API 组）：可选解析登录用户，公开接口也能通过 $request->user() 感知登录状态
+        // 全局（API 组）：
+        // - SetLocaleFromCookie：根据前端 cookie locale 临时设置后端语言，使 __('messages.*') 按用户首选语言渲染
+        // - ResolveOptionalUser：可选解析登录用户，公开接口也能通过 $request->user() 感知登录状态
         $middleware->api(append: [
+            \App\Http\Middleware\SetLocaleFromCookie::class,
             \App\Http\Middleware\ResolveOptionalUser::class,
         ]);
     })

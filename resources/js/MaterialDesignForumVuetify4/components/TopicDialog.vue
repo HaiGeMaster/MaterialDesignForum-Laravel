@@ -5,6 +5,8 @@ import http from '../api'
 import { useAuthStore } from '../stores/auth'
 import { useFeedback } from '../composables/useFeedback'
 import ImageUploadField from './ImageUploadField.vue'
+import { useDisplay } from 'vuetify'
+const { mobile } = useDisplay()
 
 const props = defineProps({
   /** 对话框显隐 */
@@ -97,7 +99,7 @@ async function submit() {
 </script>
 
 <template>
-  <v-dialog v-model="dialogOpen" max-width="560">
+  <v-dialog v-model="dialogOpen" max-width="560" :fullscreen="mobile">
     <v-card rounded="lg" >
       <!-- :title="isEdit ? $t('topicDialog.titleEdit') : $t('topicDialog.titleNew')" :prepend-icon="isEdit ? 'mdi-pencil-outline' : 'mdi-tag-plus-outline'" -->
 
@@ -127,7 +129,7 @@ async function submit() {
 
       <v-card-text>
         <v-form ref="formRef" @submit.prevent="submit">
-          <v-text-field color="primary" 
+          <v-text-field color="primary"
             v-model="name"
             :label="$t('topicDialog.name')"
             :rules="nameRules"
@@ -137,7 +139,7 @@ async function submit() {
             class="mb-4"
           />
 
-          <v-textarea color="primary" 
+          <v-textarea color="primary"
             v-model="description"
             :label="$t('topicDialog.description')"
             :rules="descriptionRules"

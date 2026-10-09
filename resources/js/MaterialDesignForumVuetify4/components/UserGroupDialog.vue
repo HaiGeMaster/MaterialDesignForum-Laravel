@@ -5,6 +5,10 @@ import http from '../api'
 import ColorTextField from './ColorTextField.vue'
 import { useFeedback } from '../composables/useFeedback'
 
+import { useDisplay } from 'vuetify'
+const { mobile } = useDisplay()
+
+
 const props = defineProps({
   /** 对话框显隐 */
   modelValue: { type: Boolean, default: false },
@@ -289,7 +293,8 @@ async function submit() {
 </script>
 
 <template>
-  <v-dialog v-model="dialogOpen" max-width="800">
+  <v-dialog v-model="dialogOpen" max-width="800"
+    :fullscreen="mobile">
     <v-card rounded="lg" >
       <v-toolbar :title="isEdit ? $t('userGroupDialog.titleEdit') : $t('userGroupDialog.titleNew')">
         <template #prepend>
@@ -314,7 +319,7 @@ async function submit() {
         <v-form ref="formRef" @submit.prevent="submit">
           <!-- 基础信息 -->
           <div class="text-subtitle-1 font-weight-bold mb-3">{{ $t('userGroupDialog.groups.basic') }}</div>
-          <v-text-field color="primary" 
+          <v-text-field color="primary"
             v-model="form.user_group_name"
             :label="$t('userGroupDialog.name')"
             :rules="nameRules"
@@ -324,7 +329,7 @@ async function submit() {
             hide-details="auto"
             class="mb-3"
           />
-          <v-textarea color="primary" 
+          <v-textarea color="primary"
             v-model="form.user_group_description"
             :label="$t('userGroupDialog.description')"
             :rules="descriptionRules"
@@ -338,7 +343,7 @@ async function submit() {
           />
           <v-row class="mb-1">
             <v-col cols="6">
-              <v-text-field color="primary" 
+              <v-text-field color="primary"
                 v-model="form.user_group_icon"
                 :label="$t('userGroupDialog.icon')"
                 :rules="iconRules"
@@ -409,7 +414,7 @@ async function submit() {
                     sm="6"
                   >
                     <!-- 时间限制：数字输入 -->
-                    <v-text-field color="primary" 
+                    <v-text-field color="primary"
                       v-if="field.type === 'number'"
                       v-model.number="form[field.key]"
                       :label="`${$t(field.labelKey)} (${$t('userGroupDialog.fields.minutes')})`"

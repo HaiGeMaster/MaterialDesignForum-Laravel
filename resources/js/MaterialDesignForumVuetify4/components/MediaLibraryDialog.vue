@@ -7,6 +7,9 @@ import { useInfiniteList } from '../composables/useInfiniteList'
 import { useAuthStore } from '../stores/auth'
 import InfiniteScroll from './InfiniteScroll.vue'
 
+import { useDisplay } from 'vuetify'
+const { mobile } = useDisplay()
+
 // v-model: 对话框开关
 const open = defineModel('open', { type: Boolean, default: false })
 
@@ -77,7 +80,7 @@ function insertFromLibrary() {
 </script>
 
 <template>
-  <v-dialog v-model="open" max-width="760" scrollable>
+  <v-dialog v-model="open" max-width="760" scrollable :fullscreen="mobile">
     <v-card rounded="lg" >
       <v-toolbar :title="$t('editor.libraryDialogTitle')">
         <template #prepend>

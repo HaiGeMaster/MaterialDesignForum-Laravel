@@ -114,10 +114,10 @@ async function openAbout() {
     <v-dialog v-model="aboutDialog" max-width="520">
       <v-card rounded="lg">
         <v-toolbar :title="$t('admin.aboutTitle')">
-          <template #prepend>
+          <template #append>
             <v-btn icon variant="text" @click="aboutDialog = false">
               <v-icon>mdi-close</v-icon>
-              <v-tooltip activator="parent" location="right">
+              <v-tooltip activator="parent" location="left">
                 {{ $t('common.close') }}
               </v-tooltip>
             </v-btn>
@@ -135,8 +135,10 @@ async function openAbout() {
           <v-alert v-else type="error" variant="tonal">{{ $t('admin.aboutLoadFailed') }}</v-alert>
         </v-card-text>
 
+        <v-divider />
+
         <v-card-actions>
-          <span class="text-caption text-medium-emphasis px-4">
+          <span class="text-caption text-medium-emphasis px-4 ">
             {{ $t('admin.appCopyright', { year: aboutData?.year || new Date().getFullYear() }) }}
             <a href="https://github.com/HaiGeMaster">HaiGeMaster</a>
           </span>

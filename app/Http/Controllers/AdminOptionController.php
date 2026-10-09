@@ -313,6 +313,18 @@ class AdminOptionController extends Controller
             }
         });
 
+        // 将默认语言同步写入 .env 的 APP_LOCALE，并更新运行时配置使其立即生效
+        // 将站点名称同步写入 .env 的 APP_NAME，并更新运行时配置使其立即生效
+        $this->updateEnvFile([
+            'APP_LOCALE' => $validated['default_language'],
+            'APP_NAME' => $validated['site_name'],
+        ]);
+        config([
+            'app.locale' => $validated['default_language'],
+            'app.name' => $validated['site_name'],
+        ]);
+        App::setLocale($validated['default_language']);
+
         return response()->json([
             'is_set' => true,
             'data' => $validated,

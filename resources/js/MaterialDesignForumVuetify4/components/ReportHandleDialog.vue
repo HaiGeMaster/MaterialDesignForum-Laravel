@@ -4,6 +4,8 @@ import { useI18n } from 'vue-i18n'
 import http from '../api'
 import { useFeedback } from '../composables/useFeedback'
 import ProseRenderer from './ProseRenderer.vue'
+import { useDisplay } from 'vuetify'
+const { mobile } = useDisplay()
 
 const props = defineProps({
   /** 对话框显隐 */
@@ -165,7 +167,7 @@ async function submit() {
 </script>
 
 <template>
-  <v-dialog v-model="dialogOpen" max-width="520">
+  <v-dialog v-model="dialogOpen" max-width="520" :fullscreen="mobile">
     <v-card rounded="lg" >
       <v-toolbar :title="$t('reportDialog.title')">
         <template #prepend>
