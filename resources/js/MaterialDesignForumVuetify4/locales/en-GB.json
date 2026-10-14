@@ -1295,5 +1295,123 @@
   "themeDialog": {
     "title": "Select theme",
     "system": "Follow system"
+  },
+  "cookiePref": {
+    "drawerLink": "Cookie preferences",
+    "banner": {
+      "title": "About our use of cookies",
+      "body": "We use cookies and similar technologies (pixels, local storage and so on) to keep the site running, analyse visits and improve our service. Necessary cookies are always on; analytics and marketing cookies are only loaded once you have consented. See our",
+      "policyLink": "Cookie Policy",
+      "hint": "You can click \"Customise categories\" to review the cookies we actually use, category by category, and you can change or withdraw your consent at any time via the \"Cookie settings\" link in the footer or the floating button.",
+      "rejectAll": "Reject all",
+      "customize": "Customise categories",
+      "acceptAll": "Accept all",
+      "close": "Close"
+    },
+    "pref": {
+      "title": "Cookie Preference Centre",
+      "close": "Close",
+      "intro": "The cookies actually used on this site are listed below, grouped by purpose. Necessary cookies are required for the site to work and cannot be switched off; the other categories are off by default, and the relevant scripts are loaded only after you switch them on. To find out more, see our",
+      "policyLink": "Cookie Policy page",
+      "alwaysOn": "Always on",
+      "countPrefix": "",
+      "countSuffix": " items",
+      "legalBasisLabel": "Legal basis:",
+      "dirtyHint": "You have unsaved changes. They will take effect once you click \"Save my choices\" below.",
+      "lastUpdatedLabel": "Last updated: {time}",
+      "lastUpdatedHint": "Withdrawing consent immediately stops the relevant scripts and deletes cookies already stored on your device.",
+      "rejectAll": "Reject all",
+      "revert": "Discard changes",
+      "save": "Save my choices",
+      "colName": "Name",
+      "colProvider": "Provider",
+      "colPurpose": "Purpose",
+      "colType": "Type",
+      "colDuration": "Retention period"
+    },
+    "cat": {
+      "necessary": {
+        "name": "Necessary (strictly necessary)",
+        "desc": "Required for the site to work; cannot be switched off",
+        "intro": "These cookies maintain your session, protect against cross-site request forgery and support CDN security checks — they are the foundation of the site's usability.",
+        "legalBasis": "Necessary to provide the service; no consent required",
+        "note": "Cloudflare cookies are set by our CDN and security provider for security protection only; they are not used for cross-site tracking."
+      },
+      "functional": {
+        "name": "Functional and preferences",
+        "desc": "Remembers language, region and interface settings",
+        "intro": "These cookies remember the choices you have made (language, region, interface preferences) so you don't have to set them again on every visit.",
+        "legalBasis": "Consent (Articles 13 and 14 of the Personal Information Protection Law)",
+        "note": ""
+      },
+      "analytics": {
+        "name": "Analytics and statistics",
+        "desc": "Visits, time on site, heatmaps and session recordings",
+        "intro": "Measures visits and click distribution to understand which content users interact with most, so we can improve the experience.",
+        "legalBasis": "Consent; for the EU also Art. 6(1)(a) GDPR + Art. 5(3) of the ePrivacy Directive",
+        "note": "Since October 2025 Clarity requires a site to send a consent v2 signal before full tracking is enabled. Session recording amounts to systematic behavioural monitoring; for the EU we recommend carrying out a DPIA and enabling content masking."
+      },
+      "marketing": {
+        "name": "Advertising and marketing",
+        "desc": "Personalised recommendations, conversion attribution, cross-site identifiers",
+        "intro": "Set by our advertising partners to build an interest profile and show relevant adverts on other sites. They do not directly store personal information, but rely on a unique identifier for your browser and device.",
+        "legalBasis": "Separate consent; where personal information is transferred overseas, separate notice and separate consent are required",
+        "note": "Data is processed by default in Azure data centres in the US, which constitutes a cross-border transfer of personal information; the recipients and safeguards (SCC / DPF) must be listed separately in the privacy policy."
+      }
+    },
+    "cookie": {
+      "type": {
+        "firstPartySession": "First-party · Session",
+        "firstPartyPersistent": "First-party · Persistent",
+        "thirdPartyPersistent": "Third-party · Persistent"
+      },
+      "XSRF_TOKEN": {
+        "provider": "This site",
+        "purpose": "Cross-site request forgery (CSRF) protection",
+        "duration": "Deleted when the session ends"
+      },
+      "xbedrock_session": {
+        "provider": "This site",
+        "purpose": "Maintains session state and request continuity",
+        "duration": "Deleted when the session ends"
+      },
+      "cf_clearance": {
+        "provider": "Cloudflare, Inc.",
+        "purpose": "Records that a security challenge has been passed and blocks malicious traffic",
+        "duration": "30 minutes to 1 year (depending on backend configuration)"
+      },
+      "ui_locale": {
+        "provider": "This site",
+        "purpose": "Stores your language and region selection",
+        "duration": "As actually configured"
+      },
+      "ui_theme": {
+        "provider": "This site",
+        "purpose": "Stores your theme preference",
+        "duration": "As actually configured"
+      },
+      "_clck": {
+        "provider": "Microsoft Clarity",
+        "purpose": "Stores a user ID to link return visits and preferences",
+        "duration": "1 year"
+      },
+      "_clsk": {
+        "provider": "Microsoft Clarity",
+        "purpose": "Merges multiple page views into a single session recording",
+        "duration": "1 day"
+      },
+      "MUID": {
+        "provider": "Microsoft (.bing.com)",
+        "purpose": "Microsoft universal browser identifier, linked with Microsoft Advertising / Bing",
+        "duration": "13 months (390 days)"
+      }
+    },
+    "toast": {
+      "acceptAll": "All cookies accepted",
+      "rejectAll": "All non-necessary cookies rejected",
+      "saved": "Your preferences have been saved",
+      "reverted": "Unsaved changes discarded",
+      "reset": "Local consent record cleared; you will be asked again after refreshing"
+    }
   }
 }

@@ -6,7 +6,7 @@ import ColorTextField from './ColorTextField.vue'
 import { useFeedback } from '../composables/useFeedback'
 
 import { useDisplay } from 'vuetify'
-const { mobile } = useDisplay()
+const { xs } = useDisplay()
 
 
 const props = defineProps({
@@ -294,7 +294,7 @@ async function submit() {
 
 <template>
   <v-dialog v-model="dialogOpen" max-width="800"
-    :fullscreen="mobile">
+    :fullscreen="xs">
     <v-card rounded="lg" >
       <v-toolbar :title="isEdit ? $t('userGroupDialog.titleEdit') : $t('userGroupDialog.titleNew')">
         <template #prepend>

@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width" />
+        <!-- Vuetify 样式与字体 -->
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/vuetify@4.2.4/dist/vuetify.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+        />
+        <title>Vuetify v-bottom-sheet · Cookie 同意示例</title>
+        <style>
+            [v-cloak] {
+                display: none;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="app" v-cloak>
+            <v-app>
+                <v-main>
+                    <v-container class="pa-6" style="max-width: 720px">
+                        <h1 class="text-h5 mb-2">Cookie 同意示例</h1>
+                        <p class="text-body-2 mb-6">
+                            底部弹层（Bottom Sheet）承载 Cookie
+                            同意：首次访问自动弹出；页脚常驻入口可随时重新打开修改选择。
+                        </p>
+
+                        <v-btn
+                            color="primary"
+                            prepend-icon="mdi-cookie"
+                            @click="consentSheet = true"
+                        >
+                            重新打开 Cookie 设置
+                        </v-btn>
+
+                        <v-card class="mt-6" variant="tonal">
+                            <v-card-title class="text-subtitle-1"
+                                >当前选择</v-card-title
+                            >
+                            <v-card-text>
+                                <pre class="text-body-2">
+{{ JSON.stringify(prefs, null, 2) }}</pre
+                                >
+                            </v-card-text>
+                        </v-card>
+                    </v-container>
+
+                    <!-- ========== 底部弹层：Cookie 同意 ========== -->
+                    <v-bottom-sheet
+                        v-model="consentSheet"
+                        :persistent="!decided"
+                        scrollable
+                    >
+                        <v-card>
+                            <v-toolbar title="关于 Cookie 的使用">
+                                <template #prepend>
+                                    <v-btn icon variant="text" @click="">
+                                        <v-icon>mdi-cookie-check</v-icon>
+                                        <!-- <v-tooltip activator="parent" location="right">
+                    {{ store.cancelText ||
+                    t('common.cancel') }}
+                  </v-tooltip> -->
+                                    </v-btn>
+                                </template>
+                                <template #append>
+                                    <!-- variant="text"  -->
+                                    <v-btn
+                                        v-if="decided"
+                                        icon
+                                        color="error"
+                                        variant="tonal"
+                                        @click="consentSheet = false"
+                                    >
+                                        <v-icon>mdi-close</v-icon>
+                                        <v-tooltip
+                                            activator="parent"
+                                            location="left"
+                                        >
+                                            关闭
+                                        </v-tooltip>
+                                    </v-btn>
+                                </template>
+                            </v-toolbar>
+
+                            <!-- <v-card-title>
+              <v-icon class="mr-2">mdi-cookie-check</v-icon>
+              <span class="text-h6">关于 Cookie 的使用</span>
+              <v-spacer></v-spacer>
+              <v-btn v-if="decided" icon="mdi-close" variant="text" density="comfortable"
+                @click="consentSheet = false"></v-btn>
+            </v-card-title> -->
+
+                            <v-card-text>
+                                <p class="text-body-2 mb-4">
+                                    我们使用 Cookie
+                                    及类似技术（像素、本地存储等）保障网站正常运行、分析访问情况并改进服务。
+                                    必要类 Cookie 始终启用；分析类、营销类
+                                    Cookie
+                                    仅在您同意后才会加载，您可以随时在页脚或侧滑栏底部声明
+                                    「Cookie 设置」中更改或撤回同意。详见<a
+                                        href="#"
+                                        @click.prevent
+                                        >《Cookie 政策》</a
+                                    >。
+                                </p>
+
+                                <!-- 分类开关：必要类锁定，其余默认关闭 -->
+                                <v-list lines="one">
+                                    <v-list-item>
+                                        <template v-slot:append>
+                                            <v-switch
+                                                :model-value="true"
+                                                disabled
+                                                color="grey"
+                                                hide-details
+                                                inset
+                                            ></v-switch>
+                                        </template>
+                                        <v-list-item-title
+                                            >必要类（始终启用）</v-list-item-title
+                                        >
+                                        <v-list-item-subtitle>
+                                            会话维持、安全令牌、CDN
+                                            安全校验。保障网站可用，无法关闭。
+                                        </v-list-item-subtitle>
+                                    </v-list-item>
+
+                                    <v-list-item>
+                                        <template v-slot:append>
+                                            <v-switch
+                                                v-model="prefs.functional"
+                                                color="primary"
+                                                hide-details
+                                                inset
+                                            ></v-switch>
+                                        </template>
+                                        <v-list-item-title
+                                            >功能偏好类</v-list-item-title
+                                        >
+                                        <v-list-item-subtitle
+                                            >记住语言、地区、界面设置（如
+                                            locale）。</v-list-item-subtitle
+                                        >
+                                    </v-list-item>
+
+                                    <v-list-item>
+                                        <template v-slot:append>
+                                            <v-switch
+                                                v-model="prefs.analytics"
+                                                color="primary"
+                                                hide-details
+                                                inset
+                                            ></v-switch>
+                                        </template>
+                                        <v-list-item-title
+                                            >分析统计类</v-list-item-title
+                                        >
+                                        <v-list-item-subtitle>
+                                            访问量、停留时长、热力图与会话录制（如
+                                            _clck / _clsk）。
+                                        </v-list-item-subtitle>
+                                    </v-list-item>
+
+                                    <v-list-item>
+                                        <template v-slot:append>
+                                            <v-switch
+                                                v-model="prefs.marketing"
+                                                color="primary"
+                                                hide-details
+                                                inset
+                                            ></v-switch>
+                                        </template>
+                                        <v-list-item-title
+                                            >广告营销类</v-list-item-title
+                                        >
+                                        <v-list-item-subtitle>
+                                            个性化推荐与转化归因，含第三方跨站标识（如
+                                            MUID），数据可能出境。
+                                        </v-list-item-subtitle>
+                                    </v-list-item>
+                                </v-list>
+                            </v-card-text>
+
+                            <!-- 三个按钮同等显著：接受 / 拒绝 / 自定义保存 -->
+                            <v-card-actions>
+                                <v-btn
+                                    variant="outlined"
+                                    color="grey-darken-2"
+                                    @click="rejectAll"
+                                    >全部拒绝</v-btn
+                                >
+
+                                <v-btn
+                                    variant="outlined"
+                                    color="primary"
+                                    @click="savePrefs"
+                                    >保存我的选择</v-btn
+                                >
+
+                                <v-btn
+                                    color="primary"
+                                    variant="flat"
+                                    @click="acceptAll"
+                                    >全部接受</v-btn
+                                >
+
+                                <p
+                                    v-if="decided"
+                                    class="text-caption text-medium-emphasis mt-3 mb-0"
+                                >
+                                    上次更新：{{ lastUpdated || '-'
+                                    }}，您可以随时撤回同意。
+                                </p>
+                            </v-card-actions>
+                        </v-card>
+                    </v-bottom-sheet>
+
+                    <!-- 常驻页脚入口 -->
+                    <v-footer class="text-caption" color="transparent">
+                        <v-spacer></v-spacer>
+                        <a
+                            href="#"
+                            class="text-decoration-underline"
+                            @click.prevent="consentSheet = true"
+                        >
+                            Cookie 设置
+                        </a>
+                    </v-footer>
+
+                    <!-- 操作反馈 -->
+                    <v-snackbar
+                        v-model="snackbar"
+                        :timeout="2200"
+                        location="bottom center"
+                    >
+                        {{ snackbarText }}
+                    </v-snackbar>
+                </v-main>
+            </v-app>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/vue@3.5.43/dist/vue.global.prod.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vuetify@4.2.4/dist/vuetify.min.js"></script>
+        <script>
+            const { createApp } = Vue;
+            const { createVuetify } = Vuetify;
+
+            const vuetify = createVuetify({
+                locale: {
+                    locale: "zhHans",
+                },
+                theme: {
+                    defaultTheme: "light",
+                },
+            });
+
+            const app = createApp({
+                data() {
+                    return {
+                        consentSheet: false,
+                        decided: false,
+                        lastUpdated: "",
+                        snackbar: false,
+                        snackbarText: "",
+                        // 关键：非必要类别默认 false，不做预勾选
+                        prefs: {
+                            necessary: true,
+                            functional: false,
+                            analytics: false,
+                            marketing: false,
+                        },
+                    };
+                },
+                methods: {
+                    showToast(text) {
+                        this.snackbarText = text;
+                        this.snackbar = true;
+                    },
+                    // 同意落地：真实项目在这里注入脚本（见下方说明）
+                    applyConsent(choice) {
+                        /*
+                         * 只有用户明确同意后，才允许加载非必要脚本，例如：
+                         *
+                         * if (choice.analytics) {
+                         *   // Microsoft Clarity：必须先传 consent 信号
+                         *   window.clarity('consentv2', {
+                         *     ad_Storage: choice.marketing ? 'granted' : 'denied',
+                         *     analytics_Storage: choice.analytics ? 'granted' : 'denied'
+                         *   })
+                         *   loadScript('https://www.clarity.ms/tag/xxxx')
+                         * }
+                         * if (choice.marketing) { /* 加载广告像素 *\/ }
+                         *
+                         * 撤回同意时执行：window.clarity('consent', false) 并删除已落地的 cookie
+                         */
+                        this.decided = true;
+                        this.lastUpdated = new Date().toLocaleString("zh-CN");
+                        // 记录同意证据：时间 + 方式 + 类别（用于自证合规）
+                        localStorage.setItem(
+                            "cookie-consent",
+                            JSON.stringify({
+                                choice,
+                                timestamp: new Date().toISOString(),
+                                version: "1.0",
+                            }),
+                        );
+                        this.consentSheet = false;
+                    },
+                    acceptAll() {
+                        this.prefs = {
+                            necessary: true,
+                            functional: true,
+                            analytics: true,
+                            marketing: true,
+                        };
+                        this.applyConsent(this.prefs);
+                        this.showToast("已接受全部 Cookie");
+                    },
+                    rejectAll() {
+                        this.prefs = {
+                            necessary: true,
+                            functional: false,
+                            analytics: false,
+                            marketing: false,
+                        };
+                        this.applyConsent(this.prefs);
+                        this.showToast("已拒绝全部非必要 Cookie");
+                    },
+                    savePrefs() {
+                        this.applyConsent(this.prefs);
+                        this.showToast("已保存您的偏好设置");
+                    },
+                },
+                mounted() {
+                    // 首次访问自动弹出；已作出选择的不再打扰
+                    const saved = localStorage.getItem("cookie-consent");
+                    if (saved) {
+                        const parsed = JSON.parse(saved);
+                        this.prefs = Object.assign(this.prefs, parsed.choice);
+                        this.decided = true;
+                        this.lastUpdated = new Date(
+                            parsed.timestamp,
+                        ).toLocaleString("zh-CN");
+                    } else {
+                        this.consentSheet = true;
+                    }
+                },
+            });
+
+            app.use(vuetify).mount("#app");
+        </script>
+    </body>
+</html>

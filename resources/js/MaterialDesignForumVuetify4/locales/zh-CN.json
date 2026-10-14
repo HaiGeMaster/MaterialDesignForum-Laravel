@@ -1295,5 +1295,123 @@
   "themeDialog": {
     "title": "选择主题",
     "system": "跟随系统"
+  },
+  "cookiePref": {
+    "drawerLink": "Cookie 偏好设置",
+    "banner": {
+      "title": "关于 Cookie 的使用",
+      "body": "我们使用 Cookie 及类似技术（像素、本地存储等）保障网站正常运行、分析访问情况并改进服务。必要类 Cookie 始终启用；分析类、营销类 Cookie 仅在您同意后才会加载。详见",
+      "policyLink": "《Cookie 政策》",
+      "hint": "您可以点击「自定义分类」逐类查看我们实际使用的 Cookie 清单，也可以随时在页脚或悬浮按钮「Cookie 设置」中更改或撤回同意。",
+      "rejectAll": "全部拒绝",
+      "customize": "自定义分类",
+      "acceptAll": "全部接受",
+      "close": "关闭"
+    },
+    "pref": {
+      "title": "Cookie 偏好中心",
+      "close": "关闭",
+      "intro": "以下按用途分组列出本站实际使用的 Cookie。必要类是网站运行所必需的，无法关闭；其余类别默认关闭，仅在您开启后才会加载相应脚本。了解更多请见",
+      "policyLink": "Cookie 政策页",
+      "alwaysOn": "始终启用",
+      "countPrefix": "共 ",
+      "countSuffix": " 项",
+      "legalBasisLabel": "法律依据：",
+      "dirtyHint": "您有尚未保存的更改，点击下方「保存我的选择」后生效。",
+      "lastUpdatedLabel": "上次更新：{time}",
+      "lastUpdatedHint": "撤回同意将立即停止相应脚本并删除已落地的 Cookie。",
+      "rejectAll": "全部拒绝",
+      "revert": "放弃更改",
+      "save": "保存我的选择",
+      "colName": "名称",
+      "colProvider": "提供方",
+      "colPurpose": "目的",
+      "colType": "类型",
+      "colDuration": "存续期"
+    },
+    "cat": {
+      "necessary": {
+        "name": "必要类（严格必要）",
+        "desc": "网站运行所必需，无法关闭",
+        "intro": "这类 Cookie 用于维持会话、防护跨站请求伪造与 CDN 安全校验，是网站可用性的基础。",
+        "legalBasis": "提供服务所必需，无需征得同意",
+        "note": "Cloudflare 相关 Cookie 由 CDN 与安全服务方设置，仅用于安全防护，不用于跨站追踪。"
+      },
+      "functional": {
+        "name": "功能偏好类",
+        "desc": "记住语言、地区与界面设置",
+        "intro": "这类 Cookie 记住您做过的选择（语言、地区、界面偏好），避免每次访问重复设置。",
+        "legalBasis": "同意（个人信息保护法第 13、14 条）",
+        "note": ""
+      },
+      "analytics": {
+        "name": "分析统计类",
+        "desc": "访问量、停留时长、热力图与会话录制",
+        "intro": "统计访问量与点击分布，用于了解用户与哪些内容互动最多，从而改进体验。",
+        "legalBasis": "同意；欧盟侧另需 Art.6(1)(a) GDPR + ePrivacy 第 5(3) 条",
+        "note": "Clarity 自 2025-10 起要求站点先传 consentv2 信号才会开启完整追踪；会话录制属系统性行为监测，欧盟侧建议做 DPIA 并开启内容遮蔽（Masking）。"
+      },
+      "marketing": {
+        "name": "广告营销类",
+        "desc": "个性化推荐、转化归因、跨站标识",
+        "intro": "由广告合作方设置，用于构建兴趣画像并在其他站点展示相关广告；不直接存储个人信息，但基于对浏览器与设备的唯一标识。",
+        "legalBasis": "单独同意；涉及个人信息出境需另行告知并取得单独同意",
+        "note": "数据默认在 Azure 美国数据中心处理，构成个人信息出境，需在隐私政策中单独列明接收方与保障措施（SCC / DPF）。"
+      }
+    },
+    "cookie": {
+      "type": {
+        "firstPartySession": "第一方 · 会话",
+        "firstPartyPersistent": "第一方 · 持久",
+        "thirdPartyPersistent": "第三方 · 持久"
+      },
+      "XSRF_TOKEN": {
+        "provider": "本站",
+        "purpose": "防跨站请求伪造（CSRF）",
+        "duration": "会话结束即删除"
+      },
+      "xbedrock_session": {
+        "provider": "本站",
+        "purpose": "维持会话状态与请求连续性",
+        "duration": "会话结束即删除"
+      },
+      "cf_clearance": {
+        "provider": "Cloudflare, Inc.",
+        "purpose": "记录已通过安全质询，拦截恶意流量",
+        "duration": "30 分钟至 1 年（取决于后台配置）"
+      },
+      "ui_locale": {
+        "provider": "本站",
+        "purpose": "保存语言与地区选择",
+        "duration": "以实际配置为准"
+      },
+      "ui_theme": {
+        "provider": "本站",
+        "purpose": "保存主题偏好",
+        "duration": "以实际配置为准"
+      },
+      "_clck": {
+        "provider": "Microsoft Clarity",
+        "purpose": "存储用户 ID，串联回访与偏好",
+        "duration": "1 年"
+      },
+      "_clsk": {
+        "provider": "Microsoft Clarity",
+        "purpose": "将多次页面浏览合并为一条会话录制",
+        "duration": "1 天"
+      },
+      "MUID": {
+        "provider": "Microsoft（.bing.com）",
+        "purpose": "微软通用浏览器标识，与 Microsoft Advertising / Bing 打通",
+        "duration": "13 个月（390 天）"
+      }
+    },
+    "toast": {
+      "acceptAll": "已接受全部 Cookie",
+      "rejectAll": "已拒绝全部非必要 Cookie",
+      "saved": "已保存您的偏好设置",
+      "reverted": "已放弃未保存的更改",
+      "reset": "已清除本地同意记录，刷新后将重新征求"
+    }
   }
 }

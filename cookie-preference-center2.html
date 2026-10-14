@@ -1,0 +1,841 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width" />
+        <!-- Vuetify 样式与字体 -->
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/vuetify@4.2.4/dist/vuetify.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+        />
+        <title>Vuetify · Cookie 同意 + 偏好中心（修复版）</title>
+        <style>
+            [v-cloak] {
+                display: none;
+            }
+
+            /* ===== 关键修复 1：overlay 内自定义滚动容器 =====
+               不用 v-bottom-sheet 的 scrollable，改为 card 自身限高 + body 滚动，
+               避免面板展开后 overlay 不重新计算高度导致内容被裁剪 */
+            .pref-card {
+                max-height: 84vh;
+                display: flex;
+                flex-direction: column;
+            }
+            .pref-body {
+                overflow-y: auto;
+                overflow-x: hidden;
+                flex: 1 1 auto;
+                min-height: 0; /* flex 子项可滚动的必要条件 */
+                -webkit-overflow-scrolling: touch;
+            }
+
+            /* ===== 关键修复 2：原生表格，不依赖 v-table 组件名 =====
+               跨 Vuetify 版本稳定渲染，同时保留 Material 观感 */
+            .cookie-tbl-wrap {
+                overflow-x: auto;
+                margin-top: 8px;
+            }
+            table.cookie-tbl {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 12px;
+                line-height: 1.5;
+            }
+            table.cookie-tbl th,
+            table.cookie-tbl td {
+                padding: 8px 12px;
+                text-align: left;
+                vertical-align: top;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+            }
+            table.cookie-tbl th {
+                font-weight: 600;
+                color: rgba(0, 0, 0, 0.6);
+                white-space: nowrap;
+                background: rgba(0, 0, 0, 0.03);
+            }
+            table.cookie-tbl td {
+                color: rgba(0, 0, 0, 0.87);
+            }
+            table.cookie-tbl tbody tr:hover {
+                background: rgba(0, 0, 0, 0.02);
+            }
+            .cookie-name {
+                font-family: "SFMono-Regular", Consolas, monospace;
+                font-size: 12px;
+                white-space: nowrap;
+            }
+
+            /* 面板标题内的开关区域不换行，避免标题被挤变形 */
+            .panel-head {
+                width: 100%;
+                align-items: center;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="app" v-cloak>
+            <v-app>
+                <v-main>
+                    <v-container class="pa-6" style="max-width: 880px">
+                        <h1 class="text-h5 mb-2">
+                            Cookie 同意 + 偏好中心（修复版）
+                        </h1>
+                        <p class="text-body-2 mb-4">
+                            修复点：① Cookie 明细表改用原生 table 渲染，不再依赖
+                            v-table；② 折叠面板改用数字索引匹配；③
+                            偏好中心自建滚动容器，展开内容不再被 overlay 裁剪。
+                        </p>
+                        <v-alert
+                            class="mb-6"
+                            type="info"
+                            density="compact"
+                            variant="tonal"
+                >
+                            <div>
+                                实际加载版本：<strong>{{ vuetifyVersion }}</strong>
+                                · 表格渲染方式：原生 &lt;table&gt;（与组件版本无关）
+                            </div>
+                        </v-alert>
+
+                        <div class="d-flex flex-wrap ga-2 mb-6">
+                            <v-btn
+                                color="primary"
+                                prepend-icon="mdi-cookie"
+                                @click="openBanner(true)"
+                            >
+                                打开同意横幅
+                            </v-btn>
+                            <v-btn
+                                variant="outlined"
+                                prepend-icon="mdi-tune-variant"
+                                @click="openPreferenceCenter"
+                            >
+                                打开偏好中心
+                            </v-btn>
+                            <v-btn
+                                variant="text"
+                                color="error"
+                                prepend-icon="mdi-delete-clock"
+                                @click="resetAll"
+                            >
+                                清除本地同意记录
+                            </v-btn>
+                        </div>
+
+                        <v-card variant="tonal">
+                            <v-card-title class="text-subtitle-1"
+                                >当前状态</v-card-title
+                            >
+                            <v-card-text>
+                                <v-row dense>
+                                    <v-col cols="12" sm="6">
+                                        <pre class="text-body-2">已选类别：
+{{ JSON.stringify(prefs, null, 2) }}</pre>
+                                    </v-col>
+                                    <v-col cols="12" sm="6">
+                                        <pre class="text-body-2">同意记录：
+{{ consentRecordText }}</pre>
+                                    </v-col>
+                                </v-row>
+                                <v-chip
+                                    v-for="c in enabledCategories"
+                                    :key="c.key"
+                                    class="mr-2 mb-2"
+                                    size="small"
+                                    :color="c.required ? 'grey' : 'primary'"
+                                    variant="tonal"
+                                >
+                                    {{ c.name }}
+                                </v-chip>
+                            </v-card-text>
+                        </v-card>
+                    </v-container>
+
+                    <!-- ========== 第一层：底部弹层横幅 ========== -->
+                    <v-bottom-sheet v-model="bannerSheet" :persistent="!decided">
+                        <v-card>
+                            <v-toolbar title="关于 Cookie 的使用">
+                                <template #prepend>
+                                    <v-btn icon variant="text">
+                                        <v-icon>mdi-cookie-check</v-icon>
+                                    </v-btn>
+                                </template>
+                                <template #append>
+                                    <v-btn
+                                        v-if="decided"
+                                        icon
+                                        color="error"
+                                        variant="tonal"
+                                        @click="bannerSheet = false"
+                                    >
+                                        <v-icon>mdi-close</v-icon>
+                                        <v-tooltip
+                                            activator="parent"
+                                            location="left"
+                                        >
+                                            关闭
+                                        </v-tooltip>
+                                    </v-btn>
+                                </template>
+                            </v-toolbar>
+
+                            <v-card-text>
+                                <p class="text-body-2 mb-2">
+                                    我们使用 Cookie
+                                    及类似技术（像素、本地存储等）保障网站正常运行、分析访问情况并改进服务。
+                                    必要类 Cookie 始终启用；分析类、营销类
+                                    Cookie 仅在您同意后才会加载。详见<a
+                                        href="/cookie-policy"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        >《Cookie 政策》</a
+                                    >。
+                                </p>
+                                <p class="text-caption text-medium-emphasis">
+                                    您可以点击「自定义分类」逐类查看我们实际使用的
+                                    Cookie
+                                    清单，也可以随时在页脚或悬浮按钮「Cookie
+                                    设置」中更改或撤回同意。
+                                </p>
+                            </v-card-text>
+
+                            <v-card-actions class="flex-wrap">
+                                <v-btn
+                                    variant="outlined"
+                                    color="grey-darken-2"
+                                    @click="rejectAll"
+                                    >全部拒绝</v-btn
+                                >
+                                <v-btn
+                                    variant="outlined"
+                                    color="primary"
+                                    prepend-icon="mdi-tune-variant"
+                                    @click="openPreferenceCenter"
+                                    >自定义分类</v-btn
+                                >
+                                <v-btn
+                                    color="primary"
+                                    variant="flat"
+                                    @click="acceptAll"
+                                    >全部接受</v-btn
+                                >
+                            </v-card-actions>
+                        </v-card>
+                    </v-bottom-sheet>
+
+                        <v-dialog
+                            v-model="prefSheet"
+                            :persistent="!decided"
+                            width="750"
+                        >
+                        <!-- class="pref-card" 自建滚动容器，替代 scrollable -->
+                        <v-card class="pref-card">
+                            <v-toolbar title="Cookie 偏好中心" >
+                                <template #prepend>
+                                    <v-btn icon variant="text">
+                                        <v-icon>mdi-tune-variant</v-icon>
+                                    </v-btn>
+                                </template>
+                                <template #append>
+                                    <v-btn
+                                        v-if="decided"
+                                        icon
+                                        variant="text"
+                                        @click="prefSheet = false"
+                                    >
+                                        <v-icon>mdi-close</v-icon>
+                                    </v-btn>
+                                </template>
+                            </v-toolbar>
+
+                            <!-- 关键：滚动区域 -->
+                            <div class="pref-body pa-4">
+                                <p class="text-body-2 mb-4">
+                                    以下按用途分组列出本站实际使用的
+                                    Cookie。必要类是网站运行所必需的，无法关闭；其余类别默认关闭，仅在您开启后才会加载相应脚本。
+                                    了解更多请见<a
+                                        href="/cookie-policy"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        >Cookie 政策页</a
+                                    >。
+                                </p>
+
+                                <!-- 关键修复 3：v-model 用数字索引，不再依赖 :value 字符串匹配 -->
+                                <v-expansion-panels
+                                    v-model="openedPanels"
+                                    multiple
+                                >
+                                    <v-expansion-panel
+                                        v-for="(cat, i) in categories"
+                                        :key="cat.key"
+                                    >
+                                        <v-expansion-panel-title>
+                                            <div class="d-flex panel-head">
+                                                <div class="flex-grow-1">
+                                                    <div
+                                                        class="text-body-2 font-weight-medium mb-2"
+                                                    >
+                                                        {{ cat.name }}
+                                                        <v-chip
+                                                            v-if="cat.required"
+                                                            size="x-small"
+                                                            class="ml-2"
+                                                            >始终启用</v-chip
+                                                        >
+                                                    </div>
+                                                    <div
+                                                        class="text-caption text-medium-emphasis"
+                                                    >
+                                                        {{ cat.desc }} · 共
+                                                        {{ cat.cookies.length }}
+                                                        项
+                                                    </div>
+                                                </div>
+                                                <!-- @click.stop 防止点开关时折叠面板 -->
+                                                <div
+                                                    class="flex-shrink-0"
+                                                    @click.stop
+                                                >
+                                                    <v-switch
+                                                        :model-value="
+                                                            cat.required
+                                                                ? true
+                                                                : prefs[cat.key]
+                                                        "
+                                                        :disabled="cat.required"
+                                                        :color="
+                                                            cat.required
+                                                                ? 'grey'
+                                                                : 'primary'
+                                                        "
+                                                        hide-details
+                                                        inset
+                                                        @update:model-value="
+                                                            (v) =>
+                                                                toggleCategory(
+                                                                    cat,
+                                                                    v,
+                                                                )
+                                                        "
+                                                    ></v-switch>
+                                                </div>
+                                            </div>
+                                        </v-expansion-panel-title>
+
+                                        <v-expansion-panel-text>
+                                            <p class="text-body-2 mb-2">
+                                                {{ cat.intro }}
+                                            </p>
+                                            <div class="text-caption mb-1">
+                                                法律依据：{{ cat.legalBasis }}
+                                            </div>
+
+                                            <!-- 原生表格：任何 Vuetify 版本都能渲染 -->
+                                            <div class="cookie-tbl-wrap">
+                                                <table class="cookie-tbl">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>名称</th>
+                                                            <th>提供方</th>
+                                                            <th>目的</th>
+                                                            <th>类型</th>
+                                                            <th>存续期</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr
+                                                            v-for="ck in cat.cookies"
+                                                            :key="ck.name"
+                                                        >
+                                                            <td
+                                                                class="cookie-name"
+                                                            >
+                                                                {{ ck.name }}
+                                                            </td>
+                                                            <td>
+                                                                {{
+                                                                    ck.provider
+                                                                }}
+                                                            </td>
+                                                            <td>
+                                                                {{ ck.purpose }}
+                                                            </td>
+                                                            <td>
+                                                                {{ ck.type }}
+                                                            </td>
+                                                            <td>
+                                                                {{
+                                                                    ck.duration
+                                                                }}
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            <div
+                                                v-if="cat.note"
+                                                class="text-caption mt-2 text-medium-emphasis"
+                                            >
+                                                {{ cat.note }}
+                                            </div>
+                                        </v-expansion-panel-text>
+                                    </v-expansion-panel>
+                                </v-expansion-panels>
+
+                                <v-alert
+                                    v-if="dirty"
+                                    class="mt-4"
+                                    type="info"
+                                    density="compact"
+                                    variant="tonal"
+                                    text="您有尚未保存的更改，点击下方「保存我的选择」后生效。"
+                                ></v-alert>
+
+                                <p
+                                    v-if="decided"
+                                    class="text-caption text-medium-emphasis mt-4 mb-0"
+                                >
+                                    上次更新：{{ lastUpdated || '-'
+                                    }}。撤回同意将立即停止相应脚本并删除已落地的
+                                    Cookie。
+                                </p>
+                            </div>
+
+                            <v-divider></v-divider>
+
+                            <v-card-actions class="flex-wrap">
+                                <v-btn
+                                    variant="text"
+                                    color="error"
+                                    @click="rejectAll"
+                                    >全部拒绝</v-btn
+                                >
+                                <v-spacer></v-spacer>
+                                <v-btn
+                                    variant="outlined"
+                                    color="grey-darken-2"
+                                    :disabled="!dirty"
+                                    @click="revertChanges"
+                                    >放弃更改</v-btn
+                                >
+                                <v-btn
+                                    color="primary"
+                                    variant="flat"
+                                    @click="savePrefs"
+                                    >保存我的选择</v-btn
+                                >
+                            </v-card-actions>
+                        </v-card>
+                        </v-dialog>
+
+                    <!-- 悬浮常驻入口 -->
+                    <v-btn
+                        class="ma-4"
+                        icon
+                        size="small"
+                        color="primary"
+                        variant="tonal"
+                        style="position: fixed; right: 0; bottom: 56px"
+                        @click="openPreferenceCenter"
+                    >
+                        <v-icon>mdi-cookie-cog</v-icon>
+                        <v-tooltip activator="parent" location="left"
+                            >Cookie 设置</v-tooltip
+                        >
+                    </v-btn>
+
+                    <!-- 常驻页脚入口：政策链接 + 设置入口，两者都要有 -->
+                    <v-footer class="text-caption" color="transparent">
+                        <v-spacer></v-spacer>
+                        <a
+                            href="/cookie-policy"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="text-decoration-underline mr-4"
+                            >Cookie 政策</a
+                        >
+                        <a
+                            href="#"
+                            class="text-decoration-underline"
+                            @click.prevent="openPreferenceCenter"
+                        >
+                            Cookie 设置
+                        </a>
+                    </v-footer>
+
+                    <!-- 操作反馈 -->
+                    <v-snackbar
+                        v-model="snackbar"
+                        :timeout="2200"
+                        location="bottom center"
+                    >
+                        {{ snackbarText }}
+                    </v-snackbar>
+                </v-main>
+            </v-app>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/vue@3.5.43/dist/vue.global.prod.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vuetify@4.2.4/dist/vuetify.min.js"></script>
+        <script>
+            const { createApp } = Vue;
+            const { createVuetify } = Vuetify;
+
+            // 政策版本：Cookie 清单或服务方发生变化时递增，触发重新征求同意
+            const CONSENT_VERSION = "1.0";
+            // 拒绝后多少天内不再重复弹出
+            const REASK_COOLDOWN_DAYS = 180;
+            // 默认选择：非必要类别全部关闭（无预勾选）
+            const DEFAULT_PREFS = Object.freeze({
+                necessary: true,
+                functional: false,
+                analytics: false,
+                marketing: false,
+            });
+
+            const vuetify = createVuetify({
+                locale: {
+                    locale: "zhHans",
+                },
+                theme: {
+                    defaultTheme: "light",
+                },
+            });
+
+            const app = createApp({
+                data() {
+                    return {
+                        vuetifyVersion:
+                            (window.Vuetify && Vuetify.version) || "未知",
+                        bannerSheet: false,
+                        prefSheet: false,
+                        decided: false,
+                        lastUpdated: "",
+                        snackbar: false,
+                        snackbarText: "",
+                        // 数字索引：默认展开第 0 个（必要类）
+                        openedPanels: [0],
+                        // 非必要类别默认 false，不做预勾选
+                        prefs: {
+                            necessary: true,
+                            functional: false,
+                            analytics: false,
+                            marketing: false,
+                        },
+                        savedSnapshot: null,
+                        consentRecord: null,
+                        // 与站点实际扫描结果保持一致；新增第三方服务后必须同步更新
+                        categories: [
+                            {
+                                key: "necessary",
+                                name: "必要类（严格必要）",
+                                required: true,
+                                desc: "网站运行所必需，无法关闭",
+                                intro: "这类 Cookie 用于维持会话、防护跨站请求伪造与 CDN 安全校验，是网站可用性的基础。",
+                                legalBasis: "提供服务所必需，无需征得同意",
+                                cookies: [
+                                    {
+                                        name: "XSRF-TOKEN",
+                                        provider: "本站",
+                                        purpose: "防跨站请求伪造（CSRF）",
+                                        type: "第一方 · 会话",
+                                        duration: "会话结束即删除",
+                                    },
+                                    {
+                                        name: "xbedrock-session",
+                                        provider: "本站",
+                                        purpose: "维持会话状态与请求连续性",
+                                        type: "第一方 · 会话",
+                                        duration: "会话结束即删除",
+                                    },
+                                    {
+                                        name: "cf_clearance",
+                                        provider: "Cloudflare, Inc.",
+                                        purpose: "记录已通过安全质询，拦截恶意流量",
+                                        type: "第三方 · 持久",
+                                        duration: "30 分钟至 1 年（取决于后台配置）",
+                                    },
+                                ],
+                                note: "Cloudflare 相关 Cookie 由 CDN 与安全服务方设置，仅用于安全防护，不用于跨站追踪。",
+                            },
+                            {
+                                key: "functional",
+                                name: "功能偏好类",
+                                required: false,
+                                desc: "记住语言、地区与界面设置",
+                                intro: "这类 Cookie 记住您做过的选择（语言、地区、界面偏好），避免每次访问重复设置。",
+                                legalBasis: "同意（个人信息保护法第 13、14 条）",
+                                cookies: [
+                                    {
+                                        name: "ui-locale",
+                                        provider: "本站",
+                                        purpose: "保存语言与地区选择",
+                                        type: "第一方 · 持久",
+                                        duration: "以实际配置为准",
+                                    },
+                                    {
+                                        name: "ui-theme",
+                                        provider: "本站",
+                                        purpose: "保存主题偏好",
+                                        type: "第一方 · 持久",
+                                        duration: "以实际配置为准",
+                                    },
+                                ],
+                                note: "",
+                            },
+                            {
+                                key: "analytics",
+                                name: "分析统计类",
+                                required: false,
+                                desc: "访问量、停留时长、热力图与会话录制",
+                                intro: "统计访问量与点击分布，用于了解用户与哪些内容互动最多，从而改进体验。",
+                                legalBasis:
+                                    "同意；欧盟侧另需 Art.6(1)(a) GDPR + ePrivacy 第 5(3) 条",
+                                cookies: [
+                                    {
+                                        name: "_clck",
+                                        provider: "Microsoft Clarity",
+                                        purpose: "存储用户 ID，串联回访与偏好",
+                                        type: "第一方 · 持久",
+                                        duration: "1 年",
+                                    },
+                                    {
+                                        name: "_clsk",
+                                        provider: "Microsoft Clarity",
+                                        purpose: "将多次页面浏览合并为一条会话录制",
+                                        type: "第一方 · 持久",
+                                        duration: "1 天",
+                                    },
+                                ],
+                                note: "Clarity 自 2025-10 起要求站点先传 consentv2 信号才会开启完整追踪；会话录制属系统性行为监测，欧盟侧建议做 DPIA 并开启内容遮蔽（Masking）。",
+                            },
+                            {
+                                key: "marketing",
+                                name: "广告营销类",
+                                required: false,
+                                desc: "个性化推荐、转化归因、跨站标识",
+                                intro: "由广告合作方设置，用于构建兴趣画像并在其他站点展示相关广告；不直接存储个人信息，但基于对浏览器与设备的唯一标识。",
+                                legalBasis:
+                                    "单独同意；涉及个人信息出境需另行告知并取得单独同意",
+                                cookies: [
+                                    {
+                                        name: "MUID",
+                                        provider: "Microsoft（.bing.com）",
+                                        purpose: "微软通用浏览器标识，与 Microsoft Advertising / Bing 打通",
+                                        type: "第三方 · 持久",
+                                        duration: "13 个月（390 天）",
+                                    },
+                                ],
+                                note: "数据默认在 Azure 美国数据中心处理，构成个人信息出境，需在隐私政策中单独列明接收方与保障措施（SCC / DPF）。",
+                            },
+                        ],
+                    };
+                },
+                computed: {
+                    enabledCategories() {
+                        return this.categories.filter(
+                            (c) => c.required || this.prefs[c.key],
+                        );
+                    },
+                    // 与「已保存的基线」比对；首次决策前基线为默认值
+                    baseline() {
+                        return this.savedSnapshot || DEFAULT_PREFS;
+                    },
+                    dirty() {
+                        return (
+                            JSON.stringify(this.prefs) !==
+                            JSON.stringify(this.baseline)
+                        );
+                    },
+                    consentRecordText() {
+                        return this.consentRecord
+                            ? JSON.stringify(this.consentRecord, null, 2)
+                            : "（暂无）";
+                    },
+                },
+                methods: {
+                    showToast(text) {
+                        this.snackbarText = text;
+                        this.snackbar = true;
+                    },
+                    openBanner(force) {
+                        this.prefSheet = false;
+                        this.bannerSheet = true;
+                        if (force) this.decided = false;
+                    },
+                    openPreferenceCenter() {
+                        this.bannerSheet = false;
+                        this.prefSheet = true;
+                    },
+                    toggleCategory(cat, value) {
+                        if (cat.required) return;
+                        this.prefs[cat.key] = !!value;
+                    },
+                    // 撤回同意时按类别删除已落地的 Cookie
+                    deleteCookiesByKey(key) {
+                        const cat = this.categories.find((c) => c.key === key);
+                        if (!cat) return;
+                        const host = location.hostname;
+                        const parts = host.split(".");
+                        const baseDomain =
+                            parts.length > 2 ? parts.slice(-2).join(".") : host;
+                        const domains = [host, "." + host, "." + baseDomain];
+                        cat.cookies.forEach((ck) => {
+                            if (ck.type.indexOf("第三方") === 0) return; // 第三方域 Cookie 需由提供方侧清除
+                            domains.forEach((d) => {
+                                document.cookie =
+                                    ck.name +
+                                    "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=" +
+                                    d;
+                            });
+                            document.cookie =
+                                ck.name +
+                                "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+                        });
+                    },
+                    // 脚本门控：仅在同意后注入，撤回时卸载并清理
+                    syncScripts(before, after) {
+                        /*
+                         * 分析类：先传 consent 信号，再注入 Clarity
+                         *
+                         * if (after.analytics && !before.analytics) {
+                         *   injectScript('https://www.clarity.ms/tag/XXXX', () => {
+                         *     window.clarity('consentv2', {
+                         *       ad_Storage: after.marketing ? 'granted' : 'denied',
+                         *       analytics_Storage: 'granted'
+                         *     })
+                         *   })
+                         * }
+                         * if (!after.analytics && before.analytics) {
+                         *   window.clarity && window.clarity('consent', false)
+                         *   this.deleteCookiesByKey('analytics')
+                         * }
+                         *
+                         * 营销类：同理控制广告像素与 GTM 触发器
+                         */
+                        ["functional", "analytics", "marketing"].forEach(
+                            (key) => {
+                                if (before[key] && !after[key]) {
+                                    this.deleteCookiesByKey(key);
+                                }
+                            },
+                        );
+                    },
+                    applyConsent(choice) {
+                        const before = Object.assign(
+                            {},
+                            this.savedSnapshot || {
+                                necessary: true,
+                                functional: false,
+                                analytics: false,
+                                marketing: false,
+                            },
+                        );
+                        this.syncScripts(before, choice);
+
+                        const record = {
+                            choice: Object.assign({}, choice),
+                            timestamp: new Date().toISOString(),
+                            version: CONSENT_VERSION,
+                            nextAskAt: new Date(
+                                Date.now() + REASK_COOLDOWN_DAYS * 86400000,
+                            ).toISOString(),
+                        };
+                        // 同意证据：时间 + 类别 + 政策版本，用于自证合规
+                        localStorage.setItem(
+                            "cookie-consent",
+                            JSON.stringify(record),
+                        );
+                        this.consentRecord = record;
+                        this.savedSnapshot = Object.assign({}, choice);
+                        this.decided = true;
+                        this.lastUpdated = new Date().toLocaleString("zh-CN");
+                        this.bannerSheet = false;
+                        this.prefSheet = false;
+                    },
+                    acceptAll() {
+                        this.prefs = {
+                            necessary: true,
+                            functional: true,
+                            analytics: true,
+                            marketing: true,
+                        };
+                        this.applyConsent(this.prefs);
+                        this.showToast("已接受全部 Cookie");
+                    },
+                    rejectAll() {
+                        this.prefs = {
+                            necessary: true,
+                            functional: false,
+                            analytics: false,
+                            marketing: false,
+                        };
+                        this.applyConsent(this.prefs);
+                        this.showToast("已拒绝全部非必要 Cookie");
+                    },
+                    savePrefs() {
+                        this.applyConsent(this.prefs);
+                        this.showToast("已保存您的偏好设置");
+                    },
+                    revertChanges() {
+                        this.prefs = Object.assign({}, this.baseline);
+                        this.showToast("已放弃未保存的更改");
+                    },
+                    resetAll() {
+                        localStorage.removeItem("cookie-consent");
+                        this.consentRecord = null;
+                        this.savedSnapshot = null;
+                        this.decided = false;
+                        this.lastUpdated = "";
+                        this.prefs = {
+                            necessary: true,
+                            functional: false,
+                            analytics: false,
+                            marketing: false,
+                        };
+                        this.showToast("已清除本地同意记录，刷新后将重新征求");
+                    },
+                },
+                mounted() {
+                    this.vuetifyVersion =
+                        (window.Vuetify && Vuetify.version) || "未知";
+                    const saved = localStorage.getItem("cookie-consent");
+                    if (saved) {
+                        const parsed = JSON.parse(saved);
+                        // 政策版本变更 → 旧记录失效，重新征求
+                        if (parsed.version !== CONSENT_VERSION) {
+                            this.bannerSheet = true;
+                            return;
+                        }
+                        this.prefs = Object.assign(this.prefs, parsed.choice);
+                        this.savedSnapshot = Object.assign({}, this.prefs);
+                        this.consentRecord = parsed;
+                        this.decided = true;
+                        this.lastUpdated = new Date(
+                            parsed.timestamp,
+                        ).toLocaleString("zh-CN");
+                        this.syncScripts(parsed.choice, parsed.choice);
+                    } else {
+                        // 首次访问自动弹出横幅
+                        this.bannerSheet = true;
+                    }
+                },
+            });
+
+            app.use(vuetify).mount("#app");
+        </script>
+    </body>
+</html>

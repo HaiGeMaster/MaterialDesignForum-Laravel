@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+// import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import Admin from './admin.vue'
 import adminRouter from './router/admin.js'
 import vuetify from './plugins/vuetify'
@@ -10,7 +11,10 @@ import { initClarity } from './clarity'
 
 const app = createApp(Admin)
 
-app.use(createPinia())
+const pinia = createPinia()
+// pinia.use(piniaPluginPersistedstate)
+
+app.use(pinia)
 app.use(adminRouter)
 app.use(vuetify)
 app.use(i18n)

@@ -335,7 +335,7 @@ class OAuthController extends Controller
             'inbox_system' => 0,
             'inbox_user_group' => 0,
             'inbox_private_message' => 0,
-            'language' => 'zh_CN',
+            'language' => 'en-US',
             'create_time' => now(),
             'update_time' => now(),
             'disable_time' => null,

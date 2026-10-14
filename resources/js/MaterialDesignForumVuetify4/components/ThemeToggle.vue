@@ -11,7 +11,7 @@ const { t } = useI18n()
 const menu = ref(false)
 
 // 当前用户存储的主题偏好（可能是 'system'）
-const storedTheme = ref(localStorage.getItem('vuetify-theme') || defaultTheme.value || 'system')
+const storedTheme = ref(localStorage.getItem('ui-theme') || defaultTheme.value || 'system')
 
 // 当前实际生效是否为深色（system 模式下跟随系统）
 const isDark = computed(() => theme.current.value?.dark ?? false)
@@ -47,7 +47,7 @@ function themeMeta(name) {
 // 选择主题
 function selectTheme(name) {
   storedTheme.value = name
-  localStorage.setItem('vuetify-theme', name)
+  localStorage.setItem('ui-theme', name)
 
   const actual = name === 'system' ? resolveTheme('system') : name
   if (document.startViewTransition) {
@@ -93,9 +93,9 @@ onUnmounted(() => {
         icon
         variant="text"
         v-bind="props"
-        :title="$t('appBar.switchTheme')"
       >
         <v-icon :icon="currentIcon" />
+                <v-tooltip activator="parent" location="bottom">{{ $t('appBar.switchTheme') }}</v-tooltip>
       </v-btn>
     </template>
     <v-list rounded="lg" density="compact" nav>

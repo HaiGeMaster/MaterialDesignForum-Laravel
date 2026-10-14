@@ -65,7 +65,7 @@ echo index.html>>"%LIST%"
 
 :: 7z pack (disable delayed expansion to avoid ! escaping)
 setlocal disabledelayedexpansion
-"%SEVENZIP%" a -t7z -mx5 -xr!node_modules -xr!.git -xr!*.log -xr!public\uploads -xr!public\storage -xr!resources\js -xr!resources\css -xr!public\static\upload -xr!public\storage -xr!storage\app\installed.lock -xr!storage\app\public\uploads -xr!public\themes\MaterialDesignForum-MCUI -xr!public\assets\info_content -xr!storage\framework\cache\* -xr!storage\framework\views\* -xr!storage\framework\sessions\* -scsUTF-8 "%OUTPUT%" "@%LIST%"
+"%SEVENZIP%" a -t7z -mx5 -xr!node_modules -xr!.git -xr!*.log -xr!public\uploads -xr!public\hot -xr!public\storage -xr!resources\js -xr!resources\css -xr!public\static\upload -xr!public\storage -xr!storage\app\installed.lock -xr!storage\app\public\uploads -xr!public\themes\MaterialDesignForum-MCUI -xr!public\assets\info_content -xr!storage\framework\cache\* -xr!storage\framework\views\* -xr!storage\framework\sessions\* -scsUTF-8 "%OUTPUT%" "@%LIST%"
 endlocal
 
 if %ERRORLEVEL% equ 0 (

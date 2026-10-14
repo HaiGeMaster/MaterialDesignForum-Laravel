@@ -23,36 +23,42 @@ const { visible: showTabBar } = useTabBar()
 const searchWindow = useSearchWindowStore()
 
 function toggleSearch() {
-  if (searchWindow.isOpen) {
-    searchWindow.close()
-    return
-  }
+    if (searchWindow.isOpen) {
+        searchWindow.close()
+        return
+    }
 
-  searchWindow.open()
+    searchWindow.open()
 }
 
 async function handleLogout() {
-  try {
-    await authStore.logout()
-  } catch (error) {
-    // 即使接口失败也清理本地登录态
-  }
-  useFeedback().show(t('appBar.logoutSuccess'), 'info')
+    try {
+        await authStore.logout()
+    } catch (error) {
+        // 即使接口失败也清理本地登录态
+    }
+    useFeedback().show(t('appBar.logoutSuccess'), 'info')
 }
 
 </script>
 
 <template>
-     <!-- scroll-behavior="elevate" -->
-  <v-app-bar>
-    <v-app-bar-nav-icon @click="emit('toggle-drawer')" />
+    <!-- scroll-behavior="elevate" -->
+     <!-- image="https://picsum.photos/1920/1080?random" -->
+    <v-app-bar >
+        <!-- <template v-slot:image>
+            <v-img gradient="to top right, rgba(19,84,122,.8), rgba(128,208,199,.8)"></v-img>
+        </template> -->
 
-    <v-img v-if="smAndDown" src="/favicon.png" alt="site logo" width="24" height="24" style="width: 24px;max-width: 24px;" />
-    <v-app-bar-title v-else>
-      {{ siteName }}
-    </v-app-bar-title>
+        <v-app-bar-nav-icon @click="emit('toggle-drawer')" />
 
-    <!-- <v-app-bar-title>
+        <v-img v-if="smAndDown" src="/favicon.png" alt="site logo" width="24" height="24"
+            style="width: 24px;max-width: 24px;" />
+        <v-app-bar-title v-else>
+            {{ siteName }}
+        </v-app-bar-title>
+
+        <!-- <v-app-bar-title>
       <template v-if="xs">
         <v-img
           src="/favicon.png"
@@ -67,41 +73,30 @@ async function handleLogout() {
       </template>
     </v-app-bar-title> -->
 
-    <v-spacer />
+        <v-spacer />
 
-    <v-btn
-      icon
-      variant="text"
-      :aria-label="$t('common.search')"
-      @click="toggleSearch"
-    >
-      <v-icon icon="mdi-magnify" />
-    </v-btn>
+        <v-btn icon variant="text" :aria-label="$t('common.search')" @click="toggleSearch">
+            <v-icon icon="mdi-magnify" />
+        </v-btn>
 
-    <LanguageSwitcher />
+        <LanguageSwitcher />
 
-    <ThemeToggle />
+        <ThemeToggle />
 
-    <NotificationBell />
+        <NotificationBell />
 
-    <UserMenu
-      v-if="authStore.isLoggedIn"
-      :avatar-size="28"
-      link-mode="router"
-      show-media-library
-      show-admin
-      @logout="handleLogout"
-    />
+        <UserMenu v-if="authStore.isLoggedIn" :avatar-size="28" link-mode="router" show-media-library show-admin
+            @logout="handleLogout" />
 
-    <!-- <v-btn v-else variant="tonal" to="/login" prepend-icon="mdi-account">
+        <!-- <v-btn v-else variant="tonal" to="/login" prepend-icon="mdi-account">
       {{ $t('appBar.loginRegister') }}
     </v-btn> -->
 
-    <GuestMenu v-if="!authStore.isLoggedIn"/>
+        <GuestMenu v-if="!authStore.isLoggedIn" />
 
-    <!-- 路由页标签栏：渲染在应用栏扩展区，随应用栏固定；无 tab 时不渲染扩展区 -->
-    <template v-if="showTabBar" #extension>
-      <AppTabBar />
-    </template>
-  </v-app-bar>
+        <!-- 路由页标签栏：渲染在应用栏扩展区，随应用栏固定；无 tab 时不渲染扩展区 -->
+        <template v-if="showTabBar" #extension>
+            <AppTabBar />
+        </template>
+    </v-app-bar>
 </template>

@@ -1295,5 +1295,123 @@
   "themeDialog": {
     "title": "選擇主題",
     "system": "跟隨系統"
+  },
+  "cookiePref": {
+    "drawerLink": "Cookie 偏好設定",
+    "banner": {
+      "title": "關於 Cookie 的使用",
+      "body": "我們使用 Cookie 及類似技術（像素、本機儲存等）來維持網站正常運作、分析造訪情形並改善服務。必要類 Cookie 一律啟用；分析類與行銷類 Cookie 僅在您同意後才會載入。詳見",
+      "policyLink": "《Cookie 政策》",
+      "hint": "您可以點選「自訂類別」逐類查看我們實際使用的 Cookie 清單，也可以隨時在頁尾或懸浮按鈕的「Cookie 設定」中變更或撤回同意。",
+      "rejectAll": "全部拒絕",
+      "customize": "自訂類別",
+      "acceptAll": "全部接受",
+      "close": "關閉"
+    },
+    "pref": {
+      "title": "Cookie 偏好中心",
+      "close": "關閉",
+      "intro": "以下依用途分組列出本站實際使用的 Cookie。必要類是網站運作所必需的，無法關閉；其餘類別預設為關閉，僅在您開啟後才會載入對應的指令碼。進一步了解請見",
+      "policyLink": "Cookie 政策頁",
+      "alwaysOn": "一律啟用",
+      "countPrefix": "共 ",
+      "countSuffix": " 項",
+      "legalBasisLabel": "法律依據：",
+      "dirtyHint": "您有尚未儲存的變更，點選下方「儲存我的選擇」後生效。",
+      "lastUpdatedLabel": "上次更新：{time}",
+      "lastUpdatedHint": "撤回同意將立即停止對應的指令碼，並刪除已寫入的 Cookie。",
+      "rejectAll": "全部拒絕",
+      "revert": "放棄變更",
+      "save": "儲存我的選擇",
+      "colName": "名稱",
+      "colProvider": "提供方",
+      "colPurpose": "用途",
+      "colType": "類型",
+      "colDuration": "存續期間"
+    },
+    "cat": {
+      "necessary": {
+        "name": "必要類（嚴格必要）",
+        "desc": "網站運作所必需，無法關閉",
+        "intro": "這類 Cookie 用來維持工作階段、防範跨站請求偽造與 CDN 安全校驗，是網站可用性的基礎。",
+        "legalBasis": "提供服務所必需，無須取得同意",
+        "note": "Cloudflare 相關 Cookie 由 CDN 與安全服務方設定，僅用於安全防護，不用於跨站追蹤。"
+      },
+      "functional": {
+        "name": "功能偏好類",
+        "desc": "記住語言、地區與介面設定",
+        "intro": "這類 Cookie 會記住您做過的選擇（語言、地區、介面偏好），避免每次造訪都重複設定。",
+        "legalBasis": "同意（個人資訊保護法第 13、14 條）",
+        "note": ""
+      },
+      "analytics": {
+        "name": "分析統計類",
+        "desc": "造訪量、停留時長、熱圖與工作階段錄製",
+        "intro": "統計造訪量與點擊分布，用來了解使用者與哪些內容互動最多，進而改善體驗。",
+        "legalBasis": "同意；歐盟側另需 Art.6(1)(a) GDPR + ePrivacy 第 5(3) 條",
+        "note": "Clarity 自 2025-10 起要求網站先傳送 consentv2 訊號才會開啟完整追蹤；工作階段錄製屬系統性行為監測，歐盟側建議進行 DPIA 並開啟內容遮蔽（Masking）。"
+      },
+      "marketing": {
+        "name": "廣告行銷類",
+        "desc": "個人化推薦、轉換歸因、跨站識別碼",
+        "intro": "由廣告合作方設定，用來建立興趣輪廓並在其他網站顯示相關廣告；不直接儲存個人資訊，但以瀏覽器與裝置的唯一識別碼為基礎。",
+        "legalBasis": "單獨同意；涉及個人資訊出境時需另行告知並取得單獨同意",
+        "note": "資料預設在 Azure 美國資料中心處理，構成個人資訊出境，需在隱私權政策中單獨列明接收方與保障措施（SCC / DPF）。"
+      }
+    },
+    "cookie": {
+      "type": {
+        "firstPartySession": "第一方 · 工作階段",
+        "firstPartyPersistent": "第一方 · 持續性",
+        "thirdPartyPersistent": "第三方 · 持續性"
+      },
+      "XSRF_TOKEN": {
+        "provider": "本站",
+        "purpose": "防範跨站請求偽造（CSRF）",
+        "duration": "工作階段結束即刪除"
+      },
+      "xbedrock_session": {
+        "provider": "本站",
+        "purpose": "維持工作階段狀態與請求連續性",
+        "duration": "工作階段結束即刪除"
+      },
+      "cf_clearance": {
+        "provider": "Cloudflare, Inc.",
+        "purpose": "記錄已通過安全驗證，攔截惡意流量",
+        "duration": "30 分鐘至 1 年（依後台設定而定）"
+      },
+      "ui_locale": {
+        "provider": "本站",
+        "purpose": "儲存語言與地區選擇",
+        "duration": "以實際設定為準"
+      },
+      "ui_theme": {
+        "provider": "本站",
+        "purpose": "儲存主題偏好",
+        "duration": "以實際設定為準"
+      },
+      "_clck": {
+        "provider": "Microsoft Clarity",
+        "purpose": "儲存使用者 ID，串連回訪與偏好",
+        "duration": "1 年"
+      },
+      "_clsk": {
+        "provider": "Microsoft Clarity",
+        "purpose": "將多次頁面瀏覽合併為一筆工作階段錄製",
+        "duration": "1 天"
+      },
+      "MUID": {
+        "provider": "Microsoft（.bing.com）",
+        "purpose": "Microsoft 通用瀏覽器識別碼，與 Microsoft Advertising / Bing 串接",
+        "duration": "13 個月（390 天）"
+      }
+    },
+    "toast": {
+      "acceptAll": "已接受全部 Cookie",
+      "rejectAll": "已拒絕全部非必要 Cookie",
+      "saved": "已儲存您的偏好設定",
+      "reverted": "已放棄未儲存的變更",
+      "reset": "已清除本機同意紀錄，重新整理後將再次徵求"
+    }
   }
 }

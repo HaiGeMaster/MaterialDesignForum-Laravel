@@ -9,20 +9,13 @@ const emit = defineEmits(['click'])
 </script>
 
 <template>
-  <v-tooltip :text="tooltip" >
+  <v-tooltip :text="tooltip">
     <template v-slot:activator="{ props: tipProps }">
-      <v-btn v-bind="tipProps" icon size="small" variant="plain" @click="emit('click')">
-        <v-badge
-          bordered
-          offset-x="-8"
-          offset-y="-8"
-          color="primary"
-          :content="count"
-          :model-value="Number(count) > 0"
-        >
+      <v-badge bordered offset-x="8" offset-y="8" color="primary" :content="count" :model-value="Number(count) > 0">
+        <v-btn v-bind="tipProps" icon size="small" variant="plain" @click="emit('click')">
           <v-icon size="small">mdi-comment-multiple-outline</v-icon>
-        </v-badge>
-      </v-btn>
+        </v-btn>
+      </v-badge>
     </template>
   </v-tooltip>
 </template>

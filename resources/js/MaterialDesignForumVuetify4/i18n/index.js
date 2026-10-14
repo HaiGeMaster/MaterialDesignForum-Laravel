@@ -1,4 +1,5 @@
 import { createI18n } from 'vue-i18n'
+// const { t } = useI18n()
 
 // "D:\Administrator\Documents\Vue\MDForumLaravel\resources\js\locales\de-DE.json"
 // "D:\Administrator\Documents\Vue\MDForumLaravel\resources\js\locales\en-GB.json"
@@ -19,8 +20,12 @@ import koKR from '../locales/ko-KR.json'
 import ruRU from '../locales/ru-RU.json'
 import zhCN from '../locales/zh-CN.json'
 import zhTW from '../locales/zh-TW.json'
+import { checkConsent } from '../stores/cookiePreference'
 
-const savedLocale = localStorage.getItem('locale')
+
+
+
+const savedLocale = localStorage.getItem('ui-locale')
 const browserLocale = (navigator.language || '').toLowerCase()
 const locale = savedLocale || (browserLocale.startsWith('zh-CN') ? 'zh-CN' : 'en-US')
 
@@ -29,7 +34,7 @@ export const i18n = createI18n({
   globalInjection: true,
   locale,
   fallbackLocale: 'en-US',
-  messages: { 
+  messages: {
     'de-DE': deDE,
     'en-GB': enGB,
     'en-US': enUS,
@@ -42,10 +47,17 @@ export const i18n = createI18n({
    },
 })
 
+
 /** 将前端语言同步到 <html lang>，并写入 cookie 供后端渲染首帧使用 */
 export function syncHtmlLang(lang) {
   document.documentElement.lang = lang;// === 'zh' ? 'zh-CN' : lang
-  document.cookie = `locale=${lang}; path=/; max-age=31536000; samesite=lax`
+  // 仅在用户同意 functional 类别后才写入语言 cookie
+  if (checkConsent('functional')) {
+    document.cookie = `ui-locale=${lang}; path=/; max-age=31536000; samesite=lax`
+  } else {
+      // 拒绝后，清除已落地的语言 cookie
+    document.cookie = `ui-locale=${lang}; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; samesite=lax`
+  }
 }
 
 // 初始化同步一次，保证 JS 加载后 <html lang> 与 i18n 一致
@@ -54,7 +66,8 @@ syncHtmlLang(locale)
 /** 切换语言并持久化 */
 export function setLocale(lang) {
   i18n.global.locale.value = lang
-  localStorage.setItem('locale', lang)
+  // changeVuetifyLocale(t('baseLanguagePackInfo.vuetifyLangcode'))
+  localStorage.setItem('ui-locale', lang)
   syncHtmlLang(lang)
 }
 

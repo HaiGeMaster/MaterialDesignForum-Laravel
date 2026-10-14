@@ -1295,5 +1295,123 @@
   "themeDialog": {
     "title": "Choisir un thème",
     "system": "Suivre le système"
+  },
+  "cookiePref": {
+    "drawerLink": "Préférences de cookies",
+    "banner": {
+      "title": "À propos de l'utilisation des cookies",
+      "body": "Nous utilisons des cookies et des technologies similaires (pixels, stockage local, etc.) pour assurer le bon fonctionnement du site, analyser les visites et améliorer nos services. Les cookies nécessaires sont toujours activés ; les cookies d'analyse et de marketing ne sont chargés qu'après votre consentement. Voir la",
+      "policyLink": "Politique relative aux cookies",
+      "hint": "Vous pouvez cliquer sur « Personnaliser les catégories » pour consulter, catégorie par catégorie, la liste des cookies réellement utilisés, et modifier ou retirer votre consentement à tout moment depuis le lien « Paramètres des cookies » en pied de page ou le bouton flottant.",
+      "rejectAll": "Tout refuser",
+      "customize": "Personnaliser les catégories",
+      "acceptAll": "Tout accepter",
+      "close": "Fermer"
+    },
+    "pref": {
+      "title": "Centre de préférences des cookies",
+      "close": "Fermer",
+      "intro": "Les cookies réellement utilisés sur ce site sont listés ci-dessous, regroupés par finalité. Les cookies nécessaires sont indispensables au fonctionnement du site et ne peuvent pas être désactivés ; les autres catégories sont désactivées par défaut et les scripts correspondants ne sont chargés qu'après activation de votre part. Pour en savoir plus, consultez notre",
+      "policyLink": "page Politique relative aux cookies",
+      "alwaysOn": "Toujours activé",
+      "countPrefix": "",
+      "countSuffix": " éléments",
+      "legalBasisLabel": "Base juridique :",
+      "dirtyHint": "Vous avez des modifications non enregistrées ; elles prendront effet après avoir cliqué sur « Enregistrer mes choix » ci-dessous.",
+      "lastUpdatedLabel": "Dernière mise à jour : {time}",
+      "lastUpdatedHint": "Le retrait du consentement arrête immédiatement les scripts concernés et supprime les cookies déjà déposés.",
+      "rejectAll": "Tout refuser",
+      "revert": "Abandonner les modifications",
+      "save": "Enregistrer mes choix",
+      "colName": "Nom",
+      "colProvider": "Fournisseur",
+      "colPurpose": "Finalité",
+      "colType": "Type",
+      "colDuration": "Durée de conservation"
+    },
+    "cat": {
+      "necessary": {
+        "name": "Nécessaires (strictement nécessaires)",
+        "desc": "Indispensables au fonctionnement du site, ne peuvent pas être désactivés",
+        "intro": "Ces cookies maintiennent la session, protègent contre la falsification de requête intersites (CSRF) et assurent les contrôles de sécurité du CDN ; ils sont la base de la disponibilité du site.",
+        "legalBasis": "Nécessaires à la fourniture du service, aucun consentement requis",
+        "note": "Les cookies Cloudflare sont déposés par le fournisseur de CDN et de sécurité, uniquement à des fins de protection ; ils ne servent pas au suivi intersites."
+      },
+      "functional": {
+        "name": "Fonctionnels et préférences",
+        "desc": "Mémorisent la langue, la région et les paramètres d'interface",
+        "intro": "Ces cookies mémorisent vos choix (langue, région, préférences d'interface) afin d'éviter de les reconfigurer à chaque visite.",
+        "legalBasis": "Consentement (articles 13 et 14 de la loi sur la protection des informations personnelles)",
+        "note": ""
+      },
+      "analytics": {
+        "name": "Analyse et statistiques",
+        "desc": "Trafic, durée de visite, cartes de chaleur et enregistrements de session",
+        "intro": "Mesure le trafic et la répartition des clics afin de comprendre avec quels contenus les utilisateurs interagissent le plus et d'améliorer l'expérience.",
+        "legalBasis": "Consentement ; dans l'UE, également art. 6(1)(a) du RGPD + art. 5(3) de la directive ePrivacy",
+        "note": "Depuis octobre 2025, Clarity exige que le site transmette d'abord un signal consent v2 pour activer le suivi complet. L'enregistrement de session constitue une surveillance systématique du comportement ; une AIPD (DPIA) et l'activation du masquage du contenu sont recommandées pour l'UE."
+      },
+      "marketing": {
+        "name": "Publicité et marketing",
+        "desc": "Recommandations personnalisées, attribution des conversions, identifiants intersites",
+        "intro": "Déposés par nos partenaires publicitaires, ils servent à construire un profil de centres d'intérêt et à afficher des publicités pertinentes sur d'autres sites. Ils ne stockent pas directement d'informations personnelles, mais reposent sur un identifiant unique du navigateur et de l'appareil.",
+        "legalBasis": "Consentement distinct ; en cas de transfert d'informations personnelles hors du territoire, une information et un consentement distincts sont requis",
+        "note": "Les données sont traitées par défaut dans les centres de données Azure aux États-Unis, ce qui constitue un transfert d'informations personnelles hors du territoire ; les destinataires et les garanties (SCC / DPF) doivent être indiqués séparément dans la politique de confidentialité."
+      }
+    },
+    "cookie": {
+      "type": {
+        "firstPartySession": "Première partie · Session",
+        "firstPartyPersistent": "Première partie · Persistant",
+        "thirdPartyPersistent": "Tiers · Persistant"
+      },
+      "XSRF_TOKEN": {
+        "provider": "Ce site",
+        "purpose": "Protection contre la falsification de requête intersites (CSRF)",
+        "duration": "Supprimé à la fin de la session"
+      },
+      "xbedrock_session": {
+        "provider": "Ce site",
+        "purpose": "Maintient l'état de la session et la continuité des requêtes",
+        "duration": "Supprimé à la fin de la session"
+      },
+      "cf_clearance": {
+        "provider": "Cloudflare, Inc.",
+        "purpose": "Enregistre la réussite d'un défi de sécurité et bloque le trafic malveillant",
+        "duration": "De 30 minutes à 1 an (selon la configuration du back-end)"
+      },
+      "ui_locale": {
+        "provider": "Ce site",
+        "purpose": "Enregistre la sélection de la langue et de la région",
+        "duration": "Selon la configuration réelle"
+      },
+      "ui_theme": {
+        "provider": "Ce site",
+        "purpose": "Enregistre la préférence de thème",
+        "duration": "Selon la configuration réelle"
+      },
+      "_clck": {
+        "provider": "Microsoft Clarity",
+        "purpose": "Stocke un identifiant utilisateur pour relier les visites répétées et les préférences",
+        "duration": "1 an"
+      },
+      "_clsk": {
+        "provider": "Microsoft Clarity",
+        "purpose": "Regroupe plusieurs pages vues en un seul enregistrement de session",
+        "duration": "1 jour"
+      },
+      "MUID": {
+        "provider": "Microsoft (.bing.com)",
+        "purpose": "Identifiant de navigateur universel de Microsoft, relié à Microsoft Advertising / Bing",
+        "duration": "13 mois (390 jours)"
+      }
+    },
+    "toast": {
+      "acceptAll": "Tous les cookies ont été acceptés",
+      "rejectAll": "Tous les cookies non nécessaires ont été refusés",
+      "saved": "Vos préférences ont été enregistrées",
+      "reverted": "Les modifications non enregistrées ont été abandonnées",
+      "reset": "L'enregistrement local du consentement a été effacé ; il vous sera de nouveau demandé après actualisation"
+    }
   }
 }

@@ -943,8 +943,17 @@ onBeforeUnmount(() => {
           </div>
         </template>
       </v-toolbar>
-
+        <!-- :items-per-page-options="[
+  {value: 10, title: '10'},
+  {value: 25, title: '25'},
+  {value: 50, title: '50'},
+  {value: 100, title: '100'},
+  {value: 500, title: '500'},
+  {value: 1000, title: '1000'},
+  {value: 10000, title: '10000'},
+]" -->
       <v-data-table-server color="primary" :mobile="mobile" v-if="moduleMeta" v-model="selected" v-model:page="page" v-model:items-per-page="itemsPerPage"
+
         v-model:sort-by="sortBy" :headers="headers" :items="items" :items-length="total" :loading="loading"
         :search="search" :item-value="itemValue" :return-object="true" show-select hover density="comfortable"
         @update:options="loadItems" @click:row="onRowClick">

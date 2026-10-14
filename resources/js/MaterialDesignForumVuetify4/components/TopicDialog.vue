@@ -6,7 +6,7 @@ import { useAuthStore } from '../stores/auth'
 import { useFeedback } from '../composables/useFeedback'
 import ImageUploadField from './ImageUploadField.vue'
 import { useDisplay } from 'vuetify'
-const { mobile } = useDisplay()
+const { xs } = useDisplay()
 
 const props = defineProps({
   /** 对话框显隐 */
@@ -99,7 +99,7 @@ async function submit() {
 </script>
 
 <template>
-  <v-dialog v-model="dialogOpen" max-width="560" :fullscreen="mobile">
+  <v-dialog v-model="dialogOpen" max-width="560" :fullscreen="xs">
     <v-card rounded="lg" >
       <!-- :title="isEdit ? $t('topicDialog.titleEdit') : $t('topicDialog.titleNew')" :prepend-icon="isEdit ? 'mdi-pencil-outline' : 'mdi-tag-plus-outline'" -->
 

@@ -76,7 +76,7 @@ const settings = ref(
   NOTIFICATION_TYPES.map((name) => ({
     name,
     web_message: true,
-    email_message: true,
+    email_message: false,
   })),
 )
 
@@ -110,7 +110,7 @@ async function loadSettings() {
       settings.value = NOTIFICATION_TYPES.map((name) => ({
         name,
         web_message: savedMap.get(name)?.web_message ?? true,
-        email_message: savedMap.get(name)?.email_message ?? true,
+        email_message: savedMap.get(name)?.email_message ?? false,
       }))
     }
   } catch (e) {

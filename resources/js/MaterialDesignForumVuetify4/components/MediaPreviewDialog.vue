@@ -4,7 +4,7 @@
 // 或：<MediaPreviewDialog v-model="previewOpen" :item="preview" />
 
 import { useDisplay } from 'vuetify'
-const { mobile } = useDisplay()
+const { xs } = useDisplay()
 
 const open = defineModel('open', { type: Boolean, default: false })
 
@@ -15,7 +15,7 @@ const props = defineProps({
 </script>
 
 <template>
-    <v-dialog v-model="open" max-width="880" scrollable :fullscreen="mobile">
+    <v-dialog v-model="open" max-width="880" scrollable :fullscreen="xs">
         <v-card rounded="lg" style="margin-top: 40px;">
             <v-toolbar :title="props.item?.filename">
                 <template #append>

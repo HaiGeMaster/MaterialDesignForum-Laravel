@@ -63,7 +63,7 @@ class AuthController extends Controller
             'blog' => null,
             'company' => null,
             'location' => null,
-            'language' => 'zh_CN',
+            'language' => 'en-US',
             'create_time' => now(),
             'update_time' => now(),
             'disable_time' => null,

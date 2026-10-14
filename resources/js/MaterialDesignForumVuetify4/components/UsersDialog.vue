@@ -14,7 +14,7 @@ const authStore = useAuthStore()
 const router = useRouter()
 const route = useRoute()
 const { t } = useI18n()
-const { mobile } = useDisplay()
+const { xs } = useDisplay()
 
 const users = ref([])
 const page = ref(1)
@@ -106,12 +106,16 @@ function isSelf(user) {
     Number(authStore.user.user_id) === Number(user.user_id)
   )
 }
+// 用户条目头像首字母
+function userInitial(item) {
+  return item.username ? item.username.slice(0, 1).toUpperCase() : '?'
+}
 </script>
 
 <template>
   <v-dialog
     v-model="model"
-    :fullscreen="mobile"
+    :fullscreen="xs"
     max-width="530"
   >
     <v-card rounded="lg" >
@@ -138,12 +142,23 @@ function isSelf(user) {
           @click="goProfile(user)"
         >
           <template #prepend>
-            <v-avatar size="44"  class="mr-2">
+            <!-- <v-avatar size="44"  class="mr-2">
               <v-img v-if="user.avatar" :src="user.avatar" cover />
               <span v-else >
                 {{ user.username?.slice(0, 1).toUpperCase() || '?' }}
               </span>
-            </v-avatar>
+            </v-avatar> -->
+
+      <v-avatar
+        size="44"  class="mr-2"
+         :variant="user.avatar?'': 'tonal'"
+      >
+        <v-img v-if="user.avatar" :src="user.avatar" cover />
+        <span v-else class="text-body-2 font-weight-bold text-primary">
+          {{ userInitial(user) }}
+        </span>
+      </v-avatar>
+
           </template>
 
           <v-list-item-title class="font-weight-bold text-truncate">
@@ -164,13 +179,6 @@ function isSelf(user) {
           </template>
         </v-list-item>
 
-        <InfiniteScroll
-          :finished="finished"
-          :loading="loading"
-          :error="error"
-          @load="load"
-          @retry="load"
-        />
       </v-list>
 
       <v-empty-state
@@ -178,6 +186,14 @@ function isSelf(user) {
         icon="mdi-account-multiple"
         :title="$t('usersDialog.empty')"
       />
+      
+        <InfiniteScroll
+          :finished="finished"
+          :loading="loading"
+          :error="error"
+          @load="load"
+          @retry="load"
+        />
     </v-card>
   </v-dialog>
 </template>

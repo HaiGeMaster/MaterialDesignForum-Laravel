@@ -84,56 +84,29 @@ async function toggleVote(type) {
 
 <template>
   <div class="d-inline-flex align-center">
-    <v-tooltip :text="$t('vote.up')" >
+    <v-tooltip :text="$t('vote.up')">
       <template v-slot:activator="{ props: tipProps }">
-        <v-btn
-          v-bind="tipProps"
-          icon
-          :size="size"
-          variant="plain"
-          :loading="loading"
-          class="mr-1"
-          @click.stop.prevent="toggleVote('up')"
-        >
-          <v-badge
-            bordered
-            offset-x="-8"
-            offset-y="-8"
-            color="primary"
-            :content="upCount"
-            :model-value="upCount > 0"
-          >
+        <v-badge bordered offset-x="8" offset-y="8" color="primary" :content="upCount" :model-value="upCount > 0">
+          <v-btn v-bind="tipProps" icon :size="size" variant="plain" :loading="loading" class="mr-1"
+            @click.stop.prevent="toggleVote('up')">
             <v-icon size="small" :color="upValue ? 'primary' : ''">
               {{ upValue ? 'mdi-thumb-up' : 'mdi-thumb-up-outline' }}
             </v-icon>
-          </v-badge>
-        </v-btn>
+          </v-btn>
+        </v-badge>
       </template>
     </v-tooltip>
 
-    <v-tooltip :text="$t('vote.down')" >
+    <v-tooltip :text="$t('vote.down')">
       <template v-slot:activator="{ props: tipProps }">
-        <v-btn
-          v-bind="tipProps"
-          icon
-          :size="size"
-          variant="plain"
-          :loading="loading"
-          @click.stop.prevent="toggleVote('down')"
-        >
-          <v-badge
-            bordered
-            offset-x="-8"
-            offset-y="-8"
-            color="primary"
-            :content="downCount"
-            :model-value="downCount > 0"
-          >
+        <v-badge bordered offset-x="8" offset-y="8" color="primary" :content="downCount" :model-value="downCount > 0">
+          <v-btn v-bind="tipProps" icon :size="size" variant="plain" :loading="loading"
+            @click.stop.prevent="toggleVote('down')">
             <v-icon size="small" :color="downValue ? 'primary' : ''">
               {{ downValue ? 'mdi-thumb-down' : 'mdi-thumb-down-outline' }}
             </v-icon>
-          </v-badge>
-        </v-btn>
+          </v-btn>
+        </v-badge>
       </template>
     </v-tooltip>
   </div>

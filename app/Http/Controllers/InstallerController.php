@@ -205,7 +205,7 @@ class InstallerController extends Controller
         $env = [
             'APP_NAME'    => $data['app_name'] ?? config('app.name', 'MDForum'),
             'APP_TIMEZONE' => $data['timezone'],
-            'APP_LOCALE'   => $data['locale'] ?? 'zh_CN',
+            'APP_LOCALE'   => $data['locale'] ?? 'en-US',
         ];
 
         // 本站域名地址（可选）：去掉末尾斜杠，保证后续拼接链接时路径正确
@@ -297,7 +297,7 @@ class InstallerController extends Controller
                 'inbox_system' => 0,
                 'inbox_user_group' => 0,
                 'inbox_private_message' => 0,
-                'language' => config('app.locale', 'zh_CN'),
+                'language' => config('app.locale', 'en-US'),
                 'create_time' => now(),
                 'update_time' => now(),
                 'disable_time' => null,

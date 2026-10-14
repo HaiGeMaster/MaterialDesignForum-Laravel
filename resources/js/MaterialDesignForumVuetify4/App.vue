@@ -16,6 +16,7 @@ import CommentReplyEditDialog from './components/CommentReplyEditDialog.vue'
 import CommentDialog from './components/CommentDialog.vue'
 import DeleteDialog from './components/DeleteDialog.vue'
 import ProfileEditDialog from './components/ProfileEditDialog.vue'
+import CookiePreferenceCenter from './components/CookiePreferenceCenter.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -133,6 +134,9 @@ onBeforeUnmount(() => {
 
       <!-- 全局个人资料编辑对话框：任意场景统一调用 -->
       <ProfileEditDialog />
+
+      <!-- Cookie 同意横幅 + 偏好中心对话框：页脚「Cookie 偏好设置」统一调用 -->
+      <CookiePreferenceCenter />
     </template>
   </v-app>
 </template>

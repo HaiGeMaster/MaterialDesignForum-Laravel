@@ -4,11 +4,39 @@ import * as components from "vuetify/components";
 import * as directives from "vuetify/directives";
 import "@mdi/font/css/materialdesignicons.css";
 
+import {
+  // pl,
+  zhHans,
+  en,
+  zhHant,
+  ru,
+  fr,
+  de,
+  ja,
+  ko,
+} from 'vuetify/locale'
+
 const vuetify = createVuetify({
   components,
   directives,
   icons: {
     defaultSet: "mdi",
+  },
+  locale: {
+    locale: 'zhHans',
+    fallback: 'en',
+    messages: {
+      zhHans,
+      en,
+      zhHant,
+      ru,
+      fr,
+      de,
+      ja,
+      ko,
+      // pl,
+      // sv
+    },
   },
   theme: {
     defaultTheme: "system",

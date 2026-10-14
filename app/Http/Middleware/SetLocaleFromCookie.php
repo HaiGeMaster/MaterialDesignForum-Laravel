@@ -26,7 +26,7 @@ class SetLocaleFromCookie
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $locale = $request->cookie('locale');
+        $locale = $request->cookie('ui-locale');
 
         // 仅接受形如 zh-CN / en-US / de-DE / zh / en 的语言代码，防止任意字符串注入
         if (is_string($locale) && preg_match('/^[a-z]{2}(-[A-Z]{2})?$/', $locale)) {

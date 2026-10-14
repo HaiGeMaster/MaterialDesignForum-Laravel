@@ -10,6 +10,7 @@ import CommentReplyEditDialog from './components/CommentReplyEditDialog.vue'
 import DeleteDialog from './components/DeleteDialog.vue'
 import ProfileEditDialog from './components/ProfileEditDialog.vue'
 import FloatingActionButton from './components/FloatingActionButton.vue'
+import CookiePreferenceCenter from './components/CookiePreferenceCenter.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -86,6 +87,9 @@ onBeforeUnmount(() => {
 
     <!-- 右下角悬浮按钮：管理员用户组页创建用户组 -->
     <FloatingActionButton />
+
+    <!-- Cookie 同意横幅 + 偏好中心对话框：页脚「Cookie 偏好设置」统一调用 -->
+    <CookiePreferenceCenter />
   </v-app>
 </template>
 

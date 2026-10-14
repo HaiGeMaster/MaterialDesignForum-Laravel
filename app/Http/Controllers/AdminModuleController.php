@@ -162,7 +162,7 @@ class AdminModuleController extends Controller
      *
      * Query 参数：
      *  - page:       页码（带 page 走 Laravel 分页）
-     *  - per_page:   每页条数（默认 15，上限 100）
+    *  - per_page:   每页条数（默认 15，上限 100；-1 时返回全部）
      *  - search:     关键字（对模块配置的 search 列做 LIKE OR 查询）
      *  - order_by:   排序列（必须在模块 sortable 白名单内，默认主键）
      *  - order_dir:  asc / desc（默认 desc）
@@ -174,7 +174,9 @@ class AdminModuleController extends Controller
             return response()->json(['message' => 'Unknown module'], 404);
         }
 
-        $perPage = min(max($request->integer('per_page', 15), 1), 100);
+        $requestedPerPage = $request->integer('per_page', 15);
+        $allItems = $requestedPerPage === -1;
+        $perPage = min(max($requestedPerPage, 1), 100);
         $page    = $request->integer('page', 1);
         $search  = trim((string) $request->query('search', ''));
         $orderBy = $request->query('order_by');
@@ -211,9 +213,20 @@ class AdminModuleController extends Controller
 
         $query->orderBy($orderBy, $orderDir);
 
-        $paginator = $query->paginate($perPage, ['*'], 'page', $page);
-
-        $collection = $paginator->getCollection();
+        if ($allItems) {
+            $collection = $query->get();
+            $total = $collection->count();
+            $currentPage = 1;
+            $responsePerPage = -1;
+            $lastPage = 1;
+        } else {
+            $paginator = $query->paginate($perPage, ['*'], 'page', $page);
+            $collection = $paginator->getCollection();
+            $total = $paginator->total();
+            $currentPage = $paginator->currentPage();
+            $responsePerPage = $paginator->perPage();
+            $lastPage = $paginator->lastPage();
+        }
 
         // 批量预取 username（避免 N+1）：收集本页出现的所有 user_id，一次查回
         $usernames = [];
@@ -237,7 +250,7 @@ class AdminModuleController extends Controller
             }
         }
 
-        $items = $collection->map(function ($item) use ($module, $usernames) {
+        $items = $collection->map(function ($item) use ($module, $usernames, $replyableUsernames) {
             $array = $item->toArray();
 
             // 把预取到的 username 附到每行
@@ -260,10 +273,10 @@ class AdminModuleController extends Controller
 
         return response()->json([
             'data'          => $items,
-            'total'         => $paginator->total(),
-            'current_page'  => $paginator->currentPage(),
-            'per_page'      => $paginator->perPage(),
-            'last_page'     => $paginator->lastPage(),
+            'total'         => $total,
+            'current_page'  => $currentPage,
+            'per_page'      => $responsePerPage,
+            'last_page'     => $lastPage,
             'module'        => $module,
         ]);
     }

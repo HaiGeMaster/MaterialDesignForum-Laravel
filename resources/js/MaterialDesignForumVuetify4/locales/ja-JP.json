@@ -1295,5 +1295,123 @@
   "themeDialog": {
     "title": "テーマを選択",
     "system": "システムに追従"
+  },
+  "cookiePref": {
+    "drawerLink": "Cookie の設定",
+    "banner": {
+      "title": "Cookie の利用について",
+      "body": "当サイトでは、サイトを正常に稼働させ、アクセス状況を分析し、サービスを改善するために、Cookie および類似技術（ピクセル、ローカルストレージなど）を使用しています。必須 Cookie は常に有効です。分析・マーケティング Cookie は、お客様が同意された場合にのみ読み込まれます。詳細は",
+      "policyLink": "Cookie ポリシー",
+      "hint": "「カテゴリをカスタマイズ」をクリックすると、実際に使用している Cookie をカテゴリごとに確認できます。また、フッターやフローティングボタンの「Cookie 設定」から、いつでも同意を変更または撤回できます。",
+      "rejectAll": "すべて拒否",
+      "customize": "カテゴリをカスタマイズ",
+      "acceptAll": "すべて受け入れる",
+      "close": "閉じる"
+    },
+    "pref": {
+      "title": "Cookie 設定センター",
+      "close": "閉じる",
+      "intro": "以下に、当サイトで実際に使用している Cookie を用途別にまとめて掲載しています。必須カテゴリはサイトの稼働に必要なため無効にできません。その他のカテゴリは既定で無効であり、お客様が有効にされた場合にのみ該当スクリプトが読み込まれます。詳細は",
+      "policyLink": "Cookie ポリシーのページ",
+      "alwaysOn": "常に有効",
+      "countPrefix": "全 ",
+      "countSuffix": " 件",
+      "legalBasisLabel": "法的根拠：",
+      "dirtyHint": "未保存の変更があります。下の「選択を保存」をクリックすると反映されます。",
+      "lastUpdatedLabel": "最終更新：{time}",
+      "lastUpdatedHint": "同意を撤回すると、該当スクリプトは直ちに停止し、すでに保存された Cookie は削除されます。",
+      "rejectAll": "すべて拒否",
+      "revert": "変更を破棄",
+      "save": "選択を保存",
+      "colName": "名前",
+      "colProvider": "提供元",
+      "colPurpose": "目的",
+      "colType": "種類",
+      "colDuration": "保存期間"
+    },
+    "cat": {
+      "necessary": {
+        "name": "必須（厳密に必要な Cookie）",
+        "desc": "サイトの稼働に必要なため、無効にできません",
+        "intro": "セッションの維持、クロスサイトリクエストフォージェリ（CSRF）の防止、および CDN のセキュリティ検証に使用され、サイトの利用可能性の基盤となります。",
+        "legalBasis": "サービスの提供に不可欠であり、同意は不要です",
+        "note": "Cloudflare 関連の Cookie は CDN およびセキュリティ提供事業者によって設定され、セキュリティ保護のみに使用されます。クロスサイトトラッキングには使用されません。"
+      },
+      "functional": {
+        "name": "機能・環境設定",
+        "desc": "言語、地域、インターフェース設定を記憶します",
+        "intro": "言語、地域、インターフェースの設定など、お客様が行った選択を記憶し、訪問のたびに再設定する手間を省きます。",
+        "legalBasis": "同意（個人情報保護法 第 13 条・第 14 条）",
+        "note": ""
+      },
+      "analytics": {
+        "name": "分析・統計",
+        "desc": "アクセス数、滞在時間、ヒートマップ、セッション録画",
+        "intro": "アクセス数やクリック分布を統計し、どのコンテンツが最も利用されているかを把握して体験を改善します。",
+        "legalBasis": "同意。EU ではさらに GDPR 第 6 条(1)(a) および ePrivacy 指令 第 5 条(3) に基づく同意が必要です",
+        "note": "Clarity は 2025 年 10 月以降、サイトが consentv2 シグナルを送信しない限り完全なトラッキングを開始しません。セッション録画は体系的な行動監視に該当するため、EU では DPIA の実施とコンテンツのマスキング（Masking）の有効化を推奨します。"
+      },
+      "marketing": {
+        "name": "広告・マーケティング",
+        "desc": "パーソナライズされた推薦、コンバージョン計測、クロスサイト識別子",
+        "intro": "広告パートナーによって設定され、興味関心プロファイルの構築や他サイトでの関連広告の表示に使用されます。個人情報を直接保存するわけではありませんが、ブラウザとデバイスの一意識別子に基づいています。",
+        "legalBasis": "個別の同意。個人情報の国外移転が伴う場合は、別途の告知と個別同意が必要です",
+        "note": "データは既定で Azure の米国データセンターで処理され、個人情報の国外移転に該当します。受信者と保護措置（SCC / DPF）はプライバシーポリシーに個別に明記する必要があります。"
+      }
+    },
+    "cookie": {
+      "type": {
+        "firstPartySession": "ファーストパーティ · セッション",
+        "firstPartyPersistent": "ファーストパーティ · 永続",
+        "thirdPartyPersistent": "サードパーティ · 永続"
+      },
+      "XSRF_TOKEN": {
+        "provider": "当サイト",
+        "purpose": "クロスサイトリクエストフォージェリ（CSRF）の防止",
+        "duration": "セッション終了時に削除"
+      },
+      "xbedrock_session": {
+        "provider": "当サイト",
+        "purpose": "セッション状態とリクエストの連続性を維持する",
+        "duration": "セッション終了時に削除"
+      },
+      "cf_clearance": {
+        "provider": "Cloudflare, Inc.",
+        "purpose": "セキュリティチャレンジの通過を記録し、悪意のあるトラフィックを遮断する",
+        "duration": "30 分〜1 年（バックエンドの設定による）"
+      },
+      "ui_locale": {
+        "provider": "当サイト",
+        "purpose": "言語と地域の選択を保存する",
+        "duration": "実際の設定に準じます"
+      },
+      "ui_theme": {
+        "provider": "当サイト",
+        "purpose": "テーマの設定を保存する",
+        "duration": "実際の設定に準じます"
+      },
+      "_clck": {
+        "provider": "Microsoft Clarity",
+        "purpose": "ユーザー ID を保存し、再訪問と設定を紐付ける",
+        "duration": "1 年"
+      },
+      "_clsk": {
+        "provider": "Microsoft Clarity",
+        "purpose": "複数のページビューを 1 件のセッション録画にまとめる",
+        "duration": "1 日"
+      },
+      "MUID": {
+        "provider": "Microsoft（.bing.com）",
+        "purpose": "Microsoft 共通のブラウザー識別子。Microsoft Advertising / Bing と連携",
+        "duration": "13 か月（390 日）"
+      }
+    },
+    "toast": {
+      "acceptAll": "すべての Cookie を受け入れました",
+      "rejectAll": "必須以外のすべての Cookie を拒否しました",
+      "saved": "設定を保存しました",
+      "reverted": "未保存の変更を破棄しました",
+      "reset": "ローカルの同意記録を削除しました。再読み込み後に改めて同意を求めます"
+    }
   }
 }

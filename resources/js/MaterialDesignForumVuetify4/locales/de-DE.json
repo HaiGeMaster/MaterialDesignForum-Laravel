@@ -1295,5 +1295,123 @@
   "themeDialog": {
     "title": "Design auswählen",
     "system": "Systemeinstellung folgen"
+  },
+  "cookiePref": {
+    "drawerLink": "Cookie-Einstellungen",
+    "banner": {
+      "title": "Über die Verwendung von Cookies",
+      "body": "Wir verwenden Cookies und ähnliche Technologien (Pixel, Local Storage usw.), um den Betrieb der Website sicherzustellen, Zugriffe zu analysieren und unseren Service zu verbessern. Notwendige Cookies sind immer aktiv; Analyse- und Marketing-Cookies werden erst nach Ihrer Einwilligung geladen. Weitere Informationen finden Sie in der",
+      "policyLink": "Cookie-Richtlinie",
+      "hint": "Sie können auf „Kategorien anpassen“ klicken, um die von uns tatsächlich verwendeten Cookies Kategorie für Kategorie einzusehen. Sie können Ihre Einwilligung außerdem jederzeit über den Link „Cookie-Einstellungen“ in der Fußzeile oder über die schwebende Schaltfläche ändern oder widerrufen.",
+      "rejectAll": "Alle ablehnen",
+      "customize": "Kategorien anpassen",
+      "acceptAll": "Alle akzeptieren",
+      "close": "Schließen"
+    },
+    "pref": {
+      "title": "Cookie-Präferenzcenter",
+      "close": "Schließen",
+      "intro": "Nachfolgend sind die auf dieser Website tatsächlich verwendeten Cookies nach Verwendungszweck gruppiert aufgelistet. Notwendige Cookies sind für den Betrieb der Website erforderlich und können nicht deaktiviert werden; alle übrigen Kategorien sind standardmäßig deaktiviert, und die entsprechenden Skripte werden erst geladen, wenn Sie sie aktivieren. Weitere Informationen finden Sie auf unserer",
+      "policyLink": "Cookie-Richtlinienseite",
+      "alwaysOn": "Immer aktiv",
+      "countPrefix": "Insgesamt ",
+      "countSuffix": " Einträge",
+      "legalBasisLabel": "Rechtsgrundlage:",
+      "dirtyHint": "Sie haben ungespeicherte Änderungen. Diese werden erst wirksam, wenn Sie unten auf „Meine Auswahl speichern“ klicken.",
+      "lastUpdatedLabel": "Zuletzt aktualisiert: {time}",
+      "lastUpdatedHint": "Ein Widerruf der Einwilligung stoppt die betreffenden Skripte sofort und löscht bereits gesetzte Cookies.",
+      "rejectAll": "Alle ablehnen",
+      "revert": "Änderungen verwerfen",
+      "save": "Meine Auswahl speichern",
+      "colName": "Name",
+      "colProvider": "Anbieter",
+      "colPurpose": "Zweck",
+      "colType": "Typ",
+      "colDuration": "Speicherdauer"
+    },
+    "cat": {
+      "necessary": {
+        "name": "Notwendig (unbedingt erforderlich)",
+        "desc": "Für den Betrieb der Website erforderlich, nicht deaktivierbar",
+        "intro": "Diese Cookies dienen der Aufrechterhaltung der Sitzung, dem Schutz vor Cross-Site-Request-Forgery und der Sicherheitsprüfung des CDN; sie sind die Grundlage für die Nutzbarkeit der Website.",
+        "legalBasis": "Zur Bereitstellung des Dienstes erforderlich, keine Einwilligung erforderlich",
+        "note": "Cloudflare-Cookies werden vom CDN- und Sicherheitsdienstleister gesetzt und dienen ausschließlich dem Schutz vor Angriffen, nicht der seitenübergreifenden Nachverfolgung."
+      },
+      "functional": {
+        "name": "Funktion und Einstellungen",
+        "desc": "Speichert Sprache, Region und Oberflächeneinstellungen",
+        "intro": "Diese Cookies speichern Ihre getroffenen Auswahlen (Sprache, Region, Oberflächenpräferenzen), damit Sie sie nicht bei jedem Besuch erneut festlegen müssen.",
+        "legalBasis": "Einwilligung (Art. 13 und 14 des Gesetzes zum Schutz personenbezogener Daten)",
+        "note": ""
+      },
+      "analytics": {
+        "name": "Analyse und Statistik",
+        "desc": "Besuchszahlen, Verweildauer, Heatmaps und Sitzungsaufzeichnungen",
+        "intro": "Erfasst Besuchszahlen und die Verteilung der Klicks, um zu verstehen, mit welchen Inhalten Nutzer am meisten interagieren, und um das Angebot zu verbessern.",
+        "legalBasis": "Einwilligung; in der EU zusätzlich Art. 6 Abs. 1 lit. a DSGVO sowie Art. 5 Abs. 3 der ePrivacy-Richtlinie",
+        "note": "Clarity verlangt seit Oktober 2025, dass Websites zuerst ein consentv2-Signal senden, bevor die vollständige Nachverfolgung aktiviert wird. Sitzungsaufzeichnungen stellen eine systematische Verhaltensbeobachtung dar; für die EU werden eine Datenschutz-Folgenabschätzung (DPIA) und die Aktivierung der Inhaltsmaskierung (Masking) empfohlen."
+      },
+      "marketing": {
+        "name": "Werbung und Marketing",
+        "desc": "Personalisierte Empfehlungen, Conversion-Attribution, seitenübergreifende Kennungen",
+        "intro": "Werden von Werbepartnern gesetzt, um Interessenprofile zu erstellen und auf anderen Websites relevante Werbung anzuzeigen. Sie speichern keine personenbezogenen Daten direkt, basieren aber auf einer eindeutigen Kennung von Browser und Gerät.",
+        "legalBasis": "Gesonderte Einwilligung; bei Übermittlung personenbezogener Daten ins Ausland sind eine gesonderte Information und eine gesonderte Einwilligung erforderlich",
+        "note": "Daten werden standardmäßig in Azure-Rechenzentren in den USA verarbeitet, was eine Übermittlung personenbezogener Daten ins Ausland darstellt; Empfänger und Schutzmaßnahmen (SCC / DPF) müssen in der Datenschutzerklärung gesondert aufgeführt werden."
+      }
+    },
+    "cookie": {
+      "type": {
+        "firstPartySession": "Erstanbieter · Sitzung",
+        "firstPartyPersistent": "Erstanbieter · Persistent",
+        "thirdPartyPersistent": "Drittanbieter · Persistent"
+      },
+      "XSRF_TOKEN": {
+        "provider": "Diese Website",
+        "purpose": "Schutz vor Cross-Site-Request-Forgery (CSRF)",
+        "duration": "Wird beim Ende der Sitzung gelöscht"
+      },
+      "xbedrock_session": {
+        "provider": "Diese Website",
+        "purpose": "Hält den Sitzungsstatus und die Kontinuität von Anfragen aufrecht",
+        "duration": "Wird beim Ende der Sitzung gelöscht"
+      },
+      "cf_clearance": {
+        "provider": "Cloudflare, Inc.",
+        "purpose": "Dokumentiert eine bestandene Sicherheitsabfrage und blockiert schädlichen Datenverkehr",
+        "duration": "30 Minuten bis 1 Jahr (abhängig von der Backend-Konfiguration)"
+      },
+      "ui_locale": {
+        "provider": "Diese Website",
+        "purpose": "Speichert die Auswahl von Sprache und Region",
+        "duration": "Entsprechend der tatsächlichen Konfiguration"
+      },
+      "ui_theme": {
+        "provider": "Diese Website",
+        "purpose": "Speichert die Theme-Präferenz",
+        "duration": "Entsprechend der tatsächlichen Konfiguration"
+      },
+      "_clck": {
+        "provider": "Microsoft Clarity",
+        "purpose": "Speichert eine Nutzer-ID, um wiederholte Besuche und Präferenzen zu verknüpfen",
+        "duration": "1 Jahr"
+      },
+      "_clsk": {
+        "provider": "Microsoft Clarity",
+        "purpose": "Fasst mehrere Seitenaufrufe zu einer einzigen Sitzungsaufzeichnung zusammen",
+        "duration": "1 Tag"
+      },
+      "MUID": {
+        "provider": "Microsoft (.bing.com)",
+        "purpose": "Universelle Browser-Kennung von Microsoft, verknüpft mit Microsoft Advertising / Bing",
+        "duration": "13 Monate (390 Tage)"
+      }
+    },
+    "toast": {
+      "acceptAll": "Alle Cookies akzeptiert",
+      "rejectAll": "Alle nicht notwendigen Cookies abgelehnt",
+      "saved": "Ihre Präferenzen wurden gespeichert",
+      "reverted": "Ungespeicherte Änderungen wurden verworfen",
+      "reset": "Lokaler Einwilligungsdatensatz gelöscht; nach dem Neuladen wird erneut um Einwilligung gebeten"
+    }
   }
 }

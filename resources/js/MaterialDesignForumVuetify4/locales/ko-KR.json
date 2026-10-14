@@ -1295,5 +1295,123 @@
   "themeDialog": {
     "title": "테마 선택",
     "system": "시스템 설정 따르기"
+  },
+  "cookiePref": {
+    "drawerLink": "쿠키 환경설정",
+    "banner": {
+      "title": "쿠키 사용 안내",
+      "body": "저희는 웹사이트의 정상적인 운영, 방문 현황 분석 및 서비스 개선을 위해 쿠키와 유사 기술(픽셀, 로컬 스토리지 등)을 사용합니다. 필수 쿠키는 항상 사용 설정되어 있으며, 분석·마케팅 쿠키는 귀하가 동의한 경우에만 로드됩니다. 자세한 내용은",
+      "policyLink": "쿠키 정책",
+      "hint": "'카테고리 설정'을 클릭하면 실제로 사용하는 쿠키 목록을 카테고리별로 확인할 수 있으며, 바닥글이나 플로팅 버튼의 '쿠키 설정'에서 언제든지 동의를 변경하거나 철회할 수 있습니다.",
+      "rejectAll": "모두 거부",
+      "customize": "카테고리 설정",
+      "acceptAll": "모두 수락",
+      "close": "닫기"
+    },
+    "pref": {
+      "title": "쿠키 환경설정 센터",
+      "close": "닫기",
+      "intro": "아래에는 이 사이트에서 실제로 사용하는 쿠키가 용도별로 묶여 나열되어 있습니다. 필수 쿠키는 사이트 운영에 필요하므로 해제할 수 없으며, 나머지 카테고리는 기본적으로 꺼져 있어 활성화한 경우에만 해당 스크립트가 로드됩니다. 자세한 내용은",
+      "policyLink": "쿠키 정책 페이지",
+      "alwaysOn": "항상 사용",
+      "countPrefix": "총 ",
+      "countSuffix": "개",
+      "legalBasisLabel": "법적 근거:",
+      "dirtyHint": "저장되지 않은 변경 사항이 있습니다. 아래의 '내 선택 저장'을 클릭하면 적용됩니다.",
+      "lastUpdatedLabel": "최근 업데이트: {time}",
+      "lastUpdatedHint": "동의를 철회하면 해당 스크립트가 즉시 중지되고 이미 저장된 쿠키가 삭제됩니다.",
+      "rejectAll": "모두 거부",
+      "revert": "변경 사항 취소",
+      "save": "내 선택 저장",
+      "colName": "이름",
+      "colProvider": "제공자",
+      "colPurpose": "목적",
+      "colType": "유형",
+      "colDuration": "보관 기간"
+    },
+    "cat": {
+      "necessary": {
+        "name": "필수(엄격히 필요한 쿠키)",
+        "desc": "웹사이트 운영에 필요하며 해제할 수 없음",
+        "intro": "세션 유지, 교차 사이트 요청 위조(CSRF) 방지, CDN 보안 검증에 사용되며 웹사이트 이용 가능성의 기반이 됩니다.",
+        "legalBasis": "서비스 제공에 필수적이므로 동의가 필요하지 않음",
+        "note": "Cloudflare 관련 쿠키는 CDN 및 보안 서비스 제공자가 설정하며 보안 보호 목적으로만 사용되고 교차 사이트 추적에는 사용되지 않습니다."
+      },
+      "functional": {
+        "name": "기능·환경설정",
+        "desc": "언어, 지역 및 인터페이스 설정 저장",
+        "intro": "언어, 지역, 인터페이스 환경설정 등 귀하가 선택한 사항을 기억하여 방문할 때마다 다시 설정하지 않도록 합니다.",
+        "legalBasis": "동의(개인정보 보호법 제13조, 제14조)",
+        "note": ""
+      },
+      "analytics": {
+        "name": "분석·통계",
+        "desc": "방문 수, 체류 시간, 히트맵, 세션 녹화",
+        "intro": "방문 수와 클릭 분포를 집계하여 사용자가 어떤 콘텐츠와 가장 많이 상호작용하는지 파악하고 경험을 개선합니다.",
+        "legalBasis": "동의, EU의 경우 GDPR 제6조(1)(a) 및 ePrivacy 지침 제5조(3) 추가 적용",
+        "note": "Clarity는 2025년 10월부터 사이트가 consentv2 신호를 먼저 전송해야 전체 추적이 활성화됩니다. 세션 녹화는 체계적인 행위 모니터링에 해당하므로 EU에서는 DPIA 실시와 콘텐츠 마스킹(Masking) 활성화를 권장합니다."
+      },
+      "marketing": {
+        "name": "광고·마케팅",
+        "desc": "개인화 추천, 전환 기여 분석, 교차 사이트 식별자",
+        "intro": "광고 파트너가 설정하며 관심사 프로필을 구성하고 다른 사이트에서 관련 광고를 표시하는 데 사용됩니다. 개인정보를 직접 저장하지는 않지만 브라우저와 기기의 고유 식별자를 기반으로 합니다.",
+        "legalBasis": "별도 동의, 개인정보의 국외 이전이 수반되는 경우 별도 고지 및 별도 동의 필요",
+        "note": "데이터는 기본적으로 Azure 미국 데이터 센터에서 처리되며 이는 개인정보의 국외 이전에 해당하므로, 수신자와 보호 조치(SCC / DPF)를 개인정보처리방침에 별도로 명시해야 합니다."
+      }
+    },
+    "cookie": {
+      "type": {
+        "firstPartySession": "자사 · 세션",
+        "firstPartyPersistent": "자사 · 지속",
+        "thirdPartyPersistent": "제3자 · 지속"
+      },
+      "XSRF_TOKEN": {
+        "provider": "본 사이트",
+        "purpose": "교차 사이트 요청 위조(CSRF) 방지",
+        "duration": "세션 종료 시 삭제"
+      },
+      "xbedrock_session": {
+        "provider": "본 사이트",
+        "purpose": "세션 상태 및 요청 연속성 유지",
+        "duration": "세션 종료 시 삭제"
+      },
+      "cf_clearance": {
+        "provider": "Cloudflare, Inc.",
+        "purpose": "보안 챌린지 통과 기록 및 악성 트래픽 차단",
+        "duration": "30분 ~ 1년(백엔드 설정에 따라 다름)"
+      },
+      "ui_locale": {
+        "provider": "본 사이트",
+        "purpose": "언어 및 지역 선택 저장",
+        "duration": "실제 설정에 따름"
+      },
+      "ui_theme": {
+        "provider": "본 사이트",
+        "purpose": "테마 환경설정 저장",
+        "duration": "실제 설정에 따름"
+      },
+      "_clck": {
+        "provider": "Microsoft Clarity",
+        "purpose": "사용자 ID를 저장하여 재방문 및 환경설정을 연결",
+        "duration": "1년"
+      },
+      "_clsk": {
+        "provider": "Microsoft Clarity",
+        "purpose": "여러 페이지 조회를 하나의 세션 녹화로 병합",
+        "duration": "1일"
+      },
+      "MUID": {
+        "provider": "Microsoft(.bing.com)",
+        "purpose": "Microsoft 공용 브라우저 식별자로 Microsoft Advertising / Bing과 연동",
+        "duration": "13개월(390일)"
+      }
+    },
+    "toast": {
+      "acceptAll": "모든 쿠키를 수락했습니다",
+      "rejectAll": "필수가 아닌 모든 쿠키를 거부했습니다",
+      "saved": "환경설정이 저장되었습니다",
+      "reverted": "저장되지 않은 변경 사항을 취소했습니다",
+      "reset": "로컬 동의 기록을 삭제했습니다. 새로 고침 후 다시 동의를 요청합니다"
+    }
   }
 }

@@ -13,7 +13,7 @@ import { useInfiniteList } from '../composables/useInfiniteList'
 
 const store = useCommentDialogStore()
 
-const { mobile } = useDisplay()
+const { xs } = useDisplay()
 
 const { t } = useI18n()
 const authStore = useAuthStore()
@@ -110,7 +110,7 @@ watch(
     :model-value="store.model"
     @update:model-value="(v) => { if (!v) store.close() }"
     max-width="760"
-    :fullscreen="mobile"
+    :fullscreen="xs"
     scrollable
   >
     <v-card rounded="lg" >
@@ -189,7 +189,7 @@ watch(
 
       <!-- 底部：发布评论输入框 -->
       <v-card-actions class="pa-3">
-        <v-text-field color="primary" 
+        <v-text-field color="primary"
           v-model="content"
           variant="outlined"
           :placeholder="$t('commentSheet.placeholder')"

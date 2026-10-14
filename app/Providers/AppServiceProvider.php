@@ -27,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
         Schema::defaultStringLength(191);
 
         // 前端通过 locale cookie 同步语言，后端据此渲染 <html lang>（welcome 模板）
-        $locale = $this->app['request']->cookie('locale');
+        $locale = $this->app['request']->cookie('ui-locale');
         if (is_string($locale) && in_array($locale, ['zh', 'en'], true)) {
             $this->app->setLocale($locale);
         }
