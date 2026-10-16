@@ -107,12 +107,18 @@ const gonganBeianImg = '/assets/fixed_content/gwbeian.png'
   line-height: 20px;
   white-space: nowrap;
   text-overflow: ellipsis;
+
+  
+  opacity: 0.6;
 }
 
 .copyright a {
   padding: 2px;
   font-size: 13px;
-  color: rgb(var(--v-theme-surface-variant));
+
+  /* color: rgb(var(--v-theme-surface-variant)); */
+  
+  opacity: 0.6;
   text-decoration: none;
 }
 

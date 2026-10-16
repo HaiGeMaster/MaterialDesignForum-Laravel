@@ -108,6 +108,9 @@ onMounted(() => {
             <LanguageSwitcher v-if="!store.decided"/>
           <v-btn v-if="store.decided" icon variant="text" @click="store.closePreferenceCenter()">
             <v-icon>mdi-close</v-icon>
+            <v-tooltip activator="parent" location="left">
+              {{ $t('common.close') }}
+            </v-tooltip>
           </v-btn>
         </template>
       </v-toolbar>

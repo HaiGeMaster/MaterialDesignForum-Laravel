@@ -49,9 +49,10 @@ const moreItems = [{ title: t('userCard.message'), icon: 'mdi-message-outline' }
         class="px-0 mb-2 cursor-pointer"
         density="comfortable"
         @click="goProfile"
+        rounded="lg"
       >
         <template #prepend>
-          <v-avatar size="48" class="mr-2">
+          <v-avatar size="48" class="mr-2" :variant="user?.avatar?'': 'tonal'">
             <v-img v-if="user?.avatar" :src="user.avatar" cover />
             <span v-else class="text-h6 font-weight-bold text-primary">{{ initial }}</span>
           </v-avatar>

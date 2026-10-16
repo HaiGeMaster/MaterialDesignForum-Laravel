@@ -176,7 +176,7 @@ onUnmounted(() => {
                 <span v-else class="text-body-2 font-weight-bold text-primary">{{ creatorInitial }}</span>
               </v-avatar>
             </template>
-            <v-list-item-title class="font-weight-medium text-primary">
+            <v-list-item-title class="font-weight-medium">
               {{ creator?.username }}
             </v-list-item-title>
             <v-list-item-subtitle v-if="creator?.headline" class="text-medium-emphasis">

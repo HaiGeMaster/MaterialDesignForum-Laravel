@@ -41,48 +41,48 @@ const vuetify = createVuetify({
   theme: {
     defaultTheme: "system",
     themes: {
-      //   light: {
-      //     dark: false,
-      //     colors: {
-      //       // 黑白灰商务配色
-      //       primary: '#1C1C1C', // 近黑，主按钮/强调
-      //       secondary: '#424242', // 深灰
-      //       accent: '#9E9E9E', // 中灰
-      //       background: '#F5F5F5', // 页面浅灰底
-      //       surface: '#FFFFFF', // 卡片纯白
-      //       'surface-variant': '#EEEEEE', // 浅灰辅助面
-      //       'on-surface-variant': '#424242',
-      //       'on-primary': '#FFFFFF',
-      //       'on-secondary': '#FFFFFF',
-      //       'on-background': '#1C1C1C',
-      //       'on-surface': '#1C1C1C',
-      //       error: '#B71C1C', // 深红，仅用于错误
-      //       info: '#37474F', // 蓝灰
-      //       success: '#2E7D32', // 墨绿
-      //       warning: '#F57F17', // 暗橙
-      //     },
-      //   },
-      //   dark: {
-      //     dark: true,
-      //     colors: {
-      //       // 黑白灰商务配色（深色）
-      //       primary: '#F5F5F5', // 近白，主按钮/强调（深色下反转为浅色以保证对比度）
-      //       secondary: '#BDBDBD', // 浅灰
-      //       accent: '#757575', // 中灰
-      //       background: '#121212', // 页面深灰底
-      //       surface: '#1E1E1E', // 卡片深灰
-      //       'surface-variant': '#2C2C2C', // 浅灰辅助面
-      //       'on-surface-variant': '#9E9E9E',
-      //       'on-primary': '#1C1C1C',
-      //       'on-secondary': '#1C1C1C',
-      //       'on-background': '#F5F5F5',
-      //       'on-surface': '#F5F5F5',
-      //       error: '#EF5350', // 浅红，深底上更易辨认
-      //       info: '#90A4AE', // 浅蓝灰
-      //       success: '#66BB6A', // 浅墨绿
-      //       warning: '#FFB74D', // 浅暗橙
-      //     },
-      //   },
+        // testlight: {
+        //   dark: false,
+        //   colors: {
+        //     // 黑白灰商务配色
+        //     primary: '#1C1C1C', // 近黑，主按钮/强调
+        //     secondary: '#424242', // 深灰
+        //     accent: '#9E9E9E', // 中灰
+        //     background: '#F5F5F5', // 页面浅灰底
+        //     surface: '#FFFFFF', // 卡片纯白
+        //     'surface-variant': '#EEEEEE', // 浅灰辅助面
+        //     'on-surface-variant': '#424242',
+        //     'on-primary': '#FFFFFF',
+        //     'on-secondary': '#FFFFFF',
+        //     'on-background': '#1C1C1C',
+        //     'on-surface': '#1C1C1C',
+        //     error: '#B71C1C', // 深红，仅用于错误
+        //     info: '#37474F', // 蓝灰
+        //     success: '#2E7D32', // 墨绿
+        //     warning: '#F57F17', // 暗橙
+        //   },
+        // },
+        // testdark: {
+        //   dark: true,
+        //   colors: {
+        //     // 黑白灰商务配色（深色）
+        //     primary: '#F5F5F5', // 近白，主按钮/强调（深色下反转为浅色以保证对比度）
+        //     secondary: '#BDBDBD', // 浅灰
+        //     accent: '#757575', // 中灰
+        //     background: '#121212', // 页面深灰底
+        //     surface: '#1E1E1E', // 卡片深灰
+        //     'surface-variant': '#2C2C2C', // 浅灰辅助面
+        //     'on-surface-variant': '#9E9E9E',
+        //     'on-primary': '#1C1C1C',
+        //     'on-secondary': '#1C1C1C',
+        //     'on-background': '#F5F5F5',
+        //     'on-surface': '#F5F5F5',
+        //     error: '#EF5350', // 浅红，深底上更易辨认
+        //     info: '#90A4AE', // 浅蓝灰
+        //     success: '#66BB6A', // 浅墨绿
+        //     warning: '#FFB74D', // 浅暗橙
+        //   },
+        // },
       light: {
         dark: false,
         colors: {
@@ -333,56 +333,40 @@ const vuetify = createVuetify({
       minecraft: {
         dark: true,
         colors: {
-          background: '#1c2119',
-          surface: '#0f150d',
-          'surface-dim': '#0f150d',
-          'surface-bright': '#353b32',
-          'on-surface': '#dfe4d7',
-          'inverse-surface': '#dfe4d7',
-          'inverse-on-surface': '#2c3229',
-          outline: '#8a9482',
-          'outline-variant': '#404a3b',
-          primary: '#85db64',
-          'on-primary': '#0c3900',
-          'inverse-primary': '#1e6d00',
-          secondary: '#cecb55',
-          'on-secondary': '#333200',
-          tertiary: '#f3bb98',
-          'on-tertiary': '#4a280f',
-          error: '#ffb4ab',
-          'on-error': '#690005',
-          'primary-fixed': '#a0f87d',
-          'primary-fixed-dim': '#85db64',
-          'on-primary-fixed': '#042100',
-          'on-primary-fixed-variant': '#155200',
-          'secondary-fixed': '#ebe86e',
-          'secondary-fixed-dim': '#cecb55',
-          'on-secondary-fixed': '#1d1d00',
-          'on-secondary-fixed-variant': '#4a4900',
-          'tertiary-fixed': '#ffdbc7',
-          'tertiary-fixed-dim': '#f3bb98',
-          'on-tertiary-fixed': '#311301',
-          'on-tertiary-fixed-variant': '#643d23',
-          'surface-light': '#353b32',
+          background: "#1f1f1f",
+          primary: "#6FAD3A",
+          surface: "#2b2720",
+          info: "#55A8D8",
+          accent: "#55DDE0",
+          success: "#79B84A",
+          "surface-light": "#344331",
+          "surface-bright": "#4A5B42",
+          "surface-variant": "#465441",
+          "on-surface-variant": "#E2E8DC",
+          "primary-darken-1": "#54852D",
+          secondary: "#D6B83F",
+          "secondary-darken-1": "#AF912A",
+          error: "#E05252",
+          warning: "#E7A93B"
         },
         variables: {
-          // "border-color": "#B8BABC",
-          // "border-opacity": .16,
-          // "high-emphasis-opacity": .95,
-          // "medium-emphasis-opacity": .72,
-          // "disabled-opacity": .42,
-          // "idle-opacity": .08,
-          // "hover-opacity": .08,
-          // "focus-opacity": .16,
-          // "selected-opacity": .14,
-          // "activated-opacity": .16,
-          // "pressed-opacity": .2,
-          // "dragged-opacity": .1,
-          // "theme-kbd": "#3B3E42",
-          // "theme-on-kbd": "#F1F5EF",
-          // "theme-code": "#1A1B1D",
-          // "theme-on-code": "#D5E4D0",
-          // "theme-on-dark": "#FFF"
+          "border-color": "#E2E8DC",
+          "border-opacity": .12,
+          "high-emphasis-opacity": .87,
+          "medium-emphasis-opacity": .6,
+          "disabled-opacity": .38,
+          "idle-opacity": .1,
+          "hover-opacity": .08,
+          "focus-opacity": .12,
+          "selected-opacity": .12,
+          "activated-opacity": .12,
+          "pressed-opacity": .16,
+          "dragged-opacity": .08,
+          "theme-kbd": "#344331",
+          "theme-on-kbd": "#E2E8DC",
+          "theme-code": "#171D16",
+          "theme-on-code": "#79B84A",
+          "theme-on-dark": "#FFF"
         }
       },
       odyssey: {

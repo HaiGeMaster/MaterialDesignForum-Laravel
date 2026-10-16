@@ -181,7 +181,8 @@ onMounted(fetchTopic)
               <span v-else class="text-body-2 font-weight-bold text-primary">{{ creatorInitial }}</span>
             </v-avatar>
             <span class="text-body-2 text-medium-emphasis">{{ $t('topicDetail.createdBy') }}</span>
-            <span class="text-body-2 font-weight-medium text-primary cursor-pointer" @click="goCreator">
+            <!-- text-primary -->
+            <span class="text-body-2 font-weight-medium  cursor-pointer" @click="goCreator">
               {{ creator.username }}
             </span>
             <span class="text-body-2 text-medium-emphasis">{{ $t('topicDetail.created') }}</span>

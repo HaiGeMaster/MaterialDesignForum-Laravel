@@ -94,7 +94,8 @@ onBeforeUnmount(() => observer?.disconnect())
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: rgba(0, 0, 0, 0.6);
+  /* color: rgba(0, 0, 0, 0.6); */
+  opacity: 0.6;
 }
 
 .infinite-scroll__status--end {
@@ -102,6 +103,7 @@ onBeforeUnmount(() => observer?.disconnect())
 }
 
 .v-theme--dark .infinite-scroll__status {
-  color: rgba(255, 255, 255, 0.6);
+  /* color: rgba(255, 255, 255, 0.6); */
+  opacity: 0.6;
 }
 </style>
