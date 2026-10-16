@@ -70,6 +70,7 @@ class ReplyController extends Controller
             'user_id' => $request->user()->user_id,
             'content' => $validated['content'],
         ]);
+        $reply->refresh();
 
         // 递增父评论的回复计数
         Comment::query()->whereKey($validated['replyable_comment_id'])->increment('reply_count');
