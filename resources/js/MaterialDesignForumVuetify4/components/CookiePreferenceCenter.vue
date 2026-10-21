@@ -40,9 +40,9 @@ onMounted(() => {
     <v-card>
       <v-toolbar :title="t('cookiePref.banner.title')">
         <template #prepend>
-          <v-btn icon variant="text">
-            <v-icon>mdi-cookie-check</v-icon>
-          </v-btn>
+          <!-- <v-btn icon variant="text"> -->
+            <v-icon class="ml-4">mdi-cookie-check</v-icon>
+          <!-- </v-btn> -->
         </template>
         <template #append>
             <LanguageSwitcher />
@@ -100,9 +100,9 @@ onMounted(() => {
     <v-card class="pref-card">
       <v-toolbar :title="t('cookiePref.pref.title')">
         <template #prepend>
-          <v-btn icon variant="text">
-            <v-icon>mdi-tune-variant</v-icon>
-          </v-btn>
+          <!-- <v-btn icon variant="text"> -->
+            <v-icon class="ml-4">mdi-tune-variant</v-icon>
+          <!-- </v-btn> -->
         </template>
         <template #append>
             <LanguageSwitcher v-if="!store.decided"/>

@@ -44,6 +44,30 @@ const showEmpty = computed(() => !props.loading && props.items.length === 0)
       </v-btn>
     </div>
 
+    <!-- <v-list-item v-if="to" :to="to" :title="title" >
+      <template #prepend>
+        <v-icon :icon="icon" color="primary"  class="mr-2" />
+      </template>
+      <template #append>
+        <v-icon>mdi-chevron-right</v-icon>
+      </template>
+    </v-list-item> -->
+
+    <v-divider v-if="to"  />
+
+    <!-- <v-toolbar :title="title" >
+        <template #prepend>
+          <v-btn icon variant="text" >
+            <v-icon>{{ icon }}</v-icon>
+          </v-btn>
+        </template>
+        <template #append>
+          <v-btn icon variant="text" :to="to" >
+            <v-icon >mdi-chevron-right</v-icon>
+          </v-btn>
+        </template>
+      </v-toolbar> -->
+
     <v-progress-linear v-if="loading" indeterminate color="primary" />
 
     <!-- 列表 -->

@@ -4,7 +4,10 @@ import { useI18n } from 'vue-i18n'
 import { siteIcpBeian, siteGonganBeian } from '../themeConfig'
 import { useCookiePreferenceStore } from '../stores/cookiePreference'
 
+import { useRouter } from 'vue-router'
+
 const { t } = useI18n()
+const router = useRouter()
 const cookiePrefStore = useCookiePreferenceStore()
 
 const props = defineProps({
@@ -45,6 +48,11 @@ const gonganBeianImg = '/assets/fixed_content/gwbeian.png'
 
 <template>
   <div class="copyright">
+    <p>
+      <a @click="router.push('/cookie-policy')">
+        {{ t('cookiePref.pref.policyLink') }}
+      </a>
+    </p>
 
     <!-- Cookie 偏好设置：通过 Pinia store 打开偏好中心 -->
     <p>

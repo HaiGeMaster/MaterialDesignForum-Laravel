@@ -1015,10 +1015,15 @@
     "oauthCallback": "登录中",
     "install": "安装向导",
     "settings": "个人设置",
+    "cookiePolicy": "Cookie 政策",
     "signIn": "签到",
     "admin": "管理后台",
     "mediaLibrary": "媒体库",
     "notFound": "页面不存在"
+  },
+  "cookiePolicy": {
+    "loadFailed": "Cookie 政策加载失败，请稍后重试。",
+    "retry": "重试"
   },
   "notFound": {
     "title": "404",

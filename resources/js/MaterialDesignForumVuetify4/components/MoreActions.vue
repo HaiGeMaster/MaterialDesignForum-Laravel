@@ -22,7 +22,7 @@ const props = defineProps({
   /** 当前数据对象（需含对应 *_id 与 user_id 字段） */
   item: { type: Object, default: null },
   /** 是否管理员（管理员不显示举报） */
-  isAdmin: { type: Boolean, default: false },
+  // isAdmin: { type: Boolean, default: false },
   /** 是否启用内置操作 */
   withBuiltin: { type: Boolean, default: true },
 })

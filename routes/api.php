@@ -24,6 +24,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserGroupController;
 use App\Http\Controllers\VoteController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
+use League\CommonMark\Extension\Table\TableExtension;
 
 // 首次安装部署接口（不需要认证；controller 内部通过 installed.lock 防止重复安装）
 Route::prefix('install')->group(function () {
@@ -49,6 +51,14 @@ Route::post('/auth/reset-password', [AuthController::class, 'resetPassword']);
 // 第三方 OAuth 登录：返回已配置的 provider 列表，前端 ajax 拉取决定渲染哪些图标按钮
 // redirect / callback 这两个会触发整页跳转的路由在 routes/web.php 注册（不带 /api 前缀）
 Route::get('/oauth/providers', [OAuthController::class, 'providers']);
+
+Route::get('/cookie-policy', function () {
+    return response()->json([
+        'content' => Str::markdown(__('cookie_policy.content', config('cookie_policy')), [], [
+            new TableExtension(),
+        ]),
+    ]);
+});
 
 // 需要登录的接口（Bearer Token）
 Route::middleware('auth.token')->group(function () {

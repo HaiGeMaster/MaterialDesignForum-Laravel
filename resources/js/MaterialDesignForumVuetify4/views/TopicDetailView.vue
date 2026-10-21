@@ -221,13 +221,13 @@ onMounted(fetchTopic)
 
       <!-- 话题下的文章与问题 -->
       <v-card rounded="lg" >
-        <v-tabs v-model="activeTab" color="primary" grow>
+        <v-tabs v-model="activeTab" color="primary" :grow="xs">
           <v-tab value="articles">
             <v-icon start icon="mdi-file-document" />
             {{ $t('topicDetail.articleTab', { count: articles.length }) }}
           </v-tab>
           <v-tab value="questions">
-            <v-icon start icon="mdi-help-circle" />
+            <v-icon start icon="mdi-forum" />
             {{ $t('topicDetail.questionTab', { count: questions.length }) }}
           </v-tab>
         </v-tabs>

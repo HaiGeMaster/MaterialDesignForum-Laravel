@@ -84,7 +84,7 @@ onMounted(fetchOverview)
 
 <template>
     <v-container class="admin-page py-6 px-4 px-md-8">
-        <section class="admin-hero mb-6">
+        <section class="admin-hero mb-6 rounded-lg">
             <div>
                 <!-- <div class="text-overline text-primary font-weight-bold">MDForum / ADMIN</div> -->
                 <h1 class="text-h4 text-md-h3 font-weight-bold mt-1">{{ $t('admin.title') }}</h1>

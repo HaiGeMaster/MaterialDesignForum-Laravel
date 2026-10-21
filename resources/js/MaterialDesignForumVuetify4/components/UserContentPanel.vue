@@ -5,6 +5,8 @@ import { useI18n } from 'vue-i18n'
 import http from '../api'
 import { useInfiniteList } from '../composables/useInfiniteList'
 import InfiniteScroll from './InfiniteScroll.vue'
+import { useDisplay } from 'vuetify'
+const { xs } = useDisplay()
 
 const props = defineProps({
     /** 用户 ID */
@@ -148,7 +150,7 @@ function answerTitle(item) {
 
 <template>
     <v-card rounded="lg" class="overflow-hidden">
-        <v-tabs v-model="tab" color="primary" grow @update:model-value="handleTabChange">
+        <v-tabs v-model="tab" color="primary" :grow="xs" @update:model-value="handleTabChange">
             <v-tab value="questions">{{ $t('userContent.questions') }}</v-tab>
             <v-tab value="articles">{{ $t('userContent.articles') }}</v-tab>
             <v-tab value="answers">{{ $t('userContent.answers') }}</v-tab>

@@ -119,8 +119,8 @@ onMounted(fetchData)
   <v-container   :style="$route.meta.maxWidth ? { maxWidth: `${$route.meta.maxWidth}px`,padding: `${xs?'0': '10px'}` } : {}" >
     <!-- style="overflow-x: hidden;" -->
     <!-- 话题转轴 -->
-    <div class="d-flex align-center mb-3 pa-4">
-      <v-icon icon="mdi-tag-multiple" class="mr-2" />
+    <div class="d-flex align-center pa-4">
+      <!-- <v-icon icon="mdi-tag-multiple" class="mr-2" /> -->
       <span class="text-h6 font-weight-bold">{{ $t('home.hotTopics') }}</span>
       <v-spacer />
       <v-btn size="small" variant="text" to="/topics" append-icon="mdi-chevron-right">

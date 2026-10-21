@@ -172,8 +172,9 @@ const canProceedFromRequirements = computed(() => requirements.value.all_pass)
 
       <v-toolbar>
         <template v-slot:prepend>
-          <v-btn icon="mdi-tune-vertical">
-          </v-btn>
+          <v-icon class="ml-4"">
+            mdi-tune-vertical
+          </v-icon>
 
         </template>
         <v-toolbar-title>
