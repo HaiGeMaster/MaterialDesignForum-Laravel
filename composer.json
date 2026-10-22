@@ -6,14 +6,21 @@
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
-        "php": "^8.3",
+        "php": "^8.4.1",
         "itbdw/ip-database": "3.0.2",
         "laravel/framework": "^13.17",
         "laravel/socialite": "*",
         "laravel/tinker": "^3.0",
-        "socialiteproviders/microsoft": "*"
+        "socialiteproviders/microsoft": "*",
+        "league/flysystem-aws-s3-v3": "^3.0",
+        "league/flysystem-ftp": "^3.0",
+        "league/flysystem-sftp-v3": "^3.0",
+        "overtrue/flysystem-qiniu": "^3.2",
+        "xxtime/flysystem-aliyun-oss": "^1.7",
+        "zencodex/flysystem-upyun": "^2.1"
     },
     "require-dev": {
+        "cweagans/composer-patches": "^2.0",
         "fakerphp/faker": "^1.23",
         "laravel/pail": "^1.2.5",
         "laravel/pao": "^1.0.6",
@@ -72,7 +79,14 @@
     },
     "extra": {
         "laravel": {
-            "dont-discover": []
+            "dont-discover": [
+                "zencodex/flysystem-upyun"
+            ]
+        },
+        "patches": {
+            "qiniu/php-sdk": {
+            "fix php8.4 implicit nullable": "patches/qiniu-php84-nullable.patch"
+            }
         }
     },
     "config": {
@@ -80,6 +94,7 @@
         "preferred-install": "dist",
         "sort-packages": true,
         "allow-plugins": {
+            "cweagans/composer-patches": true,
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
         }

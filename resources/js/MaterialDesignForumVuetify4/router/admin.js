@@ -4,7 +4,10 @@ import { useAuthStore } from '../stores/auth'
 import AdminView from '../views/AdminView.vue'
 import AdminModuleView from '../views/AdminModuleView.vue'
 import AdminOptionsView from '../views/AdminOptionsView.vue'
-import AdminOptionDetailView from '../views/AdminOptionDetailView.vue'
+import AdminOptionInfoView from '../views/AdminOptionInfoView.vue'
+import AdminOptionThemeView from '../views/AdminOptionThemeView.vue'
+import AdminOptionMailView from '../views/AdminOptionMailView.vue'
+import AdminOptionOAuthView from '../views/AdminOptionOAuthView.vue'
 import { siteName } from '../themeConfig'
 import { i18n } from '../i18n'
 
@@ -13,7 +16,10 @@ const adminRouter = createRouter({
   routes: [
     { path: '/', name: 'admin-dashboard', component: AdminView, meta: { titleKey: 'route.admin' } },
     { path: '/options', name: 'admin-options', component: AdminOptionsView, meta: { titleKey: 'route.admin' } },
-    { path: '/options/:setting(info|theme|mail|oauth)', name: 'admin-option-detail', component: AdminOptionDetailView, meta: { titleKey: 'route.admin' } },
+    { path: '/options/info', name: 'admin-option-info', component: AdminOptionInfoView, meta: { titleKey: 'route.admin' } },
+    { path: '/options/theme', name: 'admin-option-theme', component: AdminOptionThemeView, meta: { titleKey: 'route.admin' } },
+    { path: '/options/mail', name: 'admin-option-mail', component: AdminOptionMailView, meta: { titleKey: 'route.admin' } },
+    { path: '/options/oauth', name: 'admin-option-oauth', component: AdminOptionOAuthView, meta: { titleKey: 'route.admin' } },
     { path: '/:module(topics|questions|answers|articles|comments|replies|user-groups|users|reports|options)', name: 'admin-module', component: AdminModuleView, meta: { titleKey: 'route.admin' } },
   ],
 })

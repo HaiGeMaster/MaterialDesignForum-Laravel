@@ -6,6 +6,7 @@ use App\Models\Answer;
 use App\Models\Article;
 use App\Models\Question;
 use App\Models\User;
+use App\Support\MediaStorage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -183,8 +184,7 @@ class UserController extends Controller
     /**
      * 上传图片（头像 / 用户封面 / 话题封面等）
      *
-     * 校验图片类型与大小后存入 storage/app/public/uploads/{type}，
-     * 返回可访问的相对 URL。
+     * 校验图片类型与大小后存入 MEDIA_DISK 指定的磁盘，返回可访问 URL。
      * 可选参数 context 区分关联场景（默认 user），item_id 指定关联 ID。
      */
     public function uploadImage(Request $request)
@@ -206,8 +206,13 @@ class UserController extends Controller
         $extension = $file->getClientOriginalExtension() ?: 'jpg';
         $filename = Str::random(24).'.'.$extension;
 
-        // 保存到 public/uploads/{avatar|cover}
-        $path = $file->storeAs('uploads/'.$data['type'], $filename, 'uploads');
+        $diskName = MediaStorage::diskName();
+        $disk = MediaStorage::disk();
+        $path = $disk->putFileAs('uploads/'.$data['type'], $file, $filename);
+        if (! is_string($path)) {
+            throw new \RuntimeException('Unable to store uploaded image.');
+        }
+        $url = MediaStorage::url($diskName, $disk, $path);
 
         // 读取原始尺寸
         $size = @getimagesize($file->getRealPath());
@@ -228,7 +233,8 @@ class UserController extends Controller
             'type' => 'image',
             'filename' => $file->getClientOriginalName(),
             'path' => $path,
-            'url' => '/'.$path,
+            'url' => $url,
+            'storage_disk' => $diskName,
             'mime' => $file->getMimeType(),
             'size' => $file->getSize(),
             'width' => (int) $width,
@@ -239,7 +245,7 @@ class UserController extends Controller
 
         return response()->json([
             'message' => __('messages.http_media_1'),
-            'url' => '/'.$path,
+            'url' => $url,
             'path' => $path,
             'type' => $data['type'],
         ]);

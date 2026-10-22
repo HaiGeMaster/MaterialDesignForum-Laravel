@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Media;
 use App\Models\User;
+use App\Support\MediaStorage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -19,8 +20,8 @@ class MediaController extends Controller
     /**
      * 上传媒体（图片 / 视频）
      *
-     * 文件保存至 public/uploads/media/{image|video}，
-     * 并将元数据写入 media 表，返回可访问 URL 供编辑器插入。
+     * 文件保存至 MEDIA_DISK 指定的磁盘，并将元数据写入 media 表。
+     * 返回可访问 URL 供编辑器插入。
      */
     public function upload(Request $request)
     {
@@ -54,8 +55,13 @@ class MediaController extends Controller
         $extension = $file->getClientOriginalExtension() ?: ($type === 'image' ? 'jpg' : 'mp4');
         $filename = Str::random(24).'.'.$extension;
 
-        // 保存到 public/uploads/media/{image|video}
-        $path = $file->storeAs('uploads/media/'.$type, $filename, 'uploads');
+        $diskName = MediaStorage::diskName();
+        $disk = MediaStorage::disk();
+        $path = $disk->putFileAs('uploads/media/'.$type, $file, $filename);
+        if (! is_string($path)) {
+            throw new \RuntimeException('Unable to store uploaded media.');
+        }
+        $url = MediaStorage::url($diskName, $disk, $path);
 
         // 图片读取原始尺寸；视频尺寸未知时记为 0
         $width = 0;
@@ -72,7 +78,8 @@ class MediaController extends Controller
             'type' => $type,
             'filename' => $file->getClientOriginalName(),
             'path' => $path,
-            'url' => '/'.$path,
+            'url' => $url,
+            'storage_disk' => $diskName,
             'mime' => $file->getMimeType(),
             'size' => $file->getSize(),
             'width' => (int) $width,
@@ -167,7 +174,7 @@ class MediaController extends Controller
 
         $deleted = 0;
         foreach ($mediaList as $media) {
-            Storage::disk('uploads')->delete($media->path);
+            Storage::disk('media_'.($media->storage_disk ?: 'local'))->delete($media->path);
             $media->delete();
             $deleted++;
         }

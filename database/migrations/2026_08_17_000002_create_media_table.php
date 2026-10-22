@@ -14,6 +14,7 @@ return new class extends Migration
             $table->char('type', 10)->comment('媒体类型：image / video');
             $table->string('filename', 255)->comment('原始文件名');
             $table->string('path', 500)->comment('存储相对路径');
+            $table->string('storage_disk', 20)->default('local')->comment('上传文件使用的存储驱动');
             $table->string('url', 500)->comment('访问URL');
             $table->string('mime', 100)->nullable()->comment('MIME 类型');
             $table->unsignedBigInteger('size')->default(0)->comment('文件大小(字节)');

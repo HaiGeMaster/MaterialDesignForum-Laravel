@@ -28,6 +28,8 @@ return [
     |
     */
 
+    'media_disk' => env('MEDIA_DISK', 'local'),
+
     'disks' => [
 
         'local' => [
@@ -47,16 +49,82 @@ return [
             'report' => false,
         ],
 
-        /*
-         * 用户上传文件（头像 / 封面 / 富文本媒体）直接存放在 public/uploads 目录下，
-         * 无需 storage:link 符号链接，nginx 可直接服务。
-         */
-        'uploads' => [
+        'media_local' => [
             'driver' => 'local',
-            'root' => public_path(),
-            'url' => '',
+            'root' => storage_path('app/public'),
+            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
             'visibility' => 'public',
-            'throw' => false,
+            'throw' => true,
+            'report' => false,
+        ],
+
+        'media_ftp' => [
+            'driver' => 'ftp',
+            'host' => env('MEDIA_FTP_HOST'),
+            'username' => env('MEDIA_FTP_USERNAME'),
+            'password' => env('MEDIA_FTP_PASSWORD'),
+            'port' => (int) env('MEDIA_FTP_PORT', 21),
+            'root' => env('MEDIA_FTP_ROOT', ''),
+            'passive' => filter_var(env('MEDIA_FTP_PASSIVE', true), FILTER_VALIDATE_BOOL),
+            'ssl' => filter_var(env('MEDIA_FTP_SSL', false), FILTER_VALIDATE_BOOL),
+            'timeout' => (int) env('MEDIA_FTP_TIMEOUT', 30),
+            'url' => env('MEDIA_FTP_URL'),
+            'visibility' => 'public',
+            'throw' => true,
+            'report' => false,
+        ],
+
+        'media_sftp' => [
+            'driver' => 'sftp',
+            'host' => env('MEDIA_SFTP_HOST'),
+            'username' => env('MEDIA_SFTP_USERNAME'),
+            'password' => env('MEDIA_SFTP_PASSWORD'),
+            'privateKey' => env('MEDIA_SFTP_PRIVATE_KEY'),
+            'passphrase' => env('MEDIA_SFTP_PASSPHRASE'),
+            'port' => (int) env('MEDIA_SFTP_PORT', 22),
+            'root' => env('MEDIA_SFTP_ROOT', ''),
+            'timeout' => (int) env('MEDIA_SFTP_TIMEOUT', 30),
+            'permissions' => [
+                'file' => ['public' => 0644, 'private' => 0600],
+                'dir' => ['public' => 0755, 'private' => 0700],
+            ],
+            'url' => env('MEDIA_SFTP_URL'),
+            'visibility' => 'public',
+            'throw' => true,
+            'report' => false,
+        ],
+
+        'media_aliyun' => [
+            'driver' => 'aliyun',
+            'key' => env('ALIYUN_OSS_ACCESS_KEY_ID'),
+            'secret' => env('ALIYUN_OSS_ACCESS_KEY_SECRET'),
+            'bucket' => env('ALIYUN_OSS_BUCKET'),
+            'endpoint' => env('ALIYUN_OSS_ENDPOINT'),
+            'url' => env('ALIYUN_OSS_URL'),
+            'throw' => true,
+            'report' => false,
+        ],
+
+        'media_upyun' => [
+            'driver' => 'upyun',
+            'bucket' => env('UPYUN_BUCKET'),
+            'operator' => env('UPYUN_OPERATOR'),
+            'password' => env('UPYUN_PASSWORD'),
+            'domain' => env('UPYUN_DOMAIN'),
+            'protocol' => env('UPYUN_PROTOCOL', 'https'),
+            'url' => env('UPYUN_DOMAIN'),
+            'throw' => true,
+            'report' => false,
+        ],
+
+        'media_qiniu' => [
+            'driver' => 'qiniu',
+            'key' => env('QINIU_ACCESS_KEY'),
+            'secret' => env('QINIU_SECRET_KEY'),
+            'bucket' => env('QINIU_BUCKET'),
+            'domain' => env('QINIU_DOMAIN'),
+            'url' => env('QINIU_DOMAIN'),
+            'throw' => true,
             'report' => false,
         ],
 
@@ -70,6 +138,20 @@ return [
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
+            'report' => false,
+        ],
+
+        'media_aws' => [
+            'driver' => 's3',
+            'key' => env('AWS_ACCESS_KEY_ID'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'region' => env('AWS_DEFAULT_REGION'),
+            'bucket' => env('AWS_BUCKET'),
+            'url' => env('AWS_URL'),
+            'endpoint' => env('AWS_ENDPOINT'),
+            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+            'visibility' => 'public',
+            'throw' => true,
             'report' => false,
         ],
 

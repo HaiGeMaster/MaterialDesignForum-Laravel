@@ -49,6 +49,7 @@ class AdminOptionController extends Controller
         'site_icp_beian',
         'site_gongan_beian',
         'default_language',
+        'media_disk',
     ];
 
     private const MAIL_FIELDS = [
@@ -175,6 +176,7 @@ class AdminOptionController extends Controller
         foreach (self::SITE_FIELDS as $field) {
             $data[$field] = (string) ($rows[$field] ?? '');
         }
+        $data['media_disk'] = (string) config('filesystems.media_disk', 'local');
 
         return response()->json(['data' => $data]);
     }
@@ -302,7 +304,9 @@ class AdminOptionController extends Controller
             'site_icp_beian' => ['nullable', 'string', 'max:120'],
             'site_gongan_beian' => ['nullable', 'string', 'max:120'],
             'default_language' => ['required', 'string', 'max:20'],
+            'media_disk' => ['sometimes', 'required', 'string', 'in:local,ftp,sftp,aliyun,upyun,qiniu,aws'],
         ]);
+        $validated['media_disk'] ??= (string) config('filesystems.media_disk', 'local');
 
         DB::transaction(function () use ($validated) {
             foreach (self::SITE_FIELDS as $field) {
@@ -318,10 +322,12 @@ class AdminOptionController extends Controller
         $this->updateEnvFile([
             'APP_LOCALE' => $validated['default_language'],
             'APP_NAME' => $validated['site_name'],
+            'MEDIA_DISK' => $validated['media_disk'],
         ]);
         config([
             'app.locale' => $validated['default_language'],
             'app.name' => $validated['site_name'],
+            'filesystems.media_disk' => $validated['media_disk'],
         ]);
         App::setLocale($validated['default_language']);
 
