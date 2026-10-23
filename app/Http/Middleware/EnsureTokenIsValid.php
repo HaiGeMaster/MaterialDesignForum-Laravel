@@ -57,7 +57,7 @@ class EnsureTokenIsValid
             return response()->json(['message' => __('messages.http_ensuretokenisvalid_4')], 401);
         }
 
-        if ($user->disable_time) {
+        if ($user->isDisabled()) {
             return response()->json(['message' => __('messages.http_ensuretokenisvalid_5')], 401);
         }
 

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -36,6 +37,7 @@ class User extends Authenticatable
         'update_time' => 'datetime',
         'last_login_time' => 'datetime',
         'disable_time' => 'datetime',
+        'disable_until' => 'datetime',
     ];
 
     protected static function booted(): void
@@ -45,14 +47,17 @@ class User extends Authenticatable
         });
 
         static::updated(function (self $user): void {
-            if (! $user->wasChanged('user_group_id')) {
+            $userGroupChanged = $user->wasChanged('user_group_id');
+            $disableTimeChanged = $user->wasChanged('disable_time');
+            $disableUntilChanged = $user->wasChanged('disable_until');
+            if (! $userGroupChanged && ! $disableTimeChanged && ! $disableUntilChanged) {
                 return;
             }
 
             $oldGroupId = (int) $user->getOriginal('user_group_id');
             $newGroupId = (int) $user->user_group_id;
 
-            if ($oldGroupId > 0) {
+            if ($userGroupChanged && $oldGroupId > 0) {
                 self::syncUserGroupCount($oldGroupId);
             }
 
@@ -70,12 +75,41 @@ class User extends Authenticatable
 
         $count = self::query()
             ->where('user_group_id', $userGroupId)
-            ->whereNull('disable_time')
+            ->whereNotDisabled()
             ->count();
 
         UserGroup::query()
             ->where('user_group_id', $userGroupId)
             ->update(['user_group_user_count' => $count, 'update_time' => now()]);
+    }
+
+    public function isDisabled(): bool
+    {
+        if ($this->disable_time === null) {
+            return false;
+        }
+
+        if ($this->disable_until === null || $this->disable_until->isFuture()) {
+            return true;
+        }
+
+        $this->forceFill([
+            'disable_time' => null,
+            'disable_until' => null,
+        ])->save();
+
+        return false;
+    }
+
+    public function scopeWhereNotDisabled(Builder $query): Builder
+    {
+        return $query->where(function (Builder $query) {
+            $query->whereNull('disable_time')
+                ->orWhere(function (Builder $query) {
+                    $query->whereNotNull('disable_until')
+                        ->where('disable_until', '<=', now());
+                });
+        });
     }
 
     /**

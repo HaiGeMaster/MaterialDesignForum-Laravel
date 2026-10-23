@@ -15,6 +15,7 @@ use App\Services\NotificationService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 
 /**
  * 管理后台通用模块列表接口
@@ -140,10 +141,10 @@ class AdminModuleController extends Controller
         'users' => [
             'model'        => User::class,
             'search'       => ['username', 'email'],
-            'sortable'     => ['user_id', 'username', 'follower_count', 'followee_count', 'following_topic_count', 'following_article_count', 'following_question_count', 'article_count', 'question_count', 'answer_count', 'comment_count', 'reply_count', 'notification_unread', 'create_time', 'last_login_time', 'update_time', 'disable_time'],
+            'sortable'     => ['user_id', 'username', 'follower_count', 'followee_count', 'following_topic_count', 'following_article_count', 'following_question_count', 'article_count', 'question_count', 'answer_count', 'comment_count', 'reply_count', 'notification_unread', 'create_time', 'last_login_time', 'update_time', 'disable_time', 'disable_until'],
             'relations'    => ['userGroup'],
             'soft_delete' => false,
-            'update_fields' => ['username', 'email', 'user_group_id', 'headline', 'bio', 'blog', 'company', 'location', 'language', 'disable_time'],
+            'update_fields' => ['username', 'email', 'user_group_id', 'headline', 'bio', 'blog', 'company', 'location', 'language', 'disable_time', 'disable_until'],
             'delete_field'  => 'disable_time',
         ],
         'reports' => [
@@ -251,6 +252,9 @@ class AdminModuleController extends Controller
         }
 
         $items = $collection->map(function ($item) use ($module, $usernames, $replyableUsernames) {
+            if ($module === 'users') {
+                $item->isDisabled();
+            }
             $array = $item->toArray();
 
             // 把预取到的 username 附到每行
@@ -266,6 +270,9 @@ class AdminModuleController extends Controller
             // users 模块把关联用户组名扁平化
             if ($module === 'users' && isset($array['user_group']['user_group_name'])) {
                 $array['user_group_name'] = $array['user_group']['user_group_name'];
+            }
+            if ($module === 'users') {
+                $array['is_disabled'] = $item->isDisabled();
             }
 
             return $array;
@@ -301,6 +308,9 @@ class AdminModuleController extends Controller
             return response()->json(['message' => 'Item not found'], 404);
         }
 
+        if ($module === 'users') {
+            $item->isDisabled();
+        }
         $array = $item->toArray();
 
         // 附上 username
@@ -368,6 +378,15 @@ class AdminModuleController extends Controller
         // 仅取白名单内字段，防止越权修改其他列
         $data = $request->only($config['update_fields']);
 
+        if ($module === 'users' && array_key_exists('disable_until', $data)) {
+            $request->validate([
+                'disable_until' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:today'],
+            ]);
+            $data['disable_until'] = $data['disable_until']
+                ? Carbon::createFromFormat('Y-m-d', $data['disable_until'])->endOfDay()
+                : null;
+        }
+
         // users 模块邮箱唯一性校验
         if ($module === 'users' && isset($data['email'])) {
             $exists = User::query()
@@ -386,9 +405,9 @@ class AdminModuleController extends Controller
         $oldReportState = ($module === 'reports') ? (int) $item->report_handle_state : null;
 
         $item->fill($data);
-        // 软删除字段在 fill 时若被意外传入则忽略，避免误删
-        foreach (['delete_time', 'disable_time'] as $protectedField) {
-            unset($item->{$protectedField});
+        unset($item->delete_time);
+        if ($module !== 'users') {
+            unset($item->disable_time);
         }
         $item->save();
 
@@ -401,9 +420,14 @@ class AdminModuleController extends Controller
         }
 
         // users 模块更新后回带 user_group_name 给前端
-        $array = $item->refresh()->toArray();
+        $item->refresh();
         if ($module === 'users') {
-            $array = $item->refresh()->load(['userGroup'])->toArray();
+            $item->load(['userGroup']);
+            $item->isDisabled();
+        }
+        $array = $item->toArray();
+        if ($module === 'users') {
+            $array['is_disabled'] = $item->isDisabled();
             if (isset($array['user_group']['user_group_name'])) {
                 $array['user_group_name'] = $array['user_group']['user_group_name'];
             }
@@ -492,7 +516,7 @@ class AdminModuleController extends Controller
         }
 
         if ($module === 'user-groups') {
-            $memberCount = User::query()->where('user_group_id', $item->user_group_id)->whereNull('disable_time')->count();
+            $memberCount = User::query()->where('user_group_id', $item->user_group_id)->whereNotDisabled()->count();
             if ($memberCount > 0) {
                 return response()->json([
                     'message' => __('messages.http_adminmodule_4'),
@@ -505,6 +529,9 @@ class AdminModuleController extends Controller
         if (in_array($deleteField, ['delete_time', 'disable_time'], true)) {
             // 软删除：仅设置时间戳，行数据保留以便事后审计
             $item->{$deleteField} = now();
+            if ($module === 'users') {
+                $item->disable_until = null;
+            }
             $item->save();
         } else {
             // 无软删除字段的模块（如 reports）硬删除

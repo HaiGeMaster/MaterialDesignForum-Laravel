@@ -6,6 +6,7 @@ use App\Models\Token;
 use App\Models\User;
 use App\Support\GeoLocation;
 use App\Support\IssuesTokens;
+use App\Support\RegistrationProfileDefaults;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -33,9 +34,12 @@ class AuthController extends Controller
         // 邮箱验证码校验通过后，验证码即被消耗（一次性使用）
         EmailVerificationController::verify($data['email'], $data['email_code']);
 
+        $profileDefaults = app(RegistrationProfileDefaults::class);
         $user = User::create([
             'username' => $data['username'],
             'email' => $data['email'],
+            'avatar' => $profileDefaults->avatar($data['username']),
+            'cover' => $profileDefaults->cover(),
             'password' => Hash::make($data['password']),
             'user_group_id' => 2, // 普通用户组
             'create_ip' => $request->ip() ?: '127.0.0.1',
@@ -99,7 +103,7 @@ class AuthController extends Controller
             ]);
         }
 
-        if ($user->disable_time) {
+        if ($user->isDisabled()) {
             throw ValidationException::withMessages([
                 'email' => [__('messages.http_auth_6')],
             ]);
@@ -149,7 +153,7 @@ class AuthController extends Controller
             ]);
         }
 
-        if ($user->disable_time) {
+        if ($user->isDisabled()) {
             throw ValidationException::withMessages([
                 'email' => [__('messages.http_auth_6')],
             ]);

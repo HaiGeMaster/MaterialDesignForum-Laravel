@@ -125,7 +125,7 @@ php artisan serve
 ```bash
 # 后端
 php artisan serve              # 启动开发服务器
-php artisan migrate            # 执行迁移
+php artisan migrate            # 执行迁移 新增/修改表结构
 php artisan migrate:rollback   # 回滚上一次迁移
 php artisan db:seed            # 填充示例数据
 php artisan tinker             # 交互式 REPL

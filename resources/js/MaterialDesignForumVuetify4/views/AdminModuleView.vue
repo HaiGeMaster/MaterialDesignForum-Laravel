@@ -321,6 +321,7 @@ function makeHeaders() {
       { key: 'create_time', title: 'admin.fields.createdAt', align: 'end', sortable: true, width: '160px' },
       { key: 'update_time', title: 'admin.fields.updatedAt', align: 'end', sortable: true, width: '160px' },
       { key: 'disable_time', title: 'admin.fields.disabledAt', align: 'end', sortable: true, width: '160px' },
+      { key: 'disable_until', title: 'admin.fields.disabledUntil', align: 'end', sortable: true, width: '160px' },
       COLUMN_PRESETS.actions,
     ],
     reports: [
@@ -561,24 +562,45 @@ async function bulkDeleteSelected() {
 async function bulkDisableSelectedUsers() {
   if (moduleName.value !== 'users' || !selectedUsers.value.length) return
 
+  const count = selectedUsers.value.length
+  const today = new Date()
+  const localDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+
   deleteDialog.open({
     title: t('admin.bulkDisableTitle'),
-    text: t('admin.bulkDisableText', { count: selectedUsers.value.length }),
+    text: t('admin.bulkDisableText', { count }),
     confirmText: t('admin.bulkDisableAction'),
     icon: 'mdi-account-cancel',
     color: 'warning',
+    showDatePicker: true,
+    datePickerLabel: t('admin.disableUntil'),
+    minDate: localDate,
+    selectedDate: localDate,
+    allowPermanent: true,
+    permanentLabel: t('admin.permanentDisable'),
     onConfirm: async () => {
       const now = new Date().toISOString()
+      const selectedDate = deleteDialog.selectedDate
+      const disableUntil = selectedDate instanceof Date
+        ? `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`
+        : String(selectedDate || '').slice(0, 10)
       await Promise.all(
         selectedUsers.value.map((item) => {
           const id = item?.user_id
           if (!id) return Promise.resolve()
-          return http.put(`/admin/modules/users/${id}`, { disable_time: now })
+          return http.put(`/admin/modules/users/${id}`, {
+            disable_time: now,
+            disable_until: deleteDialog.permanent ? null : disableUntil,
+          })
         }),
       )
       clearSelection()
       await loadItems()
-      feedback(t('admin.bulkDisableSuccess', { count: selectedUsers.value.length }), 'success')
+      feedback(t('admin.bulkDisableSuccess', { count }), 'success')
+    },
+    onError: (error) => {
+      const message = error?.response?.data?.message || error?.message || t('admin.editFailed')
+      feedback(message, 'error')
     },
   })
 }
@@ -781,6 +803,47 @@ function openDeleteDialog(item) {
     },
     onError: (error) => {
       const message = error?.response?.data?.message || error?.message || t('admin.deleteFailed') || '删除失败'
+      feedback(message, 'error')
+    },
+  })
+}
+
+function toggleUserDisabled(item) {
+  const id = item?.user_id
+  if (!id) return
+
+  const isDisabled = Boolean(item.is_disabled ?? item.disable_time)
+  const action = isDisabled ? 'enable' : 'disable'
+  const username = item.username || `#${id}`
+  const today = new Date()
+  const localDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+
+  deleteDialog.open({
+    title: t(`admin.${action}UserTitle`),
+    text: t(`admin.${action}UserText`, { username }),
+    confirmText: t(`admin.${action}UserAction`),
+    icon: isDisabled ? 'mdi-account-check' : 'mdi-account-cancel',
+    color: isDisabled ? 'success' : 'warning',
+    showDatePicker: !isDisabled,
+    datePickerLabel: t('admin.disableUntil'),
+    minDate: localDate,
+    selectedDate: localDate,
+    allowPermanent: !isDisabled,
+    permanentLabel: t('admin.permanentDisable'),
+    onConfirm: async () => {
+      const selectedDate = deleteDialog.selectedDate
+      const disableUntil = selectedDate instanceof Date
+        ? `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`
+        : String(selectedDate || '').slice(0, 10)
+      const { data } = await http.put(`/admin/modules/users/${id}`, {
+        disable_time: isDisabled ? null : new Date().toISOString(),
+        disable_until: isDisabled || deleteDialog.permanent ? null : disableUntil,
+      })
+      onItemEdited(data)
+      feedback(t(`admin.${action}UserSuccess`, { username }), 'success')
+    },
+    onError: (error) => {
+      const message = error?.response?.data?.message || error?.message || t('admin.editFailed')
       feedback(message, 'error')
     },
   })
@@ -1046,6 +1109,9 @@ onBeforeUnmount(() => {
         <template #[`item.disable_time`]="{ item }">
           <span class="text-no-wrap">{{ formatDate(item?.disable_time) }}</span>
         </template>
+        <template #[`item.disable_until`]="{ item }">
+          <span class="text-no-wrap">{{ formatDate(item?.disable_until) }}</span>
+        </template>
         <template #[`item.last_login_time`]="{ item }">
           <span class="text-no-wrap">{{ formatDate(item?.last_login_time) }}</span>
         </template>
@@ -1073,13 +1139,37 @@ onBeforeUnmount(() => {
         </template>
         <template #[`item.actions`]="{ item }">
           <div class="d-flex justify-end" style="gap: 4px;">
-            <v-btn v-if="moduleMeta?.itemTo && moduleMeta.itemTo(item || {})" icon="mdi-open-in-new" size="small"
-              variant="text" :title="$t('admin.actions.viewOnSite')"
-              @click.stop="openInNewTab(moduleMeta.itemTo(item || {}))" />
+            <v-btn v-if="moduleMeta?.itemTo && moduleMeta.itemTo(item || {})" icon size="small"
+              variant="text"
+              @click.stop="openInNewTab(moduleMeta.itemTo(item || {}))">
+              <v-icon>mdi-open-in-new</v-icon>
+            <v-tooltip
+        activator="parent"
+      >{{$t('admin.actions.viewOnSite')}}</v-tooltip>
+            </v-btn>
             <v-btn v-if="moduleEditable" icon="mdi-pencil" size="small" variant="text" color="primary"
-              :title="$t('common.edit')" @click.stop="openEditDialog(item)" />
-            <v-btn v-if="moduleDeletable" icon="mdi-delete" size="small" variant="text" color="error"
-              :title="$t('common.delete')" @click.stop="openDeleteDialog(item)" />
+              :title="$t('common.edit')" @click.stop="openEditDialog(item)">
+              <v-icon>mdi-pencil</v-icon>
+            <v-tooltip
+        activator="parent"
+      >{{$t('common.edit')}}</v-tooltip>
+            </v-btn>
+            <v-btn v-if="moduleName === 'users'" icon
+              size="small" variant="text" :color="item?.is_disabled ? 'success' : 'warning'"
+              :title="$t(item?.is_disabled ? 'admin.enableUserAction' : 'admin.disableUserAction')"
+              @click.stop="toggleUserDisabled(item)">
+              <v-icon>{{ item?.is_disabled ? 'mdi-account-check' : 'mdi-account-cancel' }}</v-icon>
+            <v-tooltip
+        activator="parent"
+      >{{$t(item?.is_disabled ? 'admin.enableUserAction' : 'admin.disableUserAction')}}</v-tooltip>
+            </v-btn>
+            <v-btn v-else-if="moduleDeletable" size="small" variant="text" color="error"
+              :title="$t('common.delete')" @click.stop="openDeleteDialog(item)"  >
+              <v-icon>mdi-delete</v-icon>
+            <v-tooltip
+        activator="parent"
+      >{{$t('common.delete')}}</v-tooltip>
+            </v-btn>
           </div>
         </template>
         <template #loading>

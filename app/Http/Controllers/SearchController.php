@@ -70,7 +70,7 @@ class SearchController extends Controller
     private function searchUsers(Request $request, string $keyword): array
     {
         $items = User::query()
-            ->whereNull('disable_time')
+            ->whereNotDisabled()
             ->where(function ($query) use ($keyword) {
                 $query->where('username', 'like', "%{$keyword}%")
                     ->orWhere('bio', 'like', "%{$keyword}%")

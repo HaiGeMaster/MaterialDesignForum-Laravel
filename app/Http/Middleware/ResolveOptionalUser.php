@@ -39,7 +39,7 @@ class ResolveOptionalUser
                 /** @var User|null $user */
                 $user = $token->user;
 
-                if ($user && ! $user->disable_time && $user->canLoginNormally()) {
+                if ($user && ! $user->isDisabled() && $user->canLoginNormally()) {
                     Auth::setUser($user);
                 }
             }

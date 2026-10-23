@@ -297,6 +297,8 @@ async function onFileChange(event) {
     font-size: 28px !important;
     font-weight: 700 !important;
     line-height: 1.4;
+    /* -webkit-text-stroke: 1px #fff;
+    paint-order: stroke fill; */
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
 }
 

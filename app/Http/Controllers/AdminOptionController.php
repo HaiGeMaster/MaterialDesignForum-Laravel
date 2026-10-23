@@ -13,7 +13,6 @@ class AdminOptionController extends Controller
     private const DEFAULT_UPDATE_SOURCE = 'http://localhost:8000/version.json';
 
     private const THEME_DEFAULTS = [
-        'theme' => 'light',
         'default_theme' => 'light',
         'available_themes' => ['light', 'dark'],
     ];
@@ -26,16 +25,14 @@ class AdminOptionController extends Controller
     public function updateTheme(Request $request)
     {
         $validated = $request->validate([
-            'theme' => ['nullable', 'string', 'max:50'],
             'default_theme' => ['nullable', 'string', 'max:50'],
             'available_themes' => ['nullable', 'array'],
             'available_themes.*' => ['string', 'max:50'],
         ]);
 
-        $defaultTheme = $validated['default_theme'] ?? $validated['theme'] ?? 'light';
+        $defaultTheme = $validated['default_theme'] ?? 'light';
         $availableThemes = $validated['available_themes'] ?? ['light', 'dark'];
 
-        DB::table('settings')->updateOrInsert(['name' => 'theme'], ['value' => $defaultTheme]);
         DB::table('settings')->updateOrInsert(['name' => 'default_theme'], ['value' => $defaultTheme]);
         DB::table('settings')->updateOrInsert(['name' => 'available_themes'], ['value' => implode(',', $availableThemes)]);
 
@@ -278,15 +275,14 @@ class AdminOptionController extends Controller
     private function themeData(): array
     {
         $rows = DB::table('settings')->whereIn('name', [
-            'theme', 'default_theme', 'available_themes',
+            'default_theme', 'available_themes',
             'site_name', 'site_icp_beian', 'site_gongan_beian',
         ])->pluck('value', 'name');
         $availableThemesRaw = $rows['available_themes'] ?? '';
 
-        $defaultTheme = $rows['default_theme'] ?? $rows['theme'] ?? 'light';
+        $defaultTheme = $rows['default_theme'] ?? 'light';
 
         return [
-            'theme' => $defaultTheme,
             'default_theme' => $defaultTheme,
             'available_themes' => $availableThemesRaw !== '' ? array_filter(explode(',', $availableThemesRaw)) : self::THEME_DEFAULTS['available_themes'],
             'site_name' => (string) ($rows['site_name'] ?? 'Material Design Forum'),

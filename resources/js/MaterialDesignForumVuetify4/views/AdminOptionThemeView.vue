@@ -29,7 +29,7 @@ const defaultThemeItems = computed(() => {
 })
 
 function applyForm(data) {
-  form.default_theme = data.default_theme || data.theme || form.default_theme
+  form.default_theme = data.default_theme || form.default_theme
   form.available_themes = Array.isArray(data.available_themes) ? data.available_themes : form.available_themes
 }
 

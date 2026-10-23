@@ -29,7 +29,7 @@ class UserController extends Controller
     {
         $tab = $request->query('tab', 'recommend');
 
-        $query = User::query()->whereNull('disable_time');
+        $query = User::query()->whereNotDisabled();
 
         // 用户名搜索（@提及自动补全使用）
         $q = trim((string) $request->query('q', ''));
@@ -99,6 +99,9 @@ class UserController extends Controller
         $user->load('userGroup');
 
         $this->attachUserCounts(collect([$user]));
+        $isDisabled = $user->isDisabled();
+        $user->setAttribute('is_disabled', $isDisabled);
+        $user->setAttribute('system_email', config('mail.from.address'));
 
         return response()->json($this->appendFollowStatusToModel($user, $request, 'user'));
     }

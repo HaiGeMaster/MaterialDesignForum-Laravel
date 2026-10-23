@@ -34,10 +34,10 @@ return new class extends Migration
             ['name' => 'site_keywords',     'value' => 'Material Design Forum,Vuetify,MDUI,MDForum,Forum,论坛,轻量论坛,简洁论坛,材质设计论坛,轻论坛'],
             ['name' => 'site_name',         'value' => 'Material Design Forum'],
             ['name' => 'site_static_url',   'value' => ''],
-            ['name' => 'theme',             'value' => 'system'],
-            ['name' => 'default_theme',             'value' => 'system'],
-            ['name' => 'theme_carousel_param', 'value' => ''],
-            ['name' => 'theme_typed_param', 'value' => '{"header":"Message.Components.TextPlay.With","body":["Message.Components.TextPlay.MaterialDesign","Message.Components.TextPlay.VueAsTheCore","Message.Components.TextPlay.MoreElegant","Message.Components.TextPlay.UnlimitedDistance","Message.Components.TextPlay.CrossPlatform","Message.Components.TextPlay.DynamicResponsive"],"footer_header":"Message.Components.TextPlay.TheWay","footer_tail":"Message.Components.TextPlay.EnjoyCommunication"}'],
+            ['name' => 'default_theme',     'value' => 'system'],
+            ['name' => 'available_themes',  'value' => 'light,dark,asphalt9,blackguard,polaris,nebula,minecraft,odyssey,highContrast'],
+            // ['name' => 'theme_carousel_param', 'value' => ''],
+            // ['name' => 'theme_typed_param', 'value' => '{"header":"Message.Components.TextPlay.With","body":["Message.Components.TextPlay.MaterialDesign","Message.Components.TextPlay.VueAsTheCore","Message.Components.TextPlay.MoreElegant","Message.Components.TextPlay.UnlimitedDistance","Message.Components.TextPlay.CrossPlatform","Message.Components.TextPlay.DynamicResponsive"],"footer_header":"Message.Components.TextPlay.TheWay","footer_tail":"Message.Components.TextPlay.EnjoyCommunication"}'],
         ]);
     }
 

@@ -26,6 +26,13 @@ export const useDeleteDialogStore = defineStore('deleteDialog', {
     color: 'error',
     confirmText: '',
     cancelText: '',
+    showDatePicker: false,
+    datePickerLabel: '',
+    minDate: '',
+    selectedDate: null,
+    allowPermanent: false,
+    permanentLabel: '',
+    permanent: false,
     loading: false,
     onConfirm: null,
   }),
@@ -38,6 +45,13 @@ export const useDeleteDialogStore = defineStore('deleteDialog', {
       color = 'error',
       confirmText = '',
       cancelText = '',
+      showDatePicker = false,
+      datePickerLabel = '',
+      minDate = '',
+      selectedDate = null,
+      allowPermanent = false,
+      permanentLabel = '',
+      permanent = false,
       onConfirm = null,
       onError = null,
     }) {
@@ -47,6 +61,13 @@ export const useDeleteDialogStore = defineStore('deleteDialog', {
       this.color = color
       this.confirmText = confirmText
       this.cancelText = cancelText
+      this.showDatePicker = showDatePicker
+      this.datePickerLabel = datePickerLabel
+      this.minDate = minDate
+      this.selectedDate = selectedDate
+      this.allowPermanent = allowPermanent
+      this.permanentLabel = permanentLabel
+      this.permanent = permanent
       this.onConfirm = onConfirm
       this.onError = onError
       this.loading = false

@@ -7,6 +7,7 @@ use App\Models\Token;
 use App\Models\User;
 use App\Support\GeoLocation;
 use App\Support\IssuesTokens;
+use App\Support\RegistrationProfileDefaults;
 use GuzzleHttp\Client as GuzzleHttpClient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -105,7 +106,7 @@ class OAuthController extends Controller
         }
 
         $user = $token->user;
-        if (! $user || $user->disable_time || ! $user->canLoginNormally()) {
+        if (! $user || $user->isDisabled() || ! $user->canLoginNormally()) {
             return null;
         }
 
@@ -191,7 +192,7 @@ class OAuthController extends Controller
 
             if ($binding) {
                 $user = $binding->user;
-                if (! $user || $user->disable_time) {
+                if (! $user || $user->isDisabled()) {
                     return $this->frontendError('/oauth/callback', 'user_disabled');
                 }
 
@@ -309,10 +310,13 @@ class OAuthController extends Controller
     private function createNewUserFromOAuth(Request $request, string $email, ?string $name): User
     {
         $username = $this->generateUsername($name, $email);
+        $profileDefaults = app(RegistrationProfileDefaults::class);
 
         return User::create([
             'username' => $username,
             'email' => $email,
+            'avatar' => $profileDefaults->avatar($username),
+            'cover' => $profileDefaults->cover(),
             'password' => Hash::make(Str::random(40)), // OAuth 用户无需密码登录；随机串防止猜测
             'user_group_id' => 2,
             'create_ip' => $request->ip() ?: '127.0.0.1',
