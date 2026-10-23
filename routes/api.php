@@ -90,6 +90,8 @@ Route::middleware('auth.token')->group(function () {
 
     // 用户媒体库（仅本人可查看），需登录
     Route::get('/users/{user}/media', [MediaController::class, 'index']);
+    Route::post('/users/{user}/reset-profile-asset', [UserController::class, 'resetProfileAsset'])
+        ->where('user', '[0-9]+');
 
     // 批量删除媒体（仅本人），需登录
     Route::delete('/media', [MediaController::class, 'destroy']);

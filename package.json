@@ -6,6 +6,7 @@
         "phpAM": "php artisan migrate",
         "phpserver": "php artisan serve",
         "build": "vite build",
+        "build7z": "build.bat",
         "dev": "vite"
     },
     "devDependencies": {

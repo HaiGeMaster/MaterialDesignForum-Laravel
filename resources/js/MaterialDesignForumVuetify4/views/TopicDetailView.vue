@@ -7,8 +7,8 @@ import { useFeedback } from '../composables/useFeedback'
 import ContentListPanel from '../components/ContentListPanel.vue'
 import FollowButton from '../components/FollowButton.vue'
 import MoreActions from '../components/MoreActions.vue'
-import TopicDialog from '../components/TopicDialog.vue'
 import { useDeleteDialogStore } from '../stores/deleteDialog'
+import { useTopicDialogStore } from '../stores/topicDialog'
 
 import { useDisplay } from 'vuetify'
 const { xs } = useDisplay()
@@ -18,6 +18,7 @@ const router = useRouter()
 const { show } = useFeedback()
 const { t } = useI18n()
 const deleteDialog = useDeleteDialogStore()
+const topicDialog = useTopicDialogStore()
 
 const topic = ref(null)
 const creator = ref(null)
@@ -33,7 +34,6 @@ function handleOpen(item) {
 }
 const questions = ref([])
 const loading = ref(false)
-const editDialog = ref(false)
 
 const TOPIC_TABS = ['articles', 'questions']
 
@@ -111,12 +111,14 @@ const creatorInitial = computed(() =>
 
 // 更多操作：编辑 / 删除（举报由 MoreActions 内置对话框处理）
 function handleEdit() {
-  editDialog.value = true
+  topicDialog.open({
+    topic: topic.value,
+    onSubmit: onTopicSaved,
+  })
 }
 
 // 话题编辑成功：刷新详情数据
 function onTopicSaved() {
-  editDialog.value = false
   fetchTopic()
 }
 
@@ -265,9 +267,6 @@ onMounted(fetchTopic)
       :title="$t('topicDetail.notFound')"
       :text="$t('topicDetail.notFoundText')"
     />
-
-    <!-- 编辑话题对话框（MoreActions 的编辑操作打开） -->
-    <TopicDialog v-model="editDialog" :topic="topic" @submit="onTopicSaved" />
   </v-container>
 </template>
 

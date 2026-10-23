@@ -5,8 +5,8 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
 import { useFeedback } from '../composables/useFeedback'
 import CommentSheet from './CommentSheet.vue'
-import TopicDialog from './TopicDialog.vue'
-import UserGroupDialog from './UserGroupDialog.vue'
+import { useTopicDialogStore } from '../stores/topicDialog'
+import { useUserGroupDialogStore } from '../stores/userGroupDialog'
 import { useEditorWindowStore } from '../stores/editorWindow'
 
 const route = useRoute()
@@ -31,9 +31,9 @@ onBeforeUnmount(() => {
   mql?.removeEventListener('change', updateMobile)
 })
 
-const topicDialog = ref(false)
-const userGroupDialog = ref(false)
 const commentSheet = ref(false)
+const topicDialog = useTopicDialogStore()
+const userGroupDialog = useUserGroupDialogStore()
 const editorWindow = useEditorWindowStore()
 
 // 各页面匹配的文字 / 图标 / 功能接入状态
@@ -87,7 +87,16 @@ function handleClick() {
     return
   }
   if (route.name === 'topics' || (route.name === 'admin-module' && route.params.module === 'topics')) {
-    topicDialog.value = true
+    topicDialog.open({
+      onSubmit: (data) => {
+        if (route.name === 'admin-module') {
+          window.dispatchEvent(new CustomEvent('topic:created', { detail: data }))
+          return
+        }
+
+        router.push(`/topics/${data.topic_id}`)
+      },
+    })
   } else if (route.name === 'questions' || (route.name === 'admin-module' && route.params.module === 'questions')) {
     editorWindow.openEditor({ mode: 'question', action: 'create' })
   } else if (route.name === 'articles' || (route.name === 'admin-module' && route.params.module === 'articles')) {
@@ -104,20 +113,10 @@ function handleClick() {
     commentSheet.value = true
   } else if (route.name === 'admin-module' && route.params.module === 'user-groups') {
     // 管理员用户组管理页：打开新建用户组对话框
-    userGroupDialog.value = true
+    userGroupDialog.open({
+      onSubmit: (data) => window.dispatchEvent(new CustomEvent('user-group:created', { detail: data })),
+    })
   }
-}
-
-// 话题创建成功：跳转到新话题详情页
-function onTopicCreated(data) {
-  topicDialog.value = false
-  router.push(`/topics/${data.topic_id}`)
-}
-
-// 用户组创建成功：刷新当前页数据（AdminModuleView 监听 window 事件）
-function onUserGroupCreated(data) {
-  userGroupDialog.value = false
-  window.dispatchEvent(new CustomEvent('user-group:created', { detail: data }))
 }
 </script>
 
@@ -139,12 +138,6 @@ function onUserGroupCreated(data) {
         <v-icon :icon="current.icon" />
         <span v-if="!isMobile" class="fab__label">{{ $t(current.labelKey) }}</span>
       </v-btn>
-
-      <!-- 新建话题对话框（仅话题页使用） -->
-      <TopicDialog v-model="topicDialog" @submit="onTopicCreated" />
-
-      <!-- 新建用户组对话框（管理员用户组管理页使用） -->
-      <UserGroupDialog v-model="userGroupDialog" @submit="onUserGroupCreated" />
 
       <!-- 文章详情页：底部评论输入框 -->
       <CommentSheet

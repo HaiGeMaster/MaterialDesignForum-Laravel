@@ -112,6 +112,18 @@ export const useUserStore = defineStore('user', {
       }
     },
 
+    async resetProfileAsset(userId, type) {
+      this.error = ''
+
+      try {
+        const { data } = await http.post(`/users/${userId}/reset-profile-asset`, { type })
+        return data
+      } catch (error) {
+        this.error = error.message
+        throw error
+      }
+    },
+
     // 上传图片（avatar / cover），可选 context 和 itemId 区分关联场景
     async uploadImage(type, file, { context, itemId } = {}) {
       this.uploading = true

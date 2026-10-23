@@ -11,6 +11,9 @@ import DeleteDialog from './components/DeleteDialog.vue'
 import ProfileEditDialog from './components/ProfileEditDialog.vue'
 import FloatingActionButton from './components/FloatingActionButton.vue'
 import CookiePreferenceCenter from './components/CookiePreferenceCenter.vue'
+import ReportDialog from './components/ReportDialog.vue'
+import TopicDialog from './components/TopicDialog.vue'
+import UserGroupDialog from './components/UserGroupDialog.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -84,6 +87,13 @@ onBeforeUnmount(() => {
 
     <!-- 用户资料编辑对话框 -->
     <ProfileEditDialog />
+
+    <!-- 全局话题和用户组对话框 -->
+    <TopicDialog />
+    <UserGroupDialog />
+
+    <!-- 全局举报对话框 -->
+    <ReportDialog />
 
     <!-- 右下角悬浮按钮：管理员用户组页创建用户组 -->
     <FloatingActionButton />

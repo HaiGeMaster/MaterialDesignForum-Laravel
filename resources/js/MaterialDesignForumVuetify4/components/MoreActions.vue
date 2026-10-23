@@ -4,8 +4,10 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
 import { useUsersDialogStore } from '../stores/usersDialog'
 import { useCommentReplyEditStore } from '../stores/commentReplyEditDialog'
+import { useReportDialogStore } from '../stores/reportDialog'
+import { useUserStore } from '../stores/user'
 import { useFeedback } from '../composables/useFeedback'
-import ReportDialog from './ReportDialog.vue'
+import { useRoute } from 'vue-router'
 
 const props = defineProps({
   /** 自定义菜单项：[{ title, icon, color?, divider?, disabled? }] */
@@ -30,13 +32,15 @@ const props = defineProps({
 const emit = defineEmits(['select', 'copy-link', 'share', 'report', 'edit', 'delete'])
 
 const authStore = useAuthStore()
+const userStore = useUserStore()
 const usersDialog = useUsersDialogStore()
 const commentReplyEditDialog = useCommentReplyEditStore()
+const reportDialog = useReportDialogStore()
 const { show: feedback } = useFeedback()
 const { t } = useI18n()
+const route = useRoute()
 
-// 内置举报对话框（点击"举报"时打开）
-const reportDialog = ref(false)
+const resettingProfileAsset = ref(false)
 
 const currentUserId = computed(() => authStore.user?.user_id ?? null)
 
@@ -49,6 +53,17 @@ const isSelf = computed(() => {
 // 当前用户用户组权限
 const userGroup = computed(() => authStore.user?.user_group || {})
 const isAdminUser = computed(() => Boolean(userGroup.value.is_admin))
+const isOwnUserProfileRoute = computed(() =>
+  route.name === 'user'
+  && (route.params.user_id === 'me'
+    || String(route.params.user_id) === String(props.item?.user_id)),
+)
+const canResetProfileAsset = computed(() =>
+  props.type === 'user'
+  && props.item?.user_id != null
+  && currentUserId.value != null
+  && (isAdminUser.value || (isSelf.value && isOwnUserProfileRoute.value)),
+)
 
 // 按类型取数据对象的 ID
 const itemId = computed(() => {
@@ -214,6 +229,13 @@ const builtinItems = computed(() => {
     })
   }
 
+  if (canResetProfileAsset.value) {
+    list.push(
+      { title: t('moreActions.resetAvatar'), icon: 'mdi-account-circle-outline', action: 'reset-avatar', disabled: resettingProfileAsset.value },
+      { title: t('moreActions.resetCover'), icon: 'mdi-image-refresh-outline', action: 'reset-cover', disabled: resettingProfileAsset.value },
+    )
+  }
+
   // 举报：非管理员且非本人
   if (canReport.value) {
     list.push({ title: t('moreActions.report'), icon: 'mdi-flag-outline', color: 'error', action: 'report' })
@@ -260,10 +282,16 @@ async function handleSelect(item) {
       // 打开用户浏览对话框，展示关注该对象的所有用户
       usersDialog.open({ modes: 'followers', type: props.type, id: itemId.value })
       return
+    case 'reset-avatar':
+      await resetProfileAsset('avatar')
+      return
+    case 'reset-cover':
+      await resetProfileAsset('cover')
+      return
     case 'report':
       // 内置打开举报对话框（未启用内置操作时回退为事件透出）
       if (props.withBuiltin) {
-        reportDialog.value = true
+        reportDialog.open({ type: props.type, item: props.item })
         return
       }
       emit('report', props.item)
@@ -292,6 +320,29 @@ async function handleSelect(item) {
 
   // 自定义项照旧
   emit('select', item)
+}
+
+async function resetProfileAsset(type) {
+  if (!canResetProfileAsset.value || resettingProfileAsset.value) return
+
+  resettingProfileAsset.value = true
+  try {
+    const data = await userStore.resetProfileAsset(props.item.user_id, type)
+    const value = data?.user?.[type]
+    if (typeof value !== 'string' || !value) {
+      throw new Error(t('moreActions.resetFailed'))
+    }
+
+    props.item[type] = value
+    if (isSelf.value && authStore.user) {
+      authStore.setUser({ ...authStore.user, [type]: value })
+    }
+    feedback(t(type === 'avatar' ? 'moreActions.resetAvatarSuccess' : 'moreActions.resetCoverSuccess'), 'success')
+  } catch (error) {
+    feedback(error.message || t('moreActions.resetFailed'), 'error')
+  } finally {
+    resettingProfileAsset.value = false
+  }
 }
 
 async function copyLink() {
@@ -351,7 +402,4 @@ function share() {
       </template>
     </v-list>
   </v-menu>
-
-  <!-- 举报对话框（内置操作） -->
-  <ReportDialog v-model="reportDialog" :type="props.type" :item="props.item" />
 </template>

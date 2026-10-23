@@ -10,9 +10,9 @@ import { useEditorWindowStore } from '../stores/editorWindow'
 import { useProfileEditStore } from '../stores/profileEditDialog'
 import { useDisplay } from 'vuetify'
 import http from '../api'
-import TopicDialog from '../components/TopicDialog.vue'
-import UserGroupDialog from '../components/UserGroupDialog.vue'
 import ReportHandleDialog from '../components/ReportHandleDialog.vue'
+import { useTopicDialogStore } from '../stores/topicDialog'
+import { useUserGroupDialogStore } from '../stores/userGroupDialog'
 
 const { mobile } = useDisplay()
 const route = useRoute()
@@ -24,6 +24,8 @@ const deleteDialog = useDeleteDialogStore()
 const commentReplyEdit = useCommentReplyEditStore()
 const editorWindow = useEditorWindowStore()
 const profileEdit = useProfileEditStore()
+const topicDialog = useTopicDialogStore()
+const userGroupDialog = useUserGroupDialogStore()
 
 // ================== 模块元信息 ==================
 const MODULE_META = {
@@ -509,6 +511,9 @@ const selectedIds = computed(() => {
 })
 
 const selectedUsers = computed(() => selected.value.filter((item) => moduleName.value === 'users'))
+const selectedDisabledUsers = computed(() => selectedUsers.value.filter(
+  (item) => Boolean(item?.is_disabled ?? item?.disable_time),
+))
 const selectedReports = computed(() => selected.value.filter((item) => moduleName.value === 'reports'))
 const hasSelection = computed(() => selected.value.length > 0)
 
@@ -605,6 +610,35 @@ async function bulkDisableSelectedUsers() {
   })
 }
 
+function bulkEnableSelectedUsers() {
+  const usersToEnable = selectedDisabledUsers.value
+  if (moduleName.value !== 'users' || !usersToEnable.length) return
+
+  const count = usersToEnable.length
+  deleteDialog.open({
+    title: t('admin.bulkEnableTitle'),
+    text: t('admin.bulkEnableText', { count }),
+    confirmText: t('admin.bulkEnableAction'),
+    icon: 'mdi-account-check',
+    color: 'success',
+    onConfirm: async () => {
+      await Promise.all(
+        usersToEnable.map((item) => http.put(`/admin/modules/users/${item.user_id}`, {
+          disable_time: null,
+          disable_until: null,
+        })),
+      )
+      clearSelection()
+      await loadItems()
+      feedback(t('admin.bulkEnableSuccess', { count }), 'success')
+    },
+    onError: (error) => {
+      const message = error?.response?.data?.message || error?.message || t('admin.editFailed')
+      feedback(message, 'error')
+    },
+  })
+}
+
 function openBulkUserGroupDialog() {
   if (moduleName.value !== 'users' || !selectedUsers.value.length) return
   selectedUserGroupId.value = null
@@ -656,14 +690,6 @@ const moduleEditable = computed(() => EDITABLE_MODULES.includes(moduleName.value
 // reports 只能处理不能删除
 const moduleDeletable = computed(() => moduleEditable.value && moduleName.value !== 'reports')
 
-// TopicDialog 状态
-const topicDialogVisible = ref(false)
-const topicEditItem = ref(null)
-
-// UserGroupDialog 状态
-const userGroupDialogVisible = ref(false)
-const userGroupEditItem = ref(null)
-
 // ReportHandleDialog 状态
 const reportDialogVisible = ref(false)
 const reportEditItem = ref(null)
@@ -674,8 +700,11 @@ async function openEditDialog(item) {
   const row = item || {}
 
   if (m === 'topics') {
-    topicEditItem.value = row
-    topicDialogVisible.value = true
+    topicDialog.open({
+      topic: row,
+      apiBase: '/admin/modules/topics',
+      onSubmit: onTopicSaved,
+    })
     return
   }
 
@@ -733,8 +762,10 @@ async function openEditDialog(item) {
   }
 
   if (m === 'user-groups') {
-    userGroupEditItem.value = row
-    userGroupDialogVisible.value = true
+    userGroupDialog.open({
+      userGroup: row,
+      onSubmit: onUserGroupSaved,
+    })
     return
   }
 
@@ -862,9 +893,16 @@ function onUserGroupCreated() {
 }
 window.addEventListener('user-group:created', onUserGroupCreated)
 
+// 监听 FloatingActionButton 创建话题成功事件
+function onTopicCreated() {
+  loadItems()
+}
+window.addEventListener('topic:created', onTopicCreated)
+
 onBeforeUnmount(() => {
   window.removeEventListener('content:published', onContentPublished)
   window.removeEventListener('user-group:created', onUserGroupCreated)
+  window.removeEventListener('topic:created', onTopicCreated)
 })
 </script>
 
@@ -932,6 +970,20 @@ onBeforeUnmount(() => {
               <v-icon>mdi-account-cancel</v-icon>
               <v-tooltip activator="parent" >
                 {{ $t('admin.bulkDisable') }} ({{ selected.length }})
+              </v-tooltip>
+            </v-btn>
+
+            <v-btn
+              v-if="moduleName === 'users' && selectedDisabledUsers.length"
+              color="success"
+              variant="flat"
+              size="small"
+              icon
+              @click="bulkEnableSelectedUsers"
+            >
+              <v-icon>mdi-account-check</v-icon>
+              <v-tooltip activator="parent">
+                {{ $t('admin.bulkEnable') }} ({{ selectedDisabledUsers.length }})
               </v-tooltip>
             </v-btn>
 
@@ -1137,41 +1189,35 @@ onBeforeUnmount(() => {
             {{ item[slotKey(name)] || '—' }}
           </div>
         </template>
+
         <template #[`item.actions`]="{ item }">
           <div class="d-flex justify-end" style="gap: 4px;">
-            <v-btn v-if="moduleMeta?.itemTo && moduleMeta.itemTo(item || {})" icon size="small"
-              variant="text"
+            <v-btn v-if="moduleMeta?.itemTo && moduleMeta.itemTo(item || {})" icon size="small" variant="text"
               @click.stop="openInNewTab(moduleMeta.itemTo(item || {}))">
               <v-icon>mdi-open-in-new</v-icon>
-            <v-tooltip
-        activator="parent"
-      >{{$t('admin.actions.viewOnSite')}}</v-tooltip>
+              <v-tooltip activator="parent">{{ $t('admin.actions.viewOnSite') }}</v-tooltip>
             </v-btn>
             <v-btn v-if="moduleEditable" icon="mdi-pencil" size="small" variant="text" color="primary"
               :title="$t('common.edit')" @click.stop="openEditDialog(item)">
               <v-icon>mdi-pencil</v-icon>
-            <v-tooltip
-        activator="parent"
-      >{{$t('common.edit')}}</v-tooltip>
+              <v-tooltip activator="parent">{{ $t('common.edit') }}</v-tooltip>
             </v-btn>
-            <v-btn v-if="moduleName === 'users'" icon
-              size="small" variant="text" :color="item?.is_disabled ? 'success' : 'warning'"
+            <v-btn v-if="moduleName === 'users'" icon size="small" variant="text"
+              :color="item?.is_disabled ? 'success' : 'warning'"
               :title="$t(item?.is_disabled ? 'admin.enableUserAction' : 'admin.disableUserAction')"
               @click.stop="toggleUserDisabled(item)">
               <v-icon>{{ item?.is_disabled ? 'mdi-account-check' : 'mdi-account-cancel' }}</v-icon>
-            <v-tooltip
-        activator="parent"
-      >{{$t(item?.is_disabled ? 'admin.enableUserAction' : 'admin.disableUserAction')}}</v-tooltip>
+              <v-tooltip activator="parent">{{ $t(item?.is_disabled ? 'admin.enableUserAction' :
+                'admin.disableUserAction')}}</v-tooltip>
             </v-btn>
-            <v-btn v-else-if="moduleDeletable" size="small" variant="text" color="error"
-              :title="$t('common.delete')" @click.stop="openDeleteDialog(item)"  >
+            <v-btn v-else-if="moduleDeletable" icon size="small" variant="text" color="error"
+              :title="$t('common.delete')" @click.stop="openDeleteDialog(item)">
               <v-icon>mdi-delete</v-icon>
-            <v-tooltip
-        activator="parent"
-      >{{$t('common.delete')}}</v-tooltip>
+              <v-tooltip activator="parent">{{ $t('common.delete') }}</v-tooltip>
             </v-btn>
           </div>
         </template>
+
         <template #loading>
           <v-skeleton-loader type="table-row@5" />
         </template>
@@ -1183,13 +1229,6 @@ onBeforeUnmount(() => {
         </template>
       </v-data-table-server>
     </v-card>
-
-    <!-- 话题编辑对话框（topics 模块专用；其他模块的编辑对话框均为全局组件，已在 App.vue 挂载） -->
-    <TopicDialog v-model="topicDialogVisible" :topic="topicEditItem" api-base="/admin/modules/topics"
-      @submit="onTopicSaved" />
-
-    <!-- 用户组编辑对话框（user-groups 模块专用） -->
-    <UserGroupDialog v-model="userGroupDialogVisible" :user-group="userGroupEditItem" @submit="onUserGroupSaved" />
 
     <!-- 举报处理对话框（reports 模块专用） -->
     <ReportHandleDialog v-model="reportDialogVisible" :report="reportEditItem" @submit="onReportHandled" />

@@ -135,10 +135,12 @@ async function handleSendCode() {
       await authStore.sendEmailCode(email)
     }
     feedback(t('auth.codeSent'), 'success')
+
     // 开发模式下不启动倒计时，便于反复测试
     if (!import.meta.env.DEV) {
       startCooldown()
     }
+
   } catch (error) {
     feedback(error.message, 'error')
   } finally {

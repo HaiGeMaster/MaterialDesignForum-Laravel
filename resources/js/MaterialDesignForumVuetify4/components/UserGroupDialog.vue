@@ -4,32 +4,29 @@ import { useI18n } from 'vue-i18n'
 import http from '../api'
 import ColorTextField from './ColorTextField.vue'
 import { useFeedback } from '../composables/useFeedback'
+import { useUserGroupDialogStore } from '../stores/userGroupDialog'
 
 import { useDisplay } from 'vuetify'
 const { xs } = useDisplay()
 
 
-const props = defineProps({
-  /** 对话框显隐 */
-  modelValue: { type: Boolean, default: false },
-  /** 编辑模式传入用户组对象；新建模式传 null */
-  userGroup: { type: Object, default: null },
-  /** API 基础路径，默认 '/admin/modules/user-groups' */
-  apiBase: { type: String, default: '/admin/modules/user-groups' },
-})
-
-const emit = defineEmits(['update:modelValue', 'submit'])
-
+const store = useUserGroupDialogStore()
 const { show } = useFeedback()
 const { t } = useI18n()
 
 const formRef = ref(null)
 const submitting = ref(false)
 
-const isEdit = computed(() => Boolean(props.userGroup))
+const isEdit = computed(() => Boolean(store.userGroup))
 const dialogOpen = computed({
-  get: () => props.modelValue,
-  set: (v) => emit('update:modelValue', v),
+  get: () => store.model,
+  set: (value) => {
+    if (value) {
+      store.model = true
+    } else {
+      store.close()
+    }
+  },
 })
 
 // ================== 表单默认值 ==================
@@ -220,14 +217,14 @@ const PERMISSION_GROUPS = [
 const form = ref({ ...DEFAULTS })
 
 watch(
-  () => props.modelValue,
+  () => store.model,
   (open) => {
     if (!open) return
-    if (props.userGroup) {
+    if (store.userGroup) {
       // 编辑模式：从传入数据初始化，缺失字段用默认值兜底
       const merged = { ...DEFAULTS }
       for (const key of Object.keys(DEFAULTS)) {
-        const val = props.userGroup[key]
+        const val = store.userGroup[key]
         if (val !== undefined && val !== null) {
           merged[key] = val
         }
@@ -273,16 +270,16 @@ async function submit() {
 
     let data
     if (isEdit.value) {
-      const res = await http.put(`${props.apiBase}/${props.userGroup.user_group_id}`, payload)
+      const res = await http.put(`${store.apiBase}/${store.userGroup.user_group_id}`, payload)
       data = res.data
       show(t('userGroupDialog.updateSuccess'), 'success')
     } else {
-      const res = await http.post(props.apiBase, payload)
+      const res = await http.post(store.apiBase, payload)
       data = res.data
       show(t('userGroupDialog.createSuccess'), 'success')
     }
 
-    emit('submit', data)
+    store.emitSubmit(data)
     dialogOpen.value = false
   } catch (error) {
     show(error.message || t('userGroupDialog.submitError'), 'error')

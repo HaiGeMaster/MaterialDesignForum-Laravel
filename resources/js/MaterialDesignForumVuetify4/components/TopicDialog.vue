@@ -3,23 +3,14 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import http from '../api'
 import { useAuthStore } from '../stores/auth'
+import { useTopicDialogStore } from '../stores/topicDialog'
 import { useFeedback } from '../composables/useFeedback'
 import ImageUploadField from './ImageUploadField.vue'
 import { useDisplay } from 'vuetify'
 const { xs } = useDisplay()
 
-const props = defineProps({
-  /** 对话框显隐 */
-  modelValue: { type: Boolean, default: false },
-  /** 编辑模式传入话题对象；新建模式传 null */
-  topic: { type: Object, default: null },
-  /** API 基础路径：管理员后台传 '/admin/modules/topics'，默认空走用户端 '/topics' */
-  apiBase: { type: String, default: '' },
-})
-
-const emit = defineEmits(['update:modelValue', 'submit'])
-
 const authStore = useAuthStore()
+const store = useTopicDialogStore()
 const { show } = useFeedback()
 const { t } = useI18n()
 
@@ -30,20 +21,26 @@ const description = ref('')
 const cover = ref('')
 
 // 编辑模式（传入话题对象）与新建模式
-const isEdit = computed(() => Boolean(props.topic))
+const isEdit = computed(() => Boolean(store.topic))
 const dialogOpen = computed({
-  get: () => props.modelValue,
-  set: (v) => emit('update:modelValue', v),
+  get: () => store.model,
+  set: (value) => {
+    if (value) {
+      store.model = true
+    } else {
+      store.close()
+    }
+  },
 })
 
 // 每次打开时按模式初始化表单
 watch(
-  () => props.modelValue,
+  () => store.model,
   (open) => {
     if (!open) return
-    name.value = props.topic?.name || ''
-    description.value = props.topic?.description || ''
-    cover.value = props.topic?.cover || ''
+    name.value = store.topic?.name || ''
+    description.value = store.topic?.description || ''
+    cover.value = store.topic?.cover || ''
     formRef.value?.resetValidation()
   },
 )
@@ -74,21 +71,21 @@ async function submit() {
 
     let data
     if (isEdit.value) {
-      const url = props.apiBase
-        ? `${props.apiBase}/${props.topic.topic_id}`
-        : `/topics/${props.topic.topic_id}`
+      const url = store.apiBase
+        ? `${store.apiBase}/${store.topic.topic_id}`
+        : `/topics/${store.topic.topic_id}`
       const res = await http.put(url, payload)
       data = res.data
       show(t('topicDialog.updateSuccess'), 'success')
     } else {
       payload.user_id = authStore.user?.user_id
-      const url = props.apiBase || '/topics'
+      const url = store.apiBase || '/topics'
       const res = await http.post(url, payload)
       data = res.data
       show(t('topicDialog.createSuccess'), 'success')
     }
 
-    emit('submit', data)
+    store.emitSubmit(data)
     dialogOpen.value = false
   } catch (error) {
     show(error.message || t('topicDialog.submitError'), 'error')
@@ -159,7 +156,7 @@ async function submit() {
             type="cover"
             preview-ratio="16 / 6"
             context="topic"
-            :item-id="props.topic?.topic_id"
+            :item-id="store.topic?.topic_id"
             :label="$t('topicDialog.cover')"
           />
         </v-form>

@@ -7,6 +7,7 @@ use App\Models\Article;
 use App\Models\Question;
 use App\Models\User;
 use App\Support\MediaStorage;
+use App\Support\RegistrationProfileDefaults;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -280,6 +281,38 @@ class UserController extends Controller
         ]);
 
         $user->fill($data);
+        $user->update_time = now();
+        $user->save();
+
+        return response()->json([
+            'message' => __('messages.http_user_1'),
+            'user' => $user->load('userGroup'),
+        ]);
+    }
+
+    /**
+     * 将用户头像或封面重置为默认素材。
+     *
+     * 当前用户只能重置自己的资料；管理员可以重置任意用户。
+     */
+    public function resetProfileAsset(Request $request, User $user)
+    {
+        $data = $request->validate([
+            'type' => ['required', 'in:avatar,cover'],
+        ]);
+
+        /** @var User $actor */
+        $actor = $request->user();
+        abort_unless(
+            (string) $actor->user_id === (string) $user->user_id
+                || (bool) $actor->userGroup?->is_admin,
+            403,
+        );
+
+        $defaults = app(RegistrationProfileDefaults::class);
+        $user->{$data['type']} = $data['type'] === 'avatar'
+            ? $defaults->avatar($user->username)
+            : $defaults->cover();
         $user->update_time = now();
         $user->save();
 

@@ -17,6 +17,9 @@ import CommentDialog from './components/CommentDialog.vue'
 import DeleteDialog from './components/DeleteDialog.vue'
 import ProfileEditDialog from './components/ProfileEditDialog.vue'
 import CookiePreferenceCenter from './components/CookiePreferenceCenter.vue'
+import ReportDialog from './components/ReportDialog.vue'
+import TopicDialog from './components/TopicDialog.vue'
+import UserGroupDialog from './components/UserGroupDialog.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -134,6 +137,13 @@ onBeforeUnmount(() => {
 
       <!-- 全局个人资料编辑对话框：任意场景统一调用 -->
       <ProfileEditDialog />
+
+      <!-- 全局话题和用户组对话框：任意入口统一调用 -->
+      <TopicDialog />
+      <UserGroupDialog />
+
+      <!-- 全局举报对话框：更多操作统一调用 -->
+      <ReportDialog />
 
       <!-- Cookie 同意横幅 + 偏好中心对话框：页脚「Cookie 偏好设置」统一调用 -->
       <CookiePreferenceCenter />

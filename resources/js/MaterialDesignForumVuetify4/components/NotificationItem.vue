@@ -154,7 +154,7 @@ function notificationIcon(item) {
         </div>
     </v-card> -->
 
-    <v-list-item :to="notificationLink(item)" class="notification-item px-2" lines="two">
+    <v-list-item rounded="lg" :to="notificationLink(item)" class="notification-item px-2" lines="two">
         <template #prepend>
             <v-avatar size="40" :variant="sender?.avatar?'': 'tonal'" :to="sender.user_id ? `/users/${sender.user_id}` : undefined" @click.stop>
                 <v-img v-if="sender.avatar" :src="sender.avatar" cover />

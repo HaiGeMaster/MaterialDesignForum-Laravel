@@ -163,11 +163,11 @@ onMounted(() => {
         />
       </v-card-text>
 
-      <v-card-text v-else class="pa-0">
+      <v-card-text v-else >
         <v-list rounded="lg" lines="two" class="pa-0">
           <template v-for="(notification, i) in notifications" :key="notification.notification_id">
             <NotificationItem :item="notification" />
-            <v-divider v-if="i < notifications.length - 1" />
+            <!-- <v-divider v-if="i < notifications.length - 1" /> -->
           </template>
         </v-list>
         <InfiniteScroll

@@ -3,22 +3,13 @@ import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
+import { useReportDialogStore } from '../stores/reportDialog'
 import { useFeedback } from '../composables/useFeedback'
 import http from '../api'
 
-const props = defineProps({
-  /** v-model 控制对话框显隐 */
-  modelValue: { type: Boolean, default: false },
-  /** 举报目标类型：question / article / answer / comment / user / reply / topic */
-  type: { type: String, default: '' },
-  /** 举报目标对象（需含对应 *_id 字段） */
-  item: { type: Object, default: null },
-})
-
-const emit = defineEmits(['update:modelValue', 'reported'])
-
 const router = useRouter()
 const authStore = useAuthStore()
+const store = useReportDialogStore()
 const { show } = useFeedback()
 const { t } = useI18n()
 
@@ -48,7 +39,7 @@ const canSubmit = computed(() => {
 
 // 按类型取举报目标 ID
 const targetId = computed(() => {
-  if (!props.item) return null
+  if (!store.item) return null
   const key = {
     user: 'user_id',
     topic: 'topic_id',
@@ -57,13 +48,13 @@ const targetId = computed(() => {
     answer: 'answer_id',
     comment: 'comment_id',
     reply: 'reply_id',
-  }[props.type]
-  return key ? props.item[key] : null
+  }[store.type]
+  return key ? store.item[key] : null
 })
 
 // 每次打开时重置表单
 watch(
-  () => props.modelValue,
+  () => store.model,
   (open) => {
     if (open) {
       reason.value = ''
@@ -84,13 +75,12 @@ async function submit() {
   try {
     await http.post('/reports', {
       user_id: authStore.user.user_id,
-      reportable_type: props.type,
+      reportable_type: store.type,
       reportable_id: targetId.value,
       reason: showOther.value ? otherText.value.trim() : reason.value,
     })
     show(t('report.submitted'), 'success')
-    emit('reported')
-    emit('update:modelValue', false)
+    store.close()
   } catch (error) {
     show(error.message, 'error')
   } finally {
@@ -100,11 +90,11 @@ async function submit() {
 </script>
 
 <template>
-  <v-dialog :model-value="modelValue" max-width="480" @update:model-value="emit('update:modelValue', $event)">
+  <v-dialog :model-value="store.model" max-width="480" @update:model-value="store.close">
     <v-card rounded="lg">
       <v-toolbar :title="$t('report.title')">
         <template v-slot:prepend>
-          <v-btn icon variant="text" @click="emit('update:modelValue', false)">
+          <v-btn icon variant="text" @click="store.close">
             <v-icon>
               mdi-close
             </v-icon>
