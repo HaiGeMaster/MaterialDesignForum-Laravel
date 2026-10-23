@@ -399,7 +399,7 @@ abstract class Controller
     protected function paginateOrGet($query, Request $request): array
     {
         if ($request->has('page')) {
-            $paginator = $query->paginate($request->integer('per_page', 15));
+            $paginator = $query->paginate($request->integer('per_page', 20));//通用加载数量
             return [$paginator, $paginator->getCollection()];
         }
 
