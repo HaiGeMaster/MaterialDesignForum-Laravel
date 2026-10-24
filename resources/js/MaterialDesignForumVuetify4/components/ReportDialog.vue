@@ -22,14 +22,14 @@ const REASONS_KEY = [
   'report.reasons.engagement',
   'report.reasons.other',
 ]
-const reasons = computed(() => REASONS_KEY.map((key) => t(key)))
+const reasons = computed(() => REASONS_KEY.map((key) => ({ key, label: t(key) })))
 const OTHER_KEY = 'report.reasons.other'
 
 const reason = ref('')
 const otherText = ref('')
 const submitting = ref(false)
 
-const showOther = computed(() => reason.value === t(OTHER_KEY))
+const showOther = computed(() => reason.value === OTHER_KEY)
 // 未选择原因，或选择"其他原因"但未填写内容时不允许提交
 const canSubmit = computed(() => {
   if (!reason.value) return false
@@ -121,7 +121,7 @@ async function submit() {
         </div>
 
         <v-radio-group v-model="reason" color="error">
-          <v-radio v-for="r in reasons" :key="r" :label="r" :value="r" />
+          <v-radio v-for="r in reasons" :key="r.key" :label="r.label" :value="r.key" />
         </v-radio-group>
 
         <v-textarea color="primary" 

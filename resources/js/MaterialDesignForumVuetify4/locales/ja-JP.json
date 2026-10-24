@@ -10,6 +10,11 @@
     "usability": true,
     "vuetifyLangcode": "ja"
   },
+  "dateTime": {
+    "justNow": "たった今",
+    "minuteAgo": "1分前",
+    "minutesAgo": "{count}分前"
+  },
   "common": {
     "cancel": "キャンセル",
     "confirm": "確定",

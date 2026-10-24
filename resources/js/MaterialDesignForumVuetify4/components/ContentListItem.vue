@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import UserMiniCard from './UserMiniCard.vue'
+import { useLocalizedDateTime } from '../composables/useLocalizedDateTime'
 
 const props = defineProps({
   /** 列表数据条目（问题、文章或用户） */
@@ -14,6 +15,7 @@ const props = defineProps({
 
 const emit = defineEmits(['toggle-follow', 'more', 'update:active', 'open'])
 const { t } = useI18n()
+const formatDateTime = useLocalizedDateTime()
 
 const isUser = computed(() => props.itemType === 'user')
 
@@ -24,7 +26,7 @@ const metaIcon = computed(() => {
 })
 
 function metaText(item) {
-  const time = item.create_time ? String(item.create_time).slice(0, 10) : ''
+  const time = formatDateTime(item.create_time, { includeTime: false })
   if (props.itemType === 'user') {
     return t('content.followersSuffix', { count: item.follower_count ?? 0, time })
   }

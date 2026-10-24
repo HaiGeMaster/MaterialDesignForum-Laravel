@@ -7,6 +7,7 @@ import ProseRenderer from './ProseRenderer.vue'
 import UserMiniCard from './UserMiniCard.vue'
 import VoteButton from './VoteButton.vue'
 import { useCommentDialogStore } from '../stores/commentDialog'
+import { useLocalizedDateTime } from '../composables/useLocalizedDateTime'
 
 const props = defineProps({
   answer: { type: Object, required: true },
@@ -15,6 +16,7 @@ const props = defineProps({
 const emit = defineEmits(['edit', 'delete', 'open'])
 
 const { t } = useI18n()
+const formatDateTime = useLocalizedDateTime()
 const commentDialog = useCommentDialogStore()
 
 const commentCount = ref(Number(props.answer.comment_count || 0))
@@ -34,10 +36,6 @@ watch(
     commentCount.value = Number(v || 0)
   },
 )
-
-function timeText(time) {
-  return time ? String(time).slice(0, 16).replace('T', ' ') : ''
-}
 
 function openComments() {
   // 防止加载时评论按钮点击，然后错误的拉取全部数据
@@ -106,12 +104,12 @@ function handlePrimaryClick() {
     <v-list-item-action>
 
       <v-list-item-subtitle class="text-high-emphasis">
-        {{ timeText(answer.create_time) }}{{ locationText }}
+        {{ formatDateTime(answer.create_time) }}{{ locationText }}
       </v-list-item-subtitle>
 
       <!-- <div class="d-flex align-center ga-1 flex-wrap">
         <span class="text-caption text-medium-emphasis">
-          {{ timeText(answer.create_time) }}{{ locationText }}
+          {{ formatDateTime(answer.create_time) }}{{ locationText }}
         </span> -->
 
         <v-spacer />

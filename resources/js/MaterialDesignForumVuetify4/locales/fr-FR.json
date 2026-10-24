@@ -10,6 +10,11 @@
     "usability": true,
     "vuetifyLangcode": "fr"
   },
+  "dateTime": {
+    "justNow": "À l’instant",
+    "minuteAgo": "Il y a une minute",
+    "minutesAgo": "Il y a {count} minutes"
+  },
   "common": {
     "cancel": "Annuler",
     "confirm": "Confirmer",

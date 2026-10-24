@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import http from '../api'
 import { useInfiniteList } from '../composables/useInfiniteList'
+import { useLocalizedDateTime } from '../composables/useLocalizedDateTime'
 import InfiniteScroll from './InfiniteScroll.vue'
 import { useDisplay } from 'vuetify'
 const { xs } = useDisplay()
@@ -14,6 +15,7 @@ const props = defineProps({
 })
 
 const { t } = useI18n()
+const formatDateTime = useLocalizedDateTime()
 const route = useRoute()
 const router = useRouter()
 
@@ -132,7 +134,7 @@ watch(
 
 // 元信息：问题显示回答数，文章显示评论数
 function metaText(item, type) {
-    const time = item.create_time ? String(item.create_time).slice(0, 10) : ''
+    const time = formatDateTime(item.create_time, { includeTime: false })
     if (type === 'article') return t('content.commentsSuffix', { count: item.comment_count ?? 0, time })
     if (type === 'answer') return t('userContent.answeredAt', { time })
     return t('content.answersSuffix', { count: item.answer_count ?? 0, time })

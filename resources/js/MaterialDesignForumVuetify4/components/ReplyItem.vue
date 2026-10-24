@@ -9,6 +9,7 @@ import { useAuthStore } from '../stores/auth'
 import { useReplySheetStore } from '../stores/replySheet'
 import { useDeleteDialogStore } from '../stores/deleteDialog'
 import { useFeedback } from '../composables/useFeedback'
+import { useLocalizedDateTime } from '../composables/useLocalizedDateTime'
 
 const props = defineProps({
   reply: { type: Object, required: true },
@@ -19,6 +20,7 @@ const props = defineProps({
 const emit = defineEmits(['deleted', 'open'])
 
 const { t } = useI18n()
+const formatDateTime = useLocalizedDateTime()
 const authStore = useAuthStore()
 const replySheet = useReplySheetStore()
 const deleteDialog = useDeleteDialogStore()
@@ -35,10 +37,6 @@ const locationText = computed(() => {
   const loc = author.value.last_login_location
   return loc && String(loc).trim() !== '' ? ` · ${loc}` : ''
 })
-
-function timeText(time) {
-  return time ? String(time).slice(0, 16).replace('T', ' ') : ''
-}
 
 function openReply() {
   if (!authStore.isLoggedIn) {
@@ -153,7 +151,7 @@ onBeforeUnmount(() => window.removeEventListener('reply:edited', handleReplyEdit
     <!-- 操作区：时间 / 投票 / 更多 -->
     <v-list-item-action>
       <v-list-item-subtitle class="text-high-emphasis">
-        {{ timeText(reply.create_time) }}{{ locationText }}
+        {{ formatDateTime(reply.create_time) }}{{ locationText }}
       </v-list-item-subtitle>
 
       <v-spacer />

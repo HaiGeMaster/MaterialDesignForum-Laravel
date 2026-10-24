@@ -12,6 +12,7 @@ import { useAuthStore } from '../stores/auth'
 import { useDeleteDialogStore } from '../stores/deleteDialog'
 import { useEditorWindowStore } from '../stores/editorWindow'
 import { useFeedback } from '../composables/useFeedback'
+import { useLocalizedDateTime } from '../composables/useLocalizedDateTime'
 
 import { useDisplay } from 'vuetify'
 const { xs } = useDisplay()
@@ -20,6 +21,7 @@ const route = useRoute()
 const router = useRouter()
 const { show } = useFeedback()
 const { t } = useI18n()
+const formatDateTime = useLocalizedDateTime()
 const authStore = useAuthStore()
 const deleteDialog = useDeleteDialogStore()
 const editorWindow = useEditorWindowStore()
@@ -38,10 +40,6 @@ const isFollowing = computed(() => Boolean(article.value?.is_following))
 const isArticleOwner = computed(
   () => authStore.user?.user_id && String(authStore.user.user_id) === String(article.value?.user_id),
 )
-
-function dateText(time) {
-  return time ? String(time).slice(0, 10) : ''
-}
 
 async function fetchArticle() {
   loading.value = true
@@ -171,7 +169,7 @@ onUnmounted(() => {
             </v-list-item-subtitle>
             <template v-slot:append>
               <span class="text-body-2 text-medium-emphasis text-no-wrap">
-                {{ $t('articleDetail.publishedAt', { date: dateText(article.create_time) }) }}
+                {{ $t('articleDetail.publishedAt', { date: formatDateTime(article.create_time) }) }}
               </span>
             </template>
           </v-list-item>

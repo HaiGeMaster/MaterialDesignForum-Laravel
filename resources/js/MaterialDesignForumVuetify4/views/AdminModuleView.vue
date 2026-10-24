@@ -19,7 +19,7 @@ const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 const { show: feedback } = useFeedback()
-const { t, locale } = useI18n()
+const { t, te, locale } = useI18n()
 const deleteDialog = useDeleteDialogStore()
 const commentReplyEdit = useCommentReplyEditStore()
 const editorWindow = useEditorWindowStore()
@@ -342,6 +342,11 @@ function makeHeaders() {
 }
 
 const headers = computed(() => makeHeaders())
+
+function reportReasonText(reason) {
+  if (!reason) return '—'
+  return reason.startsWith('report.reasons.') && te(reason) ? t(reason) : reason
+}
 
 // 布尔型列（is_admin / user_group_icon_show / ability_*）：统一渲染为“是/否”芯片
 const boolHeaders = computed(() =>
@@ -1089,7 +1094,7 @@ onBeforeUnmount(() => {
         </template>
         <template #[`item.reason`]="{ item }">
           <div class="text-truncate" style="max-width: 240px;">
-            {{ item?.reason || '—' }}
+            {{ reportReasonText(item?.reason) }}
           </div>
         </template>
         <template #[`item.username`]="{ item }">

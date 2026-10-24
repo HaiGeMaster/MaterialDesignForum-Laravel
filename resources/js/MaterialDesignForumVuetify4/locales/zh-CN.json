@@ -10,6 +10,11 @@
     "usability": true,
     "vuetifyLangcode": "zhHans"
   },
+  "dateTime": {
+    "justNow": "刚刚",
+    "minuteAgo": "1分钟前",
+    "minutesAgo": "{count}分钟前"
+  },
   "common": {
     "cancel": "取消",
     "confirm": "确定",

@@ -11,6 +11,7 @@ import { useAuthStore } from "../stores/auth";
 import { useReplySheetStore } from "../stores/replySheet";
 import { useDeleteDialogStore } from "../stores/deleteDialog";
 import { useFeedback } from "../composables/useFeedback";
+import { useLocalizedDateTime } from "../composables/useLocalizedDateTime";
 
 const props = defineProps({
     comment: { type: Object, required: true },
@@ -19,6 +20,7 @@ const props = defineProps({
 const emit = defineEmits(["deleted", "open"]);
 
 const { t } = useI18n();
+const formatDateTime = useLocalizedDateTime();
 const authStore = useAuthStore();
 const replySheet = useReplySheetStore();
 const deleteDialog = useDeleteDialogStore();
@@ -29,10 +31,6 @@ const author = computed(() => props.comment.creator || {});
 const authorInitial = computed(() =>
     (author.value.username || "?").slice(0, 1).toUpperCase(),
 );
-
-function timeText(time) {
-    return time ? String(time).slice(0, 16).replace("T", " ") : "";
-}
 
 // 旧布局：时间旁显示用户上次登录位置（有则显示）
 const locationText = computed(() => {
@@ -270,7 +268,7 @@ onBeforeUnmount(() => {
         <!-- 操作区：时间 / 查看回复 / 加载更多 / 投票 / 更多 -->
         <v-list-item-action>
             <v-list-item-subtitle class="text-high-emphasis">
-        {{ timeText(comment.create_time)
+        {{ formatDateTime(comment.create_time)
                     }}{{ locationText }}
       </v-list-item-subtitle>
                 <!-- 查看 / 收起回复 -->

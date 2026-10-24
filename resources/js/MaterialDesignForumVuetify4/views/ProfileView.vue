@@ -7,6 +7,7 @@ import { useUserStore } from '../stores/user'
 import { useFeedback } from '../composables/useFeedback'
 import UserContentPanel from '../components/UserContentPanel.vue'
 import UserProfileCard from '../components/UserProfileCard.vue'
+import { useLocalizedDateTime } from '../composables/useLocalizedDateTime'
 
 import { useDisplay } from 'vuetify'
 const { xs } = useDisplay()
@@ -15,7 +16,8 @@ const authStore = useAuthStore()
 const userStore = useUserStore()
 const route = useRoute()
 const { show: feedback } = useFeedback()
-const { t, locale } = useI18n()
+const { t } = useI18n()
+const formatDateTime = useLocalizedDateTime()
 
 const isLoggedIn = computed(() => authStore.isLoggedIn)
 const currentUser = computed(() => authStore.user)
@@ -54,11 +56,7 @@ watch(
 const isOtherFollowing = computed(() => Boolean(viewedUser.value?.is_following))
 
 function formatBanUntil(value) {
-  return new Intl.DateTimeFormat(locale.value, {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }).format(new Date(value))
+  return formatDateTime(value, { relative: false, includeTime: false })
 }
 
 // 关注状态已由 FollowButton 调用 API 完成，这里回写最新状态与粉丝数

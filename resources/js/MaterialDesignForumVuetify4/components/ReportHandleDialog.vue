@@ -19,11 +19,16 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'submit'])
 
 const { show } = useFeedback()
-const { t } = useI18n()
+const { t, te } = useI18n()
 
 const submitting = ref(false)
 /** 处理状态：0=未处理 1=已处理(删除违规内容) 2=无违规/不予处理 */
 const handleState = ref(0)
+
+function reportReasonText(reason) {
+  if (!reason) return '—'
+  return reason.startsWith('report.reasons.') && te(reason) ? t(reason) : reason
+}
 
 /** 举报对象内容加载状态 */
 const contentLoading = ref(false)
@@ -206,7 +211,7 @@ async function submit() {
           <div class="text-body-1 mb-3">{{ report.username || `#${report.user_id}` }}</div>
 
           <div class="text-subtitle-2 text-medium-emphasis mb-1">{{ $t('reportDialog.reason') }}</div>
-          <div class="text-body-1 mb-3">{{ report.reason || '—' }}</div>
+          <div class="text-body-1 mb-3">{{ reportReasonText(report.reason) }}</div>
 
           <!-- 举报对象内容预览 -->
           <div class="text-subtitle-2 text-medium-emphasis mb-1">{{ $t('reportDialog.reportedContent') }}</div>

@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import http from '../api'
 import { useFeedback } from '../composables/useFeedback'
 import { useInfiniteList } from '../composables/useInfiniteList'
+import { useLocalizedDateTime } from '../composables/useLocalizedDateTime'
 import { useDeleteDialogStore } from '../stores/deleteDialog'
 import InfiniteScroll from './InfiniteScroll.vue'
 import MediaPreviewDialog from './MediaPreviewDialog.vue'
@@ -14,6 +15,7 @@ const props = defineProps({
 })
 
 const { t } = useI18n()
+const formatDateTime = useLocalizedDateTime()
 const { show: feedback } = useFeedback()
 
 // —— 筛选状态 ——
@@ -304,7 +306,7 @@ function formatSize(bytes) {
 }
 
 function mediaDate(item) {
-    return item.create_time ? String(item.create_time).slice(0, 10) : ''
+    return formatDateTime(item.create_time, { includeTime: false })
 }
 </script>
 

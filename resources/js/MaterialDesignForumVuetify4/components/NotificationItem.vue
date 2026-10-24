@@ -1,12 +1,14 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useLocalizedDateTime } from '../composables/useLocalizedDateTime'
 
 const props = defineProps({
     item: { type: Object, required: true },
 })
 
 const { t } = useI18n()
+const formatDateTime = useLocalizedDateTime()
 
 // 发送者信息（后端 index 已附加 sender_user）
 const sender = computed(() => props.item.sender_user || {})
@@ -14,9 +16,7 @@ const senderInitial = computed(() => (sender.value.username || '?').slice(0, 1).
 
 // 相对时间显示：与评论等组件一致
 const timeText = computed(() => {
-    const time = props.item.create_time
-    if (!time) return ''
-    return String(time).slice(0, 16).replace('T', ' ')
+    return formatDateTime(props.item.create_time)
 })
 
 // 通知类型文案

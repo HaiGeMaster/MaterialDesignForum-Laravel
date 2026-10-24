@@ -13,6 +13,7 @@ import { useCommentDialogStore } from '../stores/commentDialog'
 import { useDeleteDialogStore } from '../stores/deleteDialog'
 import { useEditorWindowStore } from '../stores/editorWindow'
 import { useFeedback } from '../composables/useFeedback'
+import { useLocalizedDateTime } from '../composables/useLocalizedDateTime'
 
 import { useDisplay } from 'vuetify'
 const { xs } = useDisplay()
@@ -21,6 +22,7 @@ const route = useRoute()
 const router = useRouter()
 const { show } = useFeedback()
 const { t } = useI18n()
+const formatDateTime = useLocalizedDateTime()
 const authStore = useAuthStore()
 const commentDialog = useCommentDialogStore()
 const deleteDialog = useDeleteDialogStore()
@@ -57,10 +59,6 @@ const isFollowing = computed(() => Boolean(question.value?.is_following))
 const isQuestionOwner = computed(
   () => authStore.user?.user_id && String(authStore.user.user_id) === String(question.value?.user_id),
 )
-
-function dateText(time) {
-  return time ? String(time).slice(0, 10) : ''
-}
 
 async function fetchQuestion() {
   loading.value = true
@@ -184,7 +182,7 @@ onUnmounted(() => {
             </v-list-item-subtitle>
             <template v-slot:append>
               <span class="text-body-2 text-medium-emphasis text-no-wrap">
-                {{ $t('questionDetail.askedAt', { date: dateText(question.create_time) }) }}
+                {{ $t('questionDetail.askedAt', { date: formatDateTime(question.create_time) }) }}
               </span>
             </template>
           </v-list-item>
