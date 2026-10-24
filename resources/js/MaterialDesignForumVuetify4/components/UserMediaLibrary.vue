@@ -358,7 +358,7 @@ function mediaDate(item) {
         <v-expand-transition>
             <div v-if="showFilters && !selectionMode" class="media-filters pa-3">
                 <div class="d-flex flex-wrap ga-3 align-end">
-                    <v-select v-model="filterItemType" :items="itemTypeOptions" item-title="label" item-value="value"
+                    <v-select color="primary"  v-model="filterItemType" :items="itemTypeOptions" item-title="label" item-value="value"
                         :label="$t('mediaFilter.itemType')" density="compact" variant="outlined" hide-details clearable
                         class="media-filter-type">
                         <template v-slot:item="{ item, props: itemProps }">

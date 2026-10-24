@@ -163,7 +163,7 @@ function handleClose() {
       </div>
 
       <!-- 话题选择：提问 / 文章（v-select 多选） -->
-      <v-select color="primary"
+      <v-select color="primary" 
         v-if="store.hasTitle"
         v-model="topicsModel"
         :items="topicOptions"

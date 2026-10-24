@@ -166,7 +166,8 @@ function userInitial(item) {
           </v-list-item-title>
 
           <v-list-item-subtitle class="text-medium-emphasis text-truncate">
-            {{ user.headline || user.bio || $t('usersDialog.noBio') }}
+            {{ user.headline  }}
+            <!-- || user.bio || $t('usersDialog.noBio') -->
           </v-list-item-subtitle>
 
           <template #append>
@@ -194,6 +195,9 @@ function userInitial(item) {
           @load="load"
           @retry="load"
         />
+
+        
+      <!-- <v-loading-indicator color="primary"></v-loading-indicator> -->
     </v-card>
   </v-dialog>
 </template>

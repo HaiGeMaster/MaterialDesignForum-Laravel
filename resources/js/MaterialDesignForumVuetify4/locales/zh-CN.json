@@ -327,6 +327,8 @@
   "userProfile": {
     "noGroup": "未分组",
     "noHeadline": "这个人很懒，什么都没有写",
+    "showDetails": "查看详细资料",
+    "hideDetails": "收起详细资料",
     "registeredAt": "注册于 {time}",
     "following": "关注 {count}",
     "followers": "粉丝 {count}",
@@ -919,6 +921,12 @@
     "follow_question_update": "关注的问题有新动态",
     "follow_article_update": "关注的文章有新动态",
     "report_handled": "举报已处理"
+  },
+  "notificationResult": {
+    "reportHandled": {
+      "actionTaken": "举报已处理：违规内容已处理",
+      "noAction": "举报已处理：未发现违规，不予处理"
+    }
   },
   "notificationTypeName": {
     "user_follow": "自己被关注",

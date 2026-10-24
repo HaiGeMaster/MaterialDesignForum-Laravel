@@ -327,6 +327,8 @@
   "userProfile": {
     "noGroup": "Без группы",
     "noHeadline": "Этот пользователь ничего не написал",
+    "showDetails": "Показать подробности профиля",
+    "hideDetails": "Скрыть подробности профиля",
     "registeredAt": "Зарегистрирован {time}",
     "following": "Подписки {count}",
     "followers": "Подписчики {count}",
@@ -919,6 +921,12 @@
     "follow_question_update": "В отслеживаемом вопросе появилась новая активность",
     "follow_article_update": "В отслеживаемой статье появилась новая активность",
     "report_handled": "Ваша жалоба обработана"
+  },
+  "notificationResult": {
+    "reportHandled": {
+      "actionTaken": "Ваша жалоба рассмотрена: нарушающий контент обработан",
+      "noAction": "Ваша жалоба рассмотрена: нарушений не найдено, меры не приняты"
+    }
   },
   "notificationTypeName": {
     "user_follow": "На меня подписались",

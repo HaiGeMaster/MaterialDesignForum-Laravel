@@ -1,7 +1,9 @@
 import "vuetify/styles";
 import { createVuetify } from "vuetify";
 import * as components from "vuetify/components";
+import * as labsComponents from 'vuetify/labs/components'
 import * as directives from "vuetify/directives";
+// import { VLoadingIndicator } from 'vuetify/labs/VLoadingIndicator'
 import "@mdi/font/css/materialdesignicons.css";
 
 import {
@@ -18,7 +20,11 @@ import {
 
 const vuetify = createVuetify({
   components,
+  labsComponents,
   directives,
+  // components: {
+  //   VLoadingIndicator,
+  // },
   icons: {
     defaultSet: "mdi",
   },
@@ -41,48 +47,48 @@ const vuetify = createVuetify({
   theme: {
     defaultTheme: "system",
     themes: {
-        // testlight: {
-        //   dark: false,
-        //   colors: {
-        //     // 黑白灰商务配色
-        //     primary: '#1C1C1C', // 近黑，主按钮/强调
-        //     secondary: '#424242', // 深灰
-        //     accent: '#9E9E9E', // 中灰
-        //     background: '#F5F5F5', // 页面浅灰底
-        //     surface: '#FFFFFF', // 卡片纯白
-        //     'surface-variant': '#EEEEEE', // 浅灰辅助面
-        //     'on-surface-variant': '#424242',
-        //     'on-primary': '#FFFFFF',
-        //     'on-secondary': '#FFFFFF',
-        //     'on-background': '#1C1C1C',
-        //     'on-surface': '#1C1C1C',
-        //     error: '#B71C1C', // 深红，仅用于错误
-        //     info: '#37474F', // 蓝灰
-        //     success: '#2E7D32', // 墨绿
-        //     warning: '#F57F17', // 暗橙
-        //   },
-        // },
-        // testdark: {
-        //   dark: true,
-        //   colors: {
-        //     // 黑白灰商务配色（深色）
-        //     primary: '#F5F5F5', // 近白，主按钮/强调（深色下反转为浅色以保证对比度）
-        //     secondary: '#BDBDBD', // 浅灰
-        //     accent: '#757575', // 中灰
-        //     background: '#121212', // 页面深灰底
-        //     surface: '#1E1E1E', // 卡片深灰
-        //     'surface-variant': '#2C2C2C', // 浅灰辅助面
-        //     'on-surface-variant': '#9E9E9E',
-        //     'on-primary': '#1C1C1C',
-        //     'on-secondary': '#1C1C1C',
-        //     'on-background': '#F5F5F5',
-        //     'on-surface': '#F5F5F5',
-        //     error: '#EF5350', // 浅红，深底上更易辨认
-        //     info: '#90A4AE', // 浅蓝灰
-        //     success: '#66BB6A', // 浅墨绿
-        //     warning: '#FFB74D', // 浅暗橙
-        //   },
-        // },
+      // testlight: {
+      //   dark: false,
+      //   colors: {
+      //     // 黑白灰商务配色
+      //     primary: '#1C1C1C', // 近黑，主按钮/强调
+      //     secondary: '#424242', // 深灰
+      //     accent: '#9E9E9E', // 中灰
+      //     background: '#F5F5F5', // 页面浅灰底
+      //     surface: '#FFFFFF', // 卡片纯白
+      //     'surface-variant': '#EEEEEE', // 浅灰辅助面
+      //     'on-surface-variant': '#424242',
+      //     'on-primary': '#FFFFFF',
+      //     'on-secondary': '#FFFFFF',
+      //     'on-background': '#1C1C1C',
+      //     'on-surface': '#1C1C1C',
+      //     error: '#B71C1C', // 深红，仅用于错误
+      //     info: '#37474F', // 蓝灰
+      //     success: '#2E7D32', // 墨绿
+      //     warning: '#F57F17', // 暗橙
+      //   },
+      // },
+      // testdark: {
+      //   dark: true,
+      //   colors: {
+      //     // 黑白灰商务配色（深色）
+      //     primary: '#F5F5F5', // 近白，主按钮/强调（深色下反转为浅色以保证对比度）
+      //     secondary: '#BDBDBD', // 浅灰
+      //     accent: '#757575', // 中灰
+      //     background: '#121212', // 页面深灰底
+      //     surface: '#1E1E1E', // 卡片深灰
+      //     'surface-variant': '#2C2C2C', // 浅灰辅助面
+      //     'on-surface-variant': '#9E9E9E',
+      //     'on-primary': '#1C1C1C',
+      //     'on-secondary': '#1C1C1C',
+      //     'on-background': '#F5F5F5',
+      //     'on-surface': '#F5F5F5',
+      //     error: '#EF5350', // 浅红，深底上更易辨认
+      //     info: '#90A4AE', // 浅蓝灰
+      //     success: '#66BB6A', // 浅墨绿
+      //     warning: '#FFB74D', // 浅暗橙
+      //   },
+      // },
       light: {
         dark: false,
         colors: {
@@ -167,6 +173,54 @@ const vuetify = createVuetify({
           "elevation-overlay-opacity-step": "2%"
         }
       },
+      // matchalight: {
+      //   colors: {
+      //     background: '#eeefe6',
+      //     surface: '#f9faf1',
+      //     'surface-dim': '#dadbd2',
+      //     'surface-bright': '#f9faf1',
+      //     'on-surface': '#1a1c17',
+      //     outline: '#73796c',
+      //     'outline-variant': '#c3c9ba',
+      //     primary: '#40682c',
+      //     'on-primary': '#ffffff',
+      //     secondary: '#646104',
+      //     'on-secondary': '#ffffff',
+      //     tertiary: '#026c50',
+      //     'on-tertiary': '#ffffff',
+      //     error: '#ba1a1a',
+      //     'on-error': '#ffffff',
+      //     'surface-light': '#e8e9e0',
+      //   },
+      //   dark: false,
+      //   variables: {
+      //     'overlay-background': '#181d14',
+      //   },
+      // },
+      // matchadark: {
+      //   colors: {
+      //     background: '#1e201b',
+      //     surface: '#12140f',
+      //     'surface-dim': '#12140f',
+      //     'surface-bright': '#383a34',
+      //     'on-surface': '#e2e3db',
+      //     outline: '#8d9385',
+      //     'outline-variant': '#43493d',
+      //     primary: '#a5d48a',
+      //     'on-primary': '#113801',
+      //     secondary: '#cfca69',
+      //     'on-secondary': '#343200',
+      //     tertiary: '#82d7b4',
+      //     'on-tertiary': '#003828',
+      //     error: '#ffb4ab',
+      //     'on-error': '#690005',
+      //     'surface-light': '#383a34',
+      //   },
+      //   dark: true,
+      //   variables: {
+      //     'overlay-background': '#181d14',
+      //   },
+      // },
       asphalt9: {
         dark: true,
         colors: {
@@ -460,6 +514,8 @@ export default vuetify;
 export const BUILTIN_THEMES = [
   { name: 'light', dark: false, icon: 'mdi-white-balance-sunny', label: 'Light' },
   { name: 'dark', dark: true, icon: 'mdi-weather-night', label: 'Dark' },
+  // { name: 'matchalight', dark: false, icon: 'mdi-leaf', label: 'Matcha Light' },
+  // { name: 'matchadark', dark: true, icon: 'mdi-leaf', label: 'Matcha Dark' },
   { name: 'asphalt9', dark: true, icon: 'mdi-flag-checkered', label: 'Asphalt 9' },
   { name: 'blackguard', dark: true, icon: 'mdi-shield-sword', label: 'Blackguard' },
   { name: 'polaris', dark: true, icon: 'mdi-star-four-points', label: 'Polaris' },

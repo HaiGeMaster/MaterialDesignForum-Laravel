@@ -1266,7 +1266,7 @@ onBeforeUnmount(() => {
         </v-toolbar>
 
         <v-card-text>
-          <v-select
+          <v-select color="primary" 
             v-model="selectedUserGroupId"
             :items="userGroupOptions"
             item-title="user_group_name"

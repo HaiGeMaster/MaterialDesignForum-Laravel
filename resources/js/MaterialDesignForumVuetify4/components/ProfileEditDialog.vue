@@ -173,7 +173,7 @@ async function save() {
 
             <!-- 管理员模式：变更用户所属用户组 -->
             <v-col v-if="isAdmin" cols="12">
-              <v-select
+              <v-select color="primary" 
                 v-model="form.user_group_id"
                 :label="$t('profileEdit.userGroup')"
                 :items="userGroups"

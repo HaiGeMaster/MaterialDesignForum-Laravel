@@ -327,6 +327,8 @@
   "userProfile": {
     "noGroup": "Aucun groupe",
     "noHeadline": "Cette personne est paresseuse et n'a rien écrit",
+    "showDetails": "Afficher les détails du profil",
+    "hideDetails": "Masquer les détails du profil",
     "registeredAt": "Inscrit {time}",
     "following": "Abonnements {count}",
     "followers": "Abonnés {count}",
@@ -919,6 +921,12 @@
     "follow_question_update": "Une question que vous suivez a une nouvelle activité",
     "follow_article_update": "Un article que vous suivez a une nouvelle activité",
     "report_handled": "Votre signalement a été traité"
+  },
+  "notificationResult": {
+    "reportHandled": {
+      "actionTaken": "Votre signalement a été traité : le contenu en infraction a été traité",
+      "noAction": "Votre signalement a été traité : aucune infraction constatée, aucune mesure prise"
+    }
   },
   "notificationTypeName": {
     "user_follow": "Quelqu'un me suit",

@@ -212,7 +212,7 @@ async function submit() {
           <div class="text-subtitle-2 text-medium-emphasis mb-1">{{ $t('reportDialog.reportedContent') }}</div>
           <v-card rounded="lg" v-if="contentLoading" variant="outlined" class="mb-3" flat>
             <v-card-text class="d-flex align-center justify-center py-6">
-              <v-progress-circular indeterminate size="small" />
+              <v-progress-circular indeterminate size="small" color="primary"/>
             </v-card-text>
           </v-card>
           <v-card rounded="lg" v-else-if="contentPreview" variant="outlined" class="mb-3" flat>

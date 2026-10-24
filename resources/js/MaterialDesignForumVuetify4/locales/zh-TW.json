@@ -327,6 +327,8 @@
   "userProfile": {
     "noGroup": "未分組",
     "noHeadline": "這個人很懶，什麼都沒有寫",
+    "showDetails": "查看詳細資料",
+    "hideDetails": "收起詳細資料",
     "registeredAt": "註冊於 {time}",
     "following": "關注 {count}",
     "followers": "粉絲 {count}",
@@ -919,6 +921,12 @@
     "follow_question_update": "關注的問題有新動態",
     "follow_article_update": "關注的文章有新動態",
     "report_handled": "檢舉已處理"
+  },
+  "notificationResult": {
+    "reportHandled": {
+      "actionTaken": "檢舉已處理：違規內容已處置",
+      "noAction": "檢舉已處理：未發現違規，未進行處置"
+    }
   },
   "notificationTypeName": {
     "user_follow": "自己被關注",

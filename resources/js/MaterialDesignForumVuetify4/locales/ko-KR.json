@@ -327,6 +327,8 @@
   "userProfile": {
     "noGroup": "그룹 없음",
     "noHeadline": "이 사용자는 아무것도 작성하지 않았습니다",
+    "showDetails": "프로필 상세 정보 보기",
+    "hideDetails": "프로필 상세 정보 접기",
     "registeredAt": "{time} 가입",
     "following": "팔로잉 {count}",
     "followers": "팔로워 {count}",
@@ -919,6 +921,12 @@
     "follow_question_update": "팔로우한 질문에 새 활동이 있습니다",
     "follow_article_update": "팔로우한 글에 새 활동이 있습니다",
     "report_handled": "신고가 처리되었습니다"
+  },
+  "notificationResult": {
+    "reportHandled": {
+      "actionTaken": "신고가 처리되었습니다: 위반 콘텐츠가 처리되었습니다",
+      "noAction": "신고가 처리되었습니다: 위반 사항이 없어 별도의 조치를 하지 않았습니다"
+    }
   },
   "notificationTypeName": {
     "user_follow": "내가 팔로우받음",

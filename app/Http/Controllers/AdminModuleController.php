@@ -450,14 +450,14 @@ class AdminModuleController extends Controller
             return;
         }
 
-        $resultText = $newState === 1
-            ? __('messages.http_adminmodule_3')
-            : __('messages.http_adminmodule_1');
+        $resultCode = $newState === 1
+            ? 'report_handled_action_taken'
+            : 'report_handled_no_action';
 
         // 根据举报对象类型补齐通知上下文（用于前端跳转）
         $context = [
-            'content_markdown' => $resultText,
-            'content_rendered' => $resultText,
+            'content_markdown' => $resultCode,
+            'content_rendered' => $resultCode,
         ];
 
         $reportableType = strtolower(str_replace('App\\Models\\', '', $report->reportable_type ?? ''));

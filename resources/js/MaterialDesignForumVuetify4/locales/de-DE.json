@@ -327,6 +327,8 @@
   "userProfile": {
     "noGroup": "Keine Gruppe",
     "noHeadline": "Diese Person ist faul und hat nichts geschrieben",
+    "showDetails": "Profildetails anzeigen",
+    "hideDetails": "Profildetails ausblenden",
     "registeredAt": "Registriert {time}",
     "following": "Folgt {count}",
     "followers": "Follower {count}",
@@ -919,6 +921,12 @@
     "follow_question_update": "Eine Frage, der du folgst, hat neue Aktivitäten",
     "follow_article_update": "Ein Artikel, dem du folgst, hat neue Aktivitäten",
     "report_handled": "Deine Meldung wurde bearbeitet"
+  },
+  "notificationResult": {
+    "reportHandled": {
+      "actionTaken": "Ihre Meldung wurde bearbeitet: der beanstandete Inhalt wurde behandelt",
+      "noAction": "Ihre Meldung wurde bearbeitet: kein Verstoß festgestellt, es wurden keine Maßnahmen ergriffen"
+    }
   },
   "notificationTypeName": {
     "user_follow": "Jemand folgt mir",

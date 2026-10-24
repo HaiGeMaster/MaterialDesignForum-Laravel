@@ -109,7 +109,7 @@ function scrollByCard(dir) {
       <v-icon icon="mdi-chevron-right" />
     </v-btn>
 
-    <v-progress-circular
+    <v-progress-circular color="primary"
       v-if="loading && !topics.length"
       indeterminate
       class="mx-auto d-block mt-4"

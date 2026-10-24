@@ -73,8 +73,8 @@ onMounted(load)
       <v-text-field v-model="form.site_keywords" color="primary" :label="$t('admin.siteKeywords')" :hint="$t('admin.siteKeywordsHint')" persistent-hint />
       <v-text-field v-model="form.site_icp_beian" color="primary" :label="$t('admin.siteIcp')" />
       <v-text-field v-model="form.site_gongan_beian" color="primary" :label="$t('admin.sitePolice')" />
-      <v-select v-model="form.default_language" :items="infoLanguages" item-title="label" item-value="code" :label="$t('admin.defaultLanguage')" />
-      <v-select v-model="form.media_disk" :items="mediaDiskOptions" :label="$t('admin.mediaDisk')" />
+      <v-select color="primary"  v-model="form.default_language" :items="infoLanguages" item-title="label" item-value="code" :label="$t('admin.defaultLanguage')" />
+      <v-select color="primary"  v-model="form.media_disk" :items="mediaDiskOptions" :label="$t('admin.mediaDisk')" />
       <div class="text-caption text-medium-emphasis mt-n4 mb-4">
         {{ $t('admin.mediaDiskHint') }}
       </div>

@@ -80,7 +80,7 @@ onMounted(load)
   <AdminOptionPageLayout :title="$t('admin.themeSettings')" :saving="saving" @save="save">
     <v-card-text class="form-section">
       <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-4" />
-      <v-select v-model="form.default_theme" :items="defaultThemeItems" :label="$t('admin.defaultTheme')" />
+      <v-select color="primary"  v-model="form.default_theme" :items="defaultThemeItems" :label="$t('admin.defaultTheme')" />
       <v-divider class="my-5" />
       <div class="text-subtitle-1 font-weight-bold mb-3">{{ $t('admin.builtinThemes') }}</div>
       <v-list rounded="lg" density="compact">

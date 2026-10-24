@@ -46,10 +46,10 @@ const pendingType = ref("cover");
 const uploadingType = ref("");
 
 const fmtCount = (n) =>
-  new Intl.NumberFormat(undefined, {
-    notation: "compact",
-    maximumFractionDigits: 1,
-  }).format(Number(n ?? 0));
+    new Intl.NumberFormat(undefined, {
+        notation: "compact",
+        maximumFractionDigits: 1,
+    }).format(Number(n ?? 0));
 
 function pick(type) {
     pendingType.value = type;
@@ -90,216 +90,115 @@ async function onFileChange(event) {
 </script>
 
 <template>
-    <v-card rounded="lg" >
-        <!-- 封面：头像+名字行整体以封面底边为锚 -->
+    <v-card rounded="lg" class="mx-auto">
         <div class="cover-wrap">
-            <v-img v-if="user?.cover" :src="user.cover" alt="" height="440" cover />
-            <div v-else class="bg-primary" style="height: 440px"></div>
+            <v-parallax v-if="user?.cover" :src="user.cover" height="280" />
+            <div v-else class="bg-primary" style="height: 280px"></div>
 
-            <!--
-                头像+名字行：bottom: -48px（行高 96px），行中心点精确落在封面底边；
-                xs 居中 / 非 xs 靠左，名字垂直居中对齐头像中心
-            -->
-            <div
-                class="profile-row"
-                :class="xs ? 'profile-row--xs' : 'profile-row--left'"
-            >
-                <v-avatar border
-                    size="96"
-                    class=" avatar-wrap elevation-2"
-                >
-                    <v-img v-if="user?.avatar" :src="user.avatar" :alt="user?.username" cover />
-                    <span v-else class="text-h4">{{ initial }}</span>
-                    <!-- 头像上传按钮：悬浮头像时显示，居中对齐头像 -->
-                    <v-btn
-                        v-if="mode === 'self'"
-                        class="avatar-upload-btn"
-                        icon="mdi-camera"
-                        size="x-small"
-                        variant="flat"
-                        color="primary"
-                        :title="$t('userProfile.uploadAvatar')"
-                        :aria-label="$t('userProfile.uploadAvatar')"
-                        :loading="uploadingType === 'avatar'"
-                        @click.stop="pick('avatar')"
-                    />
-                </v-avatar>
-
-                <!-- 非 xs：名字与一句话在头像右侧 -->
-                <div v-if="!xs" class="text-start">
-                    <div class="profile-name">{{ user?.username }}</div>
-                    <div class="text-body-2 text-medium-emphasis">
-                        {{ user?.headline || $t("userProfile.noHeadline") }}
-                    </div>
-                </div>
-            </div>
-
-            <!-- 封面上传按钮：悬浮封面时显示，位于右上角 -->
-            <v-btn
-                v-if="mode === 'self'"
-                class="cover-upload-btn"
-                icon="mdi-camera"
-                size="small"
-                variant="flat"
-                color="primary"
-                :title="$t('userProfile.uploadCover')"
-                :aria-label="$t('userProfile.uploadCover')"
-                :loading="uploadingType === 'cover'"
-                @click.stop="pick('cover')"
-            />
-            <v-chip
-                :color="groupColor || 'primary'"
-                variant="tonal"
-                class="group-chip"
-            >
-                <v-icon
-                    v-if="groupIcon"
-                    :icon="groupIcon"
-                    class="mr-1"
-                />
+            <v-btn v-if="mode === 'self'" class="cover-upload-btn" icon size="small" color="warning"
+                :aria-label="$t('userProfile.uploadCover')" :loading="uploadingType === 'cover'"
+                @click.stop="pick('cover')">
+                <v-icon icon="mdi-camera" />
+                <v-tooltip activator="parent">{{ $t('userProfile.uploadCover') }}</v-tooltip>
+            </v-btn>
+            <v-chip :color="groupColor || 'primary'" variant="tonal" class="group-chip">
+                <v-icon v-if="groupIcon" :icon="groupIcon" class="mr-1" />
                 {{ groupName }}
             </v-chip>
         </div>
 
-        <v-card-text :class="xs ? 'text-center pt-16' : 'pt-16'">
-            <!-- xs：名字与一句话居中显示在头像下方 -->
-            <div v-if="xs">
-                <div class="profile-name">{{ user?.username }}</div>
-                <div class="text-body-2 text-medium-emphasis mb-2">
-                    {{ user?.headline || $t("userProfile.noHeadline") }}
-                </div>
-            </div>
+        <v-list>
+            <v-list-item>
+                <template #prepend>
+                    <v-avatar size="72" class="avatar-wrap">
+                        <v-img v-if="user?.avatar" :src="user.avatar" :alt="user?.username" cover />
+                        <span v-else class="text-h5">{{ initial }}</span>
+                        <v-btn v-if="mode === 'self'" class="avatar-upload-btn" icon size="x-small" color="warning"
+                            :aria-label="$t('userProfile.uploadAvatar')" :loading="uploadingType === 'avatar'"
+                            @click.stop="pick('avatar')">
+                            <v-icon icon="mdi-camera" />
+                            <v-tooltip activator="parent">{{ $t('userProfile.uploadAvatar') }}</v-tooltip>
+                        </v-btn>
+                    </v-avatar>
+                </template>
 
-            <v-list
-                v-if="user"
-                lines="one"
-                density="compact"
-                class="mt-2"
-                :style="xs ? { margin: 'auto', width: 'auto' } : {}"
-            >
-                <v-list-item
-                    v-if="user.blog"
-                    prepend-icon="mdi-link"
-                    :title="user.blog"
-                />
-                <v-list-item
-                    v-if="user.company"
-                    prepend-icon="mdi-city"
-                    :title="user.company"
-                />
-                <v-list-item
-                    v-if="user.location"
-                    prepend-icon="mdi-map-marker"
-                    :title="user.location"
-                />
-                <v-list-item
-                    v-if="user.bio"
-                    prepend-icon="mdi-file-document"
-                    :title="user.bio"
-                />
+                <v-list-item-title style="font-size: 1.8rem; font-weight: 900;">
+                    <!-- <strong > -->
+                        <!-- <h1> -->
+                        {{ user?.username }}
+                        <!-- </h1> -->
+                    <!-- </strong> -->
+                </v-list-item-title>
+                <v-list-item-subtitle>
+                    {{ user?.headline }}
+                </v-list-item-subtitle>
+
+                <template #append>
+                    
+            <v-btn v-if="mode === 'self'" variant="tonal" size="small" icon
+                @click="profileEdit.open(user, { onSaved: (u) => emit('saved', u) })">
+                <v-icon icon="mdi-pencil" />
+                <v-tooltip activator="parent">{{ $t('profileEdit.title') }}</v-tooltip>
+            </v-btn>
+            <FollowButton v-else type="user" :target-id="user.user_id" :following="following"
+                @toggle-follow="emit('toggle-follow', $event)" />
+
+                </template>
+            </v-list-item>
+        </v-list>
+
+        <v-divider v-if="user.blog||user.company||user.location||user.bio"/>
+
+        <v-card-text v-if="user.blog||user.company||user.location||user.bio" :class="xs ? 'text-center' : ''">
+            <v-list v-if="user" lines="one" class="pa-2" density="compact" :style="xs ? { margin: 'auto', width: 'auto' } : {}">
+                <v-list-item v-if="user.blog" prepend-icon="mdi-link" :title="user.blog" />
+                <v-list-item v-if="user.company" prepend-icon="mdi-city" :title="user.company" />
+                <v-list-item v-if="user.location" prepend-icon="mdi-map-marker" :title="user.location" />
+                <v-list-item v-if="user.bio" prepend-icon="mdi-file-document" :title="user.bio" />
             </v-list>
-
-            <v-divider class="my-3" />
-
-            <!-- 操作区：自己显示编辑资料按钮，他人显示关注 + 统计 + 更多操作 -->
-            <div class="d-flex align-center mt-4 px-1">
-                <div class="d-flex align-center ga-3">
-                    <v-btn
-                        v-if="mode === 'self'"
-                        variant="tonal"
-                        size="small"
-                        @click="profileEdit.open(user, { onSaved: (u) => emit('saved', u) })"
-                        icon="mdi-pencil"
-                    >
-                    </v-btn>
-                    <FollowButton
-                        v-else
-                        type="user"
-                        :target-id="user.user_id"
-                        :following="following"
-                        @toggle-follow="emit('toggle-follow', $event)"
-                    />
-                    <v-btn
-                        variant="text"
-                        prepend-icon="mdi-account-arrow-right-outline"
-                        @click="
-                            usersDialog.open({
-                                modes: 'followees',
-                                type: 'user',
-                                id: user.user_id,
-                            })
-                        "
-                    >
-                        {{ $t("userProfile.following", { count: user?.followee_count ?? 0 }) }}
-                    </v-btn>
-                    <v-btn
-                        variant="text"
-                        prepend-icon="mdi-account-heart-outline"
-                        @click="
-                            usersDialog.open({
-                                modes: 'followers',
-                                type: 'user',
-                                id: user.user_id,
-                            })
-                        "
-                    >
-                        {{ $t("userProfile.followers", { count: user?.follower_count ?? 0 }) }}
-                    </v-btn>
-                </div>
-
-                <v-spacer />
-
-                <MoreActions type="user" :item="user" />
-            </div>
         </v-card-text>
 
+        <v-divider />
+
+        <v-card-actions class="d-flex align-center flex-wrap ga-2 pa-4">
+            <!-- <v-btn v-if="mode === 'self'" variant="tonal" size="small" icon
+                @click="profileEdit.open(user, { onSaved: (u) => emit('saved', u) })">
+                <v-icon icon="mdi-pencil" />
+                <v-tooltip activator="parent">{{ $t('profileEdit.title') }}</v-tooltip>
+            </v-btn>
+            <FollowButton v-else type="user" :target-id="user.user_id" :following="following"
+                @toggle-follow="emit('toggle-follow', $event)" /> -->
+            <v-btn variant="text" prepend-icon="mdi-account-arrow-right-outline" @click="
+                usersDialog.open({
+                    modes: 'followees',
+                    type: 'user',
+                    id: user.user_id,
+                })
+                ">
+                {{ $t("userProfile.following", { count: user?.followee_count ?? 0 }) }}
+            </v-btn>
+            <v-btn variant="text" prepend-icon="mdi-account-heart-outline" @click="
+                usersDialog.open({
+                    modes: 'followers',
+                    type: 'user',
+                    id: user.user_id,
+                })
+                ">
+                {{ $t("userProfile.followers", { count: user?.follower_count ?? 0 }) }}
+            </v-btn>
+            <v-spacer />
+            <MoreActions type="user" :item="user" />
+        </v-card-actions>
+
         <!-- 封面/头像上传用的隐藏文件选择 -->
-        <input
-            ref="fileInput"
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
-            class="d-none"
-            @change="onFileChange"
-        />
+        <input ref="fileInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="d-none"
+            @change="onFileChange" />
     </v-card>
 </template>
 
 <style scoped>
 .cover-wrap {
     position: relative;
-}
-
-/* 头像+名字行：absolute 锚定封面底边。
-   bottom: -48px 且行高由 96px 头像决定，
-   行中心（头像中心）精确落在封面底边线上。 */
-.profile-row {
-    position: absolute;
-    bottom: -48px;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-/* xs：水平居中 */
-.profile-row--xs {
-    left: 50%;
-    transform: translateX(-50%);
-}
-
-/* 其他：靠左 */
-.profile-row--left {
-    left: 24px;
-}
-
-/* 用户名：显式加大加粗（不依赖 Vuetify typography 类） */
-.profile-name {
-    font-size: 28px !important;
-    font-weight: 700 !important;
-    line-height: 1.4;
-    /* -webkit-text-stroke: 1px #fff;
-    paint-order: stroke fill; */
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
 }
 
 .group-chip {
@@ -321,6 +220,10 @@ async function onFileChange(event) {
 
 .cover-wrap:hover .cover-upload-btn {
     opacity: 1;
+}
+
+.avatar-wrap {
+    position: relative;
 }
 
 /* 头像上传按钮：悬浮头像时显示，居中对齐头像 */

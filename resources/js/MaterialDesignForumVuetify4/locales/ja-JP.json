@@ -327,6 +327,8 @@
   "userProfile": {
     "noGroup": "未分類",
     "noHeadline": "この人は何も書いていません",
+    "showDetails": "プロフィールの詳細を表示",
+    "hideDetails": "プロフィールの詳細を折りたたむ",
     "registeredAt": "{time}に登録",
     "following": "フォロー {count}",
     "followers": "フォロワー {count}",
@@ -919,6 +921,12 @@
     "follow_question_update": "フォロー中の質問に新しい動きがあります",
     "follow_article_update": "フォロー中の記事に新しい動きがあります",
     "report_handled": "報告が処理されました"
+  },
+  "notificationResult": {
+    "reportHandled": {
+      "actionTaken": "通報が処理されました：違反コンテンツに対応しました",
+      "noAction": "通報が処理されました：違反は見つからず、対応は行われませんでした"
+    }
   },
   "notificationTypeName": {
     "user_follow": "自分がフォローされた",

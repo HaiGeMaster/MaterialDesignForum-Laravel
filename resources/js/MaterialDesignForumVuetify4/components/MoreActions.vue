@@ -62,7 +62,7 @@ const canResetProfileAsset = computed(() =>
   props.type === 'user'
   && props.item?.user_id != null
   && currentUserId.value != null
-  && (isAdminUser.value || (isSelf.value && isOwnUserProfileRoute.value)),
+  && ((isAdminUser.value&&!isOwnUserProfileRoute.value) || (isSelf.value && isOwnUserProfileRoute.value)),
 )
 
 // 按类型取数据对象的 ID
@@ -167,12 +167,12 @@ function hasBlockingSubContent(type, item, isDelete = false) {
 
 // ================== 类型 → 权限字段映射 ==================
 const TYPE_PERM_MAP = {
-  topic:    { editAbility: 'ability_edit_own_topic',    deleteAbility: 'ability_delete_own_topic',    editTime: 'time_before_edit_topic',    deleteTime: 'time_before_delete_topic' },
+  topic: { editAbility: 'ability_edit_own_topic', deleteAbility: 'ability_delete_own_topic', editTime: 'time_before_edit_topic', deleteTime: 'time_before_delete_topic' },
   question: { editAbility: 'ability_edit_own_question', deleteAbility: 'ability_delete_own_question', editTime: 'time_before_edit_question', deleteTime: 'time_before_delete_question' },
-  article:  { editAbility: 'ability_edit_own_article',  deleteAbility: 'ability_delete_own_article',  editTime: 'time_before_edit_article',  deleteTime: 'time_before_delete_article' },
-  answer:   { editAbility: 'ability_edit_own_answer',   deleteAbility: 'ability_delete_own_answer',   editTime: 'time_before_edit_answer',   deleteTime: 'time_before_delete_answer' },
-  comment:  { editAbility: 'ability_edit_own_comment',  deleteAbility: 'ability_delete_own_comment',  editTime: 'time_before_edit_comment',  deleteTime: 'time_before_delete_comment' },
-  reply:    { editAbility: 'ability_edit_own_reply',    deleteAbility: 'ability_delete_own_reply',    editTime: 'time_before_edit_reply',    deleteTime: 'time_before_delete_reply' },
+  article: { editAbility: 'ability_edit_own_article', deleteAbility: 'ability_delete_own_article', editTime: 'time_before_edit_article', deleteTime: 'time_before_delete_article' },
+  answer: { editAbility: 'ability_edit_own_answer', deleteAbility: 'ability_delete_own_answer', editTime: 'time_before_edit_answer', deleteTime: 'time_before_delete_answer' },
+  comment: { editAbility: 'ability_edit_own_comment', deleteAbility: 'ability_delete_own_comment', editTime: 'time_before_edit_comment', deleteTime: 'time_before_delete_comment' },
+  reply: { editAbility: 'ability_edit_own_reply', deleteAbility: 'ability_delete_own_reply', editTime: 'time_before_edit_reply', deleteTime: 'time_before_delete_reply' },
 }
 
 // ================== 编辑权限 ==================
@@ -204,7 +204,7 @@ const canDelete = computed(() => {
 // ================== 举报权限 ==================
 const canReport = computed(() => {
   if (!props.item || !props.type) return false
-//   if (isAdminUser.value) return false // 管理员不举报，直接后台处理
+  //   if (isAdminUser.value) return false // 管理员不举报，直接后台处理
   if (isSelf.value) return false // 不能举报自己
   return true
 })
@@ -368,7 +368,7 @@ async function copyLink() {
 
 function share() {
   if (navigator.share) {
-    navigator.share({ url: detailUrl.value }).catch(() => {})
+    navigator.share({ url: detailUrl.value }).catch(() => { })
   } else {
     copyLink()
   }
@@ -378,27 +378,19 @@ function share() {
 <template>
   <v-menu :location="location">
     <template #activator="{ props: menuProps }">
-      <v-btn
-        :size="size"
-        variant="text"
-        icon="mdi-dots-vertical"
-        v-bind="menuProps"
-        :disabled="!hasMenu"
-        @click.stop="menuProps.onClick?.($event)"
-      />
+      <v-btn :size="size" variant="text" icon="mdi-dots-vertical" v-bind="menuProps" :disabled="!hasMenu"
+        @click.stop="menuProps.onClick?.($event)"/>
+
+        <!-- <v-icon icon="mdi-dots-vertical" />
+                        <v-tooltip activator="parent">{{ $t('profileEdit.title') }}</v-tooltip> -->
+      <!-- </v-btn> -->
     </template>
 
-    <v-list rounded="lg" density="compact" >
+    <v-list rounded="lg" density="compact">
       <template v-for="(item, index) in menuItems" :key="index">
         <v-divider v-if="item.divider" />
-        <v-list-item
-          v-else
-          :prepend-icon="item.icon"
-          :title="item.title"
-          :color="item.color"
-          :disabled="item.disabled"
-          @click="handleSelect(item)"
-        />
+        <v-list-item v-else :prepend-icon="item.icon" :title="item.title" :color="item.color" :disabled="item.disabled"
+          @click="handleSelect(item)" />
       </template>
     </v-list>
   </v-menu>

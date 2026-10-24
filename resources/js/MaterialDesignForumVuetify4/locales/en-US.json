@@ -327,6 +327,8 @@
   "userProfile": {
     "noGroup": "No group",
     "noHeadline": "This user is lazy and has written nothing",
+    "showDetails": "Show profile details",
+    "hideDetails": "Hide profile details",
     "registeredAt": "Registered {time}",
     "following": "Following {count}",
     "followers": "Followers {count}",
@@ -919,6 +921,12 @@
     "follow_question_update": "A question you follow has new activity",
     "follow_article_update": "An article you follow has new activity",
     "report_handled": "Your report has been handled"
+  },
+  "notificationResult": {
+    "reportHandled": {
+      "actionTaken": "Your report has been handled: the violating content has been dealt with",
+      "noAction": "Your report has been handled: no violation found, no action taken"
+    }
   },
   "notificationTypeName": {
     "user_follow": "Someone followed me",

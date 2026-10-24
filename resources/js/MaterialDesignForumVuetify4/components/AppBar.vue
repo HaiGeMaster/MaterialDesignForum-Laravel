@@ -77,7 +77,8 @@ async function handleLogout() {
         <v-spacer />
 
         <v-btn icon variant="text" :aria-label="$t('common.search')" @click="toggleSearch">
-            <v-icon icon="mdi-magnify" />
+                        <v-icon icon="mdi-magnify" />
+                        <v-tooltip activator="parent">{{ t('common.search') }}</v-tooltip>
         </v-btn>
 
         <LanguageSwitcher />
@@ -86,7 +87,7 @@ async function handleLogout() {
 
         <NotificationBell />
 
-        <UserMenu v-if="authStore.isLoggedIn" :avatar-size="28" link-mode="router" show-media-library show-admin
+        <UserMenu v-if="authStore.isLoggedIn" :avatar-size="30" link-mode="router" show-media-library show-admin
             @logout="handleLogout" />
 
         <!-- <v-btn v-else variant="tonal" to="/login" prepend-icon="mdi-account">

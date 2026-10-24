@@ -97,7 +97,7 @@ function onChange(value) {
         <v-icon icon="mdi-code-tags" size="small" />
         <span>{{ isReadOnly ? languageLabel : $t('codeBlock.label') }}</span>
       </span>
-      <v-select
+      <v-select color="primary" 
         v-if="!isReadOnly"
         class="code-block__lang"
         :items="displayOptions"

@@ -121,7 +121,7 @@ onMounted(() => {
             <template #activator="{ props }">
               <v-btn icon="mdi-dots-vertical" variant="text" v-bind="props" />
             </template>
-            <v-list rounded="lg" density="compact" nav>
+            <v-list rounded="lg" density="compact">
               <v-list-item
                 :prepend-icon="'mdi-delete-sweep'"
                 :title="$t('notifications.clearAll')"

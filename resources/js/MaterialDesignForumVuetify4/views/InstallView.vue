@@ -278,14 +278,14 @@ const canProceedFromRequirements = computed(() => requirements.value.all_pass)
           <v-text-field color="primary"  v-model="appForm.app_url" :label="t('install.app.appUrl')" prepend-inner-icon="mdi-web"
             :hint="t('install.app.appUrlHint')" persistent-hint class="mb-3" />
 
-          <v-select v-model="appForm.timezone" :items="timezoneOptions" :label="t('install.app.timezone')"
+          <v-select color="primary"  v-model="appForm.timezone" :items="timezoneOptions" :label="t('install.app.timezone')"
             prepend-inner-icon="mdi-clock-outline" class="mb-3" />
 
           <v-divider class="my-4">
             <template #default><span class="text-caption">{{ t('install.app.mailDivider') }}</span></template>
           </v-divider>
 
-          <v-select v-model="appForm.mail_mailer" :items="mailMailerOptions" item-value="value" item-title="title"
+          <v-select color="primary"  v-model="appForm.mail_mailer" :items="mailMailerOptions" item-value="value" item-title="title"
             :label="t('install.app.mailMailer')" prepend-inner-icon="mdi-email" class="mb-3" />
 
           <template v-if="appForm.mail_mailer === 'smtp'">
@@ -313,7 +313,7 @@ const canProceedFromRequirements = computed(() => requirements.value.all_pass)
                 <v-text-field color="primary"  v-model="appForm.mail_from_name" :label="t('install.app.mailFromName')" />
               </v-col>
             </v-row>
-            <v-select v-model="appForm.mail_scheme" :items="mailSchemeOptions" item-value="value" item-title="title"
+            <v-select color="primary"  v-model="appForm.mail_scheme" :items="mailSchemeOptions" item-value="value" item-title="title"
               :label="t('install.app.mailEncryption')" />
           </template>
         </div>

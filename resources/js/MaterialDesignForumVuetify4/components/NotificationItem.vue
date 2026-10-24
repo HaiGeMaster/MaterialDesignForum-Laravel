@@ -21,6 +21,15 @@ const timeText = computed(() => {
 
 // 通知类型文案
 const typeText = computed(() => t(`notificationType.${props.item.type}`) || props.item.type)
+const contentText = computed(() => {
+    const resultKeys = {
+        report_handled_action_taken: 'notificationResult.reportHandled.actionTaken',
+        report_handled_no_action: 'notificationResult.reportHandled.noAction',
+    }
+    const resultKey = resultKeys[props.item.content_rendered]
+
+    return resultKey ? t(resultKey) : props.item.content_rendered
+})
 
 // 点击跳转链接（参照旧项目 SpawnLink 逻辑）
 function notificationLink(item) {
@@ -66,6 +75,11 @@ function notificationLink(item) {
             return item.question_id ? { path: `/questions/${item.question_id}` } : null
         case 'follow_article_update':
             return item.article_id ? { path: `/articles/${item.article_id}` } : null
+        case 'report_handled':
+            if (item.question_id) return { path: `/questions/${item.question_id}` }
+            if (item.article_id) return { path: `/articles/${item.article_id}` }
+            if (item.topic_id) return { path: `/topics/${item.topic_id}` }
+            return item.user_id ? { path: `/users/${item.user_id}` } : null
         default:
             return null
     }
@@ -108,6 +122,8 @@ function notificationIcon(item) {
         case 'follow_question_update':
         case 'follow_article_update':
             return 'mdi-star'
+        case 'report_handled':
+            return 'mdi-flag'
         default:
             return 'mdi-bell-outline'
     }
@@ -169,8 +185,8 @@ function notificationIcon(item) {
 
         <v-list-item-subtitle class="text-body-2">
             <div class="text-medium-emphasis">{{ typeText }}</div>
-            <div v-if="item.content_rendered" class="text-truncate text-medium-emphasis" style="max-width: 320px;">
-                {{ item.content_rendered }}
+            <div v-if="contentText" class="text-truncate text-medium-emphasis" style="max-width: 320px;">
+                {{ contentText }}
             </div>
         </v-list-item-subtitle>
 

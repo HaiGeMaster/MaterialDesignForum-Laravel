@@ -367,10 +367,15 @@ function closeWindow() {
   min-height: 0;
   overflow: auto;
   padding-bottom: 8px;
+
+  height: 100%;
+  max-height: fit-content;
 }
 
 .search-window__section {
   display: block;
+
+  /* height: 100%; */
 }
 
 @media (max-width: 600px) {

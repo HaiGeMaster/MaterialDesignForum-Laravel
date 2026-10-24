@@ -65,7 +65,8 @@ onBeforeUnmount(() => observer?.disconnect())
 <template>
   <div ref="root" class="infinite-scroll">
     <div v-if="loading" class="infinite-scroll__status">
-      <v-progress-circular indeterminate size="20" />
+      <v-progress-circular indeterminate size="20" color="primary"/>
+      <!-- <v-loading-indicator color="primary"></v-loading-indicator> -->
       <span>{{ $t('infiniteScroll.loading') }}</span>
     </div>
 

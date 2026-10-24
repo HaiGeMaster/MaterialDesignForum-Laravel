@@ -56,7 +56,7 @@ onMounted(load)
       <v-text-field v-model="form.MAIL_MAILER" color="primary" :label="$t('admin.mailer')" />
       <v-text-field v-model="form.MAIL_HOST" color="primary" :label="$t('admin.smtpHost')" />
       <v-text-field v-model="form.MAIL_PORT" color="primary" :label="$t('admin.smtpPort')" />
-      <v-select v-model="form.MAIL_SCHEME" :items="[{ title: 'NULL', value: '' }, { title: 'SSL', value: 'smtps' }, { title: 'TLS', value: 'smtp' }]" :label="$t('admin.smtpEncryption')" />
+      <v-select color="primary"  v-model="form.MAIL_SCHEME" :items="[{ title: 'NULL', value: '' }, { title: 'SSL', value: 'smtps' }, { title: 'TLS', value: 'smtp' }]" :label="$t('admin.smtpEncryption')" />
       <v-text-field v-model="form.MAIL_USERNAME" color="primary" :label="$t('admin.smtpUsername')" />
       <v-text-field v-model="form.MAIL_PASSWORD" color="primary" type="password" :label="$t('admin.smtpPassword')" :hint="form.password_set ? $t('admin.passwordKeepHint') : ''" persistent-hint />
       <v-text-field v-model="form.MAIL_FROM_ADDRESS" color="primary" :label="$t('admin.mailFromAddress')" />

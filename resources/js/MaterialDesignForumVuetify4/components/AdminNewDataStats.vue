@@ -96,7 +96,7 @@ function changeRange(value) {
          </template>
       <template #append>
 
-        <v-select :model-value="range" :items="rangeItems" item-title="title" item-value="value" density="compact"
+        <v-select color="primary"  :model-value="range" :items="rangeItems" item-title="title" item-value="value" density="compact"
           variant="underlined" hide-details prepend-inner-icon="mdi-calendar-month-outline" class="range-select"
           @click.stop @update:model-value="changeRange" />
       </template>

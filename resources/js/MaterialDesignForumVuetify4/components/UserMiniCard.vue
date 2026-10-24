@@ -63,7 +63,7 @@ const moreItems = [{ title: t('userCard.message'), icon: 'mdi-message-outline' }
         </v-list-item-title>
 
         <v-list-item-subtitle class="text-medium-emphasis text-truncate">
-          {{ user?.bio || $t('userCard.noBio') }}
+          {{ user?.headline  }}
         </v-list-item-subtitle>
       </v-list-item>
 

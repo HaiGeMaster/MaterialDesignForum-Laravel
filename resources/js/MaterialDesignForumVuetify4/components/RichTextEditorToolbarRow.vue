@@ -337,7 +337,7 @@ function onMenuVisibility(id, open) {
                   {{ item.title }}
                 </v-list-item-title>
                 <template #append>
-                  <v-progress-circular
+                  <v-progress-circular color="primary"
                     v-if="(item.type === 'image' && uploading === 'image') || (item.type === 'video' && uploading === 'video')"
                     size="16"
                     indeterminate
