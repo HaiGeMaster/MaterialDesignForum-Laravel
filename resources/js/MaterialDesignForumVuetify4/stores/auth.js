@@ -129,9 +129,7 @@ export const useAuthStore = defineStore('auth', {
         identifyClarityUser(this.user)
         return this.user
       } catch (error) {
-        this.user = null
-        this.token = ''
-        localStorage.removeItem(TOKEN_KEY)
+        this.clearAuthState()
         this.error = error.message
         return null
       } finally {
@@ -148,18 +146,27 @@ export const useAuthStore = defineStore('auth', {
           await http.post('/auth/logout').catch(() => {})
         }
       } finally {
-        this.user = null
-        this.token = ''
-        localStorage.removeItem(TOKEN_KEY)
-        // 清空关注状态缓存，避免下一个账号串用
-        useFollowStore().reset()
+        this.clearAuthState()
         this.loading = false
       }
     },
 
     setUser(user) {
+      if (user === null) {
+        this.clearAuthState()
+        return
+      }
+
       this.user = user
       identifyClarityUser(user)
+    },
+
+    clearAuthState() {
+      this.user = null
+      this.token = ''
+      localStorage.removeItem(TOKEN_KEY)
+      // 清空关注状态缓存，避免下一个账号串用
+      useFollowStore().reset()
     },
   },
 })

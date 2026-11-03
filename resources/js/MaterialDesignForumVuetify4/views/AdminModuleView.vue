@@ -14,7 +14,7 @@ import ReportHandleDialog from '../components/ReportHandleDialog.vue'
 import { useTopicDialogStore } from '../stores/topicDialog'
 import { useUserGroupDialogStore } from '../stores/userGroupDialog'
 
-const { mobile } = useDisplay()
+const { xs } = useDisplay()
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
@@ -1072,7 +1072,7 @@ onBeforeUnmount(() => {
   {value: 1000, title: '1000'},
   {value: 10000, title: '10000'},
 ]" -->
-      <v-data-table-server color="primary" :mobile="mobile" v-if="moduleMeta" v-model="selected" v-model:page="page" v-model:items-per-page="itemsPerPage"
+      <v-data-table-server color="primary" :mobile="xs" v-if="moduleMeta" v-model="selected" v-model:page="page" v-model:items-per-page="itemsPerPage"
 
         v-model:sort-by="sortBy" :headers="headers" :items="items" :items-length="total" :loading="loading"
         :search="search" :item-value="itemValue" :return-object="true" show-select hover density="comfortable"
