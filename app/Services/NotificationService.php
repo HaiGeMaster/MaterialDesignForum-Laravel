@@ -223,7 +223,7 @@ class NotificationService
 
     /**
      * 读取接收者对某类型的站内 / 邮件开关。
-     * 未配置时默认开启站内通知、关闭邮件通知。
+     * 未配置时默认 开启站内通知、关闭邮件通知。
      *
      * @return array{web: bool, email: bool}
      */
@@ -243,7 +243,8 @@ class NotificationService
                 foreach ($items as $item) {
                     if (($item['name'] ?? '') === $type) {
                         $web = (bool) ($item['web_message'] ?? true);
-                        $email = (bool) ($item['email_message'] ?? false);
+                        // $email = (bool) ($item['email_message'] ?? false);
+                        $email = (bool) ($item['email_message'] ?? true);
                         break;
                     }
                 }
