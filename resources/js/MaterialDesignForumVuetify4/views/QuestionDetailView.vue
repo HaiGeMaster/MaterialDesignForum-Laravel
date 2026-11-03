@@ -1,8 +1,8 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import http from '../api'
+import { storeToRefs } from 'pinia'
 import AnswersList from '../components/AnswersList.vue'
 import CommentButton from '../components/CommentButton.vue'
 import FollowButton from '../components/FollowButton.vue'
@@ -12,6 +12,7 @@ import { useAuthStore } from '../stores/auth'
 import { useCommentDialogStore } from '../stores/commentDialog'
 import { useDeleteDialogStore } from '../stores/deleteDialog'
 import { useEditorWindowStore } from '../stores/editorWindow'
+import { useQuestionDetailViewStore } from '../stores/views/questionDetail'
 import { useFeedback } from '../composables/useFeedback'
 import { useLocalizedDateTime } from '../composables/useLocalizedDateTime'
 
@@ -27,9 +28,8 @@ const authStore = useAuthStore()
 const commentDialog = useCommentDialogStore()
 const deleteDialog = useDeleteDialogStore()
 const editorWindow = useEditorWindowStore()
-
-const question = ref(null)
-const loading = ref(false)
+const questionStore = useQuestionDetailViewStore()
+const { question, loading } = storeToRefs(questionStore)
 
 // 当前是否处于单个回答详情模式（路由含 answer_id）
 const targetAnswerId = computed(() => route.params.answer_id || null)
@@ -38,7 +38,7 @@ const targetAnswerId = computed(() => route.params.answer_id || null)
 const commentCount = computed(() => Number(question.value?.comment_count || 0))
 
 function handleCommentCount(count) {
-  if (question.value) question.value.comment_count = count
+  questionStore.setCommentCount(count)
 }
 
 function openComments() {
@@ -61,24 +61,15 @@ const isQuestionOwner = computed(
 )
 
 async function fetchQuestion() {
-  loading.value = true
   try {
-    const { data } = await http.get(`/questions/${route.params.question_id}`)
-    question.value = data
+    await questionStore.fetchQuestion(route.params.question_id)
   } catch (error) {
     show(error.message, 'error')
-  } finally {
-    loading.value = false
   }
 }
 
-function toggleFollow({ following, followerCount }) {
-  if (following !== undefined && question.value) {
-    question.value.is_following = following
-  }
-  if (followerCount !== undefined && question.value) {
-    question.value.follower_count = followerCount
-  }
+function toggleFollow(payload) {
+  questionStore.updateFollow(payload)
 }
 
 // ---- 编辑 ----
@@ -105,7 +96,7 @@ function askDeleteQuestion() {
 }
 
 async function confirmDelete() {
-  await http.delete(`/questions/${question.value.question_id}`)
+  await questionStore.deleteQuestion()
   show(t('questionDetail.deleted'), 'success')
   router.push('/questions')
 }

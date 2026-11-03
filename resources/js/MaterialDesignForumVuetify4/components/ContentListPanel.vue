@@ -35,7 +35,7 @@ const showEmpty = computed(() => !props.loading && props.items.length === 0)
 <template>
   <v-card rounded="lg"  class="overflow-hidden fill-height">
     <!-- 顶部标题栏 -->
-    <div class="d-flex align-center px-4 py-3 border-b-thin">
+    <div class="d-flex align-center px-4 py-3 border-b-thin" v-if="title!=''||icon!=''">
       <v-icon :icon="icon" color="primary" size="small" class="mr-2" />
       <span >{{ title }}</span>
       <v-spacer />

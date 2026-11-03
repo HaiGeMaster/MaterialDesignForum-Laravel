@@ -1,9 +1,10 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { storeToRefs } from 'pinia'
 import { useAuthStore } from '../stores/auth'
-import { useUserStore } from '../stores/user'
+import { useProfileViewStore } from '../stores/views/profile'
 import { useFeedback } from '../composables/useFeedback'
 import UserContentPanel from '../components/UserContentPanel.vue'
 import UserProfileCard from '../components/UserProfileCard.vue'
@@ -13,7 +14,7 @@ import { useDisplay } from 'vuetify'
 const { xs } = useDisplay()
 
 const authStore = useAuthStore()
-const userStore = useUserStore()
+const profileStore = useProfileViewStore()
 const route = useRoute()
 const { show: feedback } = useFeedback()
 const { t } = useI18n()
@@ -23,7 +24,7 @@ const isLoggedIn = computed(() => authStore.isLoggedIn)
 const currentUser = computed(() => authStore.user)
 
 // ---------- 用户主页（/users/:user_id） ----------
-const viewedUser = ref(null)
+const { viewedUser } = storeToRefs(profileStore)
 const isSelf = computed(() => {
   if (!isLoggedIn.value || !currentUser.value) return false
   const id = route.params.user_id
@@ -40,13 +41,12 @@ watch(
   async () => {
     if (viewingOther.value) {
       try {
-        viewedUser.value = await userStore.fetchUser(route.params.user_id)
+        await profileStore.fetchViewedUser(route.params.user_id)
       } catch (error) {
         feedback(error.message, 'error')
-        viewedUser.value = null
       }
     } else {
-      viewedUser.value = null
+      profileStore.clearViewedUser()
     }
   },
   { immediate: true },
@@ -60,13 +60,8 @@ function formatBanUntil(value) {
 }
 
 // 关注状态已由 FollowButton 调用 API 完成，这里回写最新状态与粉丝数
-function handleToggleFollow({ following, followerCount }) {
-  if (viewedUser.value && following !== undefined) {
-    viewedUser.value.is_following = following
-  }
-  if (viewedUser.value && followerCount !== undefined) {
-    viewedUser.value.follower_count = followerCount
-  }
+function handleToggleFollow(payload) {
+  profileStore.updateFollow(payload)
 }
 
 function handleMore(action) {

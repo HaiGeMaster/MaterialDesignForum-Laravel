@@ -2,13 +2,14 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import http from '../api'
+import { storeToRefs } from 'pinia'
 import { useFeedback } from '../composables/useFeedback'
 import ContentListPanel from '../components/ContentListPanel.vue'
 import FollowButton from '../components/FollowButton.vue'
 import MoreActions from '../components/MoreActions.vue'
 import { useDeleteDialogStore } from '../stores/deleteDialog'
 import { useTopicDialogStore } from '../stores/topicDialog'
+import { useTopicDetailViewStore } from '../stores/views/topicDetail'
 
 import { useDisplay } from 'vuetify'
 const { xs } = useDisplay()
@@ -19,10 +20,8 @@ const { show } = useFeedback()
 const { t } = useI18n()
 const deleteDialog = useDeleteDialogStore()
 const topicDialog = useTopicDialogStore()
-
-const topic = ref(null)
-const creator = ref(null)
-const articles = ref([])
+const topicStore = useTopicDetailViewStore()
+const { topic, creator, articles, questions, loading } = storeToRefs(topicStore)
 
 // 点击列表项进入对应详情页
 function handleOpen(item) {
@@ -32,8 +31,6 @@ function handleOpen(item) {
     router.push(`/articles/${item.article_id}`)
   }
 }
-const questions = ref([])
-const loading = ref(false)
 
 const TOPIC_TABS = ['articles', 'questions']
 
@@ -76,27 +73,15 @@ const gradient = computed(() => {
 const isFollowing = computed(() => Boolean(topic.value?.is_following))
 
 async function fetchTopic() {
-  loading.value = true
   try {
-    const { data } = await http.get(`/topics/${route.params.topic_id}`)
-    topic.value = data.topic
-    creator.value = data.creator || null
-    articles.value = data.articles || []
-    questions.value = data.questions || []
+    await topicStore.fetchTopic(route.params.topic_id)
   } catch (error) {
     show(error.message, 'error')
-  } finally {
-    loading.value = false
   }
 }
 
-function toggleFollow({ following, followerCount }) {
-  if (following !== undefined && topic.value) {
-    topic.value.is_following = following
-  }
-  if (followerCount !== undefined && topic.value) {
-    topic.value.follower_count = followerCount
-  }
+function toggleFollow(payload) {
+  topicStore.updateFollow(payload)
 }
 
 function goCreator() {
@@ -131,8 +116,7 @@ function openDeleteDialog() {
 }
 
 async function confirmDelete() {
-  if (!topic.value) return
-  await http.delete(`/topics/${topic.value.topic_id}`)
+  await topicStore.deleteTopic()
   show(t('topicDetail.deleted'), 'success')
   router.push('/topics')
 }

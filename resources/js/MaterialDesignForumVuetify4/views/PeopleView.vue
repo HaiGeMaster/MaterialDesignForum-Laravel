@@ -1,9 +1,10 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { storeToRefs } from 'pinia'
 import { useAuthStore } from '../stores/auth'
-import { useUserStore } from '../stores/user'
+import { usePeopleViewStore } from '../stores/views/people'
 import { useFeedback } from '../composables/useFeedback'
 import InfiniteScroll from '../components/InfiniteScroll.vue'
 import PersonCard from '../components/PersonCard.vue'
@@ -15,16 +16,10 @@ const route = useRoute()
 const router = useRouter()
 
 const authStore = useAuthStore()
-const userStore = useUserStore()
+const peopleStore = usePeopleViewStore()
+const { users, loading, error, finished } = storeToRefs(peopleStore)
 const { show } = useFeedback()
 const { t } = useI18n()
-
-const users = computed(() => userStore.list)
-
-// 分页状态（数据本身存放在 userStore.list 中）
-const page = ref(1)
-const finished = ref(false)
-const error = ref(false)
 
 // 当前 tab：未登录时强制推荐人脉
 const tab = computed(() => {
@@ -43,41 +38,12 @@ const emptyState = computed(() => {
   return map[tab.value] ?? map.recommend
 })
 
-async function refresh(reset = true) {
-  if (userStore.loading) return
-  if (reset) {
-    page.value = 1
-    finished.value = false
-    error.value = false
-  } else if (finished.value) {
-    return
-  }
-
-  error.value = false
-  try {
-    const data = await userStore.fetchUsers({ tab: tab.value, page: page.value })
-    finished.value = !(data.current_page < data.last_page)
-  } catch {
-    error.value = true
-  }
-}
-
-/** 加载下一页（由 InfiniteScroll 触发） */
-function loadNext() {
-  if (userStore.loading || finished.value || error.value) return
-  page.value += 1
-  refresh(false)
-}
-
-onMounted(() => refresh())
-watch(tab, () => refresh(true))
+onMounted(() => peopleStore.loadTab(tab.value))
+watch(tab, () => peopleStore.loadTab(tab.value))
 
 // 关注状态由服务器随列表数据返回（user.is_following），切换后回写最新状态与关注数
-function toggleFollow(user, { following, followerCount }) {
-  user.is_following = following
-  if (followerCount !== undefined) {
-    user.follower_count = followerCount
-  }
+function toggleFollow(user, payload) {
+  peopleStore.updateFollow(user, payload)
 }
 
 function goToProfile(user) {
@@ -107,14 +73,14 @@ function openPlaceholder(action) {
     <InfiniteScroll
       v-if="users.length"
       :finished="finished"
-      :loading="userStore.loading"
+      :loading="loading"
       :error="error"
-      @load="loadNext"
-      @retry="() => refresh(false)"
+      @load="peopleStore.loadNext"
+      @retry="peopleStore.retry"
     />
 
     <v-empty-state
-      v-else-if="!userStore.loading"
+      v-else-if="!loading"
       :icon="emptyState.icon"
       :title="$t(emptyState.title)"
       :text="$t(emptyState.text)"

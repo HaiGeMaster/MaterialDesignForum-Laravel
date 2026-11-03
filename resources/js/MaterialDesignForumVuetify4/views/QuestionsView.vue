@@ -2,12 +2,12 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import http from '../api'
+import { storeToRefs } from 'pinia'
 import ContentListItem from '../components/ContentListItem.vue'
 import InfiniteScroll from '../components/InfiniteScroll.vue'
 import { useFeedback } from '../composables/useFeedback'
-import { useInfiniteList } from '../composables/useInfiniteList'
 import { useAuthStore } from '../stores/auth'
+import { useQuestionsViewStore } from '../stores/views/questions'
 
 import { useDisplay } from 'vuetify'
 const { xs } = useDisplay()
@@ -18,18 +18,15 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+const questionsStore = useQuestionsViewStore()
+const { questions, loading, error, finished } = storeToRefs(questionsStore)
 
 // 当前打开头像卡片菜单的问题 id（同时只开一个）
 const activeAvatar = ref(null)
 
 // 关注状态回写到作者数据
-function handleToggleFollow(item, { following, followerCount }) {
-  const creator = item?.creator
-  if (!creator) return
-  creator.is_following = following
-  if (followerCount !== undefined) {
-    creator.follower_count = followerCount
-  }
+function handleToggleFollow(item, payload) {
+  questionsStore.updateCreatorFollow(item, payload)
 }
 
 // 小卡片里的更多操作（私信 / 举报）暂未实现
@@ -55,20 +52,6 @@ const emptyState = computed(() => {
   return map[tab.value] ?? map.hot
 })
 
-const {
-  list: questions,
-  loading,
-  error,
-  finished,
-  load,
-  loadNext,
-  retry,
-} = useInfiniteList(async (page) => {
-  const { data } = await http.get('/questions', { params: { tab: tab.value, page } })
-  if (Array.isArray(data)) return { items: data, hasMore: false }
-  return { items: data.data ?? [], hasMore: data.current_page < data.last_page }
-})
-
 // 点击列表项进入问题详情
 function handleOpen(item) {
   router.push(`/questions/${item.question_id}`)
@@ -81,18 +64,18 @@ function handleContentPublished(e) {
   if (action === 'create' && item?.question_id) {
     router.push(`/questions/${item.question_id}`)
   } else {
-    load(true)
+    questionsStore.refresh()
   }
 }
 
 onMounted(() => {
-  load(true)
+  questionsStore.loadTab(tab.value)
   window.addEventListener('content:published', handleContentPublished)
 })
 onUnmounted(() => {
   window.removeEventListener('content:published', handleContentPublished)
 })
-watch(tab, () => load(true))
+watch(tab, () => questionsStore.loadTab(tab.value))
 </script>
 
 <template>
@@ -120,8 +103,8 @@ watch(tab, () => load(true))
       :finished="finished"
       :loading="loading"
       :error="error"
-      @load="loadNext"
-      @retry="retry"
+      @load="questionsStore.loadNext"
+      @retry="questionsStore.retry"
     />
 
     <v-empty-state

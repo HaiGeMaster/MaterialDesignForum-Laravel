@@ -1,10 +1,11 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import http from '../api'
+import { storeToRefs } from 'pinia'
 import { useAuthStore } from '../stores/auth'
 import { useDeleteDialogStore } from '../stores/deleteDialog'
+import { useNotificationsViewStore } from '../stores/views/notifications'
 import { useFeedback } from '../composables/useFeedback'
 import NotificationItem from '../components/NotificationItem.vue'
 import InfiniteScroll from '../components/InfiniteScroll.vue'
@@ -18,57 +19,23 @@ const authStore = useAuthStore()
 const { show } = useFeedback()
 
 const deleteDialog = useDeleteDialogStore()
-
-const notifications = ref([])
-const loading = ref(false)
-const error = ref(false)
-const page = ref(1)
-const finished = ref(false)
-const clearing = ref(false)
+const notificationsStore = useNotificationsViewStore()
+const { notifications, loading, error, finished } = storeToRefs(notificationsStore)
 
 async function load(reset = false) {
-  if (!authStore.isLoggedIn) return
-  if (!reset && (loading.value || finished.value)) return
-  if (reset) {
-    page.value = 1
-    notifications.value = []
-    finished.value = false
-    error.value = false
-  }
-  loading.value = true
-  error.value = false
   try {
-    const { data } = await http.get('/notifications', {
-      params: { page: page.value, per_page: 20 },
-    })
-    const items = data.data || []
-    notifications.value = reset ? items : [...notifications.value, ...items]
-    finished.value = !data.data || page.value >= (data.last_page ?? 1)
-    markReadIfNeeded(items)
+    await notificationsStore.load(reset)
   } catch (e) {
-    error.value = true
     show(e.message, 'error')
-  } finally {
-    loading.value = false
   }
 }
 
-// 本次加载到未读通知时，标记全部已读并通知应用栏刷新徽章
-async function markReadIfNeeded(items) {
-  const hasUnread = items.some((n) => !n.read_time)
-  if (!hasUnread) return
+async function loadNext() {
   try {
-    await http.put('/notifications/read')
-    window.dispatchEvent(new CustomEvent('notification:updated'))
+    await notificationsStore.loadNext()
   } catch (e) {
-    // 标记已读失败不阻塞浏览
+    show(e.message, 'error')
   }
-}
-
-function loadNext() {
-  if (loading.value || finished.value || error.value) return
-  page.value += 1
-  load()
 }
 
 function retry() {
@@ -84,10 +51,7 @@ function askClearAll() {
 }
 
 async function confirmClearAll() {
-  await http.delete('/notifications')
-  notifications.value = []
-  finished.value = true
-  window.dispatchEvent(new CustomEvent('notification:updated'))
+  await notificationsStore.clearAll()
   show(t('notifications.clearAllSuccess'), 'success')
 }
 

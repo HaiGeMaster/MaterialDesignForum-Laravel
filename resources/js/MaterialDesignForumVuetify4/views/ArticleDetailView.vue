@@ -2,7 +2,7 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import http from '../api'
+import { storeToRefs } from 'pinia'
 import CommentSection from '../components/CommentSection.vue'
 import FollowButton from '../components/FollowButton.vue'
 import MoreActions from '../components/MoreActions.vue'
@@ -11,6 +11,7 @@ import VoteButton from '../components/VoteButton.vue'
 import { useAuthStore } from '../stores/auth'
 import { useDeleteDialogStore } from '../stores/deleteDialog'
 import { useEditorWindowStore } from '../stores/editorWindow'
+import { useArticleDetailViewStore } from '../stores/views/articleDetail'
 import { useFeedback } from '../composables/useFeedback'
 import { useLocalizedDateTime } from '../composables/useLocalizedDateTime'
 
@@ -25,9 +26,8 @@ const formatDateTime = useLocalizedDateTime()
 const authStore = useAuthStore()
 const deleteDialog = useDeleteDialogStore()
 const editorWindow = useEditorWindowStore()
-
-const article = ref(null)
-const loading = ref(false)
+const articleStore = useArticleDetailViewStore()
+const { article, loading } = storeToRefs(articleStore)
 
 // 底部评论输入框发布成功后递增，强制评论区重新挂载加载最新数据
 const commentRefreshKey = ref(0)
@@ -42,24 +42,15 @@ const isArticleOwner = computed(
 )
 
 async function fetchArticle() {
-  loading.value = true
   try {
-    const { data } = await http.get(`/articles/${route.params.article_id}`)
-    article.value = data
+    await articleStore.fetchArticle(route.params.article_id)
   } catch (error) {
     show(error.message, 'error')
-  } finally {
-    loading.value = false
   }
 }
 
-function toggleFollow({ following, followerCount }) {
-  if (following !== undefined && article.value) {
-    article.value.is_following = following
-  }
-  if (followerCount !== undefined && article.value) {
-    article.value.follower_count = followerCount
-  }
+function toggleFollow(payload) {
+  articleStore.updateFollow(payload)
 }
 
 // ---- 编辑 ----
@@ -86,8 +77,7 @@ function askDelete() {
 }
 
 async function confirmDelete() {
-  if (!article.value) return
-  await http.delete(`/articles/${article.value.article_id}`)
+  await articleStore.deleteArticle()
   show(t('articleDetail.deleted'), 'success')
   router.push('/articles')
 }

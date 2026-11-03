@@ -1,9 +1,9 @@
 <script setup>
 import { computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import http from '../api'
+import { storeToRefs } from 'pinia'
 import { useAuthStore } from '../stores/auth'
-import { useInfiniteList } from '../composables/useInfiniteList'
+import { useTopicsViewStore } from '../stores/views/topics'
 import InfiniteScroll from '../components/InfiniteScroll.vue'
 import TopicCard from '../components/TopicCard.vue'
 
@@ -12,6 +12,8 @@ const { xs } = useDisplay()
 
 const route = useRoute()
 const authStore = useAuthStore()
+const topicsStore = useTopicsViewStore()
+const { topics, loading, error, finished } = storeToRefs(topicsStore)
 
 // 当前 tab：未登录时强制推荐话题
 const tab = computed(() => {
@@ -26,29 +28,12 @@ const emptyState = computed(() =>
     : { icon: 'mdi-tag-multiple', title: 'topics.emptyRecommendTitle', text: 'topics.emptyRecommendText' },
 )
 
-const {
-  list: topics,
-  loading,
-  error,
-  finished,
-  load,
-  loadNext,
-  retry,
-} = useInfiniteList(async (page) => {
-  const { data } = await http.get('/topics', { params: { tab: tab.value, page } })
-  if (Array.isArray(data)) return { items: data, hasMore: false }
-  return { items: data.data ?? [], hasMore: data.current_page < data.last_page }
-})
-
-onMounted(() => load(true))
-watch(tab, () => load(true))
+onMounted(() => topicsStore.loadTab(tab.value))
+watch(tab, () => topicsStore.loadTab(tab.value))
 
 // 关注状态由服务器随列表数据返回（topic.is_following），切换后回写最新状态与关注数
-function toggleFollow(topic, { following, followerCount }) {
-  topic.is_following = following
-  if (followerCount !== undefined) {
-    topic.follower_count = followerCount
-  }
+function toggleFollow(topic, payload) {
+  topicsStore.updateFollow(topic, payload)
 }
 </script>
 
@@ -65,8 +50,8 @@ function toggleFollow(topic, { following, followerCount }) {
       :finished="finished"
       :loading="loading"
       :error="error"
-      @load="loadNext"
-      @retry="retry"
+      @load="topicsStore.loadNext"
+      @retry="topicsStore.retry"
     />
 
     <v-empty-state

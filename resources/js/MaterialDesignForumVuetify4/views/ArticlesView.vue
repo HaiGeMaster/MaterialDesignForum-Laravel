@@ -2,12 +2,12 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import http from '../api'
+import { storeToRefs } from 'pinia'
 import ContentListItem from '../components/ContentListItem.vue'
 import InfiniteScroll from '../components/InfiniteScroll.vue'
 import { useFeedback } from '../composables/useFeedback'
-import { useInfiniteList } from '../composables/useInfiniteList'
 import { useAuthStore } from '../stores/auth'
+import { useArticlesViewStore } from '../stores/views/articles'
 
 import { useDisplay } from 'vuetify'
 const { xs } = useDisplay()
@@ -18,18 +18,15 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+const articlesStore = useArticlesViewStore()
+const { articles, loading, error, finished } = storeToRefs(articlesStore)
 
 // 当前打开头像卡片菜单的文章 id（同时只开一个）
 const activeAvatar = ref(null)
 
 // 关注状态回写到作者数据
-function handleToggleFollow(item, { following, followerCount }) {
-  const creator = item?.creator
-  if (!creator) return
-  creator.is_following = following
-  if (followerCount !== undefined) {
-    creator.follower_count = followerCount
-  }
+function handleToggleFollow(item, payload) {
+  articlesStore.updateCreatorFollow(item, payload)
 }
 
 // 小卡片里的更多操作（私信 / 举报）暂未实现
@@ -55,20 +52,6 @@ const emptyState = computed(() => {
   return map[tab.value] ?? map.hot
 })
 
-const {
-  list: articles,
-  loading,
-  error,
-  finished,
-  load,
-  loadNext,
-  retry,
-} = useInfiniteList(async (page) => {
-  const { data } = await http.get('/articles', { params: { tab: tab.value, page } })
-  if (Array.isArray(data)) return { items: data, hasMore: false }
-  return { items: data.data ?? [], hasMore: data.current_page < data.last_page }
-})
-
 // 点击列表项进入文章详情
 function handleOpen(item) {
   router.push(`/articles/${item.article_id}`)
@@ -81,18 +64,18 @@ function handleContentPublished(e) {
   if (action === 'create' && item?.article_id) {
     router.push(`/articles/${item.article_id}`)
   } else {
-    load(true)
+    articlesStore.refresh()
   }
 }
 
 onMounted(() => {
-  load(true)
+  articlesStore.loadTab(tab.value)
   window.addEventListener('content:published', handleContentPublished)
 })
 onUnmounted(() => {
   window.removeEventListener('content:published', handleContentPublished)
 })
-watch(tab, () => load(true))
+watch(tab, () => articlesStore.loadTab(tab.value))
 </script>
 
 <template>
@@ -120,8 +103,8 @@ watch(tab, () => load(true))
       :finished="finished"
       :loading="loading"
       :error="error"
-      @load="loadNext"
-      @retry="retry"
+      @load="articlesStore.loadNext"
+      @retry="articlesStore.retry"
     />
 
     <v-empty-state
