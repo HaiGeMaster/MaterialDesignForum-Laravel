@@ -1,28 +1,26 @@
 <script setup>
-import { reactive, ref } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { useUserStore } from '../stores/user'
+import { storeToRefs } from 'pinia'
+import { useSettingsPasswordViewStore } from '../stores/views/settingsPassword'
 import { useFeedback } from '../composables/useFeedback'
 import { useDisplay } from 'vuetify'
 
 const router = useRouter()
-const userStore = useUserStore()
+const passwordStore = useSettingsPasswordViewStore()
 const { show: feedback } = useFeedback()
 const { t } = useI18n()
 const { xs } = useDisplay()
 
+const { form: passwordForm, loading } = storeToRefs(passwordStore)
+
 const passwordFormRef = ref()
-const passwordForm = reactive({
-  old_password: '',
-  password: '',
-  password_confirmation: '',
-})
 
 const passwordRules = {
   old_password: (value) => !!value || t('settings.rules.oldPassword'),
   password: (value) => (value && value.length >= 6) || t('settings.rules.password'),
-  confirm: (value) => value === passwordForm.password || t('settings.rules.confirm'),
+  confirm: (value) => value === passwordForm.value.password || t('settings.rules.confirm'),
 }
 
 async function handleUpdatePassword() {
@@ -30,15 +28,8 @@ async function handleUpdatePassword() {
   if (!valid) return
 
   try {
-    const result = await userStore.updatePassword({
-      old_password: passwordForm.old_password,
-      password: passwordForm.password,
-      password_confirmation: passwordForm.password_confirmation,
-    })
+    const result = await passwordStore.updatePassword()
     feedback(result.message || t('settings.passwordUpdated'), 'success')
-    passwordForm.old_password = ''
-    passwordForm.password = ''
-    passwordForm.password_confirmation = ''
   } catch (error) {
     feedback(error.message, 'error')
   }
@@ -95,7 +86,7 @@ async function handleUpdatePassword() {
             type="submit"
             color="primary"
             prepend-icon="mdi-shield-key"
-            :loading="userStore.loading"
+            :loading="loading"
           >
             {{ $t('settings.changePasswordBtn') }}
           </v-btn>

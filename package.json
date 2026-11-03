@@ -4,6 +4,7 @@
     "type": "module",
     "scripts": {
         "phpAM": "php artisan migrate",
+        "phpSlk": "php artisan storage:link",
         "phpserver": "php artisan serve",
         "build": "vite build",
         "build7z": "build.bat",

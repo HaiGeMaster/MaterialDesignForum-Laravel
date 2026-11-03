@@ -1,63 +1,35 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { storeToRefs } from 'pinia'
 import { useAuthStore } from '../stores/auth'
+import { useSettingsOAuthViewStore, OAUTH_META } from '../stores/views/settingsOAuth'
 import { useFeedback } from '../composables/useFeedback'
 import { useDisplay } from 'vuetify'
-import http from '../api'
-
-const OAUTH_META = {
-  github: { icon: 'mdi-github', label: 'GitHub' },
-  google: { icon: 'mdi-google', label: 'Google' },
-  microsoft: { icon: 'mdi-microsoft', label: 'Microsoft' },
-}
 
 const authStore = useAuthStore()
+const oauthStore = useSettingsOAuthViewStore()
+const { oauthRows, loading: oauthLoading, unbinding: oauthUnbinding } = storeToRefs(oauthStore)
 const router = useRouter()
 const route = useRoute()
 const { show: feedback } = useFeedback()
 const { t } = useI18n()
 const { xs } = useDisplay()
 
-const oauthLoading = ref(false)
-const oauthUnbinding = ref(null)
-const enabledProviders = ref([])
-const oauthBindings = ref([])
-
-const oauthRows = computed(() => {
-  return enabledProviders.value.map((provider) => {
-    const meta = OAUTH_META[provider] || { icon: 'mdi-account', label: provider }
-    const bound = oauthBindings.value.find((binding) => binding.oauth_name === provider)
-    return {
-      provider,
-      icon: meta.icon,
-      label: meta.label,
-      bound,
-    }
-  })
-})
-
 async function loadEnabledProviders() {
   try {
-    const { data } = await http.get('/oauth/providers')
-    enabledProviders.value = Array.isArray(data?.providers) ? data.providers : []
+    await oauthStore.fetchProviders()
   } catch (error) {
-    enabledProviders.value = []
     feedback(error.message || t('oauth.errors.default'), 'error')
   }
 }
 
 async function loadOauthBindings() {
-  oauthLoading.value = true
   try {
-    const { data } = await http.get('/user/oauth')
-    oauthBindings.value = Array.isArray(data?.data) ? data.data : []
+    await oauthStore.fetchBindings()
   } catch (error) {
-    oauthBindings.value = []
     feedback(error.message || t('oauth.errors.default'), 'error')
-  } finally {
-    oauthLoading.value = false
   }
 }
 
@@ -72,16 +44,11 @@ function bindProvider(provider) {
 }
 
 async function unbindProvider(row) {
-  if (!row?.bound) return
-  oauthUnbinding.value = row.provider
   try {
-    await http.delete(`/user/oauth/${row.bound.oauth_id}`)
-    oauthBindings.value = oauthBindings.value.filter((binding) => binding.oauth_id !== row.bound.oauth_id)
+    await oauthStore.unbind(row)
     feedback(t('oauth.unbindSuccess', { provider: row.label }), 'success')
   } catch (error) {
     feedback(error.message, 'error')
-  } finally {
-    oauthUnbinding.value = null
   }
 }
 

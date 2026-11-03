@@ -1,57 +1,47 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { storeToRefs } from 'pinia'
 import { useFeedback } from '../composables/useFeedback'
 import { useDisplay } from 'vuetify'
-import http from '../api'
+import { useSettingsSessionsViewStore } from '../stores/views/settingsSessions'
 
 const router = useRouter()
 const { show: feedback } = useFeedback()
 const { t } = useI18n()
 const { xs } = useDisplay()
 
-const sessionTokens = ref([])
-const sessionLoading = ref(false)
-const sessionDeleting = ref(false)
+const sessionStore = useSettingsSessionsViewStore()
+const {
+  sessionTokens,
+  loading: sessionLoading,
+  deleting: sessionDeleting,
+} = storeToRefs(sessionStore)
 
 async function loadSessionTokens() {
-  sessionLoading.value = true
   try {
-    const { data } = await http.get('/user/tokens')
-    sessionTokens.value = Array.isArray(data?.data) ? data.data : []
+    await sessionStore.fetchSessions()
   } catch (error) {
-    sessionTokens.value = []
     feedback(error.message || t('settings.deviceSessionsLoadFailed'), 'error')
-  } finally {
-    sessionLoading.value = false
   }
 }
 
 async function revokeSessionToken(token) {
-  if (!token) return
   try {
-    sessionDeleting.value = token
-    await http.delete(`/user/tokens/${encodeURIComponent(token)}`)
-    await loadSessionTokens()
+    await sessionStore.revokeSession(token)
     feedback(t('settings.deviceSessionRevoked'), 'success')
   } catch (error) {
     feedback(error.message || t('settings.deviceSessionRevokeFailed'), 'error')
-  } finally {
-    sessionDeleting.value = ''
   }
 }
 
 async function revokeOtherSessions() {
   try {
-    sessionDeleting.value = 'all'
-    await http.delete('/user/tokens')
-    await loadSessionTokens()
+    await sessionStore.revokeOtherSessions()
     feedback(t('settings.deviceSessionsRevoked'), 'success')
   } catch (error) {
     feedback(error.message || t('settings.deviceSessionsRevokeFailed'), 'error')
-  } finally {
-    sessionDeleting.value = ''
   }
 }
 
