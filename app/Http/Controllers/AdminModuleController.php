@@ -141,7 +141,7 @@ class AdminModuleController extends Controller
         'users' => [
             'model'        => User::class,
             'search'       => ['username', 'email'],
-            'sortable'     => ['user_id', 'username', 'follower_count', 'followee_count', 'following_topic_count', 'following_article_count', 'following_question_count', 'article_count', 'question_count', 'answer_count', 'comment_count', 'reply_count', 'notification_unread', 'create_time', 'last_login_time', 'update_time', 'disable_time', 'disable_until'],
+            'sortable'     => ['user_id', 'username', 'follower_count', 'followee_count', 'following_topic_count', 'following_article_count', 'following_question_count', 'topic_count', 'article_count', 'question_count', 'answer_count', 'comment_count', 'reply_count', 'notification_unread', 'create_time', 'last_login_time', 'update_time', 'disable_time', 'disable_until'],
             'relations'    => ['userGroup'],
             'soft_delete' => false,
             'update_fields' => ['username', 'email', 'user_group_id', 'headline', 'bio', 'blog', 'company', 'location', 'language', 'disable_time', 'disable_until'],
@@ -156,6 +156,18 @@ class AdminModuleController extends Controller
             'update_fields' => ['report_handle_state'],
             'delete_field'  => null,
         ],
+    ];
+
+    /**
+     * 内容模块 => user 表内容计数类型（与 UserContentCounts::COLUMNS 对应）
+     */
+    private const CONTENT_TYPE_BY_MODULE = [
+        'topics' => 'topic',
+        'articles' => 'article',
+        'questions' => 'question',
+        'answers' => 'answer',
+        'comments' => 'comment',
+        'replies' => 'reply',
     ];
 
     /**
@@ -526,6 +538,10 @@ class AdminModuleController extends Controller
         }
 
         $deleteField = $config['delete_field'] ?? null;
+
+        // 记录删除前状态：已被软删除的记录不再重复扣减内容计数
+        $wasDeleted = $deleteField === 'delete_time' && $item->delete_time !== null;
+
         if (in_array($deleteField, ['delete_time', 'disable_time'], true)) {
             // 软删除：仅设置时间戳，行数据保留以便事后审计
             $item->{$deleteField} = now();
@@ -536,6 +552,12 @@ class AdminModuleController extends Controller
         } else {
             // 无软删除字段的模块（如 reports）硬删除
             $item->delete();
+        }
+
+        // 同步内容作者的用户内容计数（软删除同样视为删除）
+        $contentType = self::CONTENT_TYPE_BY_MODULE[$module] ?? null;
+        if ($contentType !== null && ! $wasDeleted) {
+            $this->adjustUserContentCount($contentType, $item->user_id, -1);
         }
 
         return response()->json(null, 204);

@@ -80,6 +80,9 @@ class QuestionController extends Controller
             'content_rendered' => $validated['content_rendered'],
         ]);
 
+        // 同步作者的提问计数（user.question_count）
+        $this->adjustUserContentCount('question', $question->user_id);
+
         $this->syncContentTopics($question, 'question', $validated['topic_ids'] ?? []);
 
         // 发布新提问：通知粉丝（follow_user_update）与话题关注者（follow_topic_update）
@@ -150,7 +153,14 @@ class QuestionController extends Controller
             return response()->json(['message' => 'Forbidden.'], 403);
         }
 
+        // 已被后台软删除过的提问不再重复扣减
+        $wasDeleted = $question->delete_time !== null;
+
         $question->delete();
+
+        if (! $wasDeleted) {
+            $this->adjustUserContentCount('question', $question->user_id, -1);
+        }
 
         // 提问被删除时通知提问作者（question_delete；作者本人删除时自动跳过）
         NotificationService::send(

@@ -71,6 +71,9 @@ class AnswerController extends Controller
             'content_rendered' => $validated['content_rendered'],
         ]);
 
+        // 同步作者的回答计数（user.answer_count）
+        $this->adjustUserContentCount('answer', $answer->user_id);
+
         // 同步问题冗余统计：递增 answer_count、刷新 last_answer_time
         // 注意：Answer 模型 $timestamps=false，$answer->create_time 为 null，
         // 这里用 now() 取当前时间（与 MySQL 默认 CURRENT_TIMESTAMP 一致）
@@ -146,7 +149,14 @@ class AnswerController extends Controller
             return response()->json(['message' => 'Forbidden.'], 403);
         }
 
+        // 已被后台软删除过的回答不再重复扣减
+        $wasDeleted = $answer->delete_time !== null;
+
         $answer->delete();
+
+        if (! $wasDeleted) {
+            $this->adjustUserContentCount('answer', $answer->user_id, -1);
+        }
 
         // 同步问题冗余统计：递减 answer_count（不小于 0）
         Question::query()

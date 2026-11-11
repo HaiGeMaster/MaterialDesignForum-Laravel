@@ -67,6 +67,9 @@ class CommentController extends Controller
 
         $this->updateCommentCount($validated['commentable_type'], $validated['commentable_id'], 1);
 
+        // 同步作者评论计数（user.comment_count）
+        $this->adjustUserContentCount('comment', $comment->user_id);
+
         // 发送评论通知（article_comment / question_comment / answer_comment + 关注推送）
         $this->notifyCommentCreated($comment);
 
@@ -109,7 +112,15 @@ class CommentController extends Controller
         }
 
         $this->updateCommentCount($comment->commentable_type, $comment->commentable_id, -1);
+
+        // 已被后台软删除过的评论不再重复扣减
+        $wasDeleted = $comment->delete_time !== null;
+
         $comment->delete();
+
+        if (! $wasDeleted) {
+            $this->adjustUserContentCount('comment', $comment->user_id, -1);
+        }
 
         // 评论被删除时通知评论作者（comment_delete；作者本人删除时自动跳过）
         NotificationService::send(

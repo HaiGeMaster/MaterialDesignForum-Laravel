@@ -782,6 +782,7 @@
       "answers": "回答数",
       "comments": "评论数",
       "questions": "问题数",
+      "topics": "话题数",
       "articles": "文章数",
       "votes": "投票数",
       "targetType": "目标类型",

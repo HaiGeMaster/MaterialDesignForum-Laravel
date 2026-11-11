@@ -72,6 +72,9 @@ class ReplyController extends Controller
         ]);
         $reply->refresh();
 
+        // 同步作者回复计数（user.reply_count）
+        $this->adjustUserContentCount('reply', $reply->user_id);
+
         // 递增父评论的回复计数
         Comment::query()->whereKey($validated['replyable_comment_id'])->increment('reply_count');
 
@@ -127,6 +130,9 @@ class ReplyController extends Controller
         $wasReplyToReply = $reply->replyable_type === 'reply';
         $parentReplyId = $wasReplyToReply ? (int) $reply->replyable_id : 0;
 
+        // 已被后台软删除过的回复不再重复扣减作者计数
+        $wasDeleted = $reply->delete_time !== null;
+
         Comment::query()
             ->whereKey($reply->replyable_comment_id)
             ->where('reply_count', '>', 0)
@@ -141,6 +147,10 @@ class ReplyController extends Controller
         }
 
         $reply->delete();
+
+        if (! $wasDeleted) {
+            $this->adjustUserContentCount('reply', $reply->user_id, -1);
+        }
 
         // 回复被删除时通知回复作者（reply_delete；作者本人删除时自动跳过）
         NotificationService::send(

@@ -782,6 +782,7 @@
       "answers": "답변 수",
       "comments": "댓글 수",
       "questions": "질문 수",
+      "topics": "토픽 수",
       "articles": "글 수",
       "votes": "투표 수",
       "targetType": "대상 유형",

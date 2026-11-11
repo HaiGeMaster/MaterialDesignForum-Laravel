@@ -39,6 +39,13 @@ class ReplyControllerTest extends TestCase
             $table->string('username');
             $table->string('email')->default('');
             $table->string('password')->default('');
+            // 内容计数冗余字段（ReplyController 创建回复时会同步 reply_count）
+            $table->unsignedInteger('topic_count')->default(0);
+            $table->unsignedInteger('article_count')->default(0);
+            $table->unsignedInteger('question_count')->default(0);
+            $table->unsignedInteger('answer_count')->default(0);
+            $table->unsignedInteger('comment_count')->default(0);
+            $table->unsignedInteger('reply_count')->default(0);
         });
 
         Schema::create('comment', function (Blueprint $table) {
@@ -119,5 +126,8 @@ class ReplyControllerTest extends TestCase
 
         $this->assertSame(201, $response->getStatusCode());
         $this->assertNotEmpty($data['create_time'] ?? null);
+
+        // 作者的回复计数应同步递增
+        $this->assertSame(1, (int) DB::table('user')->where('user_id', 1)->value('reply_count'));
     }
 }

@@ -53,6 +53,10 @@ class TopicController extends Controller
         }
 
         $topic = Topic::create($request->all());
+
+        // 同步作者的话题计数（user.topic_count）
+        $this->adjustUserContentCount('topic', $topic->user_id);
+
         return response()->json($topic, 201);
     }
 
@@ -99,15 +103,32 @@ class TopicController extends Controller
 
     public function update(Request $request, Topic $topic)
     {
+        $oldUserId = $topic->user_id;
+
         $topic->fill($request->all());
         $topic->save();
+
+        // 创建者被改动时，计数从旧作者转移到新作者
+        if ($topic->wasChanged('user_id')) {
+            $this->adjustUserContentCount('topic', $oldUserId, -1);
+            $this->adjustUserContentCount('topic', $topic->user_id);
+        }
+
         return response()->json($topic);
     }
 
     public function destroy(Request $request, Topic $topic)
     {
         $user = $request->user();
+
+        // 已被后台软删除过的话题不再重复扣减
+        $wasDeleted = $topic->delete_time !== null;
+
         $topic->delete();
+
+        if (! $wasDeleted) {
+            $this->adjustUserContentCount('topic', $topic->user_id, -1);
+        }
 
         // 话题被删除时通知话题创建者（topic_delete；创建者本人删除时自动跳过）
         NotificationService::send(

@@ -309,6 +309,8 @@ function makeHeaders() {
       { key: 'following_topic_count', title: 'admin.fields.followingTopics', align: 'end', sortable: true, width: '100px' },
       { key: 'following_article_count', title: 'admin.fields.followingArticles', align: 'end', sortable: true, width: '100px' },
       { key: 'following_question_count', title: 'admin.fields.followingQuestions', align: 'end', sortable: true, width: '100px' },
+      
+      { key: 'topic_count', title: 'admin.fields.topics', align: 'end', sortable: true, width: '90px' },
       { key: 'article_count', title: 'admin.fields.articles', align: 'end', sortable: true, width: '90px' },
       { key: 'question_count', title: 'admin.fields.questions', align: 'end', sortable: true, width: '90px' },
       { key: 'answer_count', title: 'admin.fields.answers', align: 'end', sortable: true, width: '90px' },

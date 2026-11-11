@@ -79,6 +79,9 @@ class ArticleController extends Controller
             'content_rendered' => $validated['content_rendered'],
         ]);
 
+        // 同步作者的文章计数（user.article_count）
+        $this->adjustUserContentCount('article', $article->user_id);
+
         $this->syncContentTopics($article, 'article', $validated['topic_ids'] ?? []);
 
         // 发布新文章：通知粉丝（follow_user_update）与话题关注者（follow_topic_update）
@@ -136,7 +139,14 @@ class ArticleController extends Controller
             return response()->json(['message' => 'Forbidden.'], 403);
         }
 
+        // 已被后台软删除过的文章不再重复扣减
+        $wasDeleted = $article->delete_time !== null;
+
         $article->delete();
+
+        if (! $wasDeleted) {
+            $this->adjustUserContentCount('article', $article->user_id, -1);
+        }
 
         // 文章被删除时通知文章作者（article_delete；作者本人删除时自动跳过）
         NotificationService::send(

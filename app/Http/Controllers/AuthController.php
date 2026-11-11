@@ -7,7 +7,9 @@ use App\Models\User;
 use App\Support\GeoLocation;
 use App\Support\IssuesTokens;
 use App\Support\RegistrationProfileDefaults;
+use App\Support\UserContentCounts;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -122,6 +124,9 @@ class AuthController extends Controller
         $user->last_login_location = GeoLocation::location(GeoLocation::getClientIP());
         $user->save();
 
+        // 登录时强制校准内容计数，修正历史数据或并发写入造成的漂移
+        $this->syncUserContentCounts($user, true);
+
         $token = $this->createToken($user, $request);
 
         return response()->json([
@@ -176,6 +181,9 @@ class AuthController extends Controller
         $user->last_login_location = GeoLocation::location(GeoLocation::getClientIP());
         $user->save();
 
+        // 自动登录前强制校准内容计数
+        $this->syncUserContentCounts($user, true);
+
         // 重置成功后直接颁发令牌，自动登录
         $token = $this->createToken($user, $request);
 
@@ -208,12 +216,39 @@ class AuthController extends Controller
      */
     public function me(Request $request)
     {
-        $user = $request->user()->load('userGroup');
+        $user = $request->user();
+
+        // 已登录用户刷新页面会自动走到这里：按内容表校准一次计数，
+        // 10 分钟内不重复执行，避免每次刷新都产生额外查询。
+        $this->syncUserContentCounts($user);
+
+        $user->load('userGroup');
 
         $this->attachUserCounts(collect([$user]));
 
         return response()->json([
             'user' => $user,
         ]);
+    }
+
+    /**
+     * 按内容表校准用户的内容计数（topic/article/question/answer/comment/reply）。
+     *
+     * 写入路径本身已维护计数，这里作为自愈手段：登录 / 自动登录时校正
+     * 历史数据或并发写入造成的漂移。默认做 10 分钟节流，避免每次刷新都执行。
+     *
+     * @param  bool  $force  为 true 时忽略节流（登录成功后使用）
+     */
+    private function syncUserContentCounts(User $user, bool $force = false): void
+    {
+        $cacheKey = 'user-content-counts-synced:'.$user->user_id;
+
+        if (! $force && ! Cache::add($cacheKey, true, now()->addMinutes(10))) {
+            return;
+        }
+
+        $user->forceFill(UserContentCounts::syncUser((int) $user->user_id));
+
+        Cache::put($cacheKey, true, now()->addMinutes(10));
     }
 }

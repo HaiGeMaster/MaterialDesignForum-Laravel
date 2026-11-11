@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Answer;
 use App\Models\Follow;
 use App\Models\Topic;
 use App\Models\User;
+use App\Support\UserContentCounts;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -318,11 +318,12 @@ abstract class Controller
     }
 
     /**
-     * 给用户集合实时计算并覆盖关注量 / 粉丝量 / 回答数量。
+     * 给用户集合实时计算并覆盖关注量 / 粉丝量。
      *
-     * user 表中的 followee_count / follower_count / answer_count 是冗余字段，
-     * 但项目里没有任何写入逻辑维护它们（FollowController 只写 follow 表），
-     * 导致始终为 0。这里改为返回时按 follow / answer 表实时统计，避免数据漂移。
+     * user 表中的 followee_count / follower_count 是冗余字段，
+     * 但 FollowController 只写 follow 表，这里按 follow 表实时统计，避免数据漂移。
+     * 内容计数（topic_count / article_count / question_count / answer_count /
+     * comment_count / reply_count）已由 UserContentCounts 在写入时维护，直接读取即可。
      *
      * @param  \Illuminate\Support\Collection  $users  用户模型集合
      */
@@ -350,13 +351,6 @@ abstract class Controller
             ->groupBy('followable_id')
             ->pluck('cnt', 'followable_id');
 
-        // 回答数量
-        $answer = Answer::query()
-            ->whereIn('user_id', $ids)
-            ->selectRaw('user_id, COUNT(*) as cnt')
-            ->groupBy('user_id')
-            ->pluck('cnt', 'user_id');
-
         // 我关注的话题 / 问题 / 文章数量
         $followingTopic = Follow::query()
             ->where('followable_type', 'topic')
@@ -377,15 +371,33 @@ abstract class Controller
             ->groupBy('user_id')
             ->pluck('cnt', 'user_id');
 
-        return $users->each(function ($user) use ($followee, $follower, $answer, $followingTopic, $followingQuestion, $followingArticle) {
+        return $users->each(function ($user) use ($followee, $follower, $followingTopic, $followingQuestion, $followingArticle) {
             $id = $user->getKey();
             $user->followee_count = (int) ($followee[$id] ?? 0);
             $user->follower_count = (int) ($follower[$id] ?? 0);
-            $user->answer_count = (int) ($answer[$id] ?? 0);
             $user->following_topic_count = (int) ($followingTopic[$id] ?? 0);
             $user->following_question_count = (int) ($followingQuestion[$id] ?? 0);
             $user->following_article_count = (int) ($followingArticle[$id] ?? 0);
         });
+    }
+
+    /**
+     * 维护 user 表的内容计数冗余字段。
+     *
+     * 内容新增时 delta=+1、删除时 delta=-1；计数不会减为负数。
+     *
+     * @param  string    $type    内容类型：topic/article/question/answer/comment/reply
+     * @param  int|null  $userId  内容作者的用户 ID
+     * @param  int       $delta   增量
+     */
+    protected function adjustUserContentCount(string $type, ?int $userId, int $delta = 1): void
+    {
+        $column = UserContentCounts::COLUMNS[$type] ?? null;
+        if ($column === null) {
+            return;
+        }
+
+        UserContentCounts::adjust($userId, $column, $delta);
     }
 
     /**
